@@ -1,0 +1,19 @@
+name: Paper
+on:
+  push:
+    paths: ["paper/**"]
+  pull_request:
+    paths: ["paper/**"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          working_directory: paper
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kbfold-paper
+          path: paper/main.pdf

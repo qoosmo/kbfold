@@ -1,0 +1,16 @@
+# Rust
+rust/target/
+# Lean
+lean/.lake/
+# LaTeX
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/main.pdf
+# Python
+__pycache__/

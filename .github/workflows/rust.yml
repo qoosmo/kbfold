@@ -1,0 +1,16 @@
+name: Rust
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --release
+      - run: cargo run --release --example paper_checks | tee checks.log && ! grep -q FAIL checks.log
+      - run: cargo run --release --example pq_params

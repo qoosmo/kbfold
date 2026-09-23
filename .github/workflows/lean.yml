@@ -1,0 +1,22 @@
+name: Lean
+on:
+  push:
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lean
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          use-mathlib-cache: true
+      - name: No sorry / admit
+        run: "! grep -rnE '\\b(sorry|admit)\\b' KBFold"
+      - name: Only the declared axiom
+        run: test "$(grep -rn '^axiom' KBFold | wc -l)" = "1"
+      - name: Axiom audit
+        run: lake env lean KBFold/Audit.lean
