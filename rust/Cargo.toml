@@ -1,0 +1,16 @@
+[package]
+name = "kbfold"
+version = "0.1.0"
+edition = "2024"
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+
+[dependencies]
+blake3 = "1.8.7"
+
+[dev-dependencies]
+num-bigint = "0.4"
+num-rational = "0.4"
+num-traits = "0.2"
