@@ -1,0 +1,168 @@
+\section{The Polynomial Commitment Scheme}\label{sec:pcs}
+
+We now use the fold dictionary to build a multilinear polynomial commitment scheme for tables, in the sense of \cref{def:pcs}.
+The prover encodes a table $f$ as the Reed--Solomon codeword of $U_f = \sum_b f(b) K_b$.
+An evaluation claim $\tilde f(z) = v$ is proved by a sumcheck (\cref{sec:proofs:sumcheck}) whose round challenges are also the fold challenges, exactly as in BaseFold~\cite{ZCF24}.
+By \cref{cor:codeword-fold}, no change of representation is needed: the folds of the committed word track the partially restricted table that the sumcheck prover already holds.
+We present the scheme as a public-coin IOP (\cref{def:iop}); its compilation into a non-interactive scheme is discussed in \cref{sec:proofs:bcs,sec:sound:pq}.
+
+\subsection{Parameters and encoding}\label{sec:pcs:params}
+
+\paragraph{Fields.}
+The smooth domain lies in the base field $\Fq$, while tables, words, the evaluation point and the challenges live in a finite field $\F \supseteq \Fq$, the \emph{challenge field}.
+Taking $\F = \Fq$ gives the plain scheme; taking $\F = \K$, an extension of $\Fq$, gives the scheme with extension-field challenges used in \cref{sec:impl}, in which honest tables have entries in $\Fq$.
+All results of \cref{sec:pcs,sec:sound} hold for every such $\F$, with $|\F|$ in the error bounds.
+
+\paragraph{Parameters.}
+\begin{itemize}
+  \item the number of variables $n \ge 1$, and $N = 2^n$;
+  \item a rate $\rho = 2^{-R}$ with $R \ge 1$, and a smooth domain $L \le \Fq^\times$ of order $M = N/\rho = 2^{n+R}$ (\cref{def:domain}; it exists if and only if $2^{n+R} \mid q-1$, by \cref{lem:power});
+  \item a number of folding rounds $\ell \in \iv{0}{n}$;
+  \item a number of queries $\kappa \ge 1$.
+\end{itemize}
+For $j \in \iv{0}{\ell}$ let $L_j = L^{2^j}$, the smooth domain of order $M_j = M/2^j \ge 2^R \ge 2$ (\cref{lem:power}), let $N_j = N/2^j$, and let $\Cc_j = \RS_\F[L_j, N_j]$.
+Every code $\Cc_j$ has the same rate $N_j/M_j = \rho$, and $L_{j+1} = (L_j)^2$.
+
+\begin{definition}[Encoding]\label{def:encoding}
+The \emph{encoding} of a table $f : \iv{0}{N-1} \to \F$ is the word
+\[
+  \Enc(f) \;=\; \ev_L(U_f) \;\in\; \Cc_0,
+  \qquad
+  U_f \;=\; \sum_{b=0}^{N-1} f(b)\, K_b \;\in\; \F[X]_{<N} .
+\]
+\end{definition}
+
+\begin{lemma}[Encoding]\label{lem:encoding}
+$\Enc$ is an $\F$-linear bijection from the tables over $\F$ onto $\Cc_0$, and for $c \in \Cc_0$, the table $f$ with $\Enc(f) = c$ is the table of kernel coordinates of $P_c$.
+\end{lemma}
+
+\begin{proof}
+$f \mapsto U_f$ is a linear bijection onto $\F[X]_{<N}$ by \cref{thm:basis}, and $\ev_L$ is a linear bijection from $\F[X]_{<N}$ onto $\Cc_0$ by \cref{lem:rs-params}(1), with inverse $c \mapsto P_c$.
+\end{proof}
+
+$\Enc$ is computed by the transform of \cref{cor:transforms} ($\tfrac{n}{2}N$ additions), followed by one number-theoretic transform (NTT, the fast evaluation of a polynomial on a smooth domain) of size $M$ on the zero-padded coefficient vector.
+
+\subsection{The evaluation protocol}\label{sec:pcs:protocol}
+
+The commitment to $f$ is the word $w_0 = \Enc(f)$.
+The evaluation protocol $\Pieval$ proves the claim $\tilde f(z) = v$ for a public point $z = (z_1,\dots,z_n) \in \F^n$ and a public value $v \in \F$.
+As in \cref{def:pcs}, its instance is $(w_0; z, v)$, and the verifier has oracle access to $w_0$.
+
+\paragraph{Round structure.}
+$\Pieval$ is a public-coin IOP with $\ell+1$ rounds.
+\begin{itemize}
+  \item In round $j \in \iv{1}{\ell}$, the prover sends a \emph{round polynomial} $s_j \in \F[X]_{<3}$, together with, if $j \ge 2$, an oracle $w_{j-1} \in \F^{L_{j-1}}$; the verifier replies with a uniformly random challenge $r_j \in \F$.
+  \item In round $\ell+1$, the prover sends a \emph{final table} $g : \iv{0}{N_\ell-1} \to \F$ in the clear; the verifier replies with $\kappa$ independent uniformly random \emph{query points} $\xi^{(1)}_0,\dots,\xi^{(\kappa)}_0 \in L$, and then decides.
+\end{itemize}
+Thus the challenge sets are $\mathsf{Ch}_j = \F$ for $j \in \iv{1}{\ell}$ and $\mathsf{Ch}_{\ell+1} = L^{\times\kappa}$, the set of $\kappa$-tuples of elements of $L$ (a Cartesian power, not the image of a power map).
+A round polynomial is transmitted as its values at $0$, $1$ and $2$, which are distinct because the characteristic is odd. The map $\F[X]_{<3} \to \F^3$, $s \mapsto (s(0), s(1), s(2))$, is injective by \cref{lem:roots}, hence bijective since both spaces have dimension $3$; so every triple sent by a prover identifies a unique $s_j \in \F[X]_{<3}$.
+As in \cref{sec:proofs:iop}, the checks below are predicates on the full transcript.
+
+\paragraph{Honest prover.}
+The honest prover keeps two tables over $\F$, initialised to
+\[
+  f_0 = f \qquad\text{and}\qquad \chi_0 = \bigl(b \mapsto \eq(b,z)\bigr), \qquad b \in \iv{0}{N-1},
+\]
+and after round $j$ replaces them by their restrictions (\cref{def:restriction}) at $r_j$: $f_j = \res_{r_j}(f_{j-1})$ and $\chi_j = \res_{r_j}(\chi_{j-1})$, tables on $\iv{0}{N_j-1}$.
+In round $j$ it sends
+\begin{equation}\label{eq:honest-sj}
+  s_j(X) \;=\; \sum_{b=0}^{N_j - 1}
+      \bigl((1-X)\, f_{j-1}(2b) + X f_{j-1}(2b+1)\bigr)\,
+      \bigl((1-X)\, \chi_{j-1}(2b) + X \chi_{j-1}(2b+1)\bigr),
+\end{equation}
+and, if $j \ge 2$, the oracle $w_{j-1} = \fold_{r_{j-1}}(w_{j-2})$ (\cref{def:fold-word}).
+In round $\ell+1$ it sends $g = f_\ell$.
+
+\paragraph{Verifier.}
+Set $v_0 = v$ and $v_j = s_j(r_j)$ for $j \in \iv{1}{\ell}$.
+Let $G = \sum_{b=0}^{N_\ell - 1} g(b)\, K^{(n-\ell)}_b \in \F[X]_{<N_\ell}$ and $w_\ell = \ev_{L_\ell}(G)$; the verifier computes values of $w_\ell$ itself.
+The verifier accepts if and only if all of the following checks pass.
+\begin{enumerate}
+  \item \emph{Sumcheck.} $s_j(0) + s_j(1) = v_{j-1}$ for every $j \in \iv{1}{\ell}$.
+  \item \emph{Closure.}
+  \[
+    v_\ell \;=\; \Bigl(\prod_{j=1}^{\ell} \eq_1(r_j, z_j)\Bigr)\cdot \tilde g\bigl(z_{\ell+1},\dots,z_{n}\bigr).
+  \]
+  \item \emph{Queries.} For every $i \in \iv{1}{\kappa}$, with $\xi_0 = \xi^{(i)}_0$ and $\xi_j = \xi_0^{2^j}$ for $j \in \iv{1}{\ell}$:
+  \begin{itemize}
+    \item if $\ell \ge 1$: for every $j \in \iv{1}{\ell}$, the value $\fold_{r_j}(w_{j-1})(\xi_j)$, computed by \eqref{eq:fold-explicit} from the two queried values $w_{j-1}(\pm\xi_{j-1})$, equals $w_j(\xi_j)$ (a query to the oracle $w_j$ if $j < \ell$, and $G(\xi_\ell)$ if $j = \ell$);
+    \item if $\ell = 0$: $w_0(\xi_0) = G(\xi_0)$.
+  \end{itemize}
+\end{enumerate}
+
+\begin{remark}[Stopping parameter]\label{rem:stop}
+With $\ell = n$, the final table is the single value $\tilde f(r_1,\dots,r_n)$ and $G$ is a constant; with $\ell = 0$, the prover sends $f$ in the clear.
+Intermediate values trade the $N_\ell = 2^{n-\ell}$ field elements of the final message against $\ell$ folding rounds.
+\end{remark}
+
+\subsection{Completeness}\label{sec:pcs:complete}
+
+Recall from \cref{sec:prelim:bits} the notation $(r_{\le j}, b) = (r_1,\dots,r_j,b_1,\dots,b_{n-j})$ for an index $b$ with $n-j$ bits.
+
+\begin{lemma}[Honest prover]\label{lem:honest}
+Let $f$ be a table over $\F$, $z \in \F^n$, and $r_1,\dots,r_\ell \in \F$, and let $f_j$, $\chi_j$ and $s_j$ be computed by the honest prover. Then, for $j \in \iv{0}{\ell}$ and $b \in \iv{0}{N_j-1}$:
+\begin{enumerate}
+  \item $f_j(b) = \tilde f(r_{\le j}, b)$ and $\chi_j(b) = \eq\bigl((r_{\le j}, b), z\bigr)$;
+  \item for $j \ge 1$, $s_j$ is the honest round polynomial $s^*_j$ of \cref{sec:proofs:sumcheck} for $F(x) = \tilde f(x)\,\eq(x,z)$, and $s_j \in \F[X]_{<3}$;
+  \item for $j \ge 1$, $s_j(r_j) = \sum_b f_j(b)\,\chi_j(b)$, and $s_j(0) + s_j(1) = \sum_b f_{j-1}(b)\,\chi_{j-1}(b)$;
+  \item $\sum_b f_0(b)\chi_0(b) = \tilde f(z)$ and, for every $j$,
+  \[
+    \sum_{b=0}^{N_j-1} f_j(b)\,\chi_j(b) \;=\; \Bigl(\prod_{i=1}^{j}\eq_1(r_i,z_i)\Bigr)\cdot \widetilde{f_j}(z_{j+1},\dots,z_n).
+  \]
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(1) \Cref{lem:restriction}(2), and \cref{cor:eq-mle} for $\chi_0$.
+(2) Regard $f_{j-1}$ and $\chi_{j-1}$ as tables over the ring $\F[X] \supseteq \F$ (\cref{sec:prelim:ml}). The two factors in \eqref{eq:honest-sj} are then $\res_X(f_{j-1})(b)$ and $\res_X(\chi_{j-1})(b)$, and \cref{lem:restriction}(2) over $\F[X]$, with (1), gives
+\[
+  s_j(X) \;=\; \sum_{b=0}^{N_j-1} \tilde f(r_1,\dots,r_{j-1}, X, b_1,\dots,b_{n-j})\;\eq\bigl((r_1,\dots,r_{j-1},X,b_1,\dots,b_{n-j}),z\bigr) \;=\; s^*_j(X).
+\]
+Each summand of \eqref{eq:honest-sj} is a product of two polynomials of degree $\le 1$ in $X$, so $s_j \in \F[X]_{<3}$.
+(3) By \cref{lem:natural} applied to the evaluation $X \mapsto r_j$, the factors become $f_j(b)$ and $\chi_j(b)$. Setting $X = 0$ and $X = 1$ in \eqref{eq:honest-sj} gives $\sum_b \bigl(f_{j-1}(2b)\chi_{j-1}(2b) + f_{j-1}(2b+1)\chi_{j-1}(2b+1)\bigr)$.
+(4) The first identity is \cref{prop:mle}. For the second, (1) and \cref{lem:eq}(3) give
+\[
+  \chi_j(b) \;=\; \Bigl(\prod_{i=1}^{j}\eq_1(r_i,z_i)\Bigr)\,\eq\bigl(b,(z_{j+1},\dots,z_n)\bigr);
+\]
+conclude with \cref{prop:mle}.
+\end{proof}
+
+\begin{theorem}[Completeness]\label{thm:complete}
+If $w_0 = \Enc(f)$, $v = \tilde f(z)$ and the prover is honest, the verifier accepts with probability $1$.
+\end{theorem}
+
+\begin{proof}
+\emph{Sumcheck.} By \cref{lem:honest}(3,4), $v_0 = \tilde f(z) = \sum_b f_0(b)\chi_0(b)$ and $v_j = s_j(r_j) = \sum_b f_j(b)\chi_j(b)$, so $s_j(0) + s_j(1) = \sum_b f_{j-1}(b)\chi_{j-1}(b) = v_{j-1}$ for every $j \in \iv{1}{\ell}$.
+
+\emph{Closure.} By \cref{lem:honest}(4) with $j = \ell$ and $g = f_\ell$, $v_\ell = \prod_{j}\eq_1(r_j,z_j) \cdot \tilde g(z_{\ell+1},\dots,z_n)$.
+
+\emph{Queries.} If $\ell = 0$, then $g = f$, $G = U_f$ and $w_0 = \Enc(f) = \ev_L(G)$.
+If $\ell \ge 1$, extend $(r_1,\dots,r_\ell)$ arbitrarily to $r \in \F^n$, and let $U_j$ be as in \cref{cor:iterated} for $U = U_f$; its kernel coordinates are $f_j$.
+Since $L$ has order $2^{n+R}$ with $n+R \ge n$, \cref{cor:codeword-fold} shows that the successive folds of $w_0$ satisfy $\fold_{r_j}(\cdots\fold_{r_1}(w_0)) = \ev_{L_j}(U_j)$ for $j \in \iv{1}{\ell}$.
+The honest oracles are these folds for $j < \ell$, and $U_\ell = \sum_b f_\ell(b) K^{(n-\ell)}_b = G$ because $g = f_\ell$.
+Hence $\fold_{r_j}(w_{j-1}) = w_j$ on all of $L_j$ for every $j \in \iv{1}{\ell}$, and every check of every query passes.
+\end{proof}
+
+\subsection{Costs}\label{sec:pcs:costs}
+
+Let $t_{\mathsf{H}}$ denote the cost of one hash evaluation. We count field operations up to constant factors.
+
+\begin{itemize}
+  \item \emph{Commit.} $\tfrac{n}{2}N$ additions (\cref{cor:transforms}), one NTT of size $M$, that is, $O(M\log M)$ operations, and a Merkle tree over the $M/2$ fibres of $w_0$ (one leaf per fibre), $O(M)\cdot t_{\mathsf{H}}$.
+  \item \emph{Prover, evaluation.} Sumcheck: $O(N)$ in total, since each round is linear in the current table size and the sizes halve.
+  Folds: $\fold_{r_j}(w_{j-1})$ costs $O(M_j)$ using precomputed inverses of $2\xi$ for $\xi \in L$; $O(M)$ in total.
+  Merkle trees for $w_1,\dots,w_{\ell-1}$: $O(M)\cdot t_{\mathsf{H}}$ in total.
+  \item \emph{Verifier.} Sumcheck: $O(\ell)$. Closure: $O(N_\ell)$. Queries: $O(\kappa \ell)$ field operations plus $O(\kappa \ell \log M)\cdot t_{\mathsf{H}}$ for authentication paths, plus $\kappa$ evaluations of $G$, $O(\kappa N_\ell)$.
+  \item \emph{Proof size.} For $\ell \ge 1$: $3\ell$ field elements for the sumcheck, $N_\ell$ for the final table, $\ell-1$ Merkle roots besides the commitment, and $\kappa\ell$ opened leaves ($2\kappa \ell$ values) with their authentication paths. For $\ell = 0$: the table $g = f$ and $\kappa$ opened values of $w_0$.
+\end{itemize}
+
+\begin{remark}[Relation to BaseFold and DeepFold]\label{rem:basefold}
+The interleaving of sumcheck rounds with fold rounds under shared challenges is the BaseFold paradigm~\cite{ZCF24}, and the asymptotic costs above match Reed--Solomon instantiations of BaseFold and DeepFold~\cite{GLHQTZ25}.
+In particular, converting a table to coefficient form by \cref{lem:mobius} also costs $\tfrac{n}{2}N$ additions, so the kernel encoding offers no asymptotic advantage.
+What differs is structural: by \cref{thm:fold-dictionary}, the committed word, the sumcheck table and the folds are three views of \emph{one} object, the restricted table $f_j$, and the consistency between them is an identity rather than a bookkeeping convention (compare \cref{rem:pitfall}).
+\end{remark}
+
+\begin{remark}[Batching and zero knowledge]\label{rem:batch}
+Because $\Enc$ and $\fold_r$ are linear, several tables can be opened at the same point by running $\Pieval$ on a random linear combination of them, the verifier answering queries to the combined word from queries to each committed word.
+We do not analyse batching in this paper, and zero knowledge is out of scope.
+\end{remark}

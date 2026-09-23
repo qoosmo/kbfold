@@ -1,0 +1,85 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\IfFileExists{lmodern.sty}{\usepackage[T1]{fontenc}\usepackage{lmodern}}{\DeclareTextCommand{\k}{OT1}[1]{\c{##1}}}% ogonek fallback when Latin Modern is not installed
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{stmaryrd}
+\usepackage{booktabs}
+\usepackage{longtable,array}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink]{cleveref}
+
+% ---------- theorem environments ----------
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{fact}[theorem]{Fact}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+% ---------- notation ----------
+\newcommand{\Fq}{\mathbb{F}_q}
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\iv}[2]{\llbracket #1, #2 \rrbracket}
+\newcommand{\wt}{\mathrm{wt}}
+\newcommand{\eq}{\mathrm{eq}}
+\newcommand{\RS}{\mathrm{RS}}
+\newcommand{\Enc}{\mathrm{Enc}}
+\newcommand{\fold}{\mathrm{fold}}
+\newcommand{\coef}[2]{[X^{#1}]\,#2}
+\newcommand{\sub}{\preceq}
+\newcommand{\cmp}[1]{\overline{#1}}
+\newcommand{\Cc}{\mathcal{C}}
+\newcommand{\Pp}{\mathcal{P}}
+\newcommand{\Dd}{\mathcal{D}}
+\newcommand{\lo}{\mathrm{lo}}
+\newcommand{\res}{\mathrm{res}}
+\newcommand{\ev}{\mathrm{ev}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\hi}{\mathrm{hi}}
+\newcommand{\Pieval}{\Pi_{\mathrm{eval}}}
+
+\title{The Boolean-Kernel Basis:\\ Native Evaluation-Form FRI Folding over Multiplicative Domains,\\ with an Application to Multilinear Polynomial Commitments}
+\author{Abdelali Mkhida\\ Algorizk Labs\\ \texttt{ali.mkhida@algorizk.xyz}}
+\date{September 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Multilinear polynomial commitment schemes in the BaseFold paradigm commit to a Reed--Solomon encoding of a multilinear polynomial and prove evaluations by interleaving a sumcheck with FRI-style folding.
+Over smooth multiplicative domains, the classical fold acts on monomial coefficients, so a prover holding the polynomial as a table of values on the Boolean hypercube must first convert it to coefficient form.
+We introduce the \emph{Boolean-kernel basis} $K_b(X) = \prod_{k=1}^{n}(X^{2^{k-1}} + b_k)$, $b \in \{0,1\}^n$, of the univariate polynomials of degree $< 2^n$.
+Its change of basis to monomials is the Kronecker power of a $2\times 2$ matrix and costs $\tfrac{n}{2}2^n$ additions or subtractions.
+In this basis a suitably normalised FRI fold is \emph{exactly} the restriction of one variable of the multilinear extension of the coordinate table; hence folding the Reed--Solomon encoding of $\sum_b f(b)K_b$ evaluates the multilinear extension $\tilde f$ of the table $f$ directly.
+We also characterise low degree in kernel coordinates by a sign condition and express univariate evaluation as a scaled multilinear evaluation.
+Building on this fold dictionary, we describe a transparent, hash-based multilinear polynomial commitment scheme.
+We prove it sound, evaluation binding and round-by-round knowledge sound in the unique-decoding regime, with a self-contained argument whose only external ingredient about codes is the correlated-agreement theorem for Reed--Solomon codes (together with efficient unique decoding, for the extractor). From round-by-round knowledge soundness we derive the relaxed round-by-round knowledge soundness of Chiesa, Di, Hu and Zheng; by their theorem on the BCS transformation for interactive oracle reductions, the non-interactive scheme, in which the commitment is a Merkle root chosen by the adversary, is knowledge sound, for a single opening, against quantum adversaries in the quantum random oracle model, with explicit concrete bounds.
+We implement the scheme in Rust over the Goldilocks field and compare it with a coefficient-form baseline sharing all other code: the two encodings are indistinguishable in running time at the resolution of our machine, so the structural property comes at no measurable cost.
+The paper is self-contained: every notion used in the proofs is defined in the paper, every result specific to the paper is proved, and the external results are stated in \cref{sec:prelim,sec:proofs}; the post-quantum corollary uses the quantum extraction model of~\cite{CDHZ25}, whose definitions we restate only as far as the statement requires. Companion Lean~4 files formalise the algebraic, probabilistic and soundness results, with the correlated-agreement theorem as the only axiom.
+\end{abstract}
+
+\tableofcontents
+
+\input{sections/01-introduction}
+\input{sections/02-preliminaries}
+\input{sections/02b-proof-systems}
+\input{sections/03-kernel-basis}
+\input{sections/04-fold-dictionary}
+\input{sections/05-pcs}
+\input{sections/06-soundness}
+\input{sections/07-implementation}
+\input{sections/08-experiments}
+\input{sections/09-conclusion}
+
+\bibliographystyle{alpha}
+\bibliography{refs}
+
+\appendix
+\input{sections/10-notation}
+\input{sections/11-lean}
+
+\end{document}

@@ -1,0 +1,85 @@
+\section{Implementation}\label{sec:impl}
+
+We implemented $\Pieval$ of \cref{sec:pcs}, compiled with Merkle trees and Fiat--Shamir (\cref{sec:proofs:bcs}), as a self-contained Rust library, \texttt{kbfold} (about $1{,}200$ lines including tests and benchmarks; its only dependency is the BLAKE3 hash function).
+The code follows the paper line by line; this section records the concrete choices, and \cref{sec:exp} reports measurements.
+The library also has a coefficient-form mode, used only as the baseline of \cref{sec:exp}.
+
+\paragraph{Index conventions.}
+The paper numbers bits, variables and rounds from $1$; the code, like most Rust code, numbers them from $0$.
+Bit $b_k$ of the paper is bit $k-1$ of the code (\texttt{(b >> (k-1)) \& 1}), the variable $x_k$ and the coordinate $z_k$ are entries $k-1$ of the corresponding arrays, and the round polynomial $s_j$ and the challenge $r_j$ are stored at index $j-1$, while the oracle $w_j$ (sent in round $j+1$) is stored at index $j$.
+Tables $f : \iv{0}{N-1} \to \Fq$ are arrays of length $N$ indexed identically in both.
+
+\subsection{Fields}\label{sec:impl:fields}
+
+\paragraph{Base field.}
+Tables and the initial codeword $w_0$ live over the Goldilocks field $\mathbb{F}_p$, $p = 2^{64} - 2^{32} + 1$.
+The largest power of $2$ dividing $p - 1$ is $2^{32}$, so smooth domains of order up to $2^{32}$ exist (\cref{lem:power}).
+We take $L = \langle \omega \rangle$ with $\omega = 7^{(p-1)/M}$, where $7$ generates $\mathbb{F}_p^{\times}$: since $p - 1 = 2^{32}\cdot 3 \cdot 5 \cdot 17 \cdot 257 \cdot 65537$, this amounts to $7^{(p-1)/\ell'} \ne 1$ for each of the six prime factors $\ell'$, which the test suite checks.
+Multiplication uses the standard reduction of a $128$-bit product modulo $p$ based on $2^{64} \equiv 2^{32}-1$ and $2^{96} \equiv -1$; elements are kept in canonical form.
+
+\paragraph{Extension field.}
+The challenge field of \cref{sec:pcs:params} is the quadratic extension $\F = \K = \mathbb{F}_p[\iota]/(\iota^2 - 7)$, of size $p^2 \approx 2^{128}$: the challenges $r_j$, the evaluation point $z$, the value $v$, the sumcheck tables and all folded words $w_j$ ($j \ge 1$) live in $\K$, while tables and $w_0$ have entries in $\mathbb{F}_p$.
+The polynomial $\iota^2 - 7$ is irreducible because $7$, a generator of $\mathbb{F}_p^\times$, is a non-square.
+The post-quantum parameters of \cref{rem:pq-params} use the quartic extension instead; the code does not implement it yet, and its Merkle trees and transcript differ from the compiler of~\cite{CDHZ25} (\cref{rem:fs}).
+Multiplication in $\K$ uses three base-field multiplications (Karatsuba) and one multiplication by the constant $7$.
+Mixing base-field words with extension-field challenges is only needed in the first fold, which the code handles generically.
+
+\subsection{Encoding and folding}\label{sec:impl:enc}
+
+\paragraph{Commit.}
+$\Enc(f)$ (\cref{def:encoding}) is computed in three steps:
+the kernel-to-monomial transform $\mathrm{coef}(U_f) = C^{\otimes n} f$ of \cref{cor:transforms}, applied in place one tensor factor at a time as $(x, x') \mapsto (x', x + x')$ (exactly $\tfrac{n}{2}N$ additions, no multiplications);
+zero-padding to length $M$;
+and an iterative radix-$2$ NTT producing $w_0(\omega^i)$ in natural order.
+
+\paragraph{Domain layout.}
+With natural ordering, $L_j = \langle \omega^{2^j} \rangle$ is stored as $(\omega^{2^j i})_{i \in \iv{0}{M_j-1}}$.
+The fibre of index $i \in \iv{0}{M_{j+1}-1}$ is the pair of positions $(i, i + M_{j+1})$, since $\omega^{2^j M_{j+1}} = -1$, and its image under squaring is position $i$ of $L_{j+1}$.
+Folding therefore reads the two halves of the array and writes one array of half size, with no permutation.
+
+\paragraph{Fold.}
+Both prover and verifier evaluate \eqref{eq:fold-explicit} in the line form of \cref{lem:line}.
+With $a = w(\xi)$ and $a' = w(-\xi)$, they compute $a_e = w_e(\xi^2) = (a+a')/2$ and $a_o = w_o(\xi^2) = (a-a')/(2\xi)$, and then $\fold_r(w)(\xi^2) = (a_o - a_e) + r\,(2a_e - a_o)$ (\cref{lem:line}).
+This costs one multiplication by $r$ in $\K$ and two multiplications by base-field constants.
+The inverses $(2\xi)^{-1} = 2^{-1}\omega^{-2^j i}$ are read from a single table of $\omega^{-i}$, $i < M/2$, shared by all levels.
+The same function is used by the prover on whole words and by the verifier on single fibres, which rules out the parametrisation mismatch of \cref{rem:pitfall} by construction.
+
+\paragraph{Sumcheck.}
+The prover keeps the tables $f_{j-1}$ and $\chi_{j-1}$ of \cref{sec:pcs:protocol} as arrays over $\K$.
+It sends $s_j(0)$, $s_j(1)$ and $s_j(2)$, computed in one pass over the pairs of entries at positions $2c$ and $2c+1$ of both tables, using
+\[
+  s_j(2) \;=\; \sum_{c} \bigl(2f_{j-1}(2c+1) - f_{j-1}(2c)\bigr)\bigl(2\chi_{j-1}(2c+1) - \chi_{j-1}(2c)\bigr).
+\]
+Both tables are then restricted in place (\cref{def:restriction}).
+The verifier recovers $s_j(r_j)$ by Lagrange interpolation on $\{0,1,2\}$.
+
+\subsection{Commitments and transcript}\label{sec:impl:merkle}
+
+\paragraph{Fibre leaves.}
+Every query at level $j$ reads a whole fibre $\{w_j(\xi), w_j(-\xi)\}$ (\cref{sec:pcs:protocol}).
+We therefore build each Merkle tree over the $M_{j+1}$ fibres of $w_j$, one leaf per fibre containing both values.
+A query at level $j$ costs one authentication path of length $\log_2 M_{j+1}$.
+The value $w_{j+1}(\xi_{j+1})$ needed for the fold check at level $j+1$ is one of the two entries of the fibre opened at level $j+1$, so each query opens exactly one leaf per level.
+Leaves and internal nodes are hashed with BLAKE3 under distinct one-byte domain separators, as in \cref{sec:proofs:bcs}.
+In the IOP view, this means that the oracle $w_j$ is presented as the word $\mathrm{fib}_j(w_j)$ over the alphabet $\F^2$ indexed by $L_{j+1}$, one pair per fibre (\cref{sec:sound:pq}); every query of $\Pieval$ reads whole fibres, so this changes neither the protocol nor the analysis of \cref{sec:sound}.
+
+\paragraph{Fiat--Shamir.}
+The transcript is a BLAKE3 hash chain.
+It absorbs the parameters $(n, R, \ell, \kappa)$, the root of $w_0$, the point $z$ and the value $v$.
+Then, for $j = 1,\dots,\ell$, it absorbs $s_j$ before deriving $r_j$, and (for $j < \ell$) the root of $w_j$ before deriving $r_{j+1}$.
+It then absorbs the final table $g$, and finally derives the $\kappa$ query indices.
+A challenge in $\K$ is obtained from $256$ output bits as two $128$-bit integers reduced modulo $p$, at statistical distance below $2^{-64}$ from uniform per coordinate.
+
+\paragraph{Final message.}
+The verifier converts $g$ to monomial form with the transform $C^{\otimes (n-\ell)}$ and evaluates $G$ at each $\xi_\ell$ by Horner's rule.
+It evaluates $\tilde g(z_{\ell+1},\dots,z_{n})$ for the closure check by $n-\ell$ successive restrictions (\cref{lem:restriction}).
+
+\subsection{Testing}\label{sec:impl:tests}
+
+The test suite checks each component against a direct definition (field arithmetic against $128$-bit integer arithmetic, the transforms against the expansion of \cref{cor:bool-coeff}, the NTT against Horner evaluation) and the protocol end to end:
+\begin{itemize}
+  \item \emph{Completeness.} Honest proofs verify for all $1 \le n \le 10$, all $0 \le \ell \le n$ and rates $\rho \in \{1/2, 1/4, 1/8\}$, and the returned value equals $\tilde f(z)$ computed independently.
+  \item \emph{Tampering.} Proofs are rejected after changing the claimed value, the point, the commitment, one sumcheck value, one entry of $g$, one opened value, or one intermediate root, and when a proof for a different table is checked against the original commitment.
+  \item \emph{A consistent cheater.} Consider a prover that commits honestly and claims $v+1$. In every round it adds half of the current discrepancy to each of $s_j(0)$, $s_j(1)$ and $s_j(2)$, so that every sumcheck check passes; it folds honestly, and modifies $g(0)$ so that the closure check passes. This prover is rejected in every tested configuration, and always in the query phase, as predicted by case~2 of \cref{thm:sound}.
+\end{itemize}
+Independently, each algebraic statement of \cref{sec:kernel,sec:fold} and the two lemmas of \cref{sec:sound:lemmas} were checked numerically over small prime fields ($\mathbb{F}_{17}$ exhaustively where feasible, and $\mathbb{F}_{257}$); these scripts are part of the artefact.

@@ -1,0 +1,242 @@
+\section{The Boolean-Kernel Basis}\label{sec:kernel}
+
+This section introduces the kernel polynomials and shows that their Boolean members form a basis of $\F[X]_{<N}$, with a Kronecker-structured change of basis.
+It then characterises low degree in the new coordinates and expresses univariate evaluation as a scaled multilinear evaluation.
+Throughout, $\F \supseteq \Fq$ is a finite field (in the applications, $\F = \Fq$ or an extension field $\K$), and $n \ge 0$.
+When the number of variables matters we write $K^{(n)}_y$, and otherwise $K_y$.
+
+\subsection{Kernel polynomials}\label{sec:kernel:def}
+
+\begin{definition}[Kernel polynomials]\label{def:kernel}
+For $y = (y_1,\dots,y_n) \in \F^n$, the \emph{kernel polynomial} of $y$ is
+\[
+  K_y(X) \;=\; \prod_{k=1}^{n} \bigl( X^{2^{k-1}} + y_k \bigr) \;\in\; \F[X],
+\]
+with the empty product equal to $1$.
+For $b \in \iv{0}{N-1}$ we write $K_b = K_{(b_1,\dots,b_n)}$, where $(b_1,\dots,b_n)$ is the bit vector of $b$.
+The family $(K_b)_{b \in \iv{0}{N-1}}$ is the \emph{Boolean kernel family}; its members have coefficients in $\{0,1\}$, so they do not depend on $\F$.
+For $n = 0$ the only kernel polynomial is $K^{(0)}_0 = 1$.
+\end{definition}
+
+Every $K_y$ is monic of degree $\sum_{k=1}^{n} 2^{k-1} = N-1$.
+
+\begin{example}\label{ex:n2}
+For $n = 2$ (so $N = 4$), $K_b(X) = (X + b_1)(X^2 + b_2)$, and
+$K_0 = X^3$, \;
+$K_1 = X^3 + X^2$, \;
+$K_2 = X^3 + X$, \;
+$K_3 = X^3 + X^2 + X + 1$.
+\end{example}
+
+\begin{lemma}[Coefficient rule]\label{lem:coeff-rule}
+For every $y \in \F^n$ and $a \in \iv{0}{N-1}$,
+\[
+  \coef{a}{K_y} \;=\; \prod_{k \in \iv{1}{n} \,:\, a_k = 0} y_k ,
+\]
+with the empty product equal to $1$.
+\end{lemma}
+
+\begin{proof}
+Expanding the product, each term chooses from factor $k$ either $X^{2^{k-1}}$ or $y_k$.
+Encode the choice by $a_k = 1$ for $X^{2^{k-1}}$ and $a_k = 0$ for $y_k$.
+The term is then $\bigl(\prod_{k : a_k = 0} y_k\bigr) X^{\sum_k a_k 2^{k-1}} = \bigl(\prod_{k : a_k = 0} y_k\bigr) X^{a}$.
+Distinct choices give distinct exponents $a$ by uniqueness of the binary decomposition, so no two terms contribute to the same monomial.
+\end{proof}
+
+\begin{corollary}[Boolean coefficients]\label{cor:bool-coeff}
+For $a, b \in \iv{0}{N-1}$,
+\[
+  \coef{a}{K_b} \;=\;
+  \begin{cases}
+    1 & \text{if } \cmp{b} \sub a,\\
+    0 & \text{otherwise.}
+  \end{cases}
+\]
+\end{corollary}
+
+\begin{proof}
+By \cref{lem:coeff-rule}, $\coef{a}{K_b} = \prod_{k : a_k = 0} b_k$, which is $1$ exactly when $a_k = 0 \Rightarrow b_k = 1$ for all $k$, that is, when $\cmp{b}_k = 1 \Rightarrow a_k = 1$ for all $k$.
+\end{proof}
+
+\begin{lemma}[Recursion]\label{lem:recursion}
+Let $t \in \iv{0}{n}$, and write $b = c + 2^t h$ with $c \in \iv{0}{2^t-1}$ and $h \in \iv{0}{2^{n-t}-1}$ (\cref{sec:prelim:bits}). Then
+\[
+  K^{(n)}_{c + 2^t h}(X) \;=\; K^{(t)}_c(X)\; K^{(n-t)}_h\bigl(X^{2^t}\bigr).
+\]
+In particular, for $n \ge 1$ and $b = b_1 + 2b'$, $K^{(n)}_b(X) = (X + b_1)\, K^{(n-1)}_{b'}(X^2)$.
+\end{lemma}
+
+\begin{proof}
+The bits of $b$ are $b_k = c_k$ for $k \le t$ and $b_k = h_{k-t}$ for $k > t$.
+Split the product of \cref{def:kernel} into the factors $k \le t$, whose product is $K^{(t)}_c(X)$, and the factors $k > t$.
+For $k > t$, $X^{2^{k-1}} + h_{k-t} = (X^{2^t})^{2^{(k-t)-1}} + h_{k-t}$, and the product of these factors over $k \in \iv{t+1}{n}$ is $K^{(n-t)}_h(X^{2^t})$.
+The last statement is the case $t = 1$, since $K^{(1)}_{b_1} = X + b_1$.
+\end{proof}
+
+\subsection{Kronecker products}\label{sec:kernel:kron}
+
+Matrices below have entries in $\F$, and their rows and columns are indexed by $\{0,1\}$ (for $2 \times 2$ matrices) or by $\iv{0}{N-1}$ (for $N \times N$ matrices).
+
+\begin{definition}[Kronecker product]\label{def:kron}
+For $2 \times 2$ matrices $S_1,\dots,S_n$, the $N \times N$ matrix $S_1 \otimes \dots \otimes S_n$ has entries
+\[
+  (S_1 \otimes \dots \otimes S_n)[a,b] \;=\; \prod_{k=1}^{n} S_k[a_k, b_k], \qquad a, b \in \iv{0}{N-1},
+\]
+where factor $k$ acts on bit $k$. For $n = 0$ it is the $1 \times 1$ identity matrix.
+We write $S^{\otimes n}$ when all factors equal $S$, and $S_{(k)} = I \otimes \dots \otimes S \otimes \dots \otimes I$ (with $S$ in position $k$ and the $2 \times 2$ identity $I$ elsewhere).
+\end{definition}
+
+\begin{lemma}[Mixed-product rule]\label{lem:kron}
+For $2 \times 2$ matrices $S_1,\dots,S_n$ and $T_1,\dots,T_n$,
+\[
+  (S_1 \otimes \dots \otimes S_n)(T_1 \otimes \dots \otimes T_n) \;=\; (S_1T_1) \otimes \dots \otimes (S_nT_n).
+\]
+In particular $I^{\otimes n}$ is the identity, $S^{\otimes n}T^{\otimes n} = (ST)^{\otimes n}$, and $S^{\otimes n} = S_{(1)} S_{(2)} \cdots S_{(n)}$, where the factors $S_{(k)}$ commute.
+\end{lemma}
+
+\begin{proof}
+Entry $[a,b]$ of the left-hand side is
+\[
+  \sum_{c=0}^{N-1} \prod_{k=1}^{n} S_k[a_k,c_k]\,T_k[c_k,b_k] \;=\; \prod_{k=1}^{n} \sum_{\beta \in \{0,1\}} S_k[a_k,\beta]\,T_k[\beta,b_k],
+\]
+by distributivity, since $c \mapsto (c_1,\dots,c_n)$ is a bijection from $\iv{0}{N-1}$ onto $\{0,1\}^n$.
+The right-hand side is $\prod_k (S_kT_k)[a_k,b_k]$, which is the same.
+For the particular cases: $I^{\otimes n}[a,b] = \prod_k [a_k = b_k]$ equals $1$ if $a = b$ and $0$ otherwise, by uniqueness of the bit vector; $S_{(1)}\cdots S_{(n)}$ is, by induction on the number of factors, the Kronecker product whose factor in position $k$ is the product of $n$ matrices of which exactly one is $S$ and the others are $I$; and any two $S_{(k)}, S_{(k')}$ commute because both products equal the Kronecker product with $S$ in positions $k$ and $k'$.
+\end{proof}
+
+\subsection{The basis theorem}\label{sec:kernel:basis}
+
+Let
+\[
+  C \;=\; \begin{pmatrix} 0 & 1 \\ 1 & 1 \end{pmatrix},
+  \qquad
+  C^{-1} \;=\; \begin{pmatrix} -1 & 1 \\ 1 & 0 \end{pmatrix},
+\]
+so that $C[0,\beta] = \beta$ and $C[1,\beta] = 1$ for $\beta \in \{0,1\}$; one checks $C^{-1}C = CC^{-1} = I$.
+For $U \in \F[X]_{<N}$ we write $\mathrm{coef}(U) = (\coef{a}{U})_{a \in \iv{0}{N-1}}$ for its \emph{coefficient vector}; the map $\mathrm{coef}$ is an $\F$-linear bijection from $\F[X]_{<N}$ onto $\F^{\iv{0}{N-1}}$.
+
+\begin{theorem}[Boolean-kernel basis]\label{thm:basis}
+Let $n \ge 0$, and let $\mathbf{K}_n$ be the $N \times N$ matrix with entries $\mathbf{K}_n[a,b] = \coef{a}{K_b}$ for $a, b \in \iv{0}{N-1}$ (rows indexed by coefficient positions, columns by kernel indices).
+\begin{enumerate}
+  \item $\mathbf{K}_n = C^{\otimes n}$.
+  \item $\mathbf{K}_n$ is invertible over every field, with inverse $(C^{-1})^{\otimes n}$.
+  \item $(K_b)_{b \in \iv{0}{N-1}}$ is a basis of $\F[X]_{<N}$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(1) By \cref{lem:coeff-rule}, $\coef{a}{K_b} = \prod_{k : a_k = 0} b_k = \prod_{k} C[a_k,b_k]$. For $n = 0$ both sides are the $1\times 1$ identity.
+(2) By \cref{lem:kron}, $(C^{-1})^{\otimes n} C^{\otimes n} = (C^{-1}C)^{\otimes n} = I^{\otimes n}$, and likewise in the other order.
+(3) Each $K_b$ has degree $N-1$ and so lies in $\F[X]_{<N}$, and its coefficient vector is column $b$ of $\mathbf{K}_n$. These $N$ columns are linearly independent by (2), and $\dim \F[X]_{<N} = N$.
+\end{proof}
+
+The proof uses no property of $\F$; so $(K_b)_b$ is a basis of $\F[X]_{<N}$ over every field $\F$, of any characteristic.
+
+\begin{remark}[Determinant]\label{rem:det}
+For $n \ge 1$, $\det \mathbf{K}_n = (-1)^{n2^{n-1}}$, and $\det \mathbf{K}_0 = 1$.
+Indeed, $C^{\otimes n} = C_{(1)} \cdots C_{(n)}$ by \cref{lem:kron}, and each $C_{(k)}$ is, after a simultaneous permutation of rows and columns grouping the indices into the $N/2$ pairs that differ only in bit $k$, block diagonal with $N/2$ blocks equal to $C$; so $\det C_{(k)} = (\det C)^{N/2} = (-1)^{2^{n-1}}$, since $\det C = -1$. Multiplying over $k$ gives the claim. This fact is not used below.
+\end{remark}
+
+\begin{definition}[Kernel coordinates]\label{def:kernel-coords}
+For $U \in \F[X]_{<N}$, its \emph{kernel coordinates} are the unique table $\lambda : \iv{0}{N-1} \to \F$ with
+$U = \sum_{b=0}^{N-1} \lambda(b)\, K_b$ (\cref{thm:basis}).
+With the coefficient vector $\mathrm{coef}(U)$, we have $\mathrm{coef}(U) = C^{\otimes n}\lambda$ and $\lambda = (C^{-1})^{\otimes n}\, \mathrm{coef}(U)$.
+\end{definition}
+
+Since $(C^{-1})^{\otimes n}$ has integer entries, the kernel coordinates of a polynomial with coefficients in a subfield $\F_0 \subseteq \F$ lie in $\F_0$, and do not depend on whether it is regarded in $\F_0[X]$ or in $\F[X]$.
+
+\begin{corollary}[Explicit transforms]\label{cor:transforms}
+For $U = \sum_b \lambda(b) K_b \in \F[X]_{<N}$:
+\[
+  \coef{a}{U} \;=\; \sum_{\substack{b \in \iv{0}{N-1} \\ \cmp{b} \sub a}} \lambda(b),
+  \qquad\qquad
+  \lambda(b) \;=\; \sum_{\substack{a \in \iv{0}{N-1} \\ a \sub \cmp{b}}} (-1)^{\wt(\cmp{b}) - \wt(a)}\, \coef{a}{U} .
+\]
+Each of the two transforms is computed with exactly $\tfrac{n}{2}N$ field additions or subtractions and no multiplications.
+\end{corollary}
+
+\begin{proof}
+The first formula is \cref{cor:bool-coeff}.
+For the second, $C^{-1}[\beta,\beta']$ is nonzero only when $(\beta,\beta') \ne (1,1)$, and then equals $-1$ if $\beta = \beta' = 0$ and $1$ otherwise.
+Hence $(C^{-1})^{\otimes n}[b,a] = \prod_k C^{-1}[b_k,a_k]$ is nonzero only if $a \sub \cmp{b}$, and then equals $(-1)^{|\{k : a_k = b_k = 0\}|} = (-1)^{\wt(\cmp{b}) - \wt(a)}$.
+For the cost, $C^{\otimes n} = C_{(1)} \cdots C_{(n)}$ by \cref{lem:kron}.
+The matrix $C_{(k)}$ acts on the $N/2$ pairs of entries whose indices differ only in bit $k$: a pair with values $(x, x')$, where $x$ sits at the index with bit $k$ equal to $0$, becomes $(x', x + x')$, which costs one addition.
+Likewise $(C^{-1})_{(k)}$ maps $(x,x')$ to $(x' - x, x)$, and $(C^{-1})^{\otimes n} = (C^{-1})_{(1)}\cdots (C^{-1})_{(n)}$.
+\end{proof}
+
+\subsection{Low degree in kernel coordinates}\label{sec:kernel:lowdeg}
+
+\begin{lemma}[The constant polynomial]\label{lem:one}
+For every $n \ge 0$,
+\[
+  1 \;=\; \sum_{h=0}^{2^n-1} (-1)^{n - \wt(h)}\, K^{(n)}_h(X).
+\]
+\end{lemma}
+
+\begin{proof}
+Expand $1 = \prod_{k=1}^{n}\bigl( (X^{2^{k-1}} + 1) - X^{2^{k-1}} \bigr)$ by choosing, in factor $k$, either $X^{2^{k-1}}+1$ (bit $h_k = 1$) or $-X^{2^{k-1}}$ (bit $h_k = 0$). The term indexed by $h$ is $(-1)^{n-\wt(h)} K^{(n)}_h(X)$.
+\end{proof}
+
+\begin{theorem}[Low-degree criterion]\label{thm:lowdeg}
+Let $t \in \iv{0}{n}$ and $U = \sum_{b=0}^{N-1} \lambda(b)\, K^{(n)}_b \in \F[X]_{<N}$.
+Then $\deg U < 2^t$ if and only if there is a table $\varphi : \iv{0}{2^t-1} \to \F$ such that
+\begin{equation}\label{eq:character}
+  \lambda(c + 2^t h) \;=\; (-1)^{(n-t) - \wt(h)}\, \varphi(c)
+  \qquad \text{for all } c \in \iv{0}{2^t-1},\ h \in \iv{0}{2^{n-t}-1}.
+\end{equation}
+In that case $\varphi$ is unique, $\varphi(c) = \lambda(c + N - 2^t)$, and $\varphi$ is the table of kernel coordinates of $U$ with $t$ variables: $U = \sum_{c=0}^{2^t-1} \varphi(c)\, K^{(t)}_c$.
+\end{theorem}
+
+\begin{proof}
+By \cref{lem:recursion},
+\[
+  U(X) \;=\; \sum_{c=0}^{2^t-1} K^{(t)}_c(X)\, Y_c\bigl(X^{2^t}\bigr),
+  \qquad
+  Y_c(Z) \;=\; \sum_{h=0}^{2^{n-t}-1} \lambda(c+2^t h)\, K^{(n-t)}_h(Z) \;\in\; \F[Z]_{<2^{n-t}} .
+\]
+Put $R_i = \sum_c \coef{i}{Y_c}\, K^{(t)}_c \in \F[X]_{<2^t}$ for $i \in \iv{0}{2^{n-t}-1}$, so that $U(X) = \sum_{i} X^{2^t i} R_i(X)$.
+By \cref{lem:splits}(2) (with $m = 2^{n-t}$), this is the block split of $U$, so $\deg U < 2^t$ if and only if $R_i = 0$ for all $i \ge 1$.
+By \cref{thm:basis} with $t$ variables, this holds if and only if $\coef{i}{Y_c} = 0$ for all $c$ and all $i \ge 1$, that is, if and only if every $Y_c$ is a constant $\varphi(c) \in \F$.
+
+By \cref{lem:one} applied with $n-t$ variables, the constant $\varphi(c)$ has kernel coordinates $h \mapsto (-1)^{(n-t)-\wt(h)} \varphi(c)$.
+By uniqueness of kernel coordinates (\cref{thm:basis} with $n-t$ variables), $Y_c = \varphi(c)$ holds if and only if $\lambda(c+2^t h) = (-1)^{(n-t)-\wt(h)}\varphi(c)$ for all $h$, which is \eqref{eq:character}.
+Taking $h = 2^{n-t}-1$ (so that $\wt(h) = n-t$) gives $\varphi(c) = \lambda(c + N-2^t)$, and then $U = \sum_c \varphi(c) K^{(t)}_c$.
+\end{proof}
+
+\begin{corollary}[Reed--Solomon codes in kernel coordinates]\label{cor:rs-kernel}
+Let $t \in \iv{0}{n}$, and let $L$ be a smooth domain of order $M \ge 2^t$. Then
+\[
+  \RS_\F[L, 2^t] \;=\; \Bigl\{ \ev_L\Bigl(\sum_{b} \lambda(b) K_b\Bigr) \;:\; \lambda : \iv{0}{N-1} \to \F \text{ satisfies \eqref{eq:character} for some } \varphi \Bigr\}.
+\]
+\end{corollary}
+
+\begin{proof}
+Immediate from \cref{thm:lowdeg}, since every polynomial of degree $< 2^t$ lies in $\F[X]_{<N}$ and so has kernel coordinates.
+\end{proof}
+
+\subsection{Evaluation as a scaled multilinear evaluation}\label{sec:kernel:eval}
+
+The next result shows that evaluating $U$ at a point $\zeta \in \F$ amounts, up to an explicit scalar, to evaluating the multilinear extension $\tilde\lambda$ of its kernel coordinates (\cref{prop:mle}) at a point $\psi(\zeta)$ of an explicit curve.
+
+\begin{proposition}[Evaluation identity]\label{prop:eval}
+Let $U = \sum_{b} \lambda(b) K_b \in \F[X]_{<N}$, and let $\zeta \in \F$ satisfy $\gamma_k(\zeta) := 2\zeta^{2^{k-1}} + 1 \ne 0$ for all $k \in \iv{1}{n}$. Define $\psi(\zeta) = (\psi_1(\zeta),\dots,\psi_n(\zeta)) \in \F^n$ by
+\[
+  \psi_k(\zeta) \;=\; \frac{\zeta^{2^{k-1}} + 1}{2\zeta^{2^{k-1}} + 1}, \qquad k \in \iv{1}{n}.
+\]
+Then
+\[
+  U(\zeta) \;=\; \Bigl( \prod_{k=1}^{n} \gamma_k(\zeta) \Bigr) \cdot \tilde\lambda\bigl(\psi(\zeta)\bigr).
+\]
+\end{proposition}
+
+\begin{proof}
+Fix $k$ and $\beta \in \{0,1\}$, and write $\gamma = \gamma_k(\zeta)$ and $\psi = \psi_k(\zeta)$, so that $\gamma \psi = \zeta^{2^{k-1}} + 1$.
+Then $\gamma\, \eq_1(\beta, \psi) = \gamma\bigl(\beta \psi + (1-\beta)(1-\psi)\bigr)$ equals $\gamma \psi = \zeta^{2^{k-1}} + 1$ for $\beta = 1$, and $\gamma - \gamma \psi = \zeta^{2^{k-1}}$ for $\beta = 0$; in both cases it equals $\zeta^{2^{k-1}} + \beta$.
+Taking the product over $k$ gives $K_b(\zeta) = \bigl(\prod_k \gamma_k(\zeta)\bigr)\, \eq(b, \psi(\zeta))$ for every $b \in \iv{0}{N-1}$.
+Multiplying by $\lambda(b)$ and summing over $b$ gives the claim by \cref{prop:mle}.
+\end{proof}
+
+\begin{remark}\label{rem:eval-degenerate}
+The condition $\gamma_k(\zeta) \ne 0$ for all $k$ excludes at most $N-1$ points of $\F$, namely the roots of $\prod_k (2X^{2^{k-1}} + 1)$, a polynomial of degree $N-1$ with leading coefficient $2^n \ne 0$ (\cref{lem:roots}).
+At an excluded point, $U(\zeta) = \sum_b \lambda(b) K_b(\zeta)$ still holds, but the scalar vanishes and the identity carries no information about $\tilde\lambda$.
+\end{remark}

@@ -1,0 +1,180 @@
+\section{The Fold Dictionary}\label{sec:fold}
+
+This section proves the central structural fact of the paper.
+In kernel coordinates, a suitably normalised FRI fold is \emph{exactly} the restriction of the first variable of the multilinear extension of the coordinate table (\cref{def:restriction,lem:restriction}).
+Consequently, folding a Reed--Solomon codeword $n$ times evaluates the multilinear extension of its kernel coordinates, with no change of representation.
+As in \cref{sec:kernel}, $\F \supseteq \Fq$ is a finite field.
+We define two folds: $\mathrm{pfold}_r$ acts on polynomials and $\fold_r$ acts on words; \cref{prop:fold-consistency} relates them.
+
+\subsection{Even--odd split in kernel coordinates}\label{sec:fold:split}
+
+\begin{proposition}[Even--odd split]\label{prop:split}
+Let $n \ge 1$ and $U = \sum_{b=0}^{N-1} \lambda(b)\, K^{(n)}_b \in \F[X]_{<N}$, and let $U(X) = U_e(X^2) + X\,U_o(X^2)$ be its even--odd split, with $U_e, U_o \in \F[X]_{<N/2}$ (\cref{lem:splits}). Then
+\[
+  U_e \;=\; \sum_{b'=0}^{N/2-1} \lambda(2b'+1)\, K^{(n-1)}_{b'},
+  \qquad
+  U_o \;=\; \sum_{b'=0}^{N/2-1} \bigl(\lambda(2b') + \lambda(2b'+1)\bigr)\, K^{(n-1)}_{b'} .
+\]
+\end{proposition}
+
+\begin{proof}
+By \cref{lem:recursion}, $K^{(n)}_{2b'}(X) = X\, K^{(n-1)}_{b'}(X^2)$ and $K^{(n)}_{2b'+1}(X) = K^{(n-1)}_{b'}(X^2) + X\, K^{(n-1)}_{b'}(X^2)$. Hence
+\[
+  U(X) \;=\; \sum_{b'} \lambda(2b'+1)\, K^{(n-1)}_{b'}(X^2) \;+\; X \sum_{b'} \bigl(\lambda(2b') + \lambda(2b'+1)\bigr)\, K^{(n-1)}_{b'}(X^2).
+\]
+Both sums over $b'$ are polynomials of degree $< N/2$ evaluated at $X^2$, so the claim follows from the uniqueness in \cref{lem:splits}(1).
+\end{proof}
+
+\subsection{The kernel fold of a polynomial}\label{sec:fold:fold}
+
+\begin{definition}[Kernel fold of a polynomial]\label{def:fold-poly}
+Let $d \ge 1$. For $r \in \F$ and $U \in \F[X]_{<2d}$ with even--odd split $U = U_e(X^2) + X U_o(X^2)$, define
+\[
+  \mathrm{pfold}_r(U) \;=\; (2r-1)\,U_e \;+\; (1-r)\,U_o \;\in\; \F[X]_{<d}.
+\]
+\end{definition}
+
+The map $U \mapsto \mathrm{pfold}_r(U)$ is $\F$-linear, by \cref{lem:splits}.
+By the coefficient formulas of \cref{lem:splits}(1), $U_e$ and $U_o$, and hence $\mathrm{pfold}_r(U)$, do not depend on the choice of $d$ with $U \in \F[X]_{<2d}$: equivalently, $\coef{i}{U_e} = \coef{2i}{U}$ and $\coef{i}{U_o} = \coef{2i+1}{U}$ for all $U \in \F[X]$ and $i \in \N$.
+
+\begin{theorem}[Fold dictionary]\label{thm:fold-dictionary}
+Let $n \ge 1$, $U = \sum_{b=0}^{N-1} \lambda(b)\, K^{(n)}_b \in \F[X]_{<N}$ and $r \in \F$. Then the kernel coordinates of $\mathrm{pfold}_r(U)$, with $n-1$ variables, are the restriction $\res_r(\lambda)$ (\cref{def:restriction}):
+\[
+  \mathrm{pfold}_r(U) \;=\; \sum_{b'=0}^{N/2-1} \res_r(\lambda)(b')\, K^{(n-1)}_{b'},
+  \qquad
+  \res_r(\lambda)(b') \;=\; (1-r)\,\lambda(2b') + r\,\lambda(2b'+1).
+\]
+Consequently, $\widetilde{\res_r(\lambda)}(y) = \tilde\lambda(r, y)$ for $y = (y_1,\dots,y_{n-1})$ (\cref{lem:restriction}).
+\end{theorem}
+
+\begin{proof}
+By \cref{prop:split}, the coordinate of $K^{(n-1)}_{b'}$ in $\mathrm{pfold}_r(U)$ is
+$(2r-1)\lambda(2b'+1) + (1-r)\bigl(\lambda(2b') + \lambda(2b'+1)\bigr) = (1-r)\lambda(2b') + r\lambda(2b'+1)$.
+\end{proof}
+
+\begin{corollary}[Iterated folding evaluates the multilinear extension]\label{cor:iterated}
+Let $U = \sum_{b=0}^{N-1} \lambda(b)\, K^{(n)}_b \in \F[X]_{<N}$ and $r = (r_1,\dots,r_n) \in \F^n$.
+Define $U_0 = U$ and $U_j = \mathrm{pfold}_{r_j}(U_{j-1})$ for $j \in \iv{1}{n}$.
+Then, for $j \in \iv{0}{n}$, the kernel coordinates of $U_j$ (with $n-j$ variables) are the iterated restriction $\res_{r_{\le j}}(\lambda)$, that is,
+\[
+  U_j \;=\; \sum_{b=0}^{2^{n-j}-1} \tilde\lambda(r_{\le j}, b)\, K^{(n-j)}_b .
+\]
+In particular, $U_n$ is the constant polynomial $\tilde\lambda(r_1,\dots,r_n)$.
+\end{corollary}
+
+\begin{proof}
+Induction on $j$, using \cref{thm:fold-dictionary} for the step and \cref{def:restriction} for the iterated restriction; the displayed formula is \cref{lem:restriction}(2).
+For $j = n$, $K^{(0)}_0 = 1$.
+\end{proof}
+
+\subsection{The kernel fold of a word}\label{sec:fold:words}
+
+Let $L$ be any smooth domain of order $M \ge 2$; the definitions below are used for all such domains, in particular for the domains $L^{2^j}$.
+For a word $w \in \F^L$, let $w_e, w_o \in \F^{L^2}$ be its even and odd parts \eqref{eq:even-odd}.
+
+\begin{definition}[Kernel fold of a word]\label{def:fold-word}
+For $r \in \F$ and $w \in \F^L$, define $\fold_r(w) \in \F^{L^2}$ by
+\[
+  \fold_r(w) \;=\; (2r-1)\,w_e + (1-r)\,w_o .
+\]
+\end{definition}
+
+\begin{lemma}[Properties of the word fold]\label{lem:fold-word}
+Let $w \in \F^L$ and $r \in \F$.
+\begin{enumerate}
+  \item (Explicit formula.) For every $\xi \in L$,
+  \begin{equation}\label{eq:fold-explicit}
+    \fold_r(w)(\xi^2) \;=\; \frac{\bigl((2r-1)\xi + (1-r)\bigr)\, w(\xi) \;+\; \bigl((2r-1)\xi - (1-r)\bigr)\, w(-\xi)}{2\xi}.
+  \end{equation}
+  \item (Linearity.) $w \mapsto \fold_r(w)$ is $\F$-linear.
+  \item (Locality.) For $\eta \in L^2$, $\fold_r(w)(\eta)$ depends only on the values of $w$ on the fibre over $\eta$ (\cref{def:fibre}); a verifier computes it from two queries.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(1) Substitute \eqref{eq:even-odd} into the definition and put everything over the denominator $2\xi$:
+$(2r-1)\,\frac{w(\xi)+w(-\xi)}{2} = \frac{(2r-1)\xi\,(w(\xi)+w(-\xi))}{2\xi}$ and $(1-r)\,\frac{w(\xi)-w(-\xi)}{2\xi}$; collect the coefficients of $w(\xi)$ and $w(-\xi)$.
+(2) and (3) follow from \cref{lem:split-words}(1,2).
+\end{proof}
+
+\begin{lemma}[Line form]\label{lem:line}
+For $w \in \F^L$, put $u^0 = w_o - w_e$ and $u^1 = 2w_e - w_o$, both in $\F^{L^2}$. Then $\fold_r(w) = u^0 + r\,u^1$ for every $r \in \F$.
+Conversely, $w_e = u^0 + u^1$ and $w_o = 2u^0 + u^1$.
+\end{lemma}
+
+\begin{proof}
+$(2r-1)w_e + (1-r)w_o = (w_o - w_e) + r(2w_e - w_o)$; and $u^0 + u^1 = w_e$, $2u^0 + u^1 = w_o$.
+\end{proof}
+
+\begin{proposition}[Consistency with the polynomial fold]\label{prop:fold-consistency}
+Let $1 \le d \le M/2$, $r \in \F$ and $U \in \F[X]_{<2d}$. Then
+\[
+  \fold_r(\ev_L(U)) \;=\; \ev_{L^2}(\mathrm{pfold}_r(U)).
+\]
+In particular, $\fold_r$ maps $\RS_\F[L,2d]$ into $\RS_\F[L^2,d]$, and $P_{\fold_r(c)} = \mathrm{pfold}_r(P_c)$ for every $c \in \RS_\F[L,2d]$.
+\end{proposition}
+
+\begin{proof}
+By \cref{lem:split-words}(4), $\ev_L(U)_e = \ev_{L^2}(U_e)$ and $\ev_L(U)_o = \ev_{L^2}(U_o)$; since $\ev_{L^2}$ is linear, $\fold_r(\ev_L(U)) = \ev_{L^2}\bigl((2r-1)U_e + (1-r)U_o\bigr)$.
+Moreover $\mathrm{pfold}_r(U) \in \F[X]_{<d}$ and $d \le |L^2|$, so the last statement follows from \cref{lem:rs-params}(1).
+\end{proof}
+
+\begin{corollary}[Folding a committed codeword]\label{cor:codeword-fold}
+Let $L$ be a smooth domain of order $M = 2^{\mu}$ with $\mu \ge n$, let $\lambda : \iv{0}{N-1} \to \F$, and let $w_0 = \ev_L(U)$ with $U = \sum_b \lambda(b) K_b$.
+For $r \in \F^n$, define $w_j = \fold_{r_j}(w_{j-1}) \in \F^{L^{2^j}}$ for $j \in \iv{1}{n}$.
+Then $w_j = \ev_{L^{2^j}}(U_j)$, with $U_j$ as in \cref{cor:iterated}; in particular $w_n$ is the constant word on $L^{2^n}$ with value $\tilde\lambda(r_1,\dots,r_n)$.
+\end{corollary}
+
+\begin{proof}
+Induction on $j$. For the step, apply \cref{prop:fold-consistency} on the domain $L^{2^{j-1}}$, of order $M/2^{j-1} \ge 2$ (\cref{lem:power}), with $2d = N/2^{j-1} \le M/2^{j-1}$ and $(L^{2^{j-1}})^2 = L^{2^j}$. Conclude with \cref{cor:iterated}.
+\end{proof}
+
+\subsection{Relation to classical FRI folding}\label{sec:fold:fri}
+
+\begin{definition}[Classical FRI fold]\label{def:cfold}
+The classical FRI fold~\cite{BBHR18} with challenge $\theta \in \F$ is $\mathrm{cfold}_\theta(U) = U_e + \theta\, U_o$ for $U \in \F[X]$ (which, as for $\mathrm{pfold}$, does not depend on a degree bound), and $\mathrm{cfold}_\theta(w) = w_e + \theta\, w_o$ for a word $w$ on a smooth domain of order at least $2$.
+\end{definition}
+
+\begin{proposition}[Classical versus kernel fold]\label{prop:classical}
+\begin{enumerate}
+  \item Let $n \ge 1$, and let $U \in \F[X]_{<N}$ have kernel coordinates $\lambda$. Then the kernel coordinates of $\mathrm{cfold}_\theta(U)$, with $n-1$ variables, are
+  \[
+    b' \;\longmapsto\; \theta\,\lambda(2b') + (1+\theta)\,\lambda(2b'+1).
+  \]
+  \item As maps $\F[X]_{<2d} \to \F[X]_{<d}$, for every $d \ge 1$: if $\theta \ne -1/2$, then $\mathrm{cfold}_\theta = (1+2\theta)\,\mathrm{pfold}_{r}$ with $r = (1+\theta)/(1+2\theta)$. Conversely, if $r \ne 1/2$, then $\mathrm{pfold}_r = (2r-1)\,\mathrm{cfold}_{\theta}$ with $\theta = (1-r)/(2r-1)$.
+  \item Let $U = \sum_b \lambda(b) K_b \in \F[X]_{<N}$ and $\theta_1,\dots,\theta_n \in \F \setminus \{-1/2\}$. Applying $\mathrm{cfold}_{\theta_1},\dots,\mathrm{cfold}_{\theta_n}$ successively to $U$ gives the constant
+  \[
+    \prod_{j=1}^{n} (1+2\theta_j) \cdot \tilde\lambda\Bigl( \tfrac{1+\theta_1}{1+2\theta_1}, \dots, \tfrac{1+\theta_n}{1+2\theta_n} \Bigr).
+  \]
+  \item For $\zeta \in \F$, applying $\mathrm{cfold}_{\theta_1},\dots,\mathrm{cfold}_{\theta_n}$ with $\theta_j = \zeta^{2^{j-1}}$ to $U$ gives the constant $U(\zeta)$.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+(1) By \cref{prop:split}, the coordinate of $K^{(n-1)}_{b'}$ in $U_e + \theta U_o$ is $\lambda(2b'+1) + \theta(\lambda(2b') + \lambda(2b'+1))$.
+(2) With $r = (1+\theta)/(1+2\theta)$ we have $2r - 1 = 1/(1+2\theta)$ and $1 - r = \theta/(1+2\theta)$, so $(1+2\theta)\bigl((2r-1)U_e + (1-r)U_o\bigr) = U_e + \theta U_o$. The converse is the same computation with $\theta = (1-r)/(2r-1)$, for which $1+2\theta = 1/(2r-1)$ and $(1+\theta)/(1+2\theta) = r$.
+(3) By (2) and the linearity of $\mathrm{cfold}$ and $\mathrm{pfold}$, the composition equals $\prod_j (1+2\theta_j)$ times $\mathrm{pfold}_{r_n} \circ \dots \circ \mathrm{pfold}_{r_1}(U)$ with $r_j = (1+\theta_j)/(1+2\theta_j)$; conclude with \cref{cor:iterated}.
+(4) Let $V_0 = U$ and $V_j = \mathrm{cfold}_{\theta_j}(V_{j-1})$. We show $V_{j-1}(\zeta^{2^{j-1}}) = U(\zeta)$ for $j \in \iv{1}{n+1}$ by induction: the case $j = 1$ is trivial, and $V_{j-1}(X) = (V_{j-1})_e(X^2) + X(V_{j-1})_o(X^2)$ gives $V_{j-1}(\zeta^{2^{j-1}}) = (V_{j-1})_e(\zeta^{2^j}) + \zeta^{2^{j-1}}(V_{j-1})_o(\zeta^{2^j}) = V_j(\zeta^{2^j})$. For $j = n+1$, $V_n$ is a constant, equal to $U(\zeta)$.
+\end{proof}
+
+For $\zeta$ with $\gamma_j(\zeta) \ne 0$ for all $j$, items 3 and 4 with $\theta_j = \zeta^{2^{j-1}}$ give a second proof of \cref{prop:eval}: $1 + 2\theta_j = \gamma_j(\zeta)$ and $(1+\theta_j)/(1+2\theta_j) = \psi_j(\zeta)$.
+
+\begin{remark}[A consistency pitfall]\label{rem:pitfall}
+By \cref{prop:classical}(2), the two folds differ by a scalar and by a reparametrisation of the challenge.
+An implementation must therefore use \emph{the same} fold on the committed word and on the table that the verifier tracks.
+Folding the word with $\mathrm{cfold}_\theta$ while restricting the table with $r = \theta$ (or folding with $\mathrm{pfold}_\theta$ while tracking $\mathrm{cfold}_\theta$) yields in general a final constant different from $\tilde\lambda(r_1,\dots,r_n)$, even for an honest prover; see \cref{ex:pitfall}.
+In an early version of our implementation this mismatch caused honest proofs to fail the final consistency check; \cref{def:fold-word} together with \cref{thm:fold-dictionary} fixes the convention.
+\end{remark}
+
+\begin{example}\label{ex:pitfall}
+Over $\mathbb{F}_{17}$ with $n = 1$, take $\lambda = (\lambda(0), \lambda(1)) = (1, 0)$, so $U = K_0 = X$, $U_e = 0$ and $U_o = 1$.
+With $\theta = 2$, the classical fold gives $\mathrm{cfold}_2(U) = 2$, while the restriction at $r = 2$ gives $\res_2(\lambda)(0) = (1-2)\cdot 1 + 2 \cdot 0 = -1 = 16$.
+The kernel fold agrees with the restriction: $\mathrm{pfold}_2(U) = 3 \cdot 0 + (1-2)\cdot 1 = 16$. So the classical final constant $2$ differs from $\tilde\lambda(2) = 16$.
+\end{example}
+
+\begin{remark}[Comparison with coefficient-form folding]\label{rem:coeff-form}
+In the monomial basis, $\mathrm{cfold}_\theta$ acts on coefficients by $\coef{a'}{\mathrm{cfold}_\theta(U)} = \coef{2a'}{U} + \theta\,\coef{2a'+1}{U}$ (\cref{lem:splits}(1)).
+By induction on $n$, applying $\mathrm{cfold}_{\theta_1},\dots,\mathrm{cfold}_{\theta_n}$ gives $\sum_a \coef{a}{U} \prod_{k : a_k = 1} \theta_k = \sum_a \coef{a}{U}\, m_a(\theta_1,\dots,\theta_n)$, the evaluation at $(\theta_1,\dots,\theta_n)$ of the multilinear polynomial whose \emph{coefficient form} (\cref{def:coeff-form}) is $\mathrm{coef}(U)$.
+This is the mechanism behind Reed--Solomon instantiations of BaseFold~\cite{ZCF24} and behind DeepFold~\cite{GLHQTZ25}.
+\Cref{cor:codeword-fold} is its counterpart for the \emph{table form}: if the prover encodes a table $f$ as $U = \sum_b f(b) K_b$, folding computes $\tilde f(r_1,\dots,r_n)$ directly, without converting $f$ to coefficient form.
+\end{remark}

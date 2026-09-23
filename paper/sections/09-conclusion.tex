@@ -1,0 +1,23 @@
+\section{Conclusion and Open Problems}\label{sec:concl}
+
+The Boolean-kernel basis $\{K_b\}$ gives an exact dictionary between two operations that are usually treated separately.
+One is even--odd folding of univariate polynomials over smooth multiplicative domains; the other is restriction of a variable of a multilinear polynomial in table form.
+In kernel coordinates the normalised fold $\mathrm{pfold}_r$ \emph{is} the restriction (\cref{thm:fold-dictionary}).
+A Reed--Solomon codeword can therefore carry a table directly, and the BaseFold paradigm runs on it with no change of representation.
+We gave a self-contained proof of soundness, evaluation binding and round-by-round knowledge soundness in the unique-decoding regime, whose only external input about codes is the correlated-agreement theorem for Reed--Solomon codes (with efficient unique decoding for the extractor).
+With the BCS theorem for interactive oracle reductions of~\cite{CDHZ25}, this makes the non-interactive scheme knowledge sound, for a single opening, against quantum adversaries in the quantum random oracle model (\cref{cor:pq}).
+We also gave an implementation, in which the kernel encoding and coefficient-form folding are indistinguishable in running time at the resolution of our machine.
+
+Several questions remain open.
+\begin{itemize}
+  \item \emph{List decoding.} Extend \cref{thm:sound} to proximity parameters up to the Johnson bound, in the spirit of~\cite{Hab24,Zei26}. The line form of \cref{lem:line} reduces each fold to a Reed--Solomon line, so correlated agreement beyond unique decoding~\cite{BCIKS23} is the natural tool. The main work is to replace the unique codewords $c_j$ of the passing-set argument by lists.
+  \item \emph{Several openings.} Extend \cref{cor:pq} to several openings of one commitment, and to batched openings (\cref{rem:batch}).
+  \item \emph{Conformance of the implementation.} Implement the compiler of~\cite[Construction~11.7]{CDHZ25} (salted Merkle trees, their challenge derivation) and the quartic extension, so that \cref{cor:pq} applies to the code.
+  \item \emph{Tighter post-quantum parameters.} The quadratic loss in the number of queries in \cref{thm:cdhz} makes the post-quantum parameters of \cref{rem:pq-params} conservative; a list-decoding version of \cref{thm:rbr} would reduce the number of queries.
+  \item \emph{Other domains.} The dictionary uses a smooth multiplicative subgroup in odd characteristic. Is there a kernel-type basis whose natural fold is table-form restriction on circle domains~\cite{HLP24} or on additive subspaces~\cite{LCH14,DP24}?
+  \item \emph{Engineering.} Merkle multiproofs, batched openings (\cref{rem:batch}), parallelism and SIMD field arithmetic would bring proof sizes and running times in line with production systems. None of them interacts with the encoding.
+  \item \emph{Zero knowledge.} Adapt standard masking techniques for folding-based schemes to the kernel encoding.
+\end{itemize}
+
+\paragraph{Code availability.}
+The Rust implementation of \cref{sec:impl}, the benchmark scripts of \cref{sec:exp} and the numerical checks of \cref{sec:impl:tests} are released as open source together with this paper.

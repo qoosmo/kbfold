@@ -1,0 +1,131 @@
+\section{Experiments}\label{sec:exp}
+
+This section measures the implementation of \cref{sec:impl}.
+The goals are modest and specific: to check that the kernel encoding costs the same as coefficient-form folding at identical engineering (as predicted by \cref{rem:basefold}), to locate where the time goes, and to quantify the two protocol parameters $\ell$ and $\rho$.
+We do not claim competitive absolute performance: the code is single-threaded and uses no SIMD, no Merkle multiproofs and no hash-specific batching.
+
+\subsection{Setup}\label{sec:exp:setup}
+
+\paragraph{Machine.}
+All runs use one core of an Intel Xeon processor at $2.10$\,GHz (cloud virtual machine, $2$ vCPUs, $7$\,GB RAM), Rust $1.95.0$, release profile with fat LTO and one codegen unit, and no \texttt{target-cpu} flag.
+Times are medians over $11$ runs for $n \le 18$, $5$ for $n = 20$ and $3$ for $n = 22$ and for \cref{tab:stop,tab:rate}; verification times are medians over $21$ runs.
+The machine is a shared virtual machine, and timings of identical work vary by up to about $20\%$ between runs (see \cref{sec:exp:scaling}).
+
+\paragraph{Parameters.}
+Unless stated otherwise: rate $\rho = 1/4$ ($R = 2$), number of folding rounds $\ell = n - 4$ (final table of $16$ elements of $\K$), and $\kappa = 148$ queries.
+By \cref{thm:sound} with $\delta = (1-\rho)/2 = 3/8$, the query term is $(5/8)^{148} < 2^{-100}$, and $\varepsilon_{\mathrm{fold}} + 2\ell/|\K| < 2^{-100}$ for all sizes tested ($M \le 2^{24}$, $|\K| \approx 2^{128}$).
+Tables $f$ are uniformly random over $\mathbb{F}_p$ and the point $z$ is uniformly random in $\K^n$.
+
+\paragraph{Baseline.}
+To isolate the effect of the encoding, the library has a second mode that differs from $\Pieval$ in exactly two places: the table is converted to the monomial coefficients of $\tilde f$ by M\"obius inversion (\cref{lem:mobius}) instead of the transform of \cref{cor:transforms}, and words are folded with the classical FRI fold $\mathrm{cfold}_\theta(w) = w_e + \theta\,w_o$ (\cref{def:cfold}) instead of the kernel fold (\cref{rem:coeff-form}).
+This is the coefficient-form folding used in Reed--Solomon instantiations of BaseFold and in DeepFold; everything else (field, NTT, Merkle trees, transcript, sumcheck, query phase) is shared.
+The baseline passes the same completeness and tampering tests.
+It is \emph{not} the BaseFold or DeepFold code base, and \cref{tab:scaling} should be read as a comparison of encodings, not of implementations.
+
+\subsection{Kernel versus coefficient-form encoding}\label{sec:exp:scaling}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{r rr rr rr r}
+\toprule
+ & \multicolumn{2}{c}{Commit (ms)} & \multicolumn{2}{c}{Open (ms)} & \multicolumn{2}{c}{Verify (ms)} & Proof \\
+$n$ & kernel & coeff. & kernel & coeff. & kernel & coeff. & (KiB) \\
+\midrule
+12 & 2.5 & 2.3 & 2.6 & 2.6 & 2.3 & 2.3 & 387 \\
+14 & 10.2 & 9.8 & 10.4 & 10.3 & 3.1 & 3.1 & 531 \\
+16 & 44.7 & 36.5 & 42.1 & 34.8 & 3.1 & 3.5 & 693 \\
+18 & 158.8 & 176.4 & 173.6 & 171.7 & 5.0 & 4.1 & 873 \\
+20 & 821.5 & 779.0 & 734.8 & 751.8 & 6.1 & 6.1 & 1072 \\
+22 & 4139.7 & 3998.1 & 3354.9 & 3401.3 & 6.1 & 7.2 & 1290 \\
+\bottomrule
+\end{tabular}
+\caption{Kernel encoding ($\Pieval$) versus the coefficient-form baseline, single-threaded, $\rho = 1/4$, $\ell = n-4$, $\kappa = 148$. Proof sizes are identical for both encodings.}
+\label{tab:scaling}
+\end{table}
+
+\Cref{tab:scaling} reports commit, open and verify times for $n = 12,\dots,22$ ($N = 2^{12},\dots,2^{22}$).
+Proof sizes are identical because the proofs have the same shape.
+The timing differences between the two encodings are of the same size as the differences in steps whose code is identical in both modes: in \cref{tab:breakdown}, the NTT and Merkle columns differ by up to about $20\%$ between modes although they perform exactly the same computation.
+Moreover, in an earlier full run of the same benchmark, the sign of the difference in commit time reversed at $n = 18$ and $n = 20$.
+We conclude that the two encodings are indistinguishable at the resolution of this machine.
+This is the outcome predicted by \cref{rem:basefold}: the kernel transform and M\"obius inversion both cost $\tfrac{n}{2}N$ additions, and in line form (\cref{lem:line}) the kernel fold costs one multiplication by $r$ per output element, the same as the classical fold.
+The kernel encoding therefore buys its structural property (\cref{thm:fold-dictionary}) at no measurable cost.
+
+\subsection{Where the time goes}\label{sec:exp:breakdown}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{r rr rr rr}
+\toprule
+ & \multicolumn{2}{c}{Transform (ms)} & \multicolumn{2}{c}{NTT (ms)} & \multicolumn{2}{c}{Merkle tree (ms)} \\
+$n$ & kernel & coeff. & kernel & coeff. & kernel & coeff. \\
+\midrule
+16 & 0.48 & 0.32 & 9.4 & 7.8 & 32.4 & 28.4 \\
+18 & 2.68 & 2.61 & 40.6 & 46.3 & 104.6 & 128.6 \\
+20 & 15.2 & 13.6 & 210.2 & 227.5 & 521.2 & 509.1 \\
+22 & 60.8 & 66.1 & 1476.1 & 1469.5 & 2391.2 & 2271.7 \\
+\bottomrule
+\end{tabular}
+\caption{Components of the commitment ($M = 4N$), measured separately in the same runs as \cref{tab:scaling}. The NTT and Merkle columns execute identical code in both modes.}
+\label{tab:breakdown}
+\end{table}
+
+\Cref{tab:breakdown} splits the commitment into its three steps.
+The kernel transform accounts for $1$--$2\%$ of the commitment at every size, and takes the same time as M\"obius inversion (it performs $\tfrac{n}{2}N$ additions, against $\tfrac{M}{2}\log_2 M$ multiplications for the NTT on the $4\times$ larger domain).
+The commitment is dominated by hashing: BLAKE3 over $M/2$ fibre leaves and $M/2 - 1$ internal nodes takes $1.6$--$3.5$ times as long as the NTT.
+Opening costs about as much as committing: the folded words $w_1,\dots,w_{\ell-1}$ have total length below $M$ but live in $\K$, and each needs its own Merkle tree; the sumcheck ($O(N)$ multiplications in $\K$) is a minor term.
+
+Verification takes $2$--$7$\,ms and grows slowly with $n$, as expected from its $O(\kappa \ell \log M)$ hashing cost.
+Proof sizes ($0.4$--$1.3$\,MiB) are dominated by the $\kappa \ell$ authentication paths: we open one Merkle leaf per query and level and do not merge paths across queries.
+Both the unique-decoding query count and the absence of path merging are deliberate simplifications; \cref{rem:params} discusses the former.
+
+\subsection{The number of folding rounds}\label{sec:exp:stop}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{r r rrr}
+\toprule
+$\ell$ & final table $N_\ell$ & open (ms) & verify (ms) & proof (KiB) \\
+\midrule
+8 & 4096 & 769.7 & 9.1 & 747 \\
+10 & 1024 & 748.8 & 5.8 & 824 \\
+12 & 256 & 746.9 & 4.5 & 918 \\
+14 & 64 & 726.8 & 5.6 & 1003 \\
+16 & 16 & 666.2 & 6.0 & 1072 \\
+18 & 4 & 744.9 & 6.4 & 1123 \\
+20 & 1 & 678.9 & 5.2 & 1156 \\
+\bottomrule
+\end{tabular}
+\caption{Effect of the number of folding rounds $\ell$ (\cref{rem:stop}), kernel encoding, $n = 20$, $\rho = 1/4$, $\kappa = 148$.}
+\label{tab:stop}
+\end{table}
+
+\Cref{tab:stop} varies $\ell$ at $n = 20$.
+Each folding round adds $\kappa$ authentication paths to the proof, while stopping earlier adds $16 N_\ell$ bytes for the final table; in our range the paths dominate, so proofs shrink as $\ell$ decreases, from $1156$\,KiB at $\ell = n$ to $747$\,KiB at $\ell = n-12$.
+Verification time is smallest around $\ell = 12$: for smaller $\ell$ the verifier's $\kappa$ evaluations of $G$, each of cost $O(N_\ell)$, take over.
+Opening time is essentially independent of $\ell$, since the first folds dominate it.
+
+\subsection{The rate}\label{sec:exp:rate}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{r r r rrrr}
+\toprule
+$\rho$ & $\delta$ & $\kappa$ & commit (ms) & open (ms) & verify (ms) & proof (KiB) \\
+\midrule
+$1/2$ & $1/4$ & 241 & 422.2 & 405.3 & 7.9 & 1625 \\
+$1/4$ & $3/8$ & 148 & 704.5 & 765.5 & 6.1 & 1072 \\
+$1/8$ & $7/16$ & 121 & 1880.5 & 1521.2 & 5.3 & 937 \\
+\bottomrule
+\end{tabular}
+\caption{Effect of the rate at $100$ bits of query security, $\delta = (1-\rho)/2$, kernel encoding, $n = 20$, $\ell = 16$.}
+\label{tab:rate}
+\end{table}
+
+\Cref{tab:rate} fixes the query term of \cref{thm:sound} at $2^{-100}$ and varies the rate.
+Halving the rate doubles the domain and increases the prover's work by a factor of $1.7$--$2.7$; it also reduces the number of queries, which shortens proofs and speeds up verification.
+Within the unique-decoding analysis of this paper, $\rho = 1/4$ is a reasonable default.

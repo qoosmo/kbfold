@@ -1,0 +1,333 @@
+\section{Interactive Oracle Proofs and Polynomial Commitments}\label{sec:proofs}
+
+This section recalls the proof-system notions used in \cref{sec:pcs,sec:sound}: interactive oracle proofs, their probability space and soundness notions, the sumcheck protocol, polynomial commitment schemes, and the compilation of interactive oracle proofs into non-interactive arguments.
+Everything in \cref{sec:proofs:iop,sec:proofs:rbr,sec:proofs:sumcheck,sec:proofs:pcs} is proved.
+\Cref{sec:proofs:bcs} concerns the compiled, non-interactive scheme; it restates the definitions of Chiesa, Di, Hu and Zheng~\cite{CDHZ25} that we need and quotes their theorem (\cref{thm:cdhz}), and nothing in \cref{sec:proofs:iop,sec:proofs:rbr,sec:proofs:sumcheck,sec:proofs:pcs} or in \cref{sec:kernel,sec:fold,sec:pcs} depends on it.
+
+\subsection{Interactive oracle proofs}\label{sec:proofs:iop}
+
+A \emph{relation} $\mathcal{R}$ is a set of pairs $(\mathtt{x},\mathtt{w})$ of an \emph{instance} $\mathtt{x}$ and a \emph{witness} $\mathtt{w}$; its \emph{language} is $L_{\mathcal{R}} = \{\mathtt{x} : \exists\, \mathtt{w},\ (\mathtt{x},\mathtt{w}) \in \mathcal{R}\}$.
+An instance may have an \emph{oracle part}: a word to which the verifier has query access only.
+
+\begin{definition}[Interactive oracle proof]\label{def:iop}
+A \emph{public-coin interactive oracle proof} (IOP)~\cite{BCS16} with $\nu \ge 1$ rounds and \emph{challenge sets} $\mathsf{Ch}_1,\dots,\mathsf{Ch}_\nu$ (finite and nonempty) is a pair $(\mathsf{P},\mathsf{V})$ of a prover and a verifier.
+On a common instance $\mathtt{x}$ (and a witness given to $\mathsf{P}$ only), the interaction proceeds as follows. For $i = 1, \dots, \nu$:
+\begin{enumerate}
+  \item $\mathsf{P}$ sends a message $\mathsf{m}_i$. Parts of $\mathsf{m}_i$ may be designated as \emph{oracles}: $\mathsf{V}$ does not read them, but may later query individual entries.
+  \item $\mathsf{V}$ replies with a \emph{challenge} $\mathsf{c}_i \in \mathsf{Ch}_i$.
+\end{enumerate}
+After the last round, $\mathsf{V}$ reads the non-oracle parts of the instance and of the messages, queries entries of the oracles (including the oracle part of the instance) at positions that are determined by these non-oracle parts and by the challenges, and outputs \emph{accept} or \emph{reject} as a deterministic function of everything it has read.
+\end{definition}
+
+A \emph{partial transcript} of $i$ rounds is $\tau = (\mathtt{x}, \mathsf{m}_1, \mathsf{c}_1, \dots, \mathsf{m}_i, \mathsf{c}_i)$; for $i = 0$ it is the \emph{empty transcript} $(\mathtt{x})$, and for $i = \nu$ it is a \emph{full transcript}.
+Since the verifier's decision is a deterministic function of the full transcript (with oracles), we say that $\mathsf{V}$ \emph{accepts} or \emph{rejects} a full transcript.
+When the verifier makes checks ``during'' a round, as in the protocols below, these checks are predicates on the transcript that are evaluated at the end; the interaction always runs all $\nu$ rounds.
+
+\paragraph{Provers and the probability space.}
+A \emph{deterministic prover} $\mathsf{P}^*$ is a function that maps each partial transcript of $i-1$ rounds to a message $\mathsf{m}_i$.
+Its interaction with $\mathsf{V}$ on an instance $\mathtt{x}$ is determined by the challenges.
+All probabilities are over the \emph{challenge space} $\Omega = \mathsf{Ch}_1 \times \dots \times \mathsf{Ch}_\nu$ with the uniform distribution, that is, with independent uniform challenges.
+We write $\tau_i$ for the partial transcript after $i$ rounds, which is a function of $(\mathsf{c}_1,\dots,\mathsf{c}_i)$, and $\mathsf{m}_i$ for the $i$-th message, which is a function of $(\mathsf{c}_1,\dots,\mathsf{c}_{i-1})$.
+A \emph{randomised prover} is a finitely supported probability distribution over deterministic provers, independent of the challenges.
+
+\begin{lemma}[Sequential challenges]\label{lem:sequential}
+For $i \in \iv{1}{\nu}$, let $E_i \subseteq \mathsf{Ch}_1 \times \dots \times \mathsf{Ch}_i$, and suppose that for every $(\mathsf{c}_1,\dots,\mathsf{c}_{i-1})$ there are at most $k_i$ values $\mathsf{c}_i \in \mathsf{Ch}_i$ with $(\mathsf{c}_1,\dots,\mathsf{c}_i) \in E_i$. Then
+\[
+  \Pr_{\Omega}\bigl[\, \exists\, i \in \iv{1}{\nu} : (\mathsf{c}_1,\dots,\mathsf{c}_i) \in E_i \,\bigr] \;\le\; \sum_{i=1}^{\nu} \frac{k_i}{|\mathsf{Ch}_i|}.
+\]
+\end{lemma}
+
+\begin{proof}
+Under the uniform distribution on $\Omega$, the prefix $(\mathsf{c}_1,\dots,\mathsf{c}_{i})$ is uniform on $\mathsf{Ch}_1 \times \dots \times \mathsf{Ch}_i$.
+Counting the elements of $E_i$ prefix by prefix gives $|E_i| \le k_i \prod_{i' < i} |\mathsf{Ch}_{i'}|$, so the probability of the $i$-th event is at most $k_i/|\mathsf{Ch}_i|$. Conclude by the union bound.
+\end{proof}
+
+\begin{lemma}[Independent queries]\label{lem:queries}
+Let $\Omega'$ be a finite nonempty set with the uniform distribution, $L$ a finite nonempty set, $\kappa \ge 1$, and let $\varpi \mapsto \mathcal{S}(\varpi) \subseteq L$ and $\mathcal{A} \subseteq \Omega'$ be given.
+On $\Omega' \times L^{\times\kappa}$ with the uniform distribution, where $L^{\times\kappa}$ denotes the Cartesian power (the set of $\kappa$-tuples of elements of $L$),
+\[
+  \Pr\bigl[\, \varpi \in \mathcal{A} \text{ and } \xi^{(1)},\dots,\xi^{(\kappa)} \in \mathcal{S}(\varpi) \,\bigr] \;=\; \mathbb{E}_{\varpi}\Bigl[\mathbf{1}_{\mathcal{A}}(\varpi) \cdot \Bigl(\frac{|\mathcal{S}(\varpi)|}{|L|}\Bigr)^{\kappa}\Bigr],
+\]
+where $\mathbf{1}_{\mathcal{A}}$ is the indicator function of $\mathcal{A}$. In particular, if $\pi \ge 0$ and $|\mathcal{S}(\varpi)| \le \pi |L|$ for all $\varpi \in \mathcal{A}$, the probability is at most $\Pr[\mathcal{A}]\,\pi^\kappa \le \pi^{\kappa}$.
+\end{lemma}
+
+\begin{proof}
+For fixed $\varpi \in \mathcal{A}$, the number of $\kappa$-tuples of elements of $\mathcal{S}(\varpi)$ is $|\mathcal{S}(\varpi)|^\kappa$; divide by $|\Omega'|\,|L|^\kappa$ and sum over $\varpi$.
+\end{proof}
+
+\begin{lemma}[Randomised provers]\label{lem:randomised}
+Fix an instance $\mathtt{x}$, and let $E$ be a set of full transcripts of $\mathtt{x}$ (for instance, the accepted ones). If $\Pr_\Omega[\tau_\nu \in E] \le \varepsilon$ for every deterministic prover, then the same bound holds for every randomised prover. Equivalently, if a randomised prover achieves $\Pr[\tau_\nu \in E] > \varepsilon$, so does some deterministic prover in its support.
+\end{lemma}
+
+\begin{proof}
+Since the prover's randomness is independent of the challenges, the probability for a randomised prover is the average, over its distribution, of the probabilities for deterministic provers.
+\end{proof}
+
+\begin{definition}[Completeness and soundness]\label{def:iop-sound}
+The IOP is \emph{complete} for $\mathcal{R}$ if, for every $(\mathtt{x},\mathtt{w}) \in \mathcal{R}$, the honest prover makes $\mathsf{V}$ accept with probability $1$.
+It has \emph{soundness error} $\varepsilon$ if, for every $\mathtt{x} \notin L_{\mathcal{R}}$ and every deterministic prover $\mathsf{P}^*$, $\mathsf{V}$ accepts with probability at most $\varepsilon$.
+\end{definition}
+
+By \cref{lem:randomised}, soundness also holds against randomised provers.
+
+\subsection{Round-by-round soundness}\label{sec:proofs:rbr}
+
+For the Fiat--Shamir compilation, the relevant notions are round by round: every partial transcript is classified as \emph{doomed} or not, and no round can turn a doomed transcript into a non-doomed one except with small probability.
+The following definitions are those of~\cite[Definitions~3.11 and~3.12]{BGTZ24}; the soundness notion was introduced in~\cite{CCHLRRW19}, where it is phrased with a \emph{state function}, which amounts to specifying a set $\Dd$ of doomed transcripts, and its knowledge analogue in~\cite{CMS19}.
+We place the verifier's query positions in the last challenge $\mathsf{c}_\nu$.
+
+\begin{definition}[Round-by-round soundness]\label{def:rbr}
+An IOP with $\nu$ rounds has \emph{round-by-round soundness error} $(\varepsilon_1,\dots,\varepsilon_\nu) \in [0,1]^\nu$ for $\mathcal{R}$ if there is a set $\Dd$ of partial transcripts, the \emph{doomed} ones, such that:
+\begin{enumerate}
+  \item if $\mathtt{x} \notin L_{\mathcal{R}}$, then the empty transcript $(\mathtt{x})$ is doomed;
+  \item for every $i \in \iv{1}{\nu}$, every doomed partial transcript $\tau$ of $i-1$ rounds and every message $\mathsf{m}_i$,
+  \[
+    \Pr_{\mathsf{c}_i \leftarrow \mathsf{Ch}_i}\bigl[(\tau, \mathsf{m}_i, \mathsf{c}_i) \notin \Dd\bigr] \;\le\; \varepsilon_i ;
+  \]
+  \item $\mathsf{V}$ rejects every doomed full transcript.
+\end{enumerate}
+We write $\varepsilon_{\mathrm{rbr}} = \max_i \varepsilon_i$.
+\end{definition}
+
+\begin{definition}[Round-by-round knowledge soundness]\label{def:rbr-knowledge}
+An IOP with $\nu$ rounds is \emph{round-by-round knowledge sound} for $\mathcal{R}$ with error $(\varepsilon_1,\dots,\varepsilon_\nu) \in [0,1]^\nu$ if there are a set $\Dd$ of partial transcripts and an algorithm $\mathsf{Ext}$, the \emph{extractor}, running in time polynomial in the size of the instance (including its oracle part), defined on all pairs of a partial transcript and a next message, such that:
+\begin{enumerate}
+  \item the empty transcript $(\mathtt{x})$ is doomed for every instance $\mathtt{x}$;
+  \item for every $i \in \iv{1}{\nu}$, every doomed partial transcript $\tau$ of $i-1$ rounds and every message $\mathsf{m}_i$, if
+  \[
+    \Pr_{\mathsf{c}_i \leftarrow \mathsf{Ch}_i}\bigl[(\tau, \mathsf{m}_i, \mathsf{c}_i) \notin \Dd\bigr] \;>\; \varepsilon_i ,
+  \]
+  then $(\mathtt{x}, \mathsf{Ext}(\tau, \mathsf{m}_i)) \in \mathcal{R}$, where $\mathtt{x}$ is the instance of $\tau$;
+  \item $\mathsf{V}$ rejects every doomed full transcript.
+\end{enumerate}
+We write $\varepsilon_{\mathrm{rbr}} = \max_i \varepsilon_i$.
+\end{definition}
+
+The polynomial-time requirement on $\mathsf{Ext}$ matters only for the compiled scheme of \cref{sec:proofs:bcs}; the results of \cref{sec:proofs:rbr,sec:proofs:pcs} use conditions 1--3 but not the running time of $\mathsf{Ext}$.
+
+\begin{lemma}[Round-by-round implies overall]\label{lem:rbr-overall}
+Let $\mathsf{P}^*$ be a deterministic prover and $\mathtt{x}$ an instance, and let $\tau_i$ and $\mathsf{m}_i$ be as in \cref{sec:proofs:iop}.
+\begin{enumerate}
+  \item If the IOP has round-by-round soundness error $(\varepsilon_i)_i$ and $\mathtt{x} \notin L_{\mathcal{R}}$, then $\mathsf{V}$ accepts with probability at most $\sum_{i=1}^{\nu} \varepsilon_i$.
+  \item If the IOP is round-by-round knowledge sound with error $(\varepsilon_i)_i$, then
+  \[
+    \Pr[\mathsf{V} \text{ accepts}] \;\le\; \sum_{i=1}^{\nu} \varepsilon_i \;+\; \Pr\bigl[\, \exists\, i \in \iv{1}{\nu} : \tau_{i-1} \in \Dd \text{ and } (\mathtt{x}, \mathsf{Ext}(\tau_{i-1}, \mathsf{m}_i)) \in \mathcal{R} \,\bigr].
+  \]
+  In particular, if $\mathsf{V}$ accepts with probability greater than $\sum_i \varepsilon_i$, then there exist $i \in \iv{1}{\nu}$ and challenges $\mathsf{c}_1,\dots,\mathsf{c}_{i-1}$ such that $\tau_{i-1} \in \Dd$ and $(\mathtt{x}, \mathsf{Ext}(\tau_{i-1}, \mathsf{m}_i)) \in \mathcal{R}$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+In both cases $\tau_0$ is doomed, and an accepted full transcript $\tau_\nu$ is not doomed (condition 3).
+So if $\mathsf{V}$ accepts, there is a first round $i$ with $\tau_{i-1} \in \Dd$ and $\tau_i \notin \Dd$.
+For (2), let $E_i$ be the set of $(\mathsf{c}_1,\dots,\mathsf{c}_i)$ such that $\tau_{i-1} \in \Dd$, $(\mathtt{x}, \mathsf{Ext}(\tau_{i-1}, \mathsf{m}_i)) \notin \mathcal{R}$ and $\tau_i \notin \Dd$.
+For fixed $(\mathsf{c}_1,\dots,\mathsf{c}_{i-1})$, the transcript $\tau_{i-1}$ and the message $\mathsf{m}_i$ are fixed; if the first two conditions hold, condition~2 of \cref{def:rbr-knowledge} (in contrapositive form) shows that at most $\varepsilon_i |\mathsf{Ch}_i|$ values of $\mathsf{c}_i$ satisfy the third.
+Acceptance implies that some $E_i$ occurs or that the event in the displayed probability occurs, and \cref{lem:sequential} bounds the probability of the former by $\sum_i \varepsilon_i$.
+For (1), the same argument applies with $E_i$ defined without the condition on $\mathsf{Ext}$, using condition~2 of \cref{def:rbr}.
+\end{proof}
+
+\subsection{The sumcheck protocol}\label{sec:proofs:sumcheck}
+
+The sumcheck protocol of Lund, Fortnow, Karloff and Nisan~\cite{LFKN92} reduces a claim about the sum of a polynomial over the Boolean hypercube to a claim about one evaluation.
+Our commitment scheme runs it on a product of two multilinear polynomials, so we state it for polynomials of degree at most $2$ in each variable.
+
+Let $\F \supseteq \Fq$ be a finite field, and let $F \in \F[x_1,\dots,x_n]$ have degree at most $2$ in each variable, with $n \ge 1$.
+For $j \in \iv{1}{n}$ and $r_1,\dots,r_{j-1} \in \F$, the \emph{honest round polynomial} is
+\[
+  s^*_j(X) \;=\; \sum_{b = 0}^{2^{n-j}-1} F(r_1,\dots,r_{j-1}, X, b_1,\dots,b_{n-j}) \;\in\; \F[X]_{<3}.
+\]
+To prove the claim $\sum_{b=0}^{N-1} F(b) = v_0$, the prover sends, in round $j = 1,\dots,n$, a round polynomial $s_j \in \F[X]_{<3}$ (honestly $s_j = s^*_j$).
+The verifier samples $r_j \in \F$ uniformly at random and sets $v_j = s_j(r_j)$; it accepts if $s_j(0) + s_j(1) = v_{j-1}$ for every $j \in \iv{1}{n}$ and $v_n = F(r_1,\dots,r_n)$.
+
+\begin{lemma}[Sumcheck]\label{lem:sumcheck}
+If $\sum_{b=0}^{N-1} F(b) = v_0$, the honest prover is accepted with probability $1$.
+If $\sum_{b} F(b) \ne v_0$, then for every deterministic prover the verifier accepts with probability at most $2n/|\F|$.
+More precisely, in that case the verifier accepts only if there is a round $j$ with $s_j \ne s^*_j$ and $s_j(r_j) = s^*_j(r_j)$.
+\end{lemma}
+
+\begin{proof}
+Put $v^*_0 = \sum_b F(b)$ and $v^*_j = s^*_j(r_j)$ for $j \in \iv{1}{n}$.
+By definition, $s^*_j(0) + s^*_j(1) = v^*_{j-1}$ for every $j$, and $v^*_n = F(r_1,\dots,r_n)$.
+Completeness follows, since the honest prover has $v_j = v^*_j$ for all $j$.
+
+Soundness: suppose that $v_0 \ne v^*_0$, that the verifier accepts, and that $s_j(r_j) \ne s^*_j(r_j)$ whenever $s_j \ne s^*_j$.
+We show by induction that $v_j \ne v^*_j$ for all $j \in \iv{0}{n}$; for $j = n$ this contradicts the final check.
+If $v_{j-1} \ne v^*_{j-1}$, the check of round $j$ gives $s_j(0) + s_j(1) = v_{j-1} \ne s^*_j(0) + s^*_j(1)$, so $s_j \ne s^*_j$, hence $v_j = s_j(r_j) \ne s^*_j(r_j) = v^*_j$ by assumption.
+
+For the probability, let $E_j$ be the set of $(r_1,\dots,r_j)$ with $s_j \ne s^*_j$ and $s_j(r_j) = s^*_j(r_j)$.
+For fixed $r_1,\dots,r_{j-1}$, both $s_j$ and $s^*_j$ are fixed, and their difference, when nonzero, has degree at most $2$, so at most $2$ values of $r_j$ lie in $E_j$ (\cref{lem:roots}).
+\Cref{lem:sequential} gives the bound $2n/|\F|$.
+\end{proof}
+
+\subsection{Polynomial commitment schemes}\label{sec:proofs:pcs}
+
+A \emph{multilinear polynomial commitment scheme} lets a prover commit to a table $f : \iv{0}{N-1} \to \F$, over a finite field $\F \supseteq \Fq$, and later prove claims of the form $\tilde f(z) = v$.
+We describe it in the IOP model, where the commitment is an oracle.
+
+\begin{definition}[Polynomial commitment in the IOP model]\label{def:pcs}
+A multilinear polynomial commitment scheme in the IOP model consists of:
+\begin{itemize}
+  \item an \emph{encoding} $\Enc$ that maps each table $f$ to a word $\Enc(f)$, the \emph{commitment};
+  \item an \emph{evaluation protocol}: a public-coin IOP whose instance is $(w; z, v)$, with a word $w$ (the commitment) as oracle part, a point $z \in \F^n$ and a value $v \in \F$.
+\end{itemize}
+It is \emph{complete} if the evaluation protocol accepts with probability $1$ when the prover is honest, $w = \Enc(f)$ and $\tilde f(z) = v$.
+\end{definition}
+
+Every claim $(z,v)$ is true for \emph{some} table (for instance the constant table with value $v$, since $\sum_b \eq(b,z) = \prod_{k=1}^n (z_k + 1 - z_k) = 1$), so the relation $\{((z,v), f) : \tilde f(z) = v\}$ says nothing about the commitment.
+The meaningful requirement is that the commitment determines the table.
+To express it, fix a function $\mathrm{dist}$ from pairs of words to real numbers, and a threshold $\delta$, such that
+\begin{equation}\label{eq:dist-unique}
+  \text{for every word } w, \text{ there is at most one table } f \text{ with } \mathrm{dist}(w, \Enc(f)) \le \delta,
+\end{equation}
+and consider the relation
+\[
+  \mathcal{R}^{\delta}_{\mathrm{eval}} \;=\; \bigl\{\, ((w; z,v), f) \;:\; \mathrm{dist}(w, \Enc(f)) \le \delta \ \text{ and } \ \tilde f(z) = v \,\bigr\}.
+\]
+
+\begin{definition}[Evaluation binding]\label{def:binding}
+The evaluation protocol is \emph{$\varepsilon$-evaluation binding} if for every word $w$, point $z$ and values $v \ne v'$, it is not the case that some deterministic prover makes the verifier accept $(w; z, v)$ with probability greater than $\varepsilon$ and some deterministic prover makes it accept $(w; z, v')$ with probability greater than $\varepsilon$.
+\end{definition}
+
+By \cref{lem:randomised}, $\varepsilon$-evaluation binding also holds when randomised provers are allowed.
+
+\begin{lemma}[Knowledge soundness implies binding]\label{lem:rbr-binding}
+If the evaluation protocol is round-by-round knowledge sound for $\mathcal{R}^{\delta}_{\mathrm{eval}}$ with error $(\varepsilon_i)_i$, and \eqref{eq:dist-unique} holds, then it is $\varepsilon$-evaluation binding with $\varepsilon = \sum_i \varepsilon_i$.
+\end{lemma}
+
+\begin{proof}
+Suppose that provers are accepted on $(w; z,v)$ and on $(w;z,v')$, each with probability greater than $\varepsilon$.
+By \cref{lem:rbr-overall}(2), the extractor outputs, on some partial transcript of each interaction, tables $f$ and $f'$ with $((w;z,v),f) \in \mathcal{R}^{\delta}_{\mathrm{eval}}$ and $((w;z,v'),f') \in \mathcal{R}^{\delta}_{\mathrm{eval}}$.
+Both tables satisfy $\mathrm{dist}(w, \Enc(\cdot)) \le \delta$, so $f = f'$ by \eqref{eq:dist-unique}, and $v = \tilde f(z) = \tilde f'(z) = v'$.
+\end{proof}
+
+\subsection{Non-interactive arguments}\label{sec:proofs:bcs}
+
+This subsection concerns only the non-interactive scheme (\cref{cor:pq}).
+
+\paragraph{Merkle trees.}
+Let $\mathsf{H} : \{0,1\}^* \to \{0,1\}^{\lambda_{\mathsf{H}}}$ be a hash function with output length $\lambda_{\mathsf{H}}$, and let $\|$ denote concatenation of bit strings.
+The \emph{Merkle tree}~\cite{Mer89} over a vector $\mathbf{d} = (\mathbf{d}_0,\dots,\mathbf{d}_{T-1})$ of bit strings, with $T$ a power of $2$, is the complete binary tree whose leaves are the hashes $\mathsf{H}(0 \,\|\, \mathbf{d}_i)$ and whose internal nodes are $\mathsf{H}(1 \,\|\, \text{left child} \,\|\, \text{right child})$; its \emph{root} $\mathrm{MT}(\mathbf{d})$ is a commitment to the vector.
+An \emph{opening} of position $i$ consists of $\mathbf{d}_i$ and its \emph{authentication path}, the $\log_2 T$ siblings on the path from the leaf to the root; it is checked by recomputing the root.
+The entries $\mathbf{d}_i$ may be encodings of several field elements; in \cref{sec:impl} each leaf holds the two values of a word on one fibre.
+
+\begin{lemma}[Merkle binding]\label{lem:merkle}
+\begin{enumerate}
+  \item Given two accepting openings of the same position to different values under the same root, one can compute a collision of $\mathsf{H}$, that is, two distinct inputs with the same hash, with $O(\log_2 T)$ hash evaluations.
+  \item Given two vectors $\mathbf{d} \ne \mathbf{d}'$ of length $T$ with $\mathrm{MT}(\mathbf{d}) = \mathrm{MT}(\mathbf{d}')$, one can compute a collision of $\mathsf{H}$ with $O(T)$ hash evaluations.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(1) Number the levels of the tree from $0$ (leaf hashes) to $\log_2 T$ (root). Node values are strings of the fixed length $\lambda_{\mathsf{H}}$, and the position $i$ fixes, at every level, on which side the path node lies; so the input $1\|\text{left}\|\text{right}$ hashed at a level determines the path node below it and its sibling.
+Recompute both paths from the leaves to the root, and let $t$ be the first level at which the two recomputed path nodes are equal; it exists because both paths end at the same root.
+If $t = 0$, the hashed inputs $0\|\mathbf{d}_i$ and $0\|\mathbf{d}'_i$ are distinct. If $t > 0$, the inputs hashed at level $t$ are distinct, because they contain the path nodes of level $t-1$, which differ by the choice of $t$. In both cases these two inputs have the same hash.
+(2) Compute both trees, and apply (1) at a position where $\mathbf{d}$ and $\mathbf{d}'$ differ, taking the authentication paths from the two trees.
+\end{proof}
+
+\paragraph{Random oracles.}
+In the \emph{random oracle model}, $\mathsf{H}$ is modelled as a uniformly random function to which all parties have oracle access; in the \emph{quantum random oracle model} (QROM)~\cite{BDFLSZ11}, the adversary is a quantum algorithm that may query $\mathsf{H}$ in superposition.
+The \emph{BCS transformation} of Ben-Sasson, Chiesa and Spooner~\cite{BCS16} compiles a public-coin IOP into a non-interactive argument:
+each oracle message is replaced by a Merkle root, each challenge is derived by hashing the instance and the transcript so far (the Fiat--Shamir paradigm), and the proof contains the non-oracle messages, the roots, and an opening of every queried oracle entry.
+The BCS theorem in the QROM of Chiesa, Manohar and Spooner~\cite[Theorem~8.6]{CMS19} covers IOPs whose instance has no oracle part.
+An evaluation protocol has an oracle part, the commitment, which in the non-interactive scheme is replaced by its Merkle root and is chosen by the adversary.
+This setting is covered by the extension of the BCS transformation to \emph{interactive oracle reductions} (IORs) of Chiesa, Di, Hu and Zheng~\cite{CDHZ25}, which we now recall in the special case that we need.
+All definitions below are those of~\cite{CDHZ25}; we restate them to fix notation, and we indicate the specialisation.
+We write $\varepsilon$ for the error terms that~\cite{CDHZ25} denotes by $\kappa$, since $\kappa$ is our number of queries.
+
+\paragraph{Relations with an implicit instance~\cite[\S3.3]{CDHZ25}.}
+Fix a finite alphabet $\Sigma$ and a length $l_y \ge 1$.
+A \emph{partial string} is an element of $(\Sigma \sqcup \{\bot\})^{l_y}$, the symbol $\bot$ marking an undefined entry; $\mathrm{Dom}(y)$ is the set of positions where $y$ is defined, and $y$ is \emph{full} if $\mathrm{Dom}(y)$ is everything.
+The fractional Hamming distance $\Delta(y,y')$ of two partial strings is the fraction of positions at which they differ, $\bot$ being different from every symbol of $\Sigma$.
+A \emph{relation with implicit instance} is a set $\mathcal{R}$ of triples $(\mathtt{x}, y, \mathtt{w})$ of an \emph{explicit instance} $\mathtt{x}$, a full string $y \in \Sigma^{l_y}$, the \emph{implicit instance}, to which the verifier has oracle access only, and a witness $\mathtt{w}$.
+For $\delta \in [0,1]$, the \emph{relaxed relation} is
+\[
+  \mathcal{R}_{\le\delta} \;=\; \bigl\{\, (\mathtt{x}, y, \mathtt{w}) \;:\; y \in (\Sigma \sqcup \{\bot\})^{l_y},\ \exists\, y^* \in \Sigma^{l_y} \text{ with } (\mathtt{x}, y^*, \mathtt{w}) \in \mathcal{R} \text{ and } \Delta(y, y^*) \le \delta \,\bigr\}.
+\]
+
+\paragraph{IOPs as interactive oracle reductions~\cite[\S3.4]{CDHZ25}.}
+Consider an IOP (\cref{def:iop}) with $\nu$ rounds whose instance is $(\mathtt{x}; y)$ with oracle part $y$, in which every prover message is a string $\Pi_i$ over $\Sigma$, whose challenges are uniformly random bit strings $\mathsf{vr}_i \in \{0,1\}^{\beta_i}$, and whose verifier reads (by queries) positions of $y$ and of the $\Pi_i$ that are determined by $\mathtt{x}$ and the challenges only; a message part that the verifier reads entirely is a string all of whose positions are read.
+Let $\mathcal{R}_{\mathrm{acc}} = \{(\top, (), \mathtt{w})\}$, where $\top$ is a fixed symbol, $()$ is the empty implicit instance, and $\mathtt{w}$ is arbitrary; then $(\mathcal{R}_{\mathrm{acc}})_{\le\delta} = \mathcal{R}_{\mathrm{acc}}$ for every $\delta$.
+If the verifier outputs the instance $(\top, ())$ when it accepts and rejects otherwise, the IOP is an IOR from $\mathcal{R}$ to $\mathcal{R}_{\mathrm{acc}}$ in the sense of~\cite[\S3.4]{CDHZ25}, with $n_y = 1$ input implicit instance and $n'_y = 0$ output implicit instances.
+$\mathcal{R}_{\mathrm{acc}}$ is \emph{monotone} in the sense of~\cite[Definition~11.1]{CDHZ25}, because it has no implicit instance.
+A \emph{transcript} is a sequence $\mathrm{tr} = (\Pi_1, \mathsf{vr}_1, \Pi_2, \dots)$; the empty transcript is written $\mathrm{tr}_\emptyset$.
+
+In the proof of the theorem below, the verifier and the knowledge state function are evaluated on strings produced by an extractor, whose entries may be undefined~\cite[Constructions~11.8 and~11.9]{CDHZ25}.
+We therefore require the verifier to be defined when $y$ and the $\Pi_i$ are partial strings, and we take the statements $(\mathtt{x}, y)$ and the messages $\Pi_i$ in \cref{def:rrbr} to range over partial strings.
+For the protocols of this paper, the verifier rejects as soon as one of the entries it reads is $\bot$.
+
+\begin{definition}[Relaxed round-by-round knowledge soundness~\cite{CDHZ25}]\label{def:rrbr}
+This is~\cite[Definitions~3.5 and~3.6]{CDHZ25} with output relation $\mathcal{R}_{\mathrm{acc}}$.
+A \emph{knowledge state function} for an IOR from $\mathcal{R}$ to $\mathcal{R}_{\mathrm{acc}}$ is a deterministic function $\mathsf{KState}$ that, on input a proximity bound $\delta \in [0,1]$, a statement $(\mathtt{x}, y)$, a transcript $\mathrm{tr}$ and a witness $\mathtt{w}$, outputs a bit $\mathsf{KState}_\delta(\mathtt{x}, y, \mathrm{tr}, \mathtt{w})$, such that:
+\begin{enumerate}
+  \item (empty transcript) $\mathsf{KState}_\delta(\mathtt{x}, y, \mathrm{tr}_\emptyset, \mathtt{w}) = 1$ if and only if $(\mathtt{x}, y, \mathtt{w}) \in \mathcal{R}_{\le\delta}$;
+  \item (prover moves) if the prover is about to move after $\mathrm{tr}$ and $\mathsf{KState}_\delta(\mathtt{x}, y, \mathrm{tr}, \mathtt{w}) = 0$, then $\mathsf{KState}_\delta(\mathtt{x}, y, \mathrm{tr} \| \Pi, \mathtt{w}) = 0$ for every message $\Pi$;
+  \item (full transcript) for a full transcript, $\mathsf{KState}_\delta(\mathtt{x}, y, \mathrm{tr}, \mathtt{w}) = 1$ if and only if the verifier accepts $\mathrm{tr}$.
+\end{enumerate}
+The IOR has \emph{relaxed round-by-round knowledge soundness errors} $(\varepsilon^{\mathrm{rr}}_1, \dots, \varepsilon^{\mathrm{rr}}_\nu)$, functions of $(\mathtt{x}, y, \delta)$, if there are a knowledge state function $\mathsf{KState}$ and a deterministic polynomial-time algorithm $\mathsf{E}$, which does not depend on $\delta$, such that for every $\delta \in [0,1]$, every statement $(\mathtt{x}, y)$, every $i \in \iv{1}{\nu}$ and every transcript $\mathrm{tr} = (\Pi_1, \mathsf{vr}_1, \dots, \Pi_{i-1}, \mathsf{vr}_{i-1}, \Pi_i)$,
+\begin{multline*}
+  \Pr_{\mathsf{vr}_i \leftarrow \{0,1\}^{\beta_i}}\Bigl[\, \exists\, \mathtt{w} :\ \mathsf{KState}_\delta\bigl(\mathtt{x}, y, \mathrm{tr}, \mathsf{E}(\mathtt{x}, y, \mathrm{tr}\|\mathsf{vr}_i, \mathtt{w})\bigr) = 0 \\
+  \text{ and } \ \mathsf{KState}_\delta(\mathtt{x}, y, \mathrm{tr}\|\mathsf{vr}_i, \mathtt{w}) = 1 \,\Bigr] \;\le\; \varepsilon^{\mathrm{rr}}_i(\mathtt{x}, y, \delta).
+\end{multline*}
+\end{definition}
+
+For $\mathcal{R}_{\mathrm{acc}}$, condition 3 is the specialisation of~\cite[Definition~3.5]{CDHZ25}, which asks that the verifier output an instance $(\mathtt{x}', y')$ with $(\mathtt{x}', y', \mathtt{w}) \in (\mathcal{R}_{\mathrm{acc}})_{\le\delta}$, that is, that it accept.
+
+\paragraph{Salted Merkle commitments~\cite[Definition~8.2]{CDHZ25}.}
+The compiler of~\cite{CDHZ25} uses a salted variant of the Merkle tree: to commit to $\mathbf{a} = (a_1,\dots,a_l) \in \Sigma^{l}$ ($l$ a power of $2$, after padding), it samples uniformly random salts $\gamma_1,\dots,\gamma_l$ of a fixed length, sets the leaves to $\mathsf{H}(a_h, \gamma_h)$ and the internal nodes to $\mathsf{H}(\text{left child}, \text{right child})$, where $\mathsf{H}$ is a random oracle with output length $\lambda_{\mathsf{H}}$; the root is the commitment $\mathrm{cm}$, and the salts and the tree form the trapdoor $\mathrm{td}$.
+An opening of a set $I$ of positions consists of $(a_h, \gamma_h)$ and the authentication path of every $h \in I$, and is checked by recomputing the root.
+The proof of \cref{lem:merkle}(1) applies verbatim, with the input $(a_h, \gamma_h)$ in place of $0 \| \mathbf{d}_i$ and $\text{left}\|\text{right}$ in place of $1\|\text{left}\|\text{right}$: \emph{two accepting openings of the same position to different values under the same root and the same oracle yield a collision of that oracle.}
+
+\begin{definition}[Committed relations~{\cite[Definition~11.2]{CDHZ25}}]\label{def:committed}
+Let $\mathcal{R}$ be a relation with implicit instance and $\delta \in [0,1]$.
+A \emph{committed instance} is $\mathtt{cx} = (\mathtt{x}, \mathrm{cm})$, where $\mathrm{cm}$ is a Merkle root, and a \emph{committed witness} is $\mathtt{cw} = (y, \mathtt{w}, \mathrm{td})$.
+\begin{itemize}
+  \item $(\mathtt{cx}, \mathtt{cw}) \in \mathsf{CR}[\mathcal{R}]$ if $(\mathtt{x}, y, \mathtt{w}) \in \mathcal{R}$ and $\mathrm{cm}$ and $\mathrm{td}$ are the root and the trapdoor of the salted Merkle tree of $y$ with the salts recorded in $\mathrm{td}$;
+  \item $(\mathtt{cx}, \mathtt{cw}) \in \widehat{\mathsf{CR}}[\mathcal{R}, \delta]$ (the \emph{relaxed committed relation}) if $y$ is a partial string with $(\mathtt{x}, y, \mathtt{w}) \in \mathcal{R}_{\le\delta}$, and the opening of all positions of $\mathrm{Dom}(y)$ computed from $\mathrm{td}$ is accepted for $y$ under the root $\mathrm{cm}$.
+\end{itemize}
+\end{definition}
+
+In~\cite{CDHZ25} the committed instance also carries an index that selects, by domain separation, the random oracle used by the commitment. We fix this index in the scheme (the verifier rejects any other value) and omit it from the notation. This extra check only removes accepted proofs and makes no oracle query, so the extraction event of~\cite[Definition~10.3]{CDHZ25} (acceptance and failed extraction) can only become smaller, and \cref{thm:cdhz} still applies.
+
+\paragraph{The compiler.}
+$\mathsf{BCS}[\Pi]$ denotes the non-interactive reduction of~\cite[Construction~11.7]{CDHZ25} applied to an IOR $\Pi$, with salted Merkle commitments of output length $\lambda_{\mathsf{H}}$.
+Its prover receives $(\mathtt{cx}, \mathtt{cw}) \in \mathsf{CR}[\mathcal{R}]$; in round $i$ it commits to $\Pi_i$ by a salted Merkle tree, samples a fresh random salt, and derives $\mathsf{vr}_i$ by querying a random oracle on $\mathtt{x}$, the root $\mathrm{cm}$ of $y$, the roots of $\Pi_1,\dots,\Pi_i$ and the salts of rounds $1,\dots,i$.
+The proof consists of the roots, the salts, and the openings of every position of $y$ and of the $\Pi_i$ that the IOR verifier reads; the verifier recomputes the challenges, checks the openings, and runs the IOR verifier on the opened values.
+All random oracles are derived from one random oracle by domain separation.
+
+\paragraph{Knowledge soundness.}
+The security notion is post-quantum straightline knowledge soundness~\cite[Definition~10.3]{CDHZ25}.
+It is stated for an \emph{emulated oracle}, which answers the adversary's queries and gives the extractor an additional extraction interface.
+It has three error terms: a simulation error $\varepsilon_{\mathrm{sim}}$, bounding the distinguishing advantage between the emulated oracle and a true random oracle; a commutativity error $\varepsilon_{\mathrm{com}}$; and the extraction error $\varepsilon_{\mathrm{ext}}$, which bounds, for a $Q$-query quantum adversary $\tilde{\mathsf{P}}$ that outputs a committed instance $\mathtt{cx}$ of its choice, a proof, and a witness for the output relation, the probability that
+\begin{center}
+the verifier accepts, \quad and \quad the output $\mathtt{cw}$ of the extractor satisfies $(\mathtt{cx}, \mathtt{cw}) \notin \widehat{\mathsf{CR}}[\mathcal{R}, \delta]$.
+\end{center}
+(For $\mathcal{R}_{\mathrm{acc}}$ the output relation holds exactly when the verifier accepts, and its decider makes no oracle queries.)
+The extractor is a polynomial-time quantum algorithm and is \emph{straightline}: it does not rewind the adversary.
+
+\begin{theorem}[{\cite[Theorems~6.10, 8.3 and~11.3]{CDHZ25}}, specialised]\label{thm:cdhz}
+Let $\Pi$ be an IOR from $\mathcal{R}$ to $\mathcal{R}_{\mathrm{acc}}$ as above, with $\nu$ rounds, challenge lengths $\beta_1,\dots,\beta_\nu$ and $\beta_{\min} = \min_i \beta_i$, relaxed round-by-round knowledge soundness errors $(\varepsilon^{\mathrm{rr}}_i)_i$ (\cref{def:rrbr}), and let $\varepsilon_{\mathrm{rr}}(\delta) = \max_{i, (\mathtt{x}, y)} \varepsilon^{\mathrm{rr}}_i(\mathtt{x}, y, \delta)$, the maximum being over the statements of bounded size under consideration.
+Let $l_{\max}$ be the largest length of $y$ and of the strings $\Pi_i$, $q_{\mathsf{V}}$ the number of random-oracle queries of the verifier of $\mathsf{BCS}[\Pi]$, $q_{\widehat{\mathsf{CR}}}$ that of the decider of $\widehat{\mathsf{CR}}[\mathcal{R},\delta]$, $q_s$ the number of positions of $y$ and of the $\Pi_i$ that the IOR verifier reads, and $T_1 = Q + 1 + q_{\mathsf{V}} + \nu + q_{\widehat{\mathsf{CR}}}$.
+Then there is a polynomial-time quantum extractor such that, for every $\delta \in [0,1]$ and every query bound $Q$, $\mathsf{BCS}[\Pi]$ is a non-interactive reduction from $(\mathsf{CR}[\mathcal{R}], \widehat{\mathsf{CR}}[\mathcal{R}, \delta])$ to $(\mathsf{CR}[\mathcal{R}_{\mathrm{acc}}], \widehat{\mathsf{CR}}[\mathcal{R}_{\mathrm{acc}}, \delta])$ with post-quantum straightline knowledge soundness errors $(0, \varepsilon_{\mathrm{com}}, \varepsilon_{\mathrm{ext}})$, where $\varepsilon_{\mathrm{com}}(q) \le 240\,(q+1)/2^{\lambda_{\mathsf{H}}}$ and
+\begin{align*}
+  \varepsilon_{\mathrm{ext}}(Q) \;\le\;\;& 320\,(Q+\nu+1)(Q+\nu)\,\varepsilon_{\mathrm{rr}}(\delta) \;+\; \frac{4\,(Q+\nu+1)\,\nu}{2^{\beta_{\min}}} \\
+  &+\; \frac{32\, l_{\max} + 1280\, Q\,(2Q+1)^2 + 128\, q_s \lceil \log_2 l_{\max} \rceil}{2^{\lambda_{\mathsf{H}}}} \\
+  &+\; \frac{960\,(Q+1)\,T_1^2 + 480\, q_{\mathsf{V}}^2\,(Q + \nu + q_{\mathsf{V}} + 2)}{2^{\lambda_{\mathsf{H}}}}.
+\end{align*}
+\end{theorem}
+
+\begin{proof}[Derivation from~\cite{CDHZ25}]
+By~\cite[Theorem~6.10]{CDHZ25}, $\Pi$ has post-quantum state-restoration straightline knowledge soundness error $\varepsilon^{\mathrm{sr}} \le 80\,(Q+\nu+1)(\mathfrak{m}_{\mathsf{FS}}+\nu)\,\varepsilon_{\mathrm{rr}}(\delta) + (Q+\nu+1)\,\nu/2^{\beta_{\min}}$ for a $Q$-query prover with total query mass $\mathfrak{m}_{\mathsf{FS}}$ to the challenge oracle.
+By~\cite[Theorem~8.3]{CDHZ25}, the salted Merkle commitments are post-quantum multi-extractable with errors, at query bound $Q'$,
+\begin{gather*}
+  \varepsilon_{\mathrm{com}}(Q') \le \frac{240(Q'+1)}{2^{\lambda_{\mathsf{H}}}}, \qquad \varepsilon_{\mathrm{extract}} \le \frac{8\,n_y\,l_{\max}}{2^{\lambda_{\mathsf{H}}}}, \\
+  \varepsilon_{\mathrm{offline}} \le \frac{160\, \mathfrak{m}\, Q'^2 + 16\, q_s \log_2 l_{\max}}{2^{\lambda_{\mathsf{H}}}}, \qquad \varepsilon_{\mathrm{online}} \le \frac{240\, \mathfrak{m}'\, Q'^2}{2^{\lambda_{\mathsf{H}}}},
+\end{gather*}
+where $\mathfrak{m}, \mathfrak{m}'$ are the total query masses in the third argument of these functions in~\cite{CDHZ25}.
+Substitute these bounds into~\cite[Theorem~11.3]{CDHZ25} with $n_y = 1$, $n'_y = 0$ and $q_{\widehat{\mathsf{CR}}'} = 0$.
+Every total query mass is at most the number of queries~\cite[Definition~4.3 and Remark~4.2]{CDHZ25}, so the masses $\mathfrak{m}_{\mathsf{FS}}, \mathfrak{m}_{\mathsf{VC}}, \mathfrak{m}_{\mathsf{MultiExtract}}$ over which the maximum in~\cite[Theorem~11.3]{CDHZ25} is taken are at most $Q$.
+This gives the displayed terms in order: $4\varepsilon^{\mathrm{sr}}$; $4\varepsilon_{\mathrm{extract}}$ with $n_y = 1$; $8\varepsilon_{\mathrm{offline}}$ at query bound $2Q+1$ with mass $\mathfrak{m}_{\mathsf{VC}} \le Q$ (by~\cite[Remark~11.5]{CDHZ25} this term vanishes when $n'_y = 0$, and we keep it as an upper bound); $4\varepsilon_{\mathrm{online}}$ at query bound $T_1$ with mass $\mathfrak{m}_{\mathsf{MultiExtract}} + 1 \le Q+1$; and $2 q_{\mathsf{V}}^2 \varepsilon_{\mathrm{com}}$ at query bound $Q+1+\nu+q_{\mathsf{V}}$.
+\end{proof}
+
+We use the constants of~\cite[Theorem~8.3]{CDHZ25} as stated there (version of 2 March 2026); they follow from~\cite[Theorem~8.4, Lemmas~8.7 and~8.8]{CDHZ25} with the query counts of~\cite[\S8.3]{CDHZ25}.
+A classical adversary is a special case of a quantum one, so \cref{thm:cdhz} also applies to classical adversaries in the random oracle model, with the same quantum extractor.
+For classical adversaries, B\"unz, Mishra, Nguyen and Wang~\cite[Theorem~5.9]{BMNW24} give an asymptotic statement of the same shape for their notion of round-by-round knowledge~\cite[Definition~5.5]{BMNW24}; we do not use it.

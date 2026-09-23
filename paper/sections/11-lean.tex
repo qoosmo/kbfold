@@ -1,0 +1,47 @@
+\section{Lean formalisation}\label{sec:lean}
+
+The companion Lean~4 project \texttt{KBFold} (Lean~4.23.0, Mathlib at the tag \texttt{v4.23.0}; about $7000$ lines in $16$ modules) formalises the mathematics of \cref{sec:prelim,sec:proofs,sec:kernel,sec:fold,sec:pcs,sec:sound}.
+It contains no \texttt{sorry}. Its only axiom is \texttt{bciks\_unique}, the correlated-agreement theorem (\cref{thm:bciks}); \texttt{\#print axioms} shows that completeness, the fold dictionary, the basis theorem and the probability lemmas do not use it, and that soundness, binding and (relaxed) round-by-round knowledge soundness use it and the three standard axioms of Lean (\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}) only.
+
+\paragraph{Modelling.}
+\begin{itemize}
+  \item Bit vectors are functions $\mathtt{Fin}\ n \to \mathtt{Bool}$; bit $k$ of Lean is bit $k+1$ of the paper, and tables are functions on bit vectors. The multilinear extension is its evaluation formula (\cref{prop:mle}).
+  \item One field $\F$ is used, and the smooth domain is a subgroup $L \le \F^\times$ of order $2^\mu$; the paper's setting $L \le \Fq^\times \subseteq \F^\times$ is a special case.
+  \item Probabilities are rational numbers computed by counting over finite uniform spaces; rounds and challenges are indexed from $0$.
+  \item A deterministic prover of $\Pieval$ is a family of messages indexed by the challenges, with an explicit causality hypothesis (message $j$ depends on $r_1,\dots,r_{j-1}$ only) and the hypothesis that round polynomials have degree at most $2$, which the paper ensures by the transmission of three values.
+  \item Decoding is defined non-constructively, by uniqueness; the running times of extractors (\cref{rem:ext}) and \cref{fact:decode} are not formalised.
+\end{itemize}
+
+\paragraph{Correspondence.}
+\begin{center}
+\small
+\begin{longtable}{@{}p{0.34\linewidth}p{0.18\linewidth}p{0.42\linewidth}@{}}
+\toprule
+Paper & Lean module & Main declarations \\
+\midrule
+\endhead
+\Cref{lem:eq,prop:mle,cor:eq-mle,def:restriction,lem:restriction,lem:natural} & \texttt{Multilinear} & \texttt{eqv\_pt}, \texttt{mle\_pt}, \texttt{mle\_eqTable}, \texttt{mle\_res}, \texttt{map\_mle} \\
+\Cref{lem:mobius} & \texttt{Mobius} & \texttt{mle\_eq\_sum\_mono}, \texttt{table\_coeff\_form} \\
+\Cref{def:domain,lem:power,def:fibre,def:rs,lem:metric,lem:rs-params,lem:split-words} & \texttt{Domain} & \texttt{IsSmoothDomain}, \texttt{card\_powDom\_and\_ker}, \texttt{fibre}, \texttt{RS}, \texttt{RS\_agree\_lt}, \texttt{RS\_unique\_decoding}, \texttt{evenW}, \texttt{oddW} \\
+\Cref{thm:bciks} & \texttt{BCIKS} & axiom \texttt{bciks\_unique} \\
+\Cref{lem:sequential,lem:queries,lem:randomised} & \texttt{Probability} & \texttt{sequential\_challenges}, \texttt{independent\_queries}, \texttt{randomised\_prover\_le} \\
+\Cref{def:iop-sound,def:rbr,def:rbr-knowledge,lem:rbr-overall,lem:sumcheck,lem:rbr-binding} & \texttt{RoundByRound} & \texttt{RBRSound}, \texttt{RBRKnowledge}, \texttt{rbr\_knowledge\_overall}, \texttt{sumcheck\_sound\_iop}, \texttt{rbr\_knowledge\_binding} \\
+\Cref{def:kernel,thm:basis,def:kernel-coords} & \texttt{Kernel} & \texttt{kernel}, \texttt{ofCoords}, \texttt{ofCoordsLin\_bijective}, \texttt{exists\_unique\_coords} \\
+\Cref{sec:kernel:kron,sec:kernel:lowdeg,sec:kernel:eval} & \texttt{LowDegree}, \texttt{Mobius} & \texttt{coeff\_kernel}, \texttt{kron\_mul}, \texttt{Kmat\_inv}, \texttt{coeff\_ofCoords}, \texttt{lowDegree\_iff}, \texttt{RS\_eq\_charCond}, \texttt{eval\_ofCoords} \\
+\Cref{prop:split,def:fold-poly,thm:fold-dictionary,cor:iterated} & \texttt{Kernel}, \texttt{WordFold} & \texttt{pfold}, \texttt{fold\_dictionary}, \texttt{pfoldList\_ofCoords}, \texttt{pfoldSeq\_ofCoords} \\
+\Cref{def:fold-word,lem:fold-word,lem:line,prop:fold-consistency,cor:codeword-fold,def:cfold,prop:classical} & \texttt{WordFold} & \texttt{wfold}, \texttt{wfold\_line}, \texttt{wfold\_ev}, \texttt{codeword\_fold}, \texttt{cfold\_eq\_pfold} \\
+\Cref{lem:encoding,lem:honest,thm:complete} & \texttt{Fibre}, \texttt{Protocol}, \texttt{Completeness} & \texttt{Enc\_injective}, \texttt{honest\_table}, \texttt{honS\_eval}, \texttt{completeness} \\
+\Cref{def:fibre-dist,lem:fibre-dist,lem:unique,def:decoded,lem:far,lem:survive,def:good,lem:good,lem:step} & \texttt{Fibre} & \texttt{fibDist}, \texttt{fib\_unique}, \texttt{dec}, \texttt{decTable}, \texttt{far\_fold}, \texttt{survive}, \texttt{Good}, \texttt{ncard\_not\_good\_le}, \texttt{one\_step} \\
+\Cref{lem:passing,lem:chain,thm:sound,cor:binding,prop:l0} & \texttt{Soundness} & \texttt{Pass\_card}, \texttt{chain}, \texttt{chain\_final}, \texttt{soundness\_far}, \texttt{soundness\_close}, \texttt{eval\_binding}, \texttt{no\_folding} \\
+\Cref{def:state,lem:rbr-step,lem:rbr-sumcheck,thm:rbr,prop:rbr-l0} & \texttt{RBR}, \texttt{RBRGeneric} & \texttt{Doomed}, \texttt{rbr\_step}, \texttt{sCw\_eval}, \texttt{rbr\_round\_one}, \texttt{rbr\_round}, \texttt{rbr\_final}, \texttt{rbr\_knowledge}, \texttt{rbr\_l0} \\
+\Cref{lem:sampling,def:kstate,lem:rbr-erasures,thm:rrbr,lem:cr-unique} & \texttt{NonInteractive} & \texttt{prob\_sample\_le}, \texttt{KState}, \texttt{rbr\_stepE}, \texttt{rbr\_erasures\_one}, \texttt{rrbr\_round}, \texttt{rrbr\_final}, \texttt{cr\_unique\_core} \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\paragraph{Not formalised.}\leavevmode\\
+\Cref{thm:cdhz} and \cref{cor:pq}, which rest on the quantum analysis of Chiesa, Di, Hu and Zheng~\cite{CDHZ25}; the Merkle-tree statements (\cref{lem:merkle} and the collision step of \cref{lem:cr-unique}); Facts~\ref{fact:cyclic} and~\ref{fact:decode}, \cref{lem:descent} and \cref{rem:det}; running times and operation counts; \cref{sec:impl,sec:exp}.
+In \cref{lem:rbr-erasures,thm:rrbr} the Lean statements give the per-round bounds for a model of transcripts by stages (empty, after $j$ rounds, full); they do not build a general interactive-oracle-reduction structure.
+
+\paragraph{Findings of the formalisation.}
+The formalisation found no false statement. It showed that \cref{lem:rbr-overall} (and hence \cref{lem:rbr-binding}) needs non-negative round errors, now stated in \cref{def:rbr,def:rbr-knowledge}; that case 2 of \cref{thm:sound} does not need its hypothesis $\Delta^{\mathrm{fib}}_0(w_0, \Cc_0) \le \delta$; and several hypotheses that are implied by the parameters (odd characteristic, $\ell \le n + R$, $N_j \le M_j$).

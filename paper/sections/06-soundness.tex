@@ -1,0 +1,508 @@
+\section{Soundness}\label{sec:sound}
+
+We prove that $\Pieval$ is sound, evaluation binding, and round-by-round knowledge sound, in the unique-decoding regime.
+The only external result about codes used is the correlated-agreement theorem (\cref{thm:bciks}) of~\cite{BCIKS23}, which enters through the line form of the kernel fold (\cref{lem:line}); the efficiency of the extractor also uses \cref{fact:decode}.
+Throughout this section we use the notation of \cref{sec:pcs}: the challenge field $\F \supseteq \Fq$, the domains $L_j$ of order $M_j$, and the codes $\Cc_j = \RS_\F[L_j, N_j]$, all of rate $\rho$.
+We fix a proximity parameter $0 < \delta \le (1-\rho)/2$.
+We assume $1 \le \ell \le n$, except in \cref{sec:sound:l0}, which treats $\ell = 0$.
+Probabilities are over the challenge space $\F^\ell \times L^{\times\kappa}$ of $\Pieval$ (\cref{sec:proofs:iop,sec:pcs:protocol}).
+
+\subsection{Fibre distance and decoding}\label{sec:sound:fibre}
+
+For $j \in \iv{0}{\ell-1}$, the domain $L_j$ has order $M_j \ge 2$, and its fibres (\cref{def:fibre}) are indexed by the $M_{j+1}$ points of $L_{j+1} = (L_j)^2$.
+
+\begin{definition}[Fibre distance]\label{def:fibre-dist}
+Let $j \in \iv{0}{\ell-1}$. For $w, c \in \F^{L_j}$,
+\[
+  \Delta^{\mathrm{fib}}_j(w,c) \;=\; \frac{\bigl|\{\, \eta \in L_{j+1} \;:\; w \text{ and } c \text{ differ somewhere on the fibre over } \eta \,\}\bigr|}{M_{j+1}},
+\]
+and $\Delta^{\mathrm{fib}}_j(w, \Cc_j) = \min_{c \in \Cc_j} \Delta^{\mathrm{fib}}_j(w,c)$.
+\end{definition}
+
+\begin{lemma}[Fibre distance]\label{lem:fibre-dist}
+Let $j \in \iv{0}{\ell-1}$ and $w, c \in \F^{L_j}$.
+\begin{enumerate}
+  \item $\Delta(w,c) \le \Delta^{\mathrm{fib}}_j(w,c)$.
+  \item $\Delta^{\mathrm{fib}}_j(w,c) \le \delta$ if and only if $w$ and $c$ agree on every fibre over some set of at least $(1-\delta)M_{j+1}$ points of $L_{j+1}$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(1) Each point of $L_j$ at which $w$ and $c$ differ lies in a fibre over which they differ, and each of these $\Delta^{\mathrm{fib}}_j(w,c)\,M_{j+1}$ fibres has two points, so $\Delta(w,c)\,M_j \le 2\,\Delta^{\mathrm{fib}}_j(w,c)\,M_{j+1} = \Delta^{\mathrm{fib}}_j(w,c)\,M_j$.
+(2) The set of points over whose fibre $w$ and $c$ agree has $(1 - \Delta^{\mathrm{fib}}_j(w,c))\,M_{j+1}$ elements.
+\end{proof}
+
+\begin{lemma}[Unique fibre decoding]\label{lem:unique}
+Let $j \in \iv{0}{\ell-1}$. For every $w \in \F^{L_j}$ there is at most one $c \in \Cc_j$ with $\Delta^{\mathrm{fib}}_j(w,c) \le \delta$.
+\end{lemma}
+
+\begin{proof}
+Such a $c$ satisfies $\Delta(w,c) \le \delta \le (1-\rho)/2$ by \cref{lem:fibre-dist}(1); apply \cref{lem:rs-params}(3).
+\end{proof}
+
+\begin{definition}[Decoded codeword and decoded table]\label{def:decoded}
+Let $j \in \iv{0}{\ell-1}$ and $w \in \F^{L_j}$ with $\Delta^{\mathrm{fib}}_j(w, \Cc_j) \le \delta$.
+The \emph{decoded codeword} $\mathrm{dec}_j(w)$ is the unique $c \in \Cc_j$ of \cref{lem:unique}.
+For $j = 0$, the \emph{decoded table} of $w$ is the unique table $f^*$ over $\F$ with $\Enc(f^*) = \mathrm{dec}_0(w)$, that is, the table of kernel coordinates of $P_{\mathrm{dec}_0(w)}$ (\cref{lem:encoding}).
+\end{definition}
+
+\begin{remark}[Computing the decoded table]\label{rem:ext}
+Since $\Delta(w, \mathrm{dec}_0(w)) \le \delta < \tfrac12(1 - (N-1)/M)$ (\cref{lem:rs-params}), the algorithm of \cref{fact:decode} finds $\mathrm{dec}_0(w)$; an inverse NTT gives $P_{\mathrm{dec}_0(w)}$, and \cref{cor:transforms} gives $f^*$.
+Checking whether $\Delta^{\mathrm{fib}}_0(w, \mathrm{dec}_0(w)) \le \delta$ costs $O(M)$ comparisons.
+Conversely, for an arbitrary $w$, if the decoder fails or its output fails this check, then no codeword is within fibre distance $\delta$ of $w$; so decoding followed by the check decides whether $\Delta^{\mathrm{fib}}_0(w, \Cc_0) \le \delta$.
+If $w \in \Fq^L$ (as for a commitment computed over the base field), then $f^*$ has entries in $\Fq$, by \cref{lem:descent} and the integrality of \cref{cor:transforms}.
+\end{remark}
+
+\subsection{Two folding lemmas}\label{sec:sound:lemmas}
+
+\begin{lemma}[Folding far words]\label{lem:far}
+Let $j \in \iv{0}{\ell-1}$ and $w \in \F^{L_j}$ with $\Delta^{\mathrm{fib}}_j(w, \Cc_j) > \delta$. Then
+\[
+  \bigl|\{\, r \in \F \;:\; \Delta\bigl(\fold_r(w),\, \Cc_{j+1}\bigr) \le \delta \,\}\bigr| \;\le\; M_{j+1}.
+\]
+\end{lemma}
+
+\begin{proof}
+Suppose the set has more than $M_{j+1}$ elements. By \cref{lem:line}, $\fold_r(w) = u^0 + r u^1$ with $u^0 = w_o - w_e$ and $u^1 = 2w_e - w_o$.
+Apply \cref{thm:bciks} to the code $\Cc_{j+1}$ (length $M_{j+1}$, rate $\rho$): there are $L' \subseteq L_{j+1}$ with $|L'| \ge (1-\delta)M_{j+1}$ and codewords $\hat c^0, \hat c^1 \in \Cc_{j+1}$ with $u^0 = \hat c^0$ and $u^1 = \hat c^1$ on $L'$.
+Let $T_e = P_{\hat c^0} + P_{\hat c^1}$ and $T_o = 2P_{\hat c^0} + P_{\hat c^1}$ in $\F[X]_{<N_{j+1}}$, and $T(X) = T_e(X^2) + X T_o(X^2) \in \F[X]_{<N_j}$.
+By \cref{lem:line}, $w_e = T_e$ and $w_o = T_o$ on $L'$, so for every $\eta \in L'$ and $\xi \in L_j$ with $\xi^2 = \eta$, \eqref{eq:even-odd-inverse} gives
+$w(\pm \xi) = T_e(\eta) \pm \xi T_o(\eta) = T(\pm \xi)$.
+Thus $w$ agrees with the codeword $\ev_{L_j}(T) \in \Cc_j$ on every fibre over $L'$, so $\Delta^{\mathrm{fib}}_j(w, \Cc_j) \le \delta$, a contradiction.
+\end{proof}
+
+\begin{lemma}[Fibre errors survive folding]\label{lem:survive}
+Let $j \in \iv{0}{\ell-1}$, $w, c \in \F^{L_j}$, and $\eta \in L_{j+1}$ such that $w$ and $c$ differ somewhere on the fibre over $\eta$. Then there is at most one $r \in \F$ with $\fold_r(w)(\eta) = \fold_r(c)(\eta)$.
+\end{lemma}
+
+\begin{proof}
+Let $y = w - c$. By \cref{lem:fold-word}(2) and \cref{lem:line}, $\fold_r(w)(\eta) - \fold_r(c)(\eta) = \fold_r(y)(\eta) = \bigl(y_o(\eta) - y_e(\eta)\bigr) + r\bigl(2y_e(\eta) - y_o(\eta)\bigr)$.
+This is a polynomial of degree $\le 1$ in $r$. If it were identically zero, the inverse formulas of \cref{lem:line} would give $y_e(\eta) = y_o(\eta) = 0$, so $y$ would vanish on the fibre over $\eta$ (\cref{lem:split-words}(3)). Hence it has at most one root.
+\end{proof}
+
+\subsection{Good challenges}\label{sec:sound:good}
+
+\begin{definition}[Good challenge]\label{def:good}
+Let $j \in \iv{1}{\ell}$, $w \in \F^{L_{j-1}}$ and $r \in \F$. We say that $r$ is \emph{good for $w$ at level $j$}, and write $\mathsf{Good}_j(w,r)$, if:
+\begin{enumerate}
+  \item in case $\Delta^{\mathrm{fib}}_{j-1}(w, \Cc_{j-1}) > \delta$: $\Delta(\fold_r(w), \Cc_{j}) > \delta$;
+  \item in case $\Delta^{\mathrm{fib}}_{j-1}(w, \Cc_{j-1}) \le \delta$, with $c = \mathrm{dec}_{j-1}(w)$: for every $\eta \in L_j$ such that $w$ and $c$ differ somewhere on the fibre over $\eta$, $\fold_r(w)(\eta) \ne \fold_r(c)(\eta)$.
+\end{enumerate}
+\end{definition}
+
+\begin{lemma}[Few bad challenges]\label{lem:good}
+For every $j \in \iv{1}{\ell}$ and $w \in \F^{L_{j-1}}$, at most $M_j$ values $r \in \F$ are not good for $w$ at level $j$.
+\end{lemma}
+
+\begin{proof}
+In case 1, this is \cref{lem:far}. In case 2, by \cref{lem:survive}, each of the at most $M_j$ points $\eta$ over which $w$ and $c$ differ excludes at most one $r$.
+\end{proof}
+
+\begin{lemma}[One folding step]\label{lem:step}
+Let $j \in \iv{1}{\ell}$, $w \in \F^{L_{j-1}}$, and $r \in \F$ good for $w$ at level $j$.
+Let $c' \in \Cc_j$ and $Y = \{\eta \in L_j : \fold_r(w)(\eta) = c'(\eta)\}$, and suppose $|Y| \ge (1-\delta) M_j$.
+Then $\Delta^{\mathrm{fib}}_{j-1}(w, \Cc_{j-1}) \le \delta$; the codeword $c = \mathrm{dec}_{j-1}(w)$ satisfies $\fold_r(c) = c'$; and $w = c$ on the fibre over every $\eta \in Y$.
+\end{lemma}
+
+\begin{proof}
+We have $\Delta(\fold_r(w), c') \le \delta$, so case 1 of \cref{def:good} is excluded: $\Delta^{\mathrm{fib}}_{j-1}(w, \Cc_{j-1}) \le \delta$.
+By \cref{prop:fold-consistency} (with $2N_j = N_{j-1} \le M_{j-1}$), $\fold_r(c) \in \Cc_j$.
+By locality (\cref{lem:fold-word}(3)), $\fold_r(c)$ agrees with $\fold_r(w)$ at every $\eta$ over whose fibre $w = c$, hence on at least $(1-\delta)M_j$ points; and $\fold_r(w)$ agrees with $c'$ on $Y$.
+By \cref{lem:metric}, $\fold_r(c)$ and $c'$ agree on at least $(1-2\delta)M_j \ge \rho M_j = N_j$ points, so they are equal (\cref{lem:rs-params}(2)).
+Finally, for $\eta \in Y$, $\fold_r(w)(\eta) = c'(\eta) = \fold_r(c)(\eta)$, so by case 2 of \cref{def:good}, $w = c$ on the fibre over $\eta$.
+\end{proof}
+
+\subsection{The soundness theorem}\label{sec:sound:thm}
+
+Fix a deterministic prover $\mathsf{P}^*$ (\cref{lem:randomised} extends the results to randomised provers) and an instance $(w_0; z, v)$ with $w_0 \in \F^L$.
+The prover's messages are functions of the earlier challenges: $s_j$ of $r_{\le j-1}$, the oracle $w_j$ ($j \in \iv{1}{\ell-1}$) of $r_{\le j}$, and $g$ of $r_{\le \ell}$.
+As in \cref{sec:pcs:protocol}, $G = \sum_b g(b) K^{(n-\ell)}_b$ and $w_\ell = \ev_{L_\ell}(G) \in \Cc_\ell$.
+
+\paragraph{Passing sets.}
+For fixed challenges $r \in \F^\ell$, let $\Pp_\ell = L_\ell$ and, for $j = \ell-1, \dots, 0$,
+\[
+  \Pp_j \;=\; \bigl\{\, \xi \in L_j \;:\; \xi^2 \in \Pp_{j+1} \text{ and } \fold_{r_{j+1}}(w_j)(\xi^2) = w_{j+1}(\xi^2) \,\bigr\}.
+\]
+Let $\pi = \pi(r) = |\Pp_0|/M$. We record these facts.
+
+\begin{lemma}[Passing sets]\label{lem:passing}
+For fixed $r \in \F^\ell$:
+\begin{enumerate}
+  \item for $j \in \iv{0}{\ell}$, a point $\xi_0 \in L$ has $\xi_0^{2^j} \in \Pp_j$ if and only if the query checks at levels $j+1,\dots,\ell$ pass for $\xi_0$; in particular $\xi_0$ passes all the query checks if and only if $\xi_0 \in \Pp_0$;
+  \item for $j < \ell$, $\Pp_j$ is a union of fibres, and the squaring map sends it two-to-one onto a set $\Pp_j^2 \subseteq \Pp_{j+1}$;
+  \item $|\Pp_j| \ge \pi M_j$ for every $j \in \iv{0}{\ell}$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(1) Downward induction on $j$, from the recursive definition. (2) The defining condition of $\Pp_j$ depends only on $\xi^2$, and squaring is two-to-one on $L_j$ (\cref{lem:power}). (3) By (2), $|\Pp_j|/M_j = |\Pp_j^2|/M_{j+1} \le |\Pp_{j+1}|/M_{j+1}$; iterate from $j = 0$.
+\end{proof}
+
+\begin{lemma}[The codeword chain]\label{lem:chain}
+Fix $r \in \F^\ell$ such that $r_j$ is good for $w_{j-1}$ at level $j$ for every $j \in \iv{1}{\ell}$, and $\pi > 1-\delta$.
+Then $\Delta^{\mathrm{fib}}_j(w_j, \Cc_j) \le \delta$ for every $j \in \iv{0}{\ell-1}$, and the codewords $c_j = \mathrm{dec}_j(w_j)$ for $j < \ell$ and $c_\ell = w_\ell$ satisfy $\fold_{r_{j+1}}(c_j) = c_{j+1}$ and $w_j = c_j$ on $\Pp_j$, for every $j \in \iv{0}{\ell-1}$.
+Moreover, $g = \res_r(f^*)$, where $f^*$ is the decoded table of $w_0$.
+\end{lemma}
+
+\begin{proof}
+We show by downward induction on $j \in \iv{0}{\ell}$ that $w_j = c_j$ on $\Pp_j$, together with the other claims for $j < \ell$. For $j = \ell$ this is trivial.
+Let $j < \ell$. For $\eta \in \Pp_j^2 \subseteq \Pp_{j+1}$, $\fold_{r_{j+1}}(w_j)(\eta) = w_{j+1}(\eta) = c_{j+1}(\eta)$ by the definition of $\Pp_j$ and the induction hypothesis.
+So the set $Y$ of \cref{lem:step} (with $w = w_j$, $r = r_{j+1}$, $c' = c_{j+1}$, at level $j+1$) contains $\Pp_j^2$, of size $|\Pp_j|/2 \ge \pi M_{j+1} > (1-\delta)M_{j+1}$ (\cref{lem:passing}).
+\Cref{lem:step} gives $\Delta^{\mathrm{fib}}_j(w_j,\Cc_j) \le \delta$, $\fold_{r_{j+1}}(c_j) = c_{j+1}$, and $w_j = c_j$ on every fibre over $\Pp_j^2$, that is, on $\Pp_j$.
+
+For the last claim, extend $r$ arbitrarily to a point of $\F^n$. Then $c_0 = \Enc(f^*) = \ev_L(U_{f^*})$, and by \cref{cor:codeword-fold} (with $\mu = n + R \ge n$), $c_\ell$, obtained from $c_0$ by $\ell$ folds, is $\ev_{L_\ell}(U_\ell)$, where $U_\ell$ has kernel coordinates $\res_{r}(f^*)$ (\cref{cor:iterated}).
+Since $c_\ell = w_\ell = \ev_{L_\ell}(G)$ and both $G$ and $U_\ell$ lie in $\F[X]_{<N_\ell}$ with $N_\ell \le M_\ell$, \cref{lem:rs-params}(1) gives $G = U_\ell$, and \cref{thm:basis} gives $g = \res_r(f^*)$.
+\end{proof}
+
+\begin{theorem}[Soundness]\label{thm:sound}
+Let $1 \le \ell \le n$, and put
+\[
+  \varepsilon_{\mathrm{fold}} \;=\; \sum_{j=1}^{\ell} \frac{M_j}{|\F|} \;=\; \frac{M\,(1 - 2^{-\ell})}{|\F|} \;<\; \frac{M}{|\F|}.
+\]
+\begin{enumerate}
+  \item If $\Delta^{\mathrm{fib}}_0(w_0, \Cc_0) > \delta$, then $\mathsf{V}$ accepts with probability at most $\varepsilon_{\mathrm{fold}} + (1-\delta)^{\kappa}$.
+  \item If $\Delta^{\mathrm{fib}}_0(w_0, \Cc_0) \le \delta$ and the decoded table $f^*$ of $w_0$ satisfies $\tilde{f^*}(z) \ne v$, then $\mathsf{V}$ accepts with probability at most
+  \[
+    \varepsilon_{\mathrm{fold}} \;+\; \frac{2\ell}{|\F|} \;+\; (1-\delta)^{\kappa}.
+  \]
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+\emph{Honest values.} In case 2, let $f^*_j = \res_{r_{\le j}}(f^*)$ and $\chi^*_j = \res_{r_{\le j}}(\chi_0)$ be the tables of the honest prover for $f^*$ (\cref{sec:pcs:protocol}), let $s^*_j$ be its round polynomials, which are those of \cref{sec:proofs:sumcheck} for $F^*(x) = \tilde{f^*}(x)\,\eq(x,z)$ (\cref{lem:honest}), and let $\sigma^*_j = \sum_b f^*_j(b)\,\chi^*_j(b)$ for $j \in \iv{0}{\ell}$.
+By \cref{lem:honest}, $\sigma^*_0 = \tilde{f^*}(z)$, $s^*_j(0) + s^*_j(1) = \sigma^*_{j-1}$, $s^*_j(r_j) = \sigma^*_j$, and $\sigma^*_\ell = \bigl(\prod_{j}\eq_1(r_j,z_j)\bigr)\cdot\widetilde{f^*_\ell}(z_{\ell+1},\dots,z_n)$.
+Note that $s^*_j$ depends on $r_{\le j-1}$ only.
+
+\emph{Bad events.} For $j \in \iv{1}{\ell}$, let $E_j$ be the set of $r_{\le j}$ such that $r_j$ is not good for $w_{j-1}$ at level $j$, or (in case 2) $s_j \ne s^*_j$ and $s_j(r_j) = s^*_j(r_j)$.
+For fixed $r_{\le j-1}$, the word $w_{j-1}$ and the polynomials $s_j, s^*_j$ are fixed, so at most $M_j$ values of $r_j$ (\cref{lem:good}) plus, in case 2, at most $2$ values (\cref{lem:roots}) complete $r_{\le j-1}$ into $E_j$.
+By \cref{lem:sequential}, $\Pr[\exists j : r_{\le j} \in E_j] \le \varepsilon_{\mathrm{fold}}$ in case 1 and $\le \varepsilon_{\mathrm{fold}} + 2\ell/|\F|$ in case 2.
+
+\emph{No bad event.} Suppose that no $E_j$ occurs and that $\mathsf{V}$ accepts. We show that $\pi \le 1-\delta$.
+Assume instead $\pi > 1-\delta$. Then \cref{lem:chain} applies. In case 1 it gives $\Delta^{\mathrm{fib}}_0(w_0,\Cc_0) \le \delta$, a contradiction.
+In case 2 it gives $g = f^*_\ell$, so the closure check reads $v_\ell = \sigma^*_\ell$.
+Since $v_0 = v \ne \tilde{f^*}(z) = \sigma^*_0$, there is a largest $j \in \iv{0}{\ell-1}$ with $v_j \ne \sigma^*_j$; then $v_{j+1} = \sigma^*_{j+1}$.
+The sumcheck check for index $j+1$ gives $s_{j+1}(0) + s_{j+1}(1) = v_j \ne \sigma^*_j = s^*_{j+1}(0) + s^*_{j+1}(1)$, so $s_{j+1} \ne s^*_{j+1}$, while $s_{j+1}(r_{j+1}) = v_{j+1} = \sigma^*_{j+1} = s^*_{j+1}(r_{j+1})$; that is, $r_{\le j+1} \in E_{j+1}$, a contradiction.
+
+\emph{Conclusion.} Acceptance implies that some $E_j$ occurs, or that $\pi(r) \le 1-\delta$ and all $\kappa$ query points lie in $\Pp_0$ (\cref{lem:passing}(1)).
+By \cref{lem:queries} with $\Omega' = \F^\ell$, $\mathcal{A} = \{r : \pi(r) \le 1-\delta\}$ and $\mathcal{S}(r) = \Pp_0$, the second event has probability at most $(1-\delta)^\kappa$.
+\end{proof}
+
+\begin{corollary}[Evaluation binding]\label{cor:binding}
+Let $1 \le \ell \le n$ and $\varepsilon = \varepsilon_{\mathrm{fold}} + 2\ell/|\F| + (1-\delta)^{\kappa}$.
+For every $w_0 \in \F^L$ and $z \in \F^n$, if some prover makes $\mathsf{V}$ accept the instance $(w_0; z,v)$ with probability greater than $\varepsilon$, then $\Delta^{\mathrm{fib}}_0(w_0,\Cc_0) \le \delta$ and $v = \tilde{f^*}(z)$ for the decoded table $f^*$ of $w_0$.
+In particular, $\Pieval$ is $\varepsilon$-evaluation binding (\cref{def:binding}).
+\end{corollary}
+
+\begin{proof}
+Immediate from \cref{thm:sound} and \cref{lem:randomised}; $f^*$ depends on $w_0$ only.
+\end{proof}
+
+\subsection{The case \texorpdfstring{$\ell = 0$}{l = 0}}\label{sec:sound:l0}
+
+For $\ell = 0$ there is no fold, and the fibre distance is replaced by the Hamming distance.
+
+\begin{proposition}[No folding]\label{prop:l0}
+Let $\ell = 0$. If a deterministic prover makes $\mathsf{V}$ accept $(w_0; z,v)$ with probability greater than $(1-\delta)^{\kappa}$, then $\Delta(w_0, \Cc_0) < \delta$, and $v = \tilde{f^H}(z)$, where $f^H$ is the table such that $\Enc(f^H)$ is the unique codeword within Hamming distance $\delta$ of $w_0$ (\cref{lem:rs-params}(3)).
+\end{proposition}
+
+\begin{proof}
+For $\ell = 0$ the prover sends $g$ before any challenge, so $g$ and $G$ are fixed, and the verifier accepts if and only if $v = \tilde g(z)$ and all query points lie in $S = \{\xi \in L : w_0(\xi) = G(\xi)\}$.
+This has probability $0$ or $(|S|/M)^\kappa$. If it exceeds $(1-\delta)^\kappa$, then $v = \tilde g(z)$ and $|S| > (1-\delta)M$, so $\Delta(w_0, \ev_L(G)) < \delta$; hence $\ev_L(G) = \Enc(g)$ is the unique codeword within distance $\delta$ of $w_0$, and $g = f^H$.
+\end{proof}
+
+\subsection{Round-by-round knowledge soundness}\label{sec:sound:rbr}
+
+\Cref{thm:sound} bounds the soundness of the interactive protocol.
+We now prove the stronger property of round-by-round knowledge soundness (\cref{def:rbr-knowledge}); \cref{sec:sound:pq} derives from it the relaxed notion of \cref{def:rrbr}, which is the hypothesis of \cref{thm:cdhz}.
+
+\paragraph{Relation.}
+Let $1 \le \ell \le n$.
+We view $\Pieval$ as an IOP for the relation $\mathcal{R}^{\delta}_{\mathrm{eval}}$ of \cref{sec:proofs:pcs}, with $\mathrm{dist}(w, \Enc(f)) = \Delta^{\mathrm{fib}}_0(w, \Enc(f))$; condition~\eqref{eq:dist-unique} holds by \cref{lem:unique} and the injectivity of $\Enc$.
+A table $f$ is a witness for $(w_0;z,v)$ if and only if $\Delta^{\mathrm{fib}}_0(w_0, \Cc_0) \le \delta$, $f$ is the decoded table of $w_0$, and $\tilde f(z) = v$.
+
+\paragraph{Notation.}
+The rounds are those of \cref{sec:pcs:protocol}, and $\tau_j$ is the partial transcript after $j$ rounds.
+For $j \in \iv{1}{\ell}$ let $\hat w_j = \fold_{r_j}(w_{j-1}) \in \F^{L_j}$, which is determined by $\tau_j$, and for $j \in \iv{1}{\ell-1}$ let $\mathcal{B}_j = \{\eta \in L_j : \hat w_j(\eta) \ne w_j(\eta)\}$, which is determined by $\tau_{j+1}$.
+The \emph{sumcheck check of index $j$} is the equation $s_j(0) + s_j(1) = v_{j-1}$, which is determined by $\tau_j$.
+For $c \in \Cc_j$, let $\lambda[c]$ be the table of kernel coordinates, with $n-j$ variables, of $P_c$ (\cref{lem:rs-params,def:kernel-coords}).
+
+\paragraph{Witness sets and claimed values.}
+For $c \in \Cc_0$ let $\mathcal{W}_0(c) = \{\xi \in L : w_0(\xi) = c(\xi) \text{ and } w_0(-\xi) = c(-\xi)\}$, and for $j \in \iv{1}{\ell}$ and $c \in \Cc_j$ let
+\[
+  \mathcal{W}_j(c) \;=\; \bigl\{\, \xi \in L \;:\; \xi^{2^i} \notin \mathcal{B}_i \text{ for all } i \in \iv{1}{j-1}, \text{ and } \hat w_j(\xi^{2^j}) = c(\xi^{2^j}) \,\bigr\},
+\]
+which is determined by $\tau_j$. Let $\mathrm{dens}_j(c) = |\mathcal{W}_j(c)|/M$, and for $j \in \iv{0}{\ell}$ and $c \in \Cc_j$ let
+\[
+  \sigma_j(c) \;=\; \Bigl(\prod_{i=1}^{j} \eq_1(r_i, z_i)\Bigr) \cdot \widetilde{\lambda[c]}(z_{j+1}, \dots, z_{n}),
+\]
+the value that the running claim $v_j$ takes if the prover is honest with respect to $c$ (compare \cref{lem:honest}(4)).
+
+\begin{definition}[Doomed set and extractor]\label{def:state}
+\begin{itemize}
+  \item The empty transcript $\tau_0$ is doomed.
+  \item For $j \in \iv{1}{\ell}$, the partial transcript $\tau_j$ is \emph{not doomed} if the sumcheck checks of indices $1,\dots,j$ hold and there is $c \in \Cc_j$ with
+  \[
+    \mathrm{dens}_j(c) \;\ge\; 1 - \delta
+    \qquad\text{and}\qquad
+    v_j \;=\; \sigma_j(c);
+  \]
+  otherwise it is \emph{doomed}.
+  \item A full transcript $\tau_{\ell+1}$ is doomed if and only if the verifier rejects it.
+\end{itemize}
+Let $\Dd$ be the set of doomed transcripts.
+The \emph{extractor} $\mathsf{Ext}$, on every input $(\tau, \mathsf{m})$, reads the oracle part $w_0$ of the instance of $\tau$, and outputs the decoded table of $w_0$ if $\Delta^{\mathrm{fib}}_0(w_0,\Cc_0) \le \delta$, and the zero table otherwise.
+\end{definition}
+
+By \cref{rem:ext}, $\mathsf{Ext}$ runs in time polynomial in $M$.
+Its output is a witness for $(w_0;z,v)$ if and only if $\Delta^{\mathrm{fib}}_0(w_0,\Cc_0) \le \delta$ and the decoded table $f^*$ satisfies $\tilde{f^*}(z) = v$: if $\Delta^{\mathrm{fib}}_0(w_0,\Cc_0) > \delta$, no table is a witness.
+
+\begin{lemma}[One round of the chain]\label{lem:rbr-step}
+Let $j \in \iv{1}{\ell}$, fix $\tau_{j-1}$ and the round-$j$ message (hence $w_{j-1}$), and let $r_j$ be good for $w_{j-1}$ at level $j$.
+If $c' \in \Cc_j$ satisfies $\mathrm{dens}_{j}(c') \ge 1-\delta$, then $\Delta^{\mathrm{fib}}_{j-1}(w_{j-1}, \Cc_{j-1}) \le \delta$, the codeword $c = \mathrm{dec}_{j-1}(w_{j-1})$ satisfies $\fold_{r_j}(c) = c'$, and $\mathcal{W}_{j}(c') \subseteq \mathcal{W}_{j-1}(c)$; in particular $\mathrm{dens}_{j-1}(c) \ge 1-\delta$.
+\end{lemma}
+
+\begin{proof}
+Let $Y = \{\eta \in L_{j} : \hat w_j(\eta) = c'(\eta)\}$. Every $\xi \in \mathcal{W}_{j}(c')$ has $\xi^{2^j} \in Y$, and the map $\xi \mapsto \xi^{2^j}$ is $2^j$-to-$1$ from $L$ onto $L_j$ (\cref{lem:power}); so $|Y| \ge |\mathcal{W}_j(c')|/2^j \ge (1-\delta)M_j$.
+\Cref{lem:step} gives the first two claims, and $w_{j-1} = c$ on the fibre over every $\eta \in Y$.
+Let $\xi \in \mathcal{W}_{j}(c')$, and $\eta = \xi^{2^j} \in Y$; the fibre over $\eta$ is $\{\pm \xi^{2^{j-1}}\}$, on which $w_{j-1} = c$.
+If $j = 1$, this says $\xi \in \mathcal{W}_0(c)$.
+If $j \ge 2$, the condition $\xi^{2^{j-1}} \notin \mathcal{B}_{j-1}$ (part of the definition of $\mathcal{W}_{j}(c')$) gives $\hat w_{j-1}(\xi^{2^{j-1}}) = w_{j-1}(\xi^{2^{j-1}}) = c(\xi^{2^{j-1}})$, and the conditions $\xi^{2^i} \notin \mathcal{B}_i$ for $i \le j-2$ are common to both sets; hence $\xi \in \mathcal{W}_{j-1}(c)$.
+\end{proof}
+
+\begin{lemma}[Honest round polynomial for a codeword]\label{lem:rbr-sumcheck}
+Let $j \in \iv{1}{\ell}$, $c \in \Cc_{j-1}$ and $r_1,\dots,r_{j-1} \in \F$, and define
+\[
+  s^{c}_j(X) \;=\; \Bigl(\prod_{i=1}^{j-1}\eq_1(r_i,z_i)\Bigr) \sum_{b=0}^{N_{j}-1} \widetilde{\lambda[c]}(X, b_1,\dots,b_{n-j})\;\eq\bigl((X,b_1,\dots,b_{n-j}),\, (z_j,\dots,z_{n})\bigr).
+\]
+Then $s^{c}_j \in \F[X]_{<3}$, $s^{c}_j(0) + s^{c}_j(1) = \sigma_{j-1}(c)$, and $s^{c}_j(r) = \sigma_{j}(\fold_r(c))$ for every $r \in \F$, where $\sigma_j$ is computed with $r_j = r$.
+\end{lemma}
+
+\begin{proof}
+Each summand is a product of two polynomials of degree $\le 1$ in $X$.
+Summing over $X \in \{0,1\}$ and $b$ amounts to summing over $a = X + 2b \in \iv{0}{N_{j-1}-1}$, whose bit vector is $(X, b_1,\dots,b_{n-j})$; this gives $\sum_{a} \lambda[c](a)\, \eq(a, (z_j,\dots,z_n)) = \widetilde{\lambda[c]}(z_j,\dots,z_n)$ by \cref{prop:mle}, times the prefix, that is, $\sigma_{j-1}(c)$.
+By \cref{prop:fold-consistency} and \cref{thm:fold-dictionary}, $\lambda[\fold_r(c)] = \res_r(\lambda[c])$, whose multilinear extension is $\widetilde{\lambda[c]}(r,\cdot)$ (\cref{lem:restriction}).
+Since $\eq\bigl((r,b), (z_j,\dots,z_n)\bigr) = \eq_1(r,z_j)\,\eq\bigl(b,(z_{j+1},\dots,z_n)\bigr)$ (\cref{lem:eq}(3)), evaluating at $X = r$ (\cref{lem:natural}) gives
+\[
+  s^c_j(r) \;=\; \Bigl(\prod_{i=1}^{j-1}\eq_1(r_i,z_i)\Bigr)\,\eq_1(r,z_j)\;\widetilde{\lambda[\fold_r(c)]}(z_{j+1},\dots,z_n) \;=\; \sigma_j(\fold_r(c)). \qedhere
+\]
+\end{proof}
+
+\begin{theorem}[Round-by-round knowledge soundness]\label{thm:rbr}
+Let $1 \le \ell \le n$, and let $\Dd$ and $\mathsf{Ext}$ be as in \cref{def:state}.
+\begin{enumerate}
+  \item (Round $1$.) If the output of $\mathsf{Ext}$ is not a witness for $(w_0; z,v)$, then for every round-$1$ message $s_1$, $\tau_1$ is not doomed with probability at most $(M_1 + 2)/|\F|$ over $r_1$.
+  \item (Round $j$, $2 \le j \le \ell$.) If $\tau_{j-1}$ is doomed, then for every round-$j$ message $(w_{j-1}, s_j)$, $\tau_j$ is not doomed with probability at most $(M_j+2)/|\F|$ over $r_j$.
+  \item (Round $\ell+1$.) If $\tau_\ell$ is doomed, then for every final message $g$, the verifier accepts with probability at most $(1-\delta)^{\kappa}$ over the query points.
+\end{enumerate}
+Consequently, $\Pieval$ is round-by-round knowledge sound for $\mathcal{R}^{\delta}_{\mathrm{eval}}$ (\cref{def:rbr-knowledge}) with errors $\varepsilon_j = (M_j+2)/|\F|$ for $j \in \iv{1}{\ell}$ and $\varepsilon_{\ell+1} = (1-\delta)^\kappa$, and in particular with
+\[
+  \varepsilon_{\mathrm{rbr}} \;=\; \max\Bigl\{ \frac{M_1 + 2}{|\F|},\; (1-\delta)^{\kappa} \Bigr\}.
+\]
+\end{theorem}
+
+\begin{proof}
+\emph{Items 1 and 2.} Fix $j \in \iv{1}{\ell}$, the instance, $\tau_{j-1}$ and the round-$j$ message.
+Then $w_{j-1}$, $s_j$ and, if $\Delta^{\mathrm{fib}}_{j-1}(w_{j-1},\Cc_{j-1}) \le \delta$, the codeword $c = \mathrm{dec}_{j-1}(w_{j-1})$ and the polynomial $s^{c}_j$ of \cref{lem:rbr-sumcheck} are fixed.
+Call $r_j$ \emph{bad} if it is not good for $w_{j-1}$ at level $j$, or if $\Delta^{\mathrm{fib}}_{j-1}(w_{j-1},\Cc_{j-1}) \le \delta$, $s_j \ne s^{c}_j$ and $s_j(r_j) = s^{c}_j(r_j)$.
+By \cref{lem:good,lem:roots}, at most $M_j + 2$ values of $r_j$ are bad.
+We show that if $r_j$ is not bad and $\tau_j$ is not doomed, then the hypothesis of the item fails.
+
+Let $c' \in \Cc_j$ witness that $\tau_j$ is not doomed: $\mathrm{dens}_j(c') \ge 1-\delta$, $v_j = \sigma_j(c')$, and the sumcheck checks of indices $1,\dots,j$ hold.
+By \cref{lem:rbr-step}, $c$ exists, $\fold_{r_j}(c) = c'$ and $\mathrm{dens}_{j-1}(c) \ge 1-\delta$.
+By \cref{lem:rbr-sumcheck}, $s_j(r_j) = v_j = \sigma_j(\fold_{r_j}(c)) = s^{c}_j(r_j)$, so $s_j = s^{c}_j$ because $r_j$ is not bad.
+The sumcheck check of index $j$ then gives $v_{j-1} = s_j(0) + s_j(1) = s^{c}_j(0) + s^{c}_j(1) = \sigma_{j-1}(c)$.
+
+For $j \ge 2$, the codeword $c$ therefore witnesses that $\tau_{j-1}$ is not doomed, contradicting the hypothesis of item 2.
+For $j = 1$, $\Delta^{\mathrm{fib}}_0(w_0,\Cc_0) \le \delta$ and $c = \mathrm{dec}_0(w_0) = \Enc(f^*)$ for the decoded table $f^*$, so $\lambda[c] = f^*$ and $v = v_0 = \sigma_0(c) = \tilde{f^*}(z)$; thus the output $f^*$ of $\mathsf{Ext}$ is a witness, contradicting the hypothesis of item 1.
+
+\emph{Item 3.} If a sumcheck check or the closure check fails, the verifier rejects. Otherwise, since $\lambda[w_\ell] = g$, the closure check reads $v_\ell = \sigma_\ell(w_\ell)$; as $\tau_\ell$ is doomed, $\mathrm{dens}_\ell(w_\ell) < 1-\delta$.
+A query point $\xi$ passes all its checks exactly when $\hat w_i(\xi^{2^i}) = w_i(\xi^{2^i})$ for all $i \in \iv{1}{\ell}$, that is, when $\xi \in \mathcal{W}_\ell(w_\ell)$.
+The $\kappa$ query points are independent and uniform, so the verifier accepts with probability at most $\mathrm{dens}_\ell(w_\ell)^{\kappa} < (1-\delta)^{\kappa}$ (\cref{lem:queries}).
+
+\emph{Round-by-round knowledge soundness.} We check the three conditions of \cref{def:rbr-knowledge}.
+Condition 1 holds because $\tau_0$ is doomed, and condition 3 because a full transcript is doomed exactly when it is rejected.
+For condition 2 in round $1$, item 1 says that an escape probability above $\varepsilon_1$ forces $\mathsf{Ext}$ to output a witness.
+In rounds $2,\dots,\ell+1$, items 2 and 3 bound the escape probability from a doomed transcript by $\varepsilon_j$ outright.
+Finally, $M_j \le M_1$ for all $j \ge 1$.
+\end{proof}
+
+\begin{remark}[Relation to the definition of~\cite{BGTZ24}]\label{rem:bgtz}
+\Cref{def:rbr-knowledge} is Definition~3.12 of Block, Garreta, Tiwari and Zaj\k{a}c~\cite{BGTZ24}, with the query positions placed in the challenge of the last round.
+Because the relation $\mathcal{R}^{\delta}_{\mathrm{eval}}$ requires the witness to be the table decoded from the commitment, the extracted witness is bound to the commitment; by \cref{lem:rbr-binding}, \cref{thm:rbr} implies $\varepsilon$-evaluation binding with $\varepsilon = \sum_{j=1}^{\ell}(M_j+2)/|\F| + (1-\delta)^\kappa$, which is also the bound of \cref{cor:binding}.
+\end{remark}
+
+\begin{proposition}[Round-by-round knowledge soundness for $\ell = 0$]\label{prop:rbr-l0}
+Let $\ell = 0$, and define $\mathcal{R}^{\delta}_{\mathrm{eval}}$ with $\mathrm{dist} = \Delta$; condition~\eqref{eq:dist-unique} holds by \cref{lem:rs-params}(3).
+Let $\mathsf{Ext}$ output the table $f^H$ of \cref{prop:l0} if $\Delta(w_0, \Cc_0) \le \delta$ (computed with \cref{fact:decode}), and the zero table otherwise, and let $\Dd$ consist of $\tau_0$ and the rejected full transcripts.
+Then $\Pieval$ is round-by-round knowledge sound for $\mathcal{R}^{\delta}_{\mathrm{eval}}$ with error $\varepsilon_1 = (1-\delta)^\kappa$.
+\end{proposition}
+
+\begin{proof}
+Conditions 1 and 3 of \cref{def:rbr-knowledge} hold by construction. For condition 2, fix the message $g$: if the acceptance probability exceeds $(1-\delta)^\kappa$, the proof of \cref{prop:l0} gives $\Delta(w_0, \Cc_0) < \delta$ and $v = \tilde{f^H}(z)$, so the output of $\mathsf{Ext}$ is a witness.
+\end{proof}
+
+\subsection{The non-interactive scheme}\label{sec:sound:pq}
+
+We now show that $\Pieval$, written as an interactive oracle reduction, satisfies \cref{def:rrbr}, and apply \cref{thm:cdhz}.
+Let $1 \le \ell \le n$ and $\delta^* = (1-\rho)/2$.
+Everything proved so far in this section holds for every $\delta \in (0, \delta^*]$; below, $\delta$ varies in $[0,1]$.
+
+\paragraph{Fibre strings.}
+For each $j \in \iv{0}{\ell-1}$ and $\eta \in L_{j+1}$, fix one of the two square roots $\xi_\eta \in L_j$ of $\eta$ (\cref{lem:power}); the other is $-\xi_\eta$.
+Let $\Sigma = \F^2$, and for $w \in \F^{L_j}$ let $\mathrm{fib}_j(w) \in \Sigma^{L_{j+1}}$ be the string $\eta \mapsto (w(\xi_\eta), w(-\xi_\eta))$, indexed by $L_{j+1}$ in a fixed order.
+The map $\mathrm{fib}_j$ is a bijection from $\F^{L_j}$ onto $\Sigma^{M_{j+1}}$, and by \cref{def:fibre-dist},
+\begin{equation}\label{eq:fib-hamming}
+  \Delta\bigl(\mathrm{fib}_j(w), \mathrm{fib}_j(c)\bigr) \;=\; \Delta^{\mathrm{fib}}_j(w, c) \qquad (w, c \in \F^{L_j}).
+\end{equation}
+For a partial string $u$ over $\Sigma$, the \emph{filling} $\bar u$ replaces every $\bot$ by $(0,0)$, and $\mathcal{U}(u)$ is the set of positions where $u$ is $\bot$.
+Since $\bar u$ and $u$ agree on $\mathrm{Dom}(u)$, $\Delta(\bar u, u') \le \Delta(u, u')$ for every full string $u'$.
+
+\paragraph{The relation.}
+Let
+\[
+  \mathcal{R}_{\mathrm{eval}} \;=\; \bigl\{\, ((z,v),\, y,\, f) \;:\; y = \mathrm{fib}_0(\Enc(f)) \ \text{ and } \ \tilde f(z) = v \,\bigr\},
+\]
+with explicit instance $(z, v) \in \F^n \times \F$, implicit instance $y \in \Sigma^{M/2}$ and witness a table $f$ over $\F$.
+For a partial string $y$ and $\delta \in [0,1]$, $((z,v), y, f) \in (\mathcal{R}_{\mathrm{eval}})_{\le\delta}$ if and only if $\Delta(y, \mathrm{fib}_0(\Enc(f))) \le \delta$ and $\tilde f(z) = v$.
+For a full string $y = \mathrm{fib}_0(w_0)$, by \eqref{eq:fib-hamming}, this says $((w_0;z,v),f) \in \mathcal{R}^{\delta}_{\mathrm{eval}}$ in the notation of \cref{sec:sound:rbr}.
+
+\paragraph{The protocol as an IOR.}
+Let $\Pieval^{\Sigma}$ be $\Pieval$ with instance $((z,v); y)$, and with messages and challenges encoded as follows.
+\begin{itemize}
+  \item For $j \in \iv{1}{\ell}$, the round-$j$ message is the string over $\Sigma$ formed by $(s_j(0), s_j(1))$ and $(s_j(2), 0)$, followed, if $j \ge 2$, by the oracle part $\mathrm{fib}_{j-1}(w_{j-1})$. The final message is $g$, written as $\lceil N_\ell/2 \rceil$ symbols, padded with a zero if $N_\ell = 1$. Padding entries are ignored.
+  \item Fix an integer $\beta \ge \log_2 |\F|$ and a bijection $\mathrm{num} : \iv{0}{|\F|-1} \to \F$. The challenge of round $j \in \iv{1}{\ell}$ is $\mathsf{vr}_j \in \{0,1\}^\beta$, and $r_j = \phi(\mathsf{vr}_j)$, where $\phi(\mathsf{vr}) = \mathrm{num}(\mathrm{int}(\mathsf{vr}) \bmod |\F|)$ and $\mathrm{int}$ reads a bit string as a binary integer.
+  \item Fix a bijection $\mathrm{pos} : \{0,1\}^{n+R} \to L$ (recall $M = 2^{n+R}$). The challenge of round $\ell+1$ is $\mathsf{vr}_{\ell+1} \in \{0,1\}^{\kappa(n+R)}$, cut into $\kappa$ blocks of $n+R$ bits, whose images under $\mathrm{pos}$ are the query points.
+  \item On partial strings, the verifier rejects if an entry that it reads is $\bot$. Otherwise it runs the verifier of $\Pieval$ on the words $w_0 = \mathrm{fib}_0^{-1}(\bar y)$ and $w_{j-1} = \mathrm{fib}_{j-1}^{-1}(\overline{\text{oracle part of round } j})$, the round polynomials and the final table read from the filled messages; it outputs $(\top, ())$ if that verifier accepts, and rejects otherwise.
+\end{itemize}
+Every string of the prescribed length over $\Sigma$ encodes a message of $\Pieval$, and filled strings are such strings.
+The query point $\xi_0 = \xi^{(i)}_0$ reads, for each level $i' \in \iv{1}{\ell}$, the entry at position $\xi_0^{2^{i'}}$ of the string $y$ (if $i' = 1$) or of the oracle part of round $i'$ (if $i' \ge 2$): this entry contains the two values $w_{i'-1}(\pm\xi_0^{2^{i'-1}})$ of the fold check of level $i'$, and, for $i' \ge 2$, one of them is the value $w_{i'-1}(\xi_0^{2^{i'-1}})$ compared at level $i'-1$.
+The positions read are determined by the challenges.
+So $\Pieval^{\Sigma}$ is an IOR from $\mathcal{R}_{\mathrm{eval}}$ to $\mathcal{R}_{\mathrm{acc}}$ with $\nu = \ell + 1$ rounds, $\beta_{\min} = \min(\beta, \kappa(n+R))$ and $l_{\max} = M/2$.
+
+\begin{lemma}[Sampling]\label{lem:sampling}
+For every $S \subseteq \F$, $\Pr_{\mathsf{vr} \leftarrow \{0,1\}^\beta}[\phi(\mathsf{vr}) \in S] \le |S|\,\bigl(1/|\F| + 2^{-\beta}\bigr)$.
+The query points of round $\ell+1$ are independent and uniform in $L$.
+\end{lemma}
+
+\begin{proof}
+Each $a \in \F$ has at most $\lceil 2^\beta/|\F| \rceil < 2^\beta/|\F| + 1$ preimages under $\phi$; divide by $2^\beta$ and sum over $S$.
+The map $\{0,1\}^{\kappa(n+R)} \to L^{\times\kappa}$ induced by $\mathrm{pos}$ is a bijection.
+\end{proof}
+
+\paragraph{Erasures.}
+For a statement and messages given as partial strings, let $\mathcal{U}_0 = \mathcal{U}(y) \subseteq L_1$ and, for $i \in \iv{1}{\ell-1}$, let $\mathcal{U}_i \subseteq L_{i+1}$ be the set of erased positions of the oracle part of round $i+1$.
+We apply the notation of \cref{sec:sound:rbr} to the filled words $w_0, \dots, w_{\ell-1}$, round polynomials and final table defined above, and, for $j \in \iv{0}{\ell}$ and $c \in \Cc_j$, we put
+\[
+  \mathcal{W}^{\bot}_j(c) \;=\; \bigl\{\, \xi \in \mathcal{W}_j(c) \;:\; \xi^{2^{i}} \notin \mathcal{U}_{i-1} \text{ for all } i \in \iv{1}{\max(j,1)} \,\bigr\}, \qquad \mathrm{dens}^{\bot}_j(c) = |\mathcal{W}^{\bot}_j(c)|/M.
+\]
+For $\delta \in (0,\delta^*]$ and the statement at hand, let $\Dd^{\bot}_\delta$ be the set of partial transcripts obtained from \cref{def:state} with $\mathrm{dens}^{\bot}_j$ in place of $\mathrm{dens}_j$; it depends on the erasures of $y$ and of the messages, not only on the filled words.
+Without erasures, $\mathcal{W}^{\bot}_j = \mathcal{W}_j$ and $\Dd^{\bot}_\delta$ is the doomed set of \cref{def:state}.
+
+\begin{definition}[Knowledge state function of $\Pieval^{\Sigma}$]\label{def:kstate}
+The algorithm $\mathsf{E}$, on every input, reads $y$, lets $w_0 = \mathrm{fib}_0^{-1}(\bar y)$, and outputs the decoded table of $w_0$ at radius $\delta^*$ (\cref{def:decoded} with $\delta = \delta^*$) if $\Delta^{\mathrm{fib}}_0(w_0, \Cc_0) \le \delta^*$, and the zero table otherwise.
+For $\delta \in [0,1]$, a statement $((z,v), y)$, a transcript $\mathrm{tr}$ and a table $f$, let $\mathsf{KState}_\delta((z,v), y, \mathrm{tr}, f)$ be:
+\begin{enumerate}
+  \item $1$ if and only if $((z,v), y, f) \in (\mathcal{R}_{\mathrm{eval}})_{\le\delta}$, if $\mathrm{tr} = \mathrm{tr}_\emptyset$;
+  \item $1$ if and only if the verifier of $\Pieval^{\Sigma}$ accepts, if $\mathrm{tr}$ is a full transcript;
+  \item for $\mathrm{tr} = \tau_j$ the partial transcript after $j \in \iv{1}{\ell}$ rounds: $1$ if and only if $\tau_j \notin \Dd^{\bot}_\delta$, when $\delta \in (0, \delta^*]$; and $1$ when $\delta \notin (0, \delta^*]$;
+  \item $\mathsf{KState}_\delta((z,v), y, \mathrm{tr}', f)$, if $\mathrm{tr} = \mathrm{tr}' \| \Pi$ ends with a prover message.
+\end{enumerate}
+\end{definition}
+
+$\mathsf{E}$ runs in time polynomial in $M$ by \cref{rem:ext}, and it does not depend on $\delta$.
+Conditions 1 and 3 of \cref{def:rrbr} hold by items 1 and 2, and condition 2 by item 4.
+
+\begin{lemma}[Round-by-round steps with erasures]\label{lem:rbr-erasures}
+Let $\delta \in (0, \delta^*]$, fix a statement given by a partial string $y$, and let $j \in \iv{1}{\ell+1}$.
+Fix the partial transcript $\tau_{j-1}$ and the round-$j$ message (partial strings).
+\begin{enumerate}
+  \item If $j = 1$ and $((z,v), y, \mathsf{E}(y)) \notin (\mathcal{R}_{\mathrm{eval}})_{\le\delta}$, then at most $M_1 + 2$ values of $r_1$ make $\tau_1 \notin \Dd^{\bot}_\delta$.
+  \item If $2 \le j \le \ell$ and $\tau_{j-1} \in \Dd^{\bot}_\delta$, then at most $M_j + 2$ values of $r_j$ make $\tau_j \notin \Dd^{\bot}_\delta$.
+  \item If $j = \ell+1$ and $\tau_\ell \in \Dd^{\bot}_\delta$, then the verifier of $\Pieval^{\Sigma}$ accepts with probability at most $(1-\delta)^{\kappa}$ over the query points.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+We follow the proof of \cref{thm:rbr}, applied to the filled words, which are words of $\Pieval$.
+First, \cref{lem:rbr-step} holds with $\mathcal{W}^{\bot}$: if $\xi \in \mathcal{W}^{\bot}_j(c')$, then $\xi \in \mathcal{W}_j(c')$, so $\xi \in \mathcal{W}_{j-1}(c)$ by \cref{lem:rbr-step}; the erasure conditions defining $\mathcal{W}^{\bot}_{j-1}(c)$, for $i \le \max(j-1,1) \le j$, are among those defining $\mathcal{W}^{\bot}_{j}(c')$. So $\mathcal{W}^{\bot}_j(c') \subseteq \mathcal{W}^{\bot}_{j-1}(c)$, and the size bound on $Y$ in that proof still holds because $\mathcal{W}^{\bot}_j(c') \subseteq \mathcal{W}_j(c')$.
+\Cref{lem:rbr-sumcheck} does not involve witness sets.
+
+(1) and (2). Call $r_j$ \emph{bad} as in the proof of \cref{thm:rbr}; at most $M_j + 2$ values are bad. As there, if $r_j$ is not bad and $\tau_j \notin \Dd^{\bot}_\delta$, then $c = \mathrm{dec}_{j-1}(w_{j-1})$ exists, $\mathrm{dens}^{\bot}_{j-1}(c) \ge 1-\delta$ and $v_{j-1} = \sigma_{j-1}(c)$, and the sumcheck checks of indices $1, \dots, j-1$ hold.
+For $j \ge 2$ this says $\tau_{j-1} \notin \Dd^{\bot}_\delta$, contradicting the hypothesis of (2).
+For $j = 1$: $\mathcal{W}^{\bot}_0(c)$ is the set of $\xi \in L$ with $\xi^2 \notin \mathcal{U}_0$ and $w_0 = c$ on $\{\pm\xi\}$, so its size is twice the number of fibres $\eta \in L_1$ with $y(\eta) = \mathrm{fib}_0(c)(\eta)$ (in particular $y(\eta) \ne \bot$). So $\mathrm{dens}^{\bot}_0(c) \ge 1-\delta$ gives $\Delta(y, \mathrm{fib}_0(c)) \le \delta$.
+Hence $\Delta^{\mathrm{fib}}_0(w_0, c) = \Delta(\bar y, \mathrm{fib}_0(c)) \le \delta \le \delta^*$, so $\mathsf{E}(y) = \lambda[c]$ by \cref{lem:unique} at radius $\delta^*$ and \cref{lem:encoding}; and $v = v_0 = \sigma_0(c) = \widetilde{\lambda[c]}(z)$. Thus $((z,v), y, \mathsf{E}(y)) \in (\mathcal{R}_{\mathrm{eval}})_{\le\delta}$, contradicting the hypothesis of (1).
+
+(3). If the verifier accepts, no entry it reads is $\bot$, its round polynomials and final table are those of the filled messages, and the checks of $\Pieval$ pass on the filled words. As in item 3 of \cref{thm:rbr}, the closure check gives $v_\ell = \sigma_\ell(w_\ell)$, so $\mathrm{dens}^{\bot}_\ell(w_\ell) < 1-\delta$ because $\tau_\ell \in \Dd^{\bot}_\delta$.
+A query point $\xi$ that passes its checks lies in $\mathcal{W}_\ell(w_\ell)$, and it reads the positions $\xi^{2^{i}}$ of the strings with erasure sets $\mathcal{U}_{i-1}$, $i \in \iv{1}{\ell}$, which are therefore not erased; so $\xi \in \mathcal{W}^{\bot}_\ell(w_\ell)$.
+By \cref{lem:sampling} and \cref{lem:queries}, the verifier accepts with probability at most $\mathrm{dens}^{\bot}_\ell(w_\ell)^\kappa < (1-\delta)^\kappa$.
+\end{proof}
+
+\begin{theorem}[Relaxed round-by-round knowledge soundness]\label{thm:rrbr}
+$\Pieval^{\Sigma}$ has relaxed round-by-round knowledge soundness errors (\cref{def:rrbr}), with the knowledge state function and the algorithm $\mathsf{E}$ of \cref{def:kstate},
+\[
+  \varepsilon^{\mathrm{rr}}_j(\delta) \;=\; (M_j + 2)\Bigl(\frac{1}{|\F|} + \frac{1}{2^\beta}\Bigr) \quad (j \in \iv{1}{\ell}), \qquad \varepsilon^{\mathrm{rr}}_{\ell+1}(\delta) \;=\; (1-\delta)^{\kappa},
+\]
+for $\delta \in (0, \delta^*]$, and $\varepsilon^{\mathrm{rr}}_j(\delta) = 1$ for $\delta \notin (0, \delta^*]$.
+\end{theorem}
+
+\begin{proof}
+For $\delta \notin (0,\delta^*]$ there is nothing to prove. Fix $\delta \in (0,\delta^*]$, a statement, a round $j \in \iv{1}{\ell+1}$ and $\mathrm{tr} = \tau_{j-1} \| \Pi_j$, where $\tau_0 = \mathrm{tr}_\emptyset$.
+By item 4 of \cref{def:kstate}, $\mathsf{KState}_\delta(\cdot, \mathrm{tr}, \cdot) = \mathsf{KState}_\delta(\cdot, \tau_{j-1}, \cdot)$, and by items 2 and 3, $\mathsf{KState}_\delta(\cdot, \mathrm{tr}\|\mathsf{vr}_j, f)$ does not depend on $f$.
+So the event of \cref{def:rrbr} is contained in the conjunction of $\mathsf{KState}_\delta(\cdot, \tau_{j-1}, \mathsf{E}(\cdot)) = 0$, which does not depend on $\mathsf{vr}_j$, and $\mathsf{KState}_\delta(\cdot, \tau_j, \cdot) = 1$.
+If the first condition fails, the event is empty. Otherwise:
+for $j = 1$, $((z,v), y, \mathsf{E}(y)) \notin (\mathcal{R}_{\mathrm{eval}})_{\le\delta}$; for $2 \le j \le \ell+1$, $\tau_{j-1} \in \Dd^{\bot}_\delta$.
+For $j \le \ell$, \cref{lem:rbr-erasures}(1,2) and \cref{lem:sampling} with $|S| \le M_j + 2$ bound the probability that $\tau_j \notin \Dd^{\bot}_\delta$ by $\varepsilon^{\mathrm{rr}}_j(\delta)$.
+For $j = \ell+1$, $\mathsf{KState}_\delta(\cdot, \tau_{\ell+1}, \cdot) = 1$ means acceptance, whose probability is at most $(1-\delta)^\kappa$ by \cref{lem:rbr-erasures}(3).
+\end{proof}
+
+\begin{corollary}[Post-quantum knowledge soundness]\label{cor:pq}
+Let $\delta \in (0,\delta^*]$ and $\varepsilon_{\mathrm{rr}}(\delta) = \max\{(M_1+2)(1/|\F| + 2^{-\beta}),\ (1-\delta)^{\kappa}\}$.
+The non-interactive scheme $\mathsf{BCS}[\Pieval^{\Sigma}]$ (\cref{sec:proofs:bcs}) satisfies the conclusion of \cref{thm:cdhz} with $\nu = \ell + 1$, $\beta_{\min} = \min(\beta, \kappa(n+R))$, $l_{\max} = M/2$ and this $\varepsilon_{\mathrm{rr}}(\delta)$.
+In particular, for every quantum adversary that makes at most $Q$ queries to the random oracle and outputs a Merkle root $\mathrm{cm}$, a claim $(z, v)$ and a proof, except with probability $\varepsilon_{\mathrm{ext}}(Q)$, if the verifier accepts then the extractor outputs a partial string $y \in (\Sigma \sqcup \{\bot\})^{M/2}$, a table $f$ and a trapdoor such that:
+the openings of all positions of $\mathrm{Dom}(y)$ are accepted under $\mathrm{cm}$; $y$ agrees with $\mathrm{fib}_0(\Enc(f))$ on at least $(1-\delta)M/2$ fibres; and $\tilde f(z) = v$.
+\end{corollary}
+
+\begin{proof}
+\Cref{thm:rrbr} and \cref{thm:cdhz}; the last sentence unfolds \cref{def:committed} for $\mathcal{R}_{\mathrm{eval}}$ ($\bot$ entries count as disagreements).
+\end{proof}
+
+The extracted table is bound to the root: two extracted witnesses for the same root with different tables expose a hash collision.
+
+\begin{lemma}[Uniqueness of relaxed committed witnesses]\label{lem:cr-unique}
+Let $\delta \in (0,\delta^*]$ and let $\mathrm{cm}$ be a Merkle root. Let $\mathtt{cx} = ((z,v), \mathrm{cm})$ and $\mathtt{cx}' = ((z',v'), \mathrm{cm})$, and suppose that $(\mathtt{cx}, (y, f, \mathrm{td}))$ and $(\mathtt{cx}', (y', f', \mathrm{td}'))$ belong to $\widehat{\mathsf{CR}}[\mathcal{R}_{\mathrm{eval}}, \delta]$.
+If $f \ne f'$, then $\mathrm{td}$ and $\mathrm{td}'$ yield two accepting openings, under $\mathrm{cm}$, of one position to different values, hence a collision of the random oracle.
+In particular, if $z = z'$ and $v \ne v'$, such a collision is obtained.
+\end{lemma}
+
+\begin{proof}
+Let $A = \{\eta \in L_1 : y(\eta) = \mathrm{fib}_0(\Enc(f))(\eta)\}$ and $A' = \{\eta \in L_1 : y'(\eta) = \mathrm{fib}_0(\Enc(f'))(\eta)\}$.
+Then $A \subseteq \mathrm{Dom}(y)$ and $A' \subseteq \mathrm{Dom}(y')$, and $|A|, |A'| \ge (1-\delta)M/2$, so $|A \cap A'| \ge (1-2\delta)M/2 \ge \rho M/2 = N/2$.
+If $y = y'$ on $A \cap A'$, then $\Enc(f)$ and $\Enc(f')$ agree on the at least $N$ points of the fibres over $A \cap A'$, hence are equal (\cref{lem:rs-params}(2)), and $f = f'$ (\cref{lem:encoding}).
+So if $f \ne f'$, some $\eta \in A \cap A'$ has $y(\eta) \ne y'(\eta)$, and the openings of $\eta$ computed from $\mathrm{td}$ and $\mathrm{td}'$ are both accepted under $\mathrm{cm}$ (\cref{def:committed}), with the same random oracle since the commitment index is fixed by the scheme; apply the salted form of \cref{lem:merkle}(1) (\cref{sec:proofs:bcs}).
+If $z = z'$ and $v \ne v'$, then $\tilde f(z) = v \ne v' = \tilde f'(z)$, so $f \ne f'$.
+\end{proof}
+
+\Cref{lem:cr-unique} is deterministic. We do not state a probability bound for an adversary that produces two accepting proofs for one root, since that would require running the extractor of \cref{thm:cdhz} on two proofs of one adversary, which the theorem does not address.
+
+\begin{remark}[Post-quantum parameters]\label{rem:pq-params}
+Take $\rho = 1/4$, $\delta = \delta^* = 3/8$, $M \le 2^{32}$ (so $\ell \le n \le 30$), the quartic extension $\F = \mathbb{F}_p[\iota]/(\iota^4 - 7)$ of the Goldilocks field, of size $p^4 > 2^{255.99}$ ($\iota^4 - 7$ is irreducible over $\mathbb{F}_p$ because $7$ is a non-square in $\mathbb{F}_p$ and $p \equiv 1 \pmod 4$~\cite[Theorem~3.75]{LN97}), $\beta = 320$, hash output length $\lambda_{\mathsf{H}} = 256$, and $\kappa = 248$ queries, so that $(5/8)^{\kappa} < 2^{-168}$ and $(M_1+2)(1/|\F| + 2^{-\beta}) < 2^{-224}$.
+The quantities of \cref{thm:cdhz} satisfy $q_s \le \kappa(\ell+1) + 2\ell + \lceil N_\ell/2 \rceil \le 2^{30}$ (positions read: one per query and level, the sumcheck symbols, and the final table), $q_{\mathsf{V}} \le \nu + q_s(\lceil\log_2 l_{\max}\rceil + 1) \le 2^{36}$ (one challenge query per round and one authentication path, of at most $\lceil\log_2 l_{\max}\rceil + 1$ hashes, per position read), and $q_{\widehat{\mathsf{CR}}} \le (M/2)\log_2 M \le 2^{36}$ (one leaf hash and $\log_2(M/2)$ internal hashes per position of $y$).
+For an adversary making $Q = 2^{64}$ queries, \cref{thm:cdhz} then gives $\varepsilon_{\mathrm{ext}}(2^{64}) < 2^{-31.8}$: the first term is $2^{-31.84}$ and the other terms together are below $2^{-51}$ (computed exactly in rational arithmetic by \texttt{rust/examples/pq\_params.rs} and \texttt{checks/pq\_params.py} in the companion repository).
+The dominant term is $320\, Q^2 \varepsilon_{\mathrm{rr}}(\delta)$, so each additional factor $2$ in $Q$ costs about $2/\log_2(8/5) \approx 3$ further queries.
+The parameters of \cref{sec:exp} (quadratic extension, $\kappa = 148$) give $\varepsilon_{\mathrm{rr}}(\delta) \approx 2^{-100}$ and are sized for classical adversaries only.
+\end{remark}
+
+\begin{remark}[Parameters]\label{rem:params}
+For $\rho = 1/4$ and $\delta = (1-\rho)/2 = 3/8$, one query passes with probability at most $5/8$; $\kappa = 148$ queries give $(5/8)^{\kappa} < 2^{-100}$.
+With $M = 2^{24}$ and $|\F| = p^2 > 2^{127.9}$ (the quadratic extension of \cref{sec:impl}), $\varepsilon_{\mathrm{fold}} + 2\ell/|\F| < 2^{-103}$.
+These unique-decoding parameters are conservative; list-decoding analyses of FRI-type folding~\cite{BCIKS23} allow fewer queries, and we leave that extension to future work.
+\end{remark}
+
+\begin{remark}[Scope]\label{rem:fs}
+\begin{itemize}
+  \item The analysis concerns one commitment opened at one point $z$ per proof. Reusing a commitment across several openings, batching, or choosing $z$ after the commitment inside a larger Fiat--Shamir transcript is not analysed here.
+  \item \Cref{cor:pq} applies to the compiler $\mathsf{BCS}$ of~\cite[Construction~11.7]{CDHZ25}, with salted Merkle trees and the challenge derivation described in \cref{sec:proofs:bcs}. The implementation of \cref{sec:impl} uses unsalted, domain-separated Merkle trees and a hash-chain transcript, and is therefore not covered by \cref{cor:pq} as it stands.
+  \item For $\ell = 0$ the same argument applies with $\Sigma = \F$, the implicit instance $y = w_0$ and the Hamming distance, giving the single error $(1-\delta)^{\kappa}$: the verifier rejects on $\bot$, $\mathsf{E}$ decodes the filled word at radius $\delta^*$, and, for a fixed final table $g$, the accepted query points lie in $\{\xi : y(\xi) \ne \bot,\ y(\xi) = G(\xi)\}$, whose density is less than $1-\delta$ unless $\Delta(y, \ev_L(G)) \le \delta$ and $v = \tilde g(z)$, in which case $\mathsf{E}(y) = g$ is a witness (as in \cref{prop:l0}).
+  \item The bounds also hold against classical adversaries in the random oracle model, with the same (quantum) extractor (\cref{sec:proofs:bcs}).
+\end{itemize}
+\end{remark}

@@ -1,0 +1,107 @@
+\section{Introduction}\label{sec:intro}
+
+Many succinct arguments reduce the correctness of a computation to a claim about a multilinear polynomial evaluated at a random point.
+This is the case for sumcheck-based systems such as Spartan~\cite{Set20} and HyperPlonk~\cite{CBBZ23}.
+Such systems need a \emph{multilinear polynomial commitment scheme}: the prover commits to a multilinear polynomial $\tilde f$ in $n$ variables and later proves that $\tilde f(z) = v$ for a point $z$ chosen by the verifier.
+When the scheme is built from hash functions and error-correcting codes, the resulting arguments are transparent and rely on no number-theoretic assumption, which makes them candidates for post-quantum security.
+
+A multilinear polynomial can be given in two forms.
+In \emph{table form} (also called evaluation or Lagrange form) it is given by its values $f(b)$ on the Boolean hypercube $B_n = \{0,1\}^n$; this is the form in which provers naturally hold their witnesses.
+In \emph{coefficient form} it is given by its monomial coefficients.
+The two forms are related by M\"obius inversion on the Boolean lattice.
+
+Code-based schemes in the BaseFold paradigm~\cite{ZCF24} commit to an encoding of $f$ and prove an evaluation by running a sumcheck whose round challenges also drive an FRI-like folding of the codeword~\cite{BBHR18}.
+With Reed--Solomon codes on smooth multiplicative subgroups, as in DeepFold~\cite{GLHQTZ25}, the classical FRI fold $U \mapsto U_e + \theta\, U_o$ acts on coefficient vectors.
+It computes the multilinear evaluation of the \emph{coefficient} vector: the monomial coefficients of the committed univariate polynomial must be the monomial coefficients of $\tilde f$.
+A prover that holds a table must therefore first move to coefficient form, and must keep the two views consistent across the committed word, the sumcheck state and the folds.
+
+This paper asks whether there is a basis of univariate polynomials in which FRI-style folding over a smooth multiplicative domain acts \emph{directly} on the table form.
+There is, and it is explicit.
+
+\subsection{Contributions}\label{sec:intro:contrib}
+
+\paragraph{The Boolean-kernel basis (\cref{sec:kernel}).}
+For $y \in \Fq^n$ let $K_y(X) = \prod_{k=1}^{n}(X^{2^{k-1}} + y_k)$.
+We show that the $N = 2^n$ polynomials $K_b$, $b \in B_n$, which have coefficients in $\{0,1\}$, form a basis of $\F[X]_{<N}$ over every field $\F$.
+The change of basis to monomials is the Kronecker power $C^{\otimes n}$ of $C = \bigl(\begin{smallmatrix} 0 & 1 \\ 1 & 1\end{smallmatrix}\bigr)$.
+It costs exactly $\tfrac{n}{2}N$ additions or subtractions in either direction, and no multiplications.
+In this basis, having degree $< 2^t$ is a sign condition on the coordinates (\cref{thm:lowdeg}).
+For all but at most $N-1$ points $\zeta$, evaluating $U$ at $\zeta$ equals, up to an explicit nonzero scalar, evaluating the multilinear extension of its coordinates at a point on an explicit curve (\cref{prop:eval}).
+
+\paragraph{The fold dictionary (\cref{sec:fold}).}
+Our main structural result is \cref{thm:fold-dictionary}.
+Let $U = \sum_b \lambda(b) K_b$ and $U = U_e(X^2) + X U_o(X^2)$. Then the kernel coordinates of the fold
+\[
+  \mathrm{pfold}_r(U) \;=\; (2r-1)\,U_e + (1-r)\,U_o
+\]
+are exactly $(1-r)\lambda(2b') + r\lambda(2b'+1)$, the restriction of the first variable of the table $\lambda$.
+Consequently, encoding a table $f$ as the Reed--Solomon codeword of $U_f = \sum_b f(b) K_b$ and folding it $n$ times with challenges $r_1,\dots,r_n$ yields the constant $\tilde f(r_1,\dots,r_n)$ (\cref{cor:codeword-fold}), with no change of representation at any point.
+The kernel fold agrees with the classical FRI fold up to a nonzero scalar and a reparametrisation of the challenge (\cref{sec:fold:fri}); mixing the two parametrisations breaks correctness (\cref{ex:pitfall}), a mistake we made in an early implementation.
+
+\paragraph{A multilinear PCS with a self-contained soundness proof (\cref{sec:pcs,sec:sound}).}
+We instantiate the BaseFold paradigm with the kernel encoding and prove it sound in the unique-decoding regime (\cref{thm:sound}).
+The only external ingredient about codes in the soundness proof is the correlated-agreement theorem for Reed--Solomon codes of Ben-Sasson, Carmon, Ishai, Kopparty and Saraf~\cite{BCIKS23}; the efficiency of the extractor also uses polynomial-time unique decoding of Reed--Solomon codes.
+The theorem enters through a one-line observation: the kernel fold of any word is an affine line $u^0 + r\,u^1$ whose generators determine the word (\cref{lem:line}).
+The proof tracks the set of passing query chains level by level, and it yields evaluation binding (\cref{cor:binding}).
+The same argument gives round-by-round knowledge soundness with an explicit decoding extractor (\cref{thm:rbr}).
+The BCS theorem in the quantum random oracle model of Chiesa, Manohar and Spooner~\cite{CMS19} does not cover instances containing a Merkle-committed oracle, such as the commitment. Chiesa, Di, Hu and Zheng~\cite{CDHZ25} extend the BCS transformation to interactive oracle reductions, whose instances may contain such oracles, under a relaxed round-by-round knowledge soundness hypothesis. We derive this hypothesis from \cref{thm:rbr} (\cref{thm:rrbr}); their theorem then makes the non-interactive scheme knowledge sound, for a single opening, against quantum adversaries that choose the commitment, with explicit concrete bounds (\cref{thm:cdhz,cor:pq}); \cref{rem:pq-params} gives parameters for this setting.
+
+\paragraph{Implementation and experiments (\cref{sec:impl,sec:exp}).}
+We give a Rust implementation over the Goldilocks field with a quadratic extension for challenges.
+We compare it with a coefficient-form baseline that shares all other code.
+The two encodings are indistinguishable in running time at the resolution of our machine, as the operation counts predict.
+The kernel encoding thus provides its structural property at no measurable cost.
+
+\paragraph{What we do not claim.}
+The scheme is not asymptotically or concretely faster than Reed--Solomon instantiations of BaseFold or DeepFold (\cref{rem:basefold}).
+Its evaluation protocol is BaseFold's sumcheck-plus-folding, applied to a different encoding.
+Our soundness analysis is restricted to the unique-decoding regime, which needs more queries than list-decoding analyses~\cite{Hab24,Zei26}.
+Zero knowledge is out of scope, and we analyse one commitment opened at one point.
+The post-quantum statement (\cref{cor:pq}) uses the theorem of~\cite{CDHZ25}, which we quote and do not reprove, and it applies to their compiler (salted Merkle trees, their challenge derivation), not to our implementation as it stands (\cref{rem:fs}).
+The contribution is the basis and the dictionary: a precise, elementary account of why FRI folding and table-form multilinear restriction are the same operation over multiplicative domains in odd characteristic.
+
+\subsection{Related work}\label{sec:intro:related}
+
+\paragraph{Proximity tests for Reed--Solomon codes.}
+FRI~\cite{BBHR18} tests proximity to Reed--Solomon codes by repeated even--odd folding.
+Its soundness in the unique-decoding and list-decoding regimes rests on proximity gaps for Reed--Solomon codes~\cite{BCIKS23}.
+WHIR~\cite{ACFY24} tests proximity to constrained Reed--Solomon codes with very fast verification and supports multilinear evaluation claims.
+Our soundness proof uses only the unique-decoding correlated-agreement theorem of~\cite{BCIKS23}; extending it to the list-decoding regime is the most natural next step.
+
+\paragraph{Multilinear commitments from folding.}
+BaseFold~\cite{ZCF24} introduced foldable codes and the interleaving of sumcheck rounds with folding rounds under shared challenges.
+Our evaluation protocol follows it directly.
+DeepFold~\cite{GLHQTZ25} instantiates the paradigm with Reed--Solomon codes and improves proof size; its folding computes coefficient-form evaluations, and our coefficient-form baseline of \cref{sec:exp} follows the same principle.
+Hab\"ock~\cite{Hab24} analyses BaseFold over Reed--Solomon codes up to the Johnson bound.
+Zeilberger~\cite{Zei26} proves proximity gaps for multilinear evaluation for all linear codes.
+Both results concern the soundness of the folding paradigm; our contribution is orthogonal and concerns the encoding.
+
+\paragraph{Binary fields and the novel polynomial basis.}
+FRI-Binius~\cite{DP24} adapts BaseFold to binary towers using the novel polynomial basis of Lin, Chung and Han~\cite{LCH14}.
+In that basis the additive FFT, and with it FRI-style folding over additive subspaces, interacts cleanly with multilinear structure.
+The Boolean-kernel basis plays an analogous role for smooth \emph{multiplicative} subgroups in \emph{odd} characteristic.
+The two constructions are genuinely different. In characteristic $2$ every factor $X^{2^{k-1}} + 1$ equals $(X+1)^{2^{k-1}}$, so $K_b = X^{N-1-b}(X+1)^{b}$ is a Bernstein-type basis; moreover the multiplicative group of a field of characteristic $2$ has odd order, so smooth multiplicative domains do not exist, and the even--odd formulas~\eqref{eq:even-odd} divide by $2$.
+
+\paragraph{Multilinear-to-univariate reductions.}
+A different line of work proves multilinear evaluations with a \emph{univariate} polynomial commitment, typically KZG.
+Gemini~\cite{BCHO22} reduces a coefficient-form multilinear claim to univariate claims through recursive even--odd splitting.
+Zeromorph~\cite{KT24} works in table form and uses quotients and degree checks.
+Mercury~\cite{EG25} reaches constant proof size and expresses the evaluation as a coefficient of a product with a tensor-structured polynomial. Samaritan~\cite{GPS25} improves on Gemini in proof size, prover cost and verifier cost.
+Mohamed~\cite{Moh25} relates univariate and multilinear sumchecks through the inverse Kronecker substitution.
+These schemes treat the univariate commitment as a black box.
+In ours, the univariate polynomial is committed through a Reed--Solomon code, and the basis is chosen so that the code's own folding carries the multilinear structure.
+
+\paragraph{Other domains.}
+Brakedown~\cite{GLSTW23} and related schemes avoid FFTs by using linear-time encodable codes.
+Circle STARKs~\cite{HLP24} obtain smooth folding domains over the Mersenne prime $2^{31}-1$ from the circle curve.
+The fold dictionary as stated needs a smooth multiplicative subgroup in odd characteristic.
+Whether a Boolean-kernel-type basis exists for circle domains and for additive domains is an open question that we leave to future work.
+
+\subsection{Organisation}\label{sec:intro:org}
+
+\Cref{sec:prelim} fixes notation and collects the facts on multilinear polynomials and Reed--Solomon codes that we use, including the correlated-agreement theorem.
+\Cref{sec:proofs} recalls interactive oracle proofs and their probability space, round-by-round (knowledge) soundness, the sumcheck protocol, polynomial commitments, and the definitions and the theorem of~\cite{CDHZ25} on the BCS transformation for interactive oracle reductions, which we use for the non-interactive scheme.
+\Cref{sec:kernel} develops the Boolean-kernel basis, and \cref{sec:fold} proves the fold dictionary.
+\Cref{sec:pcs} defines the commitment scheme and \cref{sec:sound} proves its soundness.
+\Cref{sec:impl,sec:exp} describe the implementation and the measurements, and \cref{sec:concl} lists open problems.
+\Cref{app:notation} collects the notation.

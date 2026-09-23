@@ -1,0 +1,122 @@
+\section{Notation}\label{app:notation}
+
+\begin{center}
+\small
+\begin{longtable}{@{}p{0.27\textwidth} p{0.49\textwidth} >{\raggedright\arraybackslash}p{0.17\textwidth}@{}}
+\toprule
+Symbol & Meaning & Where \\
+\midrule
+\endhead
+\multicolumn{3}{l}{\emph{Integers, bits and points}} \\
+$\N$, $\iv{a}{c}$ & non-negative integers; integers $i$ with $a \le i \le c$ (empty if $a > c$) & \S\ref{sec:prelim:bits} \\
+$n$, $N = 2^n$ & number of variables; size of a table & \S\ref{sec:prelim:bits} \\
+$b_k$, $(b_1,\dots,b_n)$ & bit $k$ of an index $b$ (least significant first); bit vector & \S\ref{sec:prelim:bits} \\
+$B_n$ & Boolean hypercube $\{0,1\}^n$, identified with $\iv{0}{N-1}$ & \S\ref{sec:prelim:bits} \\
+$\wt(b)$, $\cmp{b}$, $c \sub b$ & Hamming weight; complement; submask & \S\ref{sec:prelim:bits} \\
+$b = c + 2^t h$, $b = b_1 + 2b'$ & splitting an index & \S\ref{sec:prelim:bits} \\
+$(x,y)$, $(x,b)$, $r_{\le j}$ & concatenated points; prefix of a point & \S\ref{sec:prelim:bits} \\
+\midrule
+\multicolumn{3}{l}{\emph{Fields and polynomials}} \\
+$\Fq$ & base field, finite, odd characteristic & \S\ref{sec:prelim:fields} \\
+$\F$, $\K$ & finite field containing $\Fq$ (challenge field); extension field & \S\ref{sec:prelim:fields}, \S\ref{sec:pcs:params} \\
+$\F[X]_{<d}$, $\coef{a}{P}$ & polynomials of degree $< d$; coefficient of $X^a$ & \S\ref{sec:prelim:fields} \\
+$P_e$, $P_o$; $R_i$ & even and odd parts; blocks of a polynomial & \Cref{lem:splits} \\
+\midrule
+\multicolumn{3}{l}{\emph{Multilinear polynomials and tables}} \\
+$A$ & commutative ring & \S\ref{sec:prelim:ml} \\
+$\mathcal{L}_n(A)$, $\mathcal{L}_n$ & multilinear polynomials over $A$, over $\Fq$ & \S\ref{sec:prelim:ml} \\
+$m_a$, $e_b$ & canonical monomial; Lagrange polynomial & \Cref{def:bases} \\
+$\eq_1$, $\eq$ & equality polynomials; $e_b(x) = \eq(b,x)$ & \Cref{def:bases,lem:eq} \\
+$f$, $f(b)$, $\tilde f$ & table; its entries; its multilinear extension & \Cref{prop:mle} \\
+$\alpha_a$ & coefficient form of $\tilde f$ & \Cref{def:coeff-form} \\
+$\res_r(f)$ & restriction of a table at $r \in A$ or $r \in A^j$ & \Cref{def:restriction} \\
+$\vartheta$ & ring homomorphism, applied entrywise & \Cref{lem:natural} \\
+\midrule
+\multicolumn{3}{l}{\emph{Smooth domains and codes}} \\
+$L$, $M = 2^{\mu}$ & smooth domain and its order & \Cref{def:domain} \\
+$L^{2^j}$ & image of $L$ under $\xi \mapsto \xi^{2^j}$ (not a Cartesian power) & \Cref{def:domain,lem:power} \\
+$\xi$, $\eta$, $\zeta$ & points of a domain; points of the squared domain; arbitrary field point & \S\ref{sec:prelim:rs}, \S\ref{sec:kernel:eval} \\
+fibre $\{\xi, -\xi\}$ & the two square roots of $\eta = \xi^2$ in $L$ & \Cref{def:fibre} \\
+$\ev_L$, $\RS_\F[L,d]$, $\rho$ & evaluation map; Reed--Solomon code; rate $d/M$ & \Cref{def:rs} \\
+$P_c$ & polynomial of degree $< d$ whose evaluation is the codeword $c$ & \Cref{lem:rs-params} \\
+$\mathrm{Frob}$ & Frobenius map $x \mapsto x^q$ & \Cref{lem:descent} \\
+$\Delta$ & relative Hamming distance & \Cref{def:rs,lem:metric} \\
+$w_e$, $w_o$ & even and odd parts of a word & \eqref{eq:even-odd}, \Cref{lem:split-words} \\
+$\delta$ & proximity parameter, $0 < \delta \le (1-\rho)/2$ & \Cref{thm:bciks} \\
+$u^0$, $u^1$; $\hat c^0$, $\hat c^1$ & words on a line; codewords of correlated agreement & \Cref{thm:bciks,lem:line} \\
+\midrule
+\multicolumn{3}{l}{\emph{Proof systems}} \\
+$\mathcal{R}$, $\mathtt{x}$, $\mathtt{w}$, $L_{\mathcal{R}}$ & relation, instance, witness, language & \S\ref{sec:proofs:iop} \\
+$\mathsf{P}$, $\mathsf{V}$, $\mathsf{P}^*$ & prover, verifier, arbitrary prover & \Cref{def:iop} \\
+$\nu$, $\mathsf{m}_i$, $\mathsf{c}_i$, $\mathsf{Ch}_i$ & number of rounds; message; challenge; challenge set & \Cref{def:iop} \\
+$\tau$, $\tau_i$, $\Omega$ & partial transcript; after $i$ rounds; challenge space & \S\ref{sec:proofs:iop} \\
+$E_i$, $k_i$ & events and counts of the sequential-challenge bound & \Cref{lem:sequential} \\
+$\Omega'$, $\varpi$, $\mathcal{S}(\varpi)$, $\mathcal{A}$, $\mathbf{1}_{\mathcal{A}}$ & finite probability space, its element, a set of points, an event, its indicator & \Cref{lem:queries} \\
+$L^{\times\kappa}$ & set of $\kappa$-tuples of elements of $L$ (Cartesian power) & \Cref{lem:queries}, \S\ref{sec:pcs:protocol} \\
+$\Dd$, $\mathsf{Ext}$, $\varepsilon_i$, $\varepsilon_{\mathrm{rbr}}$ & doomed set; extractor; round errors; maximum error & \Cref{def:rbr,def:rbr-knowledge} \\
+$F$, $s_j$, $s^*_j$, $r_j$, $v_j$ & summed polynomial; round polynomial sent; honest round polynomial; challenge; running claim & \S\ref{sec:proofs:sumcheck} \\
+$\Enc$, $(w; z, v)$ & encoding; instance of an evaluation protocol & \Cref{def:pcs} \\
+$\mathrm{dist}$, $\mathcal{R}^{\delta}_{\mathrm{eval}}$ & distance to encodings; evaluation relation & \S\ref{sec:proofs:pcs} \\
+$\mathsf{H}$, $\lambda_{\mathsf{H}}$, $Q$ & hash function (random oracle); output length; number of oracle queries of the adversary & \S\ref{sec:proofs:bcs} \\
+$\mathbf{d}$, $T$, $\mathrm{MT}(\mathbf{d})$ & vector of leaves; its length; Merkle root & \S\ref{sec:proofs:bcs}, \Cref{lem:merkle} \\
+$\Sigma$, $y$, $\bot$, $\mathrm{Dom}(y)$ & alphabet; implicit instance (partial string); undefined entry; defined positions & \S\ref{sec:proofs:bcs} \\
+$\mathrm{tr}$, $\mathrm{tr}_\emptyset$, $\mathbf{a}$, $\gamma_h$ & transcript; empty transcript; committed vector; salts & \S\ref{sec:proofs:bcs} \\
+$\mathcal{R}_{\le\delta}$, $\mathcal{R}_{\mathrm{acc}}$, $(\top, ())$ & relaxed relation; acceptance relation; its instance (explicit $\top$, empty implicit instance $()$) & \S\ref{sec:proofs:bcs} \\
+$n_y$, $n'_y$ & numbers of input and output implicit instances ($1$ and $0$ here) & \S\ref{sec:proofs:bcs} \\
+$I$, $h$ & set of opened positions; position index in a salted Merkle tree & \S\ref{sec:proofs:bcs} \\
+$\varepsilon_{\mathrm{sim}}$, $\varepsilon^{\mathrm{sr}}$ & simulation error; state-restoration knowledge error (\cite{CDHZ25}) & \S\ref{sec:proofs:bcs}, \Cref{thm:cdhz} \\
+$\varepsilon_{\mathrm{extract}}$, $\varepsilon_{\mathrm{offline}}$, $\varepsilon_{\mathrm{online}}$ & multi-extractability errors of Merkle commitments (\cite[Thm.~8.3]{CDHZ25}) & proof of \Cref{thm:cdhz} \\
+$\mathfrak{m}_{\mathsf{FS}}$, $\mathfrak{m}_{\mathsf{VC}}$, $\mathfrak{m}_{\mathsf{MultiExtract}}$, $\mathfrak{m}$, $\mathfrak{m}'$ & total query masses (\cite[Def.~4.3]{CDHZ25}) & proof of \Cref{thm:cdhz} \\
+$\Pi_i$, $\mathsf{vr}_i$, $\beta_i$ & IOR message; challenge bit string; its length & \S\ref{sec:proofs:bcs} \\
+$\mathsf{KState}_\delta$, $\varepsilon^{\mathrm{rr}}_i$, $\varepsilon_{\mathrm{rr}}$ & knowledge state function; relaxed round-by-round errors; their maximum & \Cref{def:rrbr,thm:cdhz} \\
+$\mathrm{cm}$, $\mathrm{td}$, $\mathsf{CR}$, $\widehat{\mathsf{CR}}$ & Merkle root; trapdoor; committed and relaxed committed relations & \Cref{def:committed} \\
+$\mathsf{BCS}[\Pi]$, $\varepsilon_{\mathrm{ext}}$, $\varepsilon_{\mathrm{com}}$ & compiled reduction; extraction and commutativity errors & \Cref{thm:cdhz} \\
+$l_{\max}$, $q_{\mathsf{V}}$, $q_{\widehat{\mathsf{CR}}}$, $q_s$, $T_1$ & parameters of the bound of \cref{thm:cdhz} & \Cref{thm:cdhz} \\
+\midrule
+\multicolumn{3}{l}{\emph{Kernel basis and folding}} \\
+$K_y$, $K_b$, $K^{(n)}_b$ & kernel polynomial; Boolean kernel polynomial; with $n$ variables & \Cref{def:kernel} \\
+$S_1 \otimes \dots \otimes S_n$, $S_{(k)}$ & Kronecker product; factor on bit $k$ & \Cref{def:kron} \\
+$C$, $\mathbf{K}_n$, $\mathrm{coef}(U)$ & $2\times 2$ change of basis; coefficient matrix of $(K_b)$; coefficient vector & \S\ref{sec:kernel:basis} \\
+$\lambda$, $\lambda(b)$ & kernel coordinates & \Cref{def:kernel-coords} \\
+$\varphi$ & kernel coordinates of a low-degree polynomial with $t$ variables & \Cref{thm:lowdeg} \\
+$\gamma_k(\zeta)$, $\psi_k(\zeta)$ & scalar and curve of the evaluation identity & \Cref{prop:eval} \\
+$U_e$, $U_o$ & even and odd parts of $U$ & \Cref{lem:splits,prop:split} \\
+$\mathrm{pfold}_r$, $U_j$ & kernel fold of a polynomial; iterated folds & \Cref{def:fold-poly,cor:iterated} \\
+$\fold_r$ & kernel fold of a word & \Cref{def:fold-word,lem:fold-word} \\
+$\mathrm{cfold}_\theta$, $\theta$ & classical FRI fold and its challenge & \Cref{def:cfold} \\
+\midrule
+\multicolumn{3}{l}{\emph{The commitment scheme}} \\
+$R$, $\ell$, $\kappa$ & $\rho = 2^{-R}$; number of folding rounds; number of queries & \S\ref{sec:pcs:params} \\
+$L_j$, $M_j$, $N_j$, $\Cc_j$ & $L^{2^j}$; $M/2^j$; $N/2^j$; $\RS_\F[L_j,N_j]$ & \S\ref{sec:pcs:params} \\
+$U_f$ & kernel polynomial of a table & \Cref{def:encoding,lem:encoding} \\
+$z$, $v$ & evaluation point; claimed value & \S\ref{sec:pcs:protocol} \\
+$f_j$, $\chi_j$ & honest restricted table; restricted equality table & \S\ref{sec:pcs:protocol}, \Cref{lem:honest} \\
+$w_0$; $w_j$ & commitment (instance oracle); prover oracles for $1 \le j < \ell$, and $w_\ell = \ev_{L_\ell}(G)$ & \S\ref{sec:pcs:protocol} \\
+$g$, $G$ & final table; its kernel polynomial & \S\ref{sec:pcs:protocol} \\
+$\omega$, $\iota$ & generator of $L$; generator of the extension field & \S\ref{sec:impl} \\
+$\xi^{(i)}_0$, $\xi_j$ & query points; $\xi_0^{2^j}$ & \S\ref{sec:pcs:protocol} \\
+$\Pieval$, $t_{\mathsf{H}}$ & evaluation protocol; cost of one hash & \S\ref{sec:pcs:protocol}, \S\ref{sec:pcs:costs} \\
+\midrule
+\multicolumn{3}{l}{\emph{Soundness}} \\
+$\Delta^{\mathrm{fib}}_j$ & fibre distance at level $j$ & \Cref{def:fibre-dist} \\
+$\mathrm{dec}_j(w)$, $f^*$ & decoded codeword; decoded table & \Cref{def:decoded} \\
+$\mathsf{Good}_j(w,r)$ & $r$ is good for $w$ at level $j$ & \Cref{def:good} \\
+$\Pp_j$, $\pi$ & passing sets; passing fraction & \S\ref{sec:sound:thm}, \Cref{lem:passing} \\
+$c_j$ & codeword chain & \Cref{lem:chain} \\
+$\varepsilon_{\mathrm{fold}}$ & folding error $M(1-2^{-\ell})/|\F|$ & \Cref{thm:sound} \\
+$E_j$, $f^*_j$, $\chi^*_j$, $\sigma^*_j$ & bad events; honest tables and claims for $f^*$ & proof of \Cref{thm:sound} \\
+$f^H$ & table decoded within Hamming distance $\delta$ & \Cref{prop:l0} \\
+$\hat w_j$, $\mathcal{B}_j$ & $\fold_{r_j}(w_{j-1})$; points where it differs from $w_j$ & \S\ref{sec:sound:rbr} \\
+$\lambda[c]$ & kernel coordinates of $P_c$ & \S\ref{sec:sound:rbr} \\
+$\mathcal{W}_j(c)$, $\mathrm{dens}_j(c)$, $\sigma_j(c)$ & witness set; its density; claimed value for a codeword $c$ & \S\ref{sec:sound:rbr} \\
+$s^c_j$ & honest round polynomial for a codeword $c$ & \Cref{lem:rbr-sumcheck} \\
+$\delta^*$ & largest proximity parameter $(1-\rho)/2$ & \S\ref{sec:sound:pq} \\
+$\xi_\eta$, $\mathrm{fib}_j$ & chosen square root of $\eta$; fibre string of a word over $\Sigma = \F^2$ & \S\ref{sec:sound:pq} \\
+$\mathcal{R}_{\mathrm{eval}}$, $\Pieval^{\Sigma}$ & evaluation relation with implicit instance; $\Pieval$ as an IOR & \S\ref{sec:sound:pq} \\
+$\beta$, $\phi$, $\mathrm{num}$, $\mathrm{pos}$ & challenge length; sampling map; enumerations of $\F$ and $L$ & \S\ref{sec:sound:pq}, \Cref{lem:sampling} \\
+$\mathsf{E}$ & $\delta$-independent extractor & \Cref{def:kstate} \\
+$\bar u$, $\mathcal{U}(u)$, $\mathcal{U}_i$ & filling of a partial string; its erased positions; erasures of $y$ and of the oracles & \S\ref{sec:sound:pq} \\
+$\mathcal{W}^{\bot}_j$, $\mathrm{dens}^{\bot}_j$, $\Dd^{\bot}_\delta$ & witness sets, densities and doomed set with erasures & \S\ref{sec:sound:pq} \\
+\bottomrule
+\end{longtable}
+\end{center}
