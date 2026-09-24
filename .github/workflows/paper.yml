@@ -1,6 +1,7 @@
 name: Paper
 on:
   push:
+    branches: [main]
     paths: ["paper/**"]
   pull_request:
     paths: ["paper/**"]

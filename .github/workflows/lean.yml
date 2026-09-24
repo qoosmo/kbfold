@@ -1,6 +1,7 @@
 name: Lean
 on:
   push:
+    branches: [main]
   pull_request:
 jobs:
   build:
@@ -10,13 +11,19 @@ jobs:
         working-directory: lean
     steps:
       - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: lean
-          use-mathlib-cache: true
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Toolchain
+        run: lean --version && lake --version
+      - name: Fetch Mathlib cache
+        run: lake exe cache get
+      - name: Build
+        run: lake build
       - name: No sorry / admit
-        run: "! grep -rnE '\\b(sorry|admit)\\b' KBFold"
-      - name: Only the declared axiom
+        run: "! grep -rnwE 'sorry|admit' KBFold"
+      - name: Exactly one axiom
         run: test "$(grep -rn '^axiom' KBFold | wc -l)" = "1"
       - name: Axiom audit
         run: lake env lean KBFold/Audit.lean
