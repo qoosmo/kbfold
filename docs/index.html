@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}</style>
+<title>KBFold</title>
+<meta name="description" content="The Boolean-kernel basis: native evaluation-form FRI folding, a multilinear polynomial commitment with post-quantum security, formalised in Lean 4.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&family=Archivo:wght@500;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#F3F6F5; --surface:#FFFFFF; --ink:#13212A; --muted:#566871; --rule:#D3DCDA;
+  --accent:#0B6E6C; --accent-soft:#DDEFEE; --axiom:#9A5B0F; --axiom-soft:#F7ECDC;
+  --ok:#1F7A3A; --code-bg:#EAF0EF;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"STIX Two Text","Times New Roman",Georgia,serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1518; --surface:#152025; --ink:#E2EAE8; --muted:#97A8AE; --rule:#28363B;
+    --accent:#5BC2BD; --accent-soft:#17312F; --axiom:#E3A652; --axiom-soft:#33271A;
+    --ok:#6FCB8A; --code-bg:#1B282D; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1518; --surface:#152025; --ink:#E2EAE8; --muted:#97A8AE; --rule:#28363B;
+  --accent:#5BC2BD; --accent-soft:#17312F; --axiom:#E3A652; --axiom-soft:#33271A;
+  --ok:#6FCB8A; --code-bg:#1B282D; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:18px;line-height:1.6;margin:0;padding-inline:20px}
+.wrap{max-width:1080px;margin:0 auto;padding-block:40px 64px}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.12;margin:0}
+.label{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-size:.84em}
+.m{font-family:var(--f-body);font-style:italic}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:end;padding-block:24px 40px;border-bottom:1px solid var(--rule)}
+.hero h1{font-size:clamp(56px,11vw,120px);font-weight:800;letter-spacing:-.035em}
+.hero h1 span{color:var(--accent)}
+.hero .sub{font-size:clamp(19px,2.3vw,23px);line-height:1.4;margin:16px 0 0;max-width:34ch}
+.byline{margin-top:20px;color:var(--muted);font-size:16px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.btn{font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.02em;padding:10px 16px;border:1.5px solid var(--ink);color:var(--ink);text-decoration:none;border-radius:2px;background:transparent}
+.btn.primary{background:var(--ink);color:var(--ground)}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:var(--ground)}
+.kernel{font-size:clamp(22px,3vw,30px);line-height:1.3;padding:22px 0 0}
+.kernel .eq{display:block;white-space:nowrap;overflow-x:auto}
+.kernel small{display:block;font-size:15px;color:var(--muted);margin-top:10px;line-height:1.5}
+
+section{padding-block:56px 8px}
+.sec-head{display:grid;grid-template-columns:220px 1fr;gap:32px;margin-bottom:28px}
+.sec-head h2{font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-.02em}
+.sec-head p{margin:10px 0 0;max-width:62ch;color:var(--muted)}
+.body{margin-left:252px;max-width:760px}
+
+/* dictionary */
+.dict{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:stretch;margin-left:252px}
+.side{background:var(--surface);border:1px solid var(--rule);padding:18px 20px}
+.side h3{font-size:15px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.side .f{font-size:21px}
+.iff{align-self:center;font-family:var(--f-display);font-weight:800;font-size:28px;color:var(--accent)}
+
+/* demo */
+.demo{margin-left:252px;margin-top:28px;background:var(--surface);border:1px solid var(--rule)}
+.demo-top{display:flex;flex-wrap:wrap;gap:18px 32px;align-items:center;padding:16px 20px;border-bottom:1px solid var(--rule)}
+.demo-top label{font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.demo-top input[type=range]{width:200px;accent-color:var(--accent);vertical-align:middle}
+.rval{font-family:var(--f-mono);font-size:18px;font-weight:600;min-width:2ch;display:inline-block}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.pane{padding:16px 20px;min-width:0}
+.pane+.pane{border-left:1px solid var(--rule)}
+.pane h4{margin:0 0 6px;font-family:var(--f-display);font-size:14px;font-weight:700}
+.pane p{margin:0 0 10px;font-size:15px;color:var(--muted);line-height:1.45}
+.vec{display:flex;flex-wrap:wrap;gap:6px}
+.cell{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:15px;min-width:44px;text-align:center;padding:6px 4px;background:var(--code-bg);border-radius:2px}
+.cell i{display:block;font-style:normal;font-size:10px;color:var(--muted)}
+.cell.in{cursor:pointer}
+.cell.in:hover{outline:1.5px solid var(--accent)}
+.verdict{display:flex;gap:12px;align-items:center;padding:12px 20px;border-top:1px solid var(--rule);font-size:15px}
+.pill{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.demo-note{font-size:14px;color:var(--muted);margin:10px 0 0 252px}
+
+/* results */
+.results{margin-left:252px;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.res{background:var(--surface);padding:18px 20px}
+.res .ref{font-family:var(--f-mono);font-size:12px;color:var(--accent)}
+.res h3{font-size:19px;font-weight:700;margin:6px 0 6px}
+.res p{margin:0;font-size:16px;line-height:1.5;color:var(--muted)}
+
+/* protocol diagram */
+.diagram{margin-left:252px;overflow-x:auto;background:var(--surface);border:1px solid var(--rule);padding:12px}
+.diagram svg{display:block;min-width:640px;width:100%;height:auto}
+.diagram text{font-family:var(--f-mono);font-size:12px;fill:var(--ink)}
+.diagram .t-muted{fill:var(--muted)}
+.diagram .t-acc{fill:var(--accent);font-weight:600}
+
+/* verification */
+.stats{margin-left:252px;display:flex;flex-wrap:wrap;gap:32px 48px;margin-bottom:26px}
+.stat b{display:block;font-family:var(--f-display);font-weight:800;font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:14px;color:var(--muted)}
+.tbl-wrap{margin-left:252px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:15px;background:var(--surface);border:1px solid var(--rule)}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--f-display);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--f-mono);font-size:14px}
+.st{display:inline-block;font-family:var(--f-display);font-weight:700;font-size:12px;padding:2px 8px;border-radius:2px;white-space:nowrap}
+.st.ok{background:var(--accent-soft);color:var(--accent)}
+.st.ax{background:var(--axiom-soft);color:var(--axiom)}
+.st.q{background:var(--code-bg);color:var(--muted)}
+.axiom{margin:18px 0 0 252px;max-width:760px;border-left:3px solid var(--axiom);padding:4px 0 4px 16px;font-size:16px}
+.axiom code{font-family:var(--f-mono);font-size:.9em;color:var(--axiom)}
+
+/* next */
+.next{margin-left:252px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.next h3{font-size:17px;font-weight:700;margin-bottom:6px}
+.next ul{margin:0;padding-left:18px;font-size:16px;line-height:1.5;color:var(--muted)}
+.next li{margin-bottom:6px}
+.scope{margin:30px 0 0 252px;max-width:760px;font-size:16px;color:var(--muted)}
+.scope b{color:var(--ink)}
+
+/* cite */
+.cite{margin-left:252px;position:relative}
+.cite pre{margin:0;background:var(--code-bg);padding:18px 20px;overflow-x:auto;font-family:var(--f-mono);font-size:13.5px;line-height:1.55;border:1px solid var(--rule)}
+.copy{position:absolute;top:10px;right:10px;font-family:var(--f-display);font-weight:700;font-size:12px;padding:6px 10px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer;border-radius:2px}
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between;font-size:15px;color:var(--muted)}
+footer .who{color:var(--ink)}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:12px}
+  .sec-head{grid-template-columns:1fr;gap:6px}
+  .body,.dict,.demo,.demo-note,.results,.diagram,.stats,.tbl-wrap,.axiom,.next,.scope,.cite{margin-left:0}
+  .next{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  body{font-size:17px}
+  .dict{grid-template-columns:1fr}
+  .iff{justify-self:center;transform:rotate(90deg)}
+  .demo-grid,.results{grid-template-columns:1fr}
+  .pane+.pane{border-left:0;border-top:1px solid var(--rule)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="hero">
+  <div>
+    <div class="label">Research project · Algorizk Labs · 2026</div>
+    <h1>KB<span>Fold</span></h1>
+    <p class="sub">The Boolean-kernel basis: FRI folding that acts directly on tables of values, a multilinear commitment scheme built on it, and machine-checked proofs.</p>
+    <p class="byline">Abdelali Mkhida · paper, Lean 4 formalisation and Rust implementation</p>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/qoosmo/kbfold/blob/main/paper/kbfold.pdf">Read the paper (PDF)</a>
+      <a class="btn" href="https://github.com/qoosmo/kbfold">Source on GitHub</a>
+      <a class="btn" href="https://github.com/qoosmo/kbfold/tree/main/lean">Lean proofs</a>
+      <a class="btn" href="https://github.com/qoosmo/kbfold/releases/tag/v0.1.0">Release v0.1.0</a>
+    </div>
+  </div>
+  <div class="kernel">
+    <span class="eq"><span class="m">K<sub>b</sub></span>(<span class="m">X</span>) = ∏<sub><span class="m">k</span>=1</sub><sup><span class="m">n</span></sup> (<span class="m">X</span><sup>2<sup><span class="m">k</span>−1</sup></sup> + <span class="m">b<sub>k</sub></span>)</span>
+    <small>One polynomial per point <span class="m">b</span> ∈ {0,1}<sup><span class="m">n</span></sup> of the Boolean hypercube. Together they form a basis of the polynomials of degree &lt; 2<sup><span class="m">n</span></sup> (Theorem 4.8).</small>
+  </div>
+</header>
+
+<section id="dictionary">
+  <div class="sec-head">
+    <div class="label">The fold dictionary</div>
+    <div>
+      <h2>Folding a codeword is restricting a table</h2>
+      <p>Over smooth multiplicative domains the classical FRI fold acts on monomial coefficients, so a prover that holds a multilinear polynomial as a table of values must convert it first. In kernel coordinates the conversion disappears: one normalised fold is exactly one sumcheck restriction.</p>
+    </div>
+  </div>
+  <div class="dict">
+    <div class="side">
+      <h3>Univariate side</h3>
+      <div class="f">pfold<sub><span class="m">r</span></sub>(<span class="m">U</span>) = (2<span class="m">r</span>−1)<span class="m">U<sub>e</sub></span> + (1−<span class="m">r</span>)<span class="m">U<sub>o</sub></span></div>
+      <p style="margin:8px 0 0;font-size:15px;color:var(--muted)">even/odd split of <span class="m">U</span> = Σ<sub><span class="m">b</span></sub> λ(<span class="m">b</span>) <span class="m">K<sub>b</sub></span>, one FRI step</p>
+    </div>
+    <div class="iff" aria-hidden="true">≡</div>
+    <div class="side">
+      <h3>Multilinear side</h3>
+      <div class="f">res<sub><span class="m">r</span></sub>(λ)(<span class="m">b</span>′) = (1−<span class="m">r</span>)λ(0,<span class="m">b</span>′) + <span class="m">r</span>λ(1,<span class="m">b</span>′)</div>
+      <p style="margin:8px 0 0;font-size:15px;color:var(--muted)">fix the first variable of the table at <span class="m">r</span>, one sumcheck step</p>
+    </div>
+  </div>
+
+  <div class="demo" aria-label="Interactive check of the fold dictionary over F17">
+    <div class="demo-top">
+      <div><label for="rng">Challenge <span class="m" style="text-transform:none">r</span> ∈ 𝔽<sub>17</sub></label>
+        <input id="rng" type="range" min="0" max="16" value="5"> <span class="rval" id="rv">5</span></div>
+      <div><label>Table <span class="m" style="text-transform:none">λ</span>, <span class="m" style="text-transform:none">n</span> = 3</label>
+        <button class="copy" style="position:static" id="shuffle" type="button">New random table</button></div>
+    </div>
+    <div class="demo-grid">
+      <div class="pane" style="grid-column:1/-1;border-bottom:1px solid var(--rule)">
+        <h4>Kernel coordinates λ(<span class="m">b</span>) — click a value to change it</h4>
+        <div class="vec" id="lam"></div>
+      </div>
+      <div class="pane">
+        <h4>Fold the polynomial</h4>
+        <p>Coefficients of pfold<sub><span class="m">r</span></sub>(Σ λ(<span class="m">b</span>)<span class="m">K<sub>b</sub></span>), degree &lt; 4</p>
+        <div class="vec" id="left"></div>
+      </div>
+      <div class="pane">
+        <h4>Restrict the table, then re-encode</h4>
+        <p>Coefficients of Σ res<sub><span class="m">r</span></sub>(λ)(<span class="m">b</span>′)<span class="m">K<sub>b′</sub></span>, degree &lt; 4</p>
+        <div class="vec" id="right"></div>
+      </div>
+    </div>
+    <div class="verdict"><span class="pill" id="pill">Equal</span><span id="vtext">Both sides agree coefficient by coefficient.</span></div>
+  </div>
+  <p class="demo-note">Computed live in your browser over 𝔽<sub>17</sub>. The identity holds for every field of odd characteristic and every <span class="m">r</span>: Theorem 5.3 in the paper, <span class="mono">fold_dictionary</span> in Lean.</p>
+</section>
+
+<section id="results">
+  <div class="sec-head">
+    <div class="label">What is proved</div>
+    <div>
+      <h2>Results</h2>
+      <p>Every result specific to the paper is proved in the paper. The only external results used are the correlated-agreement theorem for Reed–Solomon codes and the BCS theorem for interactive oracle reductions.</p>
+    </div>
+  </div>
+  <div class="results">
+    <div class="res"><div class="ref">Theorem 4.8 · Corollary 4.11</div><h3>Basis theorem</h3><p>The kernel polynomials form a basis of 𝔽[<span class="m">X</span>]<sub>&lt;2<sup><span class="m">n</span></sup></sub>. The change of basis to monomials is a Kronecker power of a 2×2 matrix and costs (<span class="m">n</span>/2)·2<sup><span class="m">n</span></sup> additions.</p></div>
+    <div class="res"><div class="ref">Theorem 5.3 · Corollary 5.9</div><h3>Fold dictionary</h3><p>A normalised FRI fold is the restriction of one variable. Folding the committed codeword ℓ times evaluates the multilinear extension at the challenges.</p></div>
+    <div class="res"><div class="ref">Theorem 4.13 · Proposition 4.15</div><h3>Low degree and evaluation</h3><p>Low degree in kernel coordinates is a sign condition on the table; univariate evaluation is a scaled multilinear evaluation.</p></div>
+    <div class="res"><div class="ref">Theorem 6.5 · Theorem 7.13</div><h3>Completeness and soundness</h3><p>A BaseFold-style commitment in the kernel encoding. Sound and evaluation binding in the unique-decoding regime, with error ε<sub>fold</sub> + 2ℓ/|𝔽| + (1−δ)<sup>κ</sup>.</p></div>
+    <div class="res"><div class="ref">Theorem 7.19</div><h3>Round-by-round knowledge soundness</h3><p>With an explicit decoding extractor, and a witness bound to the commitment through the fibre distance.</p></div>
+    <div class="res"><div class="ref">Theorem 7.25 · Corollary 7.26</div><h3>Post-quantum knowledge soundness</h3><p>The relaxed round-by-round notion of Chiesa, Di, Hu and Zheng, including partial strings produced by their extractor. Their theorem then gives straightline extraction in the quantum random oracle model, with explicit bounds.</p></div>
+  </div>
+</section>
+
+<section id="protocol">
+  <div class="sec-head">
+    <div class="label">The protocol</div>
+    <div>
+      <h2>Three views of one object</h2>
+      <p>The committed word, the sumcheck table and the folds are the same restricted table at each level. Each round halves the domain, the codeword and the table with one shared challenge.</p>
+    </div>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 900 280" role="img" aria-label="Folding rounds: the domain L of order M, then L squared of order M over 2, down to L sub l; the table halves each round with the same challenge">
+      <g fill="none" stroke="currentColor" style="color:var(--rule)">
+        <line x1="40" y1="70" x2="860" y2="70"/>
+        <line x1="40" y1="170" x2="860" y2="170"/>
+      </g>
+      <text x="40" y="28" class="t-muted">CODEWORD  (Reed–Solomon on smooth domain)</text>
+      <text x="40" y="128" class="t-muted">TABLE  (sumcheck prover)</text>
+      <g id="cols"></g>
+      <text x="40" y="252" class="t-muted">Commit: w₀ = ev_L(Σ f(b) K_b).  Round j: prover sends s_j (and the oracle w_{j−1});</text>
+      <text x="40" y="268" class="t-muted">verifier sends r_j.  Final round: table g in the clear, then κ query points.</text>
+    </svg>
+  </div>
+</section>
+
+<section id="verification">
+  <div class="sec-head">
+    <div class="label">Verification</div>
+    <div>
+      <h2>Machine-checked in Lean 4</h2>
+      <p>The mathematics of Sections 2–7 is formalised against Mathlib and rebuilt from scratch on every commit by continuous integration.</p>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>16</b><span>Lean modules</span></div>
+    <div class="stat"><b>~7,000</b><span>lines of proof</span></div>
+    <div class="stat"><b>0</b><span>sorry</span></div>
+    <div class="stat"><b>1</b><span>axiom (BCIKS)</span></div>
+    <div class="stat"><b>76</b><span>numerical checks (Rust)</span></div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Part of the paper</th><th>Proof</th><th>Lean</th><th>Main declarations</th></tr></thead>
+      <tbody>
+        <tr><td>Multilinear toolkit, smooth domains, Reed–Solomon codes (§2)</td><td>proved</td><td><span class="st ok">formalised</span></td><td class="mono">mle_res, RS_unique_decoding</td></tr>
+        <tr><td>IOPs, round-by-round soundness, sumcheck (§3)</td><td>proved</td><td><span class="st ok">formalised</span></td><td class="mono">rbr_knowledge_overall, sumcheck_sound_iop</td></tr>
+        <tr><td>Kernel basis, low degree, evaluation (§4)</td><td>proved</td><td><span class="st ok">formalised</span></td><td class="mono">ofCoordsLin_bijective, lowDegree_iff</td></tr>
+        <tr><td>Fold dictionary, word folds (§5)</td><td>proved</td><td><span class="st ok">formalised</span></td><td class="mono">fold_dictionary, codeword_fold</td></tr>
+        <tr><td>Completeness (§6)</td><td>proved</td><td><span class="st ok">formalised</span></td><td class="mono">completeness</td></tr>
+        <tr><td>Soundness, binding, round-by-round knowledge (§7.1–7.6)</td><td>proved</td><td><span class="st ax">formalised · uses axiom</span></td><td class="mono">soundness_far, eval_binding, rbr_knowledge</td></tr>
+        <tr><td>Relaxed RBR knowledge with erasures (§7.7)</td><td>proved</td><td><span class="st ax">formalised · uses axiom</span></td><td class="mono">rrbr_round, rrbr_final, cr_unique_core</td></tr>
+        <tr><td>BCS for IORs in the QROM (Theorem 3.16)</td><td>quoted, specialised</td><td><span class="st q">not formalised</span></td><td>external: CDHZ, ePrint 2025/2166</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="axiom">The one axiom is <code>bciks_unique</code>: correlated agreement for Reed–Solomon codes in the unique-decoding regime (Ben-Sasson, Carmon, Ishai, Kopparty, Saraf, Theorem 4.1). Completeness, the basis theorem and the fold dictionary do not use it.</p>
+</section>
+
+<section id="parameters">
+  <div class="sec-head">
+    <div class="label">Concrete security</div>
+    <div>
+      <h2>Post-quantum parameters</h2>
+      <p>Remark 7.28, computed in exact rational arithmetic by <span class="mono">cargo run --example pq_params</span>.</p>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Parameter</th><th>Value</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td>Adversary queries <span class="m">Q</span></td><td class="num">2^64</td><td>quantum queries to the random oracle</td></tr>
+        <tr><td>Rate ρ, proximity δ</td><td class="num">1/4, 3/8</td><td>unique-decoding radius (1−ρ)/2</td></tr>
+        <tr><td>Queries κ</td><td class="num">248</td><td>(5/8)^248 = 2^−168.16</td></tr>
+        <tr><td>Challenge field</td><td class="num">𝔽_p[ι]/(ι⁴−7)</td><td>Goldilocks quartic extension, |𝔽| &gt; 2^255.99</td></tr>
+        <tr><td>Hash output λ<sub>H</sub></td><td class="num">256</td><td>salted Merkle commitments</td></tr>
+        <tr><td>Extraction error</td><td class="num">&lt; 2^−31.8</td><td>dominated by 320·Q²·ε<sub>rr</sub></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="next">
+  <div class="sec-head">
+    <div class="label">Roadmap</div>
+    <div>
+      <h2>A foundation for the next protocol</h2>
+      <p>The dictionary is a structural fact about folding, not a single scheme. These are the directions it opens.</p>
+    </div>
+  </div>
+  <div class="next">
+    <div><h3>Theory</h3><ul><li>List decoding up to the Johnson bound, which needs fewer queries</li><li>Several openings and batching of one commitment</li><li>Zero knowledge for the kernel encoding</li><li>Kernel-type bases for circle and additive domains</li></ul></div>
+    <div><h3>Implementation</h3><ul><li>Conformance with the CDHZ compiler (salted Merkle trees, quartic extension)</li><li>Multiproofs, parallel commit and open, SIMD arithmetic</li><li>Stable API, documentation, fuzzing</li></ul></div>
+    <div><h3>Formal verification</h3><ul><li>A general interactive-oracle-reduction structure in Lean</li><li>Replace the BCIKS axiom with a proof</li><li>Link the Rust folding kernel to the Lean specification</li></ul></div>
+  </div>
+  <p class="scope"><b>Scope.</b> The analysis covers one opening per proof in the unique-decoding regime. The post-quantum corollary applies to the compiler of CDHZ (Construction 11.7); the current Rust code is research code that does not yet implement that compiler. No speed advantage over BaseFold or DeepFold is claimed.</p>
+</section>
+
+<section id="cite">
+  <div class="sec-head">
+    <div class="label">Cite</div>
+    <div><h2>Citation</h2></div>
+  </div>
+  <div class="cite">
+    <button class="copy" id="copybib" type="button">Copy BibTeX</button>
+<pre id="bib">@misc{Mkhida2026KBFold,
+  author = {Abdelali Mkhida},
+  title  = {The Boolean-Kernel Basis: Native Evaluation-Form {FRI} Folding
+            over Multiplicative Domains, with an Application to
+            Multilinear Polynomial Commitments},
+  year   = {2026},
+  note   = {Paper, Lean 4 formalisation and Rust implementation},
+  howpublished = {\url{https://github.com/qoosmo/kbfold}}
+}</pre>
+  </div>
+</section>
+
+<footer>
+  <div><span class="who">Abdelali Mkhida</span> · Algorizk Labs · ORCID <a href="https://orcid.org/0009-0009-2101-9070">0009-0009-2101-9070</a></div>
+  <div>ali.mkhida@algorizk.xyz · <a href="https://github.com/qoosmo">github.com/qoosmo</a></div>
+</footer>
+</div>
+
+<script>
+(function(){
+  const P=17, md=a=>((a%P)+P)%P;
+  const inv=a=>{a=md(a);let r=1,e=P-2;while(e){if(e&1)r=r*a%P;a=a*a%P;e>>=1}return r};
+  const mul=(A,B)=>{const C=new Array(A.length+B.length-1).fill(0);A.forEach((a,i)=>B.forEach((b,j)=>C[i+j]=md(C[i+j]+a*b)));return C};
+  // K_b(X) = prod_k (X^{2^{k-1}} + b_k), bit k of index b (LSB first)
+  function kernel(b,n){let K=[1];for(let k=0;k<n;k++){const d=1<<k;const f=new Array(d+1).fill(0);f[d]=1;f[0]=(b>>k)&1;K=mul(K,f)}return K}
+  function ofCoords(lam,n){const N=1<<n;const U=new Array(N).fill(0);lam.forEach((l,b)=>{kernel(b,n).forEach((c,i)=>{if(i<N)U[i]=md(U[i]+l*c)})});return U}
+  function pfold(U,r){const h=U.length/2,out=[];for(let i=0;i<h;i++)out.push(md((2*r-1)*U[2*i]+(1-r)*U[2*i+1]));return out}
+  function res(lam,r){const out=[];for(let b=0;b<lam.length/2;b++)out.push(md((1-r)*lam[2*b]+r*lam[2*b+1]));return out}
+  const n=3; let lam=[3,14,0,9,7,1,12,5], r=5;
+  const $=id=>document.getElementById(id);
+  const bits=b=>[0,1,2].map(k=>(b>>k)&1).join('');
+  function cells(el,v,lab,editable){el.innerHTML='';v.forEach((x,i)=>{const d=document.createElement(editable?'button':'div');d.className='cell'+(editable?' in':'');if(editable){d.type='button';d.title='Click to increase (mod 17)';d.addEventListener('click',()=>{lam[i]=md(lam[i]+1);render()})}d.innerHTML='<i>'+lab(i)+'</i>'+x;el.appendChild(d)})}
+  function render(){
+    $('rv').textContent=r;
+    const L=pfold(ofCoords(lam,n),r), R=ofCoords(res(lam,r),n-1);
+    cells($('lam'),lam,i=>'b='+bits(i),true);
+    cells($('left'),L,i=>'X^'+i);
+    cells($('right'),R,i=>'X^'+i);
+    const eq=L.every((x,i)=>x===R[i]);
+    $('pill').textContent=eq?'Equal':'Differ';
+    $('vtext').textContent=eq?'Both sides agree coefficient by coefficient.':'The two sides differ.';
+  }
+  $('rng').addEventListener('input',e=>{r=+e.target.value;render()});
+  $('shuffle').addEventListener('click',()=>{lam=lam.map(()=>Math.floor(Math.random()*P));render()});
+  render();
+
+  // protocol diagram columns
+  const g=$('cols'), NS='http://www.w3.org/2000/svg';
+  const lv=[['L','M','f','2ⁿ'],['L²','M/2','res(f; r₁)','2ⁿ⁻¹'],['L⁴','M/4','res(f; r₁,r₂)','2ⁿ⁻²'],['…','…','…','…'],['L_ℓ','M/2^ℓ','g','2ⁿ⁻ˡ']];
+  lv.forEach((c,i)=>{const x=60+i*190, w=[150,112,80,40,56][i];
+    const mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);g.appendChild(e);return e};
+    if(i!==3){mk('rect',{x,y:50,width:w,height:40,rx:2,fill:'var(--accent-soft)',stroke:'var(--accent)'});
+      mk('rect',{x,y:150,width:w*0.6,height:40,rx:2,fill:'var(--code-bg)',stroke:'var(--muted)'});}
+    if(i===3){const d=mk('text',{x:x+20,y:75,class:'t-muted'});d.textContent='⋯';const d2=mk('text',{x:x+20,y:175,class:'t-muted'});d2.textContent='⋯';}
+    else{const t1=mk('text',{x,y:108,class:'t-acc'});t1.textContent=c[0];
+      const t1b=mk('text',{x,y:122,class:'t-muted'});t1b.textContent='order '+c[1];
+      const t2=mk('text',{x,y:207,class:''});t2.textContent=c[2];
+      const t2b=mk('text',{x,y:221,class:'t-muted'});t2b.textContent=c[3]+' values';}
+    if(i<4){const a=mk('text',{x:x+(i===3?100:160),y:75,class:'t-muted'});a.textContent=i===3?'→ r_ℓ':'→ r'+['₁','₂','₃'][i]}
+  });
+})();
+</script>
+</body>
+</html>
