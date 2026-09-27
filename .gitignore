@@ -14,3 +14,5 @@ paper/*.toc
 paper/main.pdf
 # Python
 __pycache__/
+# CI logs
+rust/checks.log

@@ -13,12 +13,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --release
-      - run: cargo run --release --example paper_checks | tee checks.log && ! grep -q FAIL checks.log
-      - run: cargo run --release --example pq_params
       - name: Documentation
         run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
       - name: Package
         run: cargo publish --dry-run
+      - run: cargo run --release --example paper_checks | tee checks.log && ! grep -q FAIL checks.log
+      - run: cargo run --release --example pq_params
   msrv:
     runs-on: ubuntu-latest
     defaults:
