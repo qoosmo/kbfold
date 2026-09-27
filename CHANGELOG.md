@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Rust
+- `rust/src/merkle.rs`: leaves and internal nodes are hashed with BLAKE3 in keyed mode under two fixed keys (domain separation) instead of one-byte prefixes, so that an internal node is 64 bytes, one compression. Same change as in the Kronecker-FRI implementation, which keeps the comparison of the Kronecker-FRI paper at identical engineering. The data in `rust/results/` were recorded with the earlier format.
+
+### Paper
+- §7: the Merkle hashing format; the measurements of §8 predate it.
+
 ## v0.1.0 — 2026-09-23
 First public release: paper, Lean formalisation and Rust implementation.
 

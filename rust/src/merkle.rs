@@ -4,19 +4,22 @@ use crate::field::{Field, Fp, Fp2, P};
 
 pub type Digest = [u8; 32];
 
+/// Domain separation of leaves and internal nodes by two fixed BLAKE3 keys (keyed mode), so that
+/// a node hashes exactly 64 bytes, one BLAKE3 compression.
+const LEAF_KEY: [u8; 32] = [0u8; 32];
+const NODE_KEY: [u8; 32] = [1u8; 32];
+
 fn hash_leaf<F: Field>(a: &F, b: &F) -> Digest {
     let mut buf = Vec::with_capacity(32);
     a.to_bytes(&mut buf);
     b.to_bytes(&mut buf);
-    let mut h = blake3::Hasher::new();
-    h.update(&[0u8]); // leaf domain separator
+    let mut h = blake3::Hasher::new_keyed(&LEAF_KEY); // leaf domain separation by key
     h.update(&buf);
     *h.finalize().as_bytes()
 }
 
 fn hash_node(l: &Digest, r: &Digest) -> Digest {
-    let mut h = blake3::Hasher::new();
-    h.update(&[1u8]); // node domain separator
+    let mut h = blake3::Hasher::new_keyed(&NODE_KEY); // node domain separation by key
     h.update(l);
     h.update(r);
     *h.finalize().as_bytes()

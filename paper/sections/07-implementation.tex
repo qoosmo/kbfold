@@ -60,7 +60,7 @@ Every query at level $j$ reads a whole fibre $\{w_j(\xi), w_j(-\xi)\}$ (\cref{se
 We therefore build each Merkle tree over the $M_{j+1}$ fibres of $w_j$, one leaf per fibre containing both values.
 A query at level $j$ costs one authentication path of length $\log_2 M_{j+1}$.
 The value $w_{j+1}(\xi_{j+1})$ needed for the fold check at level $j+1$ is one of the two entries of the fibre opened at level $j+1$, so each query opens exactly one leaf per level.
-Leaves and internal nodes are hashed with BLAKE3 under distinct one-byte domain separators, as in \cref{sec:proofs:bcs}.
+Leaves and internal nodes are hashed with BLAKE3 in keyed mode under two distinct fixed keys, which separate the two domains as in \cref{sec:proofs:bcs}; an internal node is then $64$ bytes, one BLAKE3 compression. The measurements of \cref{sec:exp} were recorded with an earlier format, which separated the domains by one-byte prefixes.
 In the IOP view, this means that the oracle $w_j$ is presented as the word $\mathrm{fib}_j(w_j)$ over the alphabet $\F^2$ indexed by $L_{j+1}$, one pair per fibre (\cref{sec:sound:pq}); every query of $\Pieval$ reads whole fibres, so this changes neither the protocol nor the analysis of \cref{sec:sound}.
 
 \paragraph{Fiat--Shamir.}
