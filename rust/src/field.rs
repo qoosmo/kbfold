@@ -1,4 +1,4 @@
-//! Goldilocks field F_p, p = 2^64 - 2^32 + 1, and its quadratic extension F_p[u]/(u^2 - 7).
+//! Goldilocks field F_p, p = 2^64 - 2^32 + 1, and its quadratic extension `F_p[u]/(u^2 - 7)`.
 
 use core::ops::{Add, Mul, Neg, Sub};
 

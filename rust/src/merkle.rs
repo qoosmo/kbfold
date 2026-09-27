@@ -25,7 +25,7 @@ fn hash_node(l: &Digest, r: &Digest) -> Digest {
     *h.finalize().as_bytes()
 }
 
-/// Merkle tree over the fibres of a word w on L_j: leaf i = (w[i], w[i + n/2]).
+/// Merkle tree over the fibres of a word w on L_j: leaf i = `(w[i], w[i + n/2])`.
 pub struct MerkleTree {
     /// layers[0] = leaf hashes, last layer = [root]
     layers: Vec<Vec<Digest>>,

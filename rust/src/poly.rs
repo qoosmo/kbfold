@@ -2,7 +2,7 @@
 
 use crate::field::{Field, Fp};
 
-/// Kernel coordinates -> monomial coefficients:  u = C^{(x)m} lambda,  C = [[0,1],[1,1]].
+/// Kernel coordinates -> monomial coefficients:  `u = C^{(x)m} lambda`,  `C = [[0,1],[1,1]]`.
 /// Each tensor factor maps (v0, v1) -> (v1, v0 + v1).  Cost: (m/2) N additions.
 pub fn kernel_to_mono<F: Field>(v: &mut [F]) {
     let n = v.len();
@@ -58,7 +58,7 @@ pub fn mobius<F: Field>(v: &mut [F]) {
     }
 }
 
-/// Restriction of the first (least significant) variable: t -> (1-T) t[2b] + T t[2b+1]  (Lemma 2.4).
+/// Restriction of the first (least significant) variable: `t -> (1-T) t[2b] + T t[2b+1]`  (Lemma 2.4).
 pub fn restrict<F: Field>(t: &[F], r: F) -> Vec<F> {
     t.chunks_exact(2).map(|p| p[0] + r * (p[1] - p[0])).collect()
 }

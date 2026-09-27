@@ -1,7 +1,17 @@
 [package]
 name = "kbfold"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
+rust-version = "1.85"
+authors = ["Abdelali Mkhida <ali.mkhida@algorizk.xyz>"]
+description = "KBFold: a multilinear polynomial commitment from the Boolean-kernel basis, with native evaluation-form FRI folding"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/qoosmo/kbfold"
+documentation = "https://docs.rs/kbfold"
+readme = "README.md"
+keywords = ["commitment", "fri", "zero-knowledge", "multilinear", "basefold"]
+categories = ["cryptography", "mathematics"]
+exclude = ["target/", "results/"]
 
 [profile.release]
 codegen-units = 1

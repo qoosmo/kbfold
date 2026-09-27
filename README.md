@@ -8,6 +8,8 @@
 ![Lean 4.23.0](https://img.shields.io/badge/Lean-4.23.0-blue)
 ![Mathlib v4.23.0](https://img.shields.io/badge/Mathlib-v4.23.0-blue)
 ![sorry-free](https://img.shields.io/badge/sorry-0-brightgreen)
+[![crates.io](https://img.shields.io/crates/v/kbfold.svg)](https://crates.io/crates/kbfold)
+[![docs.rs](https://img.shields.io/docsrs/kbfold)](https://docs.rs/kbfold)
 
 This repository contains three things that describe one object:
 
@@ -77,7 +79,7 @@ lake build
 lake env lean KBFold/Audit.lean    # prints the axioms used by the main theorems
 ```
 
-**Rust** (Rust ≥ 1.85):
+**Rust** (Rust ≥ 1.85; the library is published on crates.io as [`kbfold`](https://crates.io/crates/kbfold)):
 ```bash
 cd rust
 cargo test --release                          # completeness, tampering, field facts
@@ -119,4 +121,5 @@ See also [`CITATION.cff`](CITATION.cff).
 
 ## License
 
-To be decided. Until a license file is added, all rights are reserved.
+Code: dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
+Paper (`paper/`): [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).

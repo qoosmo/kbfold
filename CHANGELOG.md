@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v0.2.0 — 2026-09-27
+
+### License and crate
+- Code under MIT OR Apache-2.0, paper under CC BY 4.0 (license files added).
+- The Rust library is published on crates.io as `kbfold`: package metadata, license files in the crate, crate documentation with a tested example, `cargo doc` without warnings; CI builds the documentation, runs `cargo publish --dry-run` and builds with the minimum supported Rust version (1.85).
 
 ### Rust
 - `rust/src/merkle.rs`: leaves and internal nodes are hashed with BLAKE3 in keyed mode under two fixed keys (domain separation) instead of one-byte prefixes, so that an internal node is 64 bytes, one compression. Same change as in the Kronecker-FRI implementation, which keeps the comparison of the Kronecker-FRI paper at identical engineering. The data in `rust/results/` were recorded with the earlier format.

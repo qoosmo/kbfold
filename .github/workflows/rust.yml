@@ -15,3 +15,18 @@ jobs:
       - run: cargo test --release
       - run: cargo run --release --example paper_checks | tee checks.log && ! grep -q FAIL checks.log
       - run: cargo run --release --example pq_params
+      - name: Documentation
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
+      - name: Package
+        run: cargo publish --dry-run
+  msrv:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+      # rust-version of Cargo.toml
+      - uses: dtolnay/rust-toolchain@1.85.0
+      - name: Build with the minimum supported Rust version
+        run: cargo build --release --all-targets
