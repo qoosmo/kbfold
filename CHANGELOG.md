@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.3.0 (unreleased, ePrint version)
+## v0.3.0 — 2026-09-29 (ePrint version)
 
 ### Paper
 - New title: "Post-Quantum Multilinear Polynomial Commitments from FRI Folding in the Boolean-Kernel Basis" (also in README, CITATION.cff, the crate description and the project page).
