@@ -42,7 +42,7 @@ noncomputable def augW (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) (r : ℕ → 
       else if k + 1 ∈ J then
         P.orc (k + 1) r
       else
-        wfold (r k) (P.augW ℓ J w0 r k)
+        wfold (r k) (augW ℓ J w0 r k)
 
 /-- The augmented prover from Lemma "Skipping commitments".  It has the same round polynomials
 and final table as `P`.  For `j < ℓ` its oracle is `augW j`; for `j ≥ ℓ` we use the zero word,
@@ -63,7 +63,8 @@ theorem aug_W_eq (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) (r : ℕ → F) :
   | 0, _ => rfl
   | j + 1, hj => by
       by_cases heq : j + 1 = ℓ
-      · simp [EvalProver.W, augW, aug, heq]
+      · subst heq
+        simp [EvalProver.W, augW, aug]
       · have hlt : j + 1 < ℓ := by omega
         simp [EvalProver.W, augW, aug, heq, hlt]
 
@@ -75,12 +76,13 @@ theorem augW_congr (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) (hC : P.Causal) {
   | 0, _, _ => rfl
   | j + 1, hj, h => by
       have hne : j + 1 ≠ ℓ := by omega
-      simp only [augW, hne, if_false]
+      have ih : P.augW ℓ J w0 r j = P.augW ℓ J w0 r' j :=
+        augW_congr ℓ J w0 hC j (by omega) (fun k hk => h k (by omega))
       by_cases hJ : j + 1 ∈ J
-      · rw [if_pos hJ, hC.2 (j + 1) r r' h]
-      · rw [if_neg hJ]
-        rw [h j (by omega), P.augW_congr ℓ J w0 hC j (by omega)
-          (fun k hk => h k (by omega))]
+      · simp only [augW, hne, hJ, if_false, if_true]
+        exact hC.2 (j + 1) r r' h
+      · simp only [augW, hne, hJ, if_false]
+        rw [h j (by omega), ih]
 
 end EvalProver
 
@@ -120,6 +122,8 @@ theorem accepts_aug (P : EvalProver F L m) (ℓ : ℕ) (J : Finset ℕ) (w0 : L 
   · simpa [EvalProver.ClosureOK] using hCl
   · refine ⟨?_, ?_⟩
     · intro j hj
+      show wfold (r j) ((P.aug ℓ J w0).W ℓ w0 r j) (ptAt (ξ t) (j + 1)) =
+        (P.aug ℓ J w0).W ℓ w0 r (j + 1) (ptAt (ξ t) (j + 1))
       rw [P.aug_W_eq ℓ J w0 r j (by omega), P.aug_W_eq ℓ J w0 r (j + 1) (by omega)]
       by_cases hmark : j + 1 ∈ J ∨ j + 1 = ℓ
       · exact (hQ t).1 j hj hmark
