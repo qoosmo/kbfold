@@ -68,7 +68,7 @@ We compare it with a coefficient-form baseline that shares all other code: the t
 We also report the cost of the post-quantum parameters, and place the implementation next to the WHIR implementation on the same machine: at $n = 20$, its prover is about three times faster, with proofs about twice as large.
 
 \paragraph{Formal verification (\cref{sec:lean}).}
-Companion Lean~4 files, of about $7000$ lines with no \texttt{sorry}, formalise the basis theorem, the fold dictionary, completeness, soundness, evaluation binding and round-by-round knowledge soundness. Correlated agreement (\cref{thm:bciks}) is the only axiom; the algebraic results and completeness do not use it.
+Companion Lean~4 files, of about $7200$ lines with no \texttt{sorry}, formalise the basis theorem, the fold dictionary, completeness, soundness, evaluation binding and round-by-round knowledge soundness. Correlated agreement (\cref{thm:bciks}) is the only axiom; the algebraic results and completeness do not use it.
 
 \paragraph{Scope.}
 The evaluation protocol is BaseFold's sumcheck-plus-folding applied to the kernel encoding, so its asymptotic and concrete costs are those of Reed--Solomon instantiations of BaseFold and DeepFold (\cref{rem:basefold}); what the kernel encoding adds is that the prover works on the table form throughout.

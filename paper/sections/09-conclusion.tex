@@ -26,7 +26,7 @@ The kernel encoding is compatible with the standard masking techniques for foldi
 \end{itemize}
 
 \paragraph{Formal verification.}
-Formalise \cref{lem:skip} and \cref{thm:skip} on the existing model of $\Pieval$; replace the axiom \texttt{bciks\_unique} by a formal proof of correlated agreement in the unique-decoding regime, state relaxed round-by-round knowledge soundness for a general interactive oracle reduction in Lean, and link the Rust implementation to the Lean specification, for instance through test vectors extracted from Lean.
+Formalise \cref{lem:local-fold} and items 2--4 of \cref{thm:skip}; replace the axiom \texttt{bciks\_unique} by a formal proof of correlated agreement in the unique-decoding regime, state relaxed round-by-round knowledge soundness for a general interactive oracle reduction in Lean, and link the Rust implementation to the Lean specification, for instance through test vectors extracted from Lean.
 
 \paragraph{Other domains.}
 The dictionary uses a smooth multiplicative subgroup in odd characteristic. Is there a kernel-type basis whose natural fold is table-form restriction on circle domains~\cite{HLP24} or on additive subspaces~\cite{LCH14,DP24}?

@@ -3,7 +3,7 @@
 Machine-checked proofs of the mathematics of the paper (§2–§7).
 
 - Lean `4.23.0`, Mathlib `v4.23.0` (pinned in `lake-manifest.json`).
-- 16 modules, about 7,000 lines. **No `sorry`.**
+- 17 modules, about 7,200 lines. **No `sorry`.**
 - **One axiom:** `bciks_unique` in `KBFold/BCIKS.lean`, the correlated-agreement theorem of Ben-Sasson, Carmon, Ishai, Kopparty and Saraf (Theorem 2.23 of the paper).
 
 ```bash
@@ -27,6 +27,7 @@ lake env lean KBFold/Audit.lean   # #print axioms for the main theorems
 | `Soundness` | §7.4–7.5 passing sets, codeword chain, soundness theorem, binding, ℓ = 0 |
 | `RBR`, `RBRGeneric` | §7.6 doomed sets, round-by-round knowledge soundness |
 | `NonInteractive` | §7.7 fibre strings, sampling, erasures, relaxed round-by-round knowledge, witness uniqueness |
+| `Skip` | §6.3 committed levels: augmentation, Lemma "Skipping commitments"; §7.9 Theorem "Committed levels", item 1 (soundness and binding) |
 
 Full correspondence: [`../docs/LEAN_MAP.md`](../docs/LEAN_MAP.md).
 

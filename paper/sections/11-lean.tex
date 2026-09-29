@@ -1,6 +1,6 @@
 \section{Lean formalisation}\label{sec:lean}
 
-The companion Lean~4 project \texttt{KBFold} (Lean~4.23.0, Mathlib at the tag \texttt{v4.23.0}; about $7000$ lines in $16$ modules) formalises the mathematics of \cref{sec:prelim,sec:proofs,sec:kernel,sec:fold,sec:pcs,sec:sound}.
+The companion Lean~4 project \texttt{KBFold} (Lean~4.23.0, Mathlib at the tag \texttt{v4.23.0}; about $7200$ lines in $17$ modules) formalises the mathematics of \cref{sec:prelim,sec:proofs,sec:kernel,sec:fold,sec:pcs,sec:sound}.
 It contains no \texttt{sorry}. Its only axiom is \texttt{bciks\_unique}, the correlated-agreement theorem (\cref{thm:bciks}); \texttt{\#print axioms} shows that completeness, the fold dictionary, the basis theorem and the probability lemmas do not use it, and that soundness, binding and (relaxed) round-by-round knowledge soundness use it and the three standard axioms of Lean (\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}) only.
 
 \paragraph{Modelling.}
@@ -35,12 +35,14 @@ Paper & Lean module & Main declarations \\
 \Cref{lem:passing,lem:chain,thm:sound,cor:binding,prop:l0} & \texttt{Soundness} & \texttt{Pass\_card}, \texttt{chain}, \texttt{chain\_final}, \texttt{soundness\_far}, \texttt{soundness\_close}, \texttt{eval\_binding}, \texttt{no\_folding} \\
 \Cref{def:state,lem:rbr-step,lem:rbr-sumcheck,thm:rbr,prop:rbr-l0} & \texttt{RBR}, \texttt{RBRGeneric} & \texttt{Doomed}, \texttt{rbr\_step}, \texttt{sCw\_eval}, \texttt{rbr\_round\_one}, \texttt{rbr\_round}, \texttt{rbr\_final}, \texttt{rbr\_knowledge}, \texttt{rbr\_l0} \\
 \Cref{lem:sampling,def:kstate,lem:rbr-erasures,thm:rrbr,lem:cr-unique} & \texttt{NonInteractive} & \texttt{prob\_sample\_le}, \texttt{KState}, \texttt{rbr\_stepE}, \texttt{rbr\_erasures\_one}, \texttt{rrbr\_round}, \texttt{rrbr\_final}, \texttt{cr\_unique\_core} \\
+\Cref{lem:skip}, \cref{thm:skip}(1) & \texttt{Skip} & \texttt{augW}, \texttt{aug}, \texttt{AcceptsJ}, \texttt{accepts\_aug}, \texttt{accProbJ\_le}, \texttt{aug\_causal}, \texttt{soundness\_far\_J}, \texttt{soundness\_close\_J}, \texttt{eval\_binding\_J} \\
 \bottomrule
 \end{longtable}
 \end{center}
 
 \paragraph{Not formalised.}\leavevmode\\
-\Cref{thm:cdhz} and \cref{cor:pq}, which rest on the quantum analysis of Chiesa, Di, Hu and Zheng~\cite{CDHZ25}; the Merkle-tree statements (\cref{lem:merkle} and the collision step of \cref{lem:cr-unique}); Facts~\ref{fact:cyclic} and~\ref{fact:decode}, \cref{lem:descent} and \cref{rem:det}; running times and operation counts; \cref{sec:impl,sec:exp}; \cref{lem:local-fold,lem:skip} and \cref{thm:skip} on committed levels, whose proofs reduce to the formalised results for $\Pieval$.
+\Cref{thm:cdhz} and \cref{cor:pq}, which rest on the quantum analysis of Chiesa, Di, Hu and Zheng~\cite{CDHZ25}; the Merkle-tree statements (\cref{lem:merkle} and the collision step of \cref{lem:cr-unique}); Facts~\ref{fact:cyclic} and~\ref{fact:decode}, \cref{lem:descent} and \cref{rem:det}; running times and operation counts; \cref{sec:impl,sec:exp}; \cref{lem:local-fold}, and items 2--4 of \cref{thm:skip}.
+The Lean verifier of $\Pieval^{\mathcal{J}}$ states each check with the value $\fold_{r_{j^+}}$ of the augmented word below $j^+$, which \cref{lem:local-fold} shows the verifier computes from the opened coset.
 In \cref{lem:rbr-erasures,thm:rrbr} the Lean statements give the per-round bounds for a model of transcripts by stages (empty, after $j$ rounds, full); they do not build a general interactive-oracle-reduction structure.
 
 \paragraph{Findings of the formalisation.}

@@ -10,7 +10,7 @@ The items of paper §10.1 that change the main results:
 - **List decoding:** soundness and round-by-round knowledge soundness up to the Johnson bound; fewer queries in both the classical and the post-quantum parameters.
 - **Batched and repeated openings:** proof for the batched opening of Remark 6.7 and several openings of one commitment.
 - **Zero knowledge:** masked commitment `U_f + X^N R`, Libra-style masked sumcheck, masking codeword; simulator proof, following the technique developed for Kronecker-FRI 0.5.
-- **Lean:** the new theorems formalised with the same single axiom, and the committed-levels results of version 1 (Lemma on skipping commitments and its theorem), which reduce to the formalised results for Pi_eval.
+- **Lean:** the new theorems formalised with the same single axiom, and items 2-4 of the committed-levels theorem (round-by-round, relaxed and post-quantum transfers) and the local-folding lemma; the skipping lemma and item 1 are formalised in `KBFold/Skip.lean`.
 - **Proof of work** before the query phase, with its analysis in the post-quantum setting: fewer queries, hence smaller proofs and faster verification.
 
 ## Later

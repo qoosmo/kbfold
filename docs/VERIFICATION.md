@@ -69,7 +69,7 @@ Earlier corrections (previous rewrite): vacuous knowledge relation replaced; "sa
 
 ## 5. Lean formalisation
 
-- Project: `lean/` (Lake package `KBFold`) (Lean 4.23.0, Mathlib v4.23.0), 16 modules, about 7000 lines.
+- Project: `lean/` (Lake package `KBFold`) (Lean 4.23.0, Mathlib v4.23.0), 17 modules, about 7200 lines.
 - Full clean build in dependency order: no errors, no warnings.
 - `grep sorry|admit`: nothing. Only axiom: `bciks_unique` (Theorem 2.23).
 - `#print axioms` (file `KBFold/Audit.lean`): `fold_dictionary`, `ofCoordsLin_bijective`, `lowDegree_iff`, `eval_ofCoords`, `codeword_fold`, `completeness`, `rrbr_final`, `cr_unique_core`, `sumcheck_sound_iop` use only propext, Classical.choice, Quot.sound; `soundness_far`, `soundness_close`, `eval_binding`, `rbr_knowledge`, `rrbr_round` additionally use `bciks_unique`.

@@ -16,7 +16,7 @@ This repository contains three things that describe one object:
 | | What | Where |
 |---|---|---|
 | 📄 | A self-contained paper (55 pages): definitions, theorems and full proofs | [`paper/`](paper/) · [PDF](paper/kbfold.pdf) |
-| ✅ | A Lean 4 formalisation of the paper's mathematics (16 modules, ~7,000 lines, no `sorry`) | [`lean/`](lean/) |
+| ✅ | A Lean 4 formalisation of the paper's mathematics (17 modules, ~7,200 lines, no `sorry`) | [`lean/`](lean/) |
 | ⚙️ | A Rust reference implementation of the commitment scheme, with benchmarks | [`rust/`](rust/) |
 
 ## The idea in one paragraph

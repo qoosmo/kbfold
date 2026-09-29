@@ -43,7 +43,8 @@
 ### Paper (committed levels)
 - §6.3 "Committing to fewer words": committed levels J, cosets, Lemma 6.x (local folding), the protocol Pi_eval^J and Lemma 6.x (skipping commitments, a reduction to Pi_eval for every transcript).
 - §7.9 "Committed levels": Theorem 7.x transfers soundness, binding, round-by-round knowledge soundness, the relaxed version (IOR over a disjoint-union alphabet, reordered implicit instance) and the post-quantum corollary with the same errors; Remark on parameters and merged paths. Reviewed by an independent pass; its corrections are included.
-- §8 describes committed levels, leaf order and merged openings; §9 re-measured, with a new table on k; abstract and introduction give the headline numbers; notation table and Lean appendix updated (the new lemma and theorem are not yet formalised in Lean).
+- Lean: new module `KBFold/Skip.lean` formalises Lemma "Skipping commitments" and Theorem "Committed levels", item 1 (soundness far and close, evaluation binding), with the same axioms as the originals; the Lean appendix, `lean/README.md` and `docs/LEAN_MAP.md` list it.
+- §8 describes committed levels, leaf order and merged openings; §9 re-measured, with a new table on k; abstract and introduction give the headline numbers; notation table and Lean appendix updated.
 
 ### Docs
 - `docs/ROADMAP.md`: version 1 (first ePrint submission) and version 2 (revision of the same entry).
