@@ -11,6 +11,7 @@ import KBFold.Fibre
 import KBFold.Protocol
 import KBFold.Completeness
 import KBFold.Soundness
+import KBFold.Skip
 import KBFold.RBR
 import KBFold.RBRGeneric
 import KBFold.NonInteractive

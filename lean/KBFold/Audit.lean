@@ -1,3 +1,4 @@
+import KBFold.Skip
 import KBFold.NonInteractive
 import KBFold.Completeness
 import KBFold.RBRGeneric
@@ -12,6 +13,11 @@ open KBFold
 #print axioms KBFold.soundness_far
 #print axioms KBFold.soundness_close
 #print axioms KBFold.eval_binding
+#print axioms KBFold.accepts_aug
+#print axioms KBFold.accProbJ_le
+#print axioms KBFold.soundness_far_J
+#print axioms KBFold.soundness_close_J
+#print axioms KBFold.eval_binding_J
 #print axioms KBFold.rbr_knowledge
 #print axioms KBFold.rrbr_round
 #print axioms KBFold.rrbr_final
