@@ -212,7 +212,10 @@ mod tests {
         let z: Vec<Fp2> = (0..5).map(|_| Fp2(rnd(&mut s), rnd(&mut s))).collect();
         let t: Vec<Fp2> = (0..32).map(|_| Fp2(rnd(&mut s), rnd(&mut s))).collect();
         let e = eq_table(&z);
-        let direct = t.iter().zip(&e).fold(Fp2::ZERO, |acc, (&a, &b)| acc + a * b);
+        let direct = t
+            .iter()
+            .zip(&e)
+            .fold(Fp2::ZERO, |acc, (&a, &b)| acc + a * b);
         assert_eq!(direct, mle_eval(&t, &z));
     }
 }
@@ -228,7 +231,9 @@ mod mobius_tests {
         mobius(&mut c);
         // f(b) = sum_{a <= b} c_a
         for b in 0..16usize {
-            let s = (0..16usize).filter(|a| a & !b == 0).fold(Fp::ZERO, |acc, a| acc + c[a]);
+            let s = (0..16usize)
+                .filter(|a| a & !b == 0)
+                .fold(Fp::ZERO, |acc, a| acc + c[a]);
             assert_eq!(s, t[b]);
         }
     }

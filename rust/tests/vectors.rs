@@ -11,7 +11,11 @@ fn hex(b: &[u8]) -> String {
 }
 
 fn digits<E: ExtField>(x: E) -> String {
-    x.digits().iter().map(|d| d.0.to_string()).collect::<Vec<_>>().join(",")
+    x.digits()
+        .iter()
+        .map(|d| d.0.to_string())
+        .collect::<Vec<_>>()
+        .join(",")
 }
 
 fn check(name: &str, got: &str) {
@@ -52,9 +56,14 @@ fn proof_vectors() {
         let p = Params::new(m, 2, s, 8);
         let table: Vec<Fp> = (0..1u64 << m).map(|i| Fp::new(i * i + 1)).collect();
         let (root, pd) = insecure::commit(&p, &table, &[1u8; 32]).unwrap();
-        out += &format!("m={m} R=2 s={s} queries=8 salt_len=32 e={e}\nroot: {}\n", hex(&root));
+        out += &format!(
+            "m={m} R=2 s={s} k=4 queries=8 salt_len=32 e={e}\nroot: {}\n",
+            hex(&root)
+        );
         let bytes = if e == 2 {
-            let z: Vec<Fp2> = (0..m as u64).map(|i| Fp2(Fp::new(i + 2), Fp::new(3 * i))).collect();
+            let z: Vec<Fp2> = (0..m as u64)
+                .map(|i| Fp2(Fp::new(i + 2), Fp::new(3 * i)))
+                .collect();
             let (v, proof) = insecure::open(&p, &pd, &z, &[2u8; 32]).unwrap();
             assert_eq!(verify(&p, &root, &z, v, &proof), Ok(()));
             assert_eq!(proof.to_bytes().len(), proof.size_bytes());
@@ -62,7 +71,9 @@ fn proof_vectors() {
             proof.to_bytes()
         } else {
             let z: Vec<Fp4> = (0..m as u64)
-                .map(|i| Fp4::from_digits(&[Fp::new(i + 2), Fp::new(3 * i), Fp::new(5), Fp::new(i)]))
+                .map(|i| {
+                    Fp4::from_digits(&[Fp::new(i + 2), Fp::new(3 * i), Fp::new(5), Fp::new(i)])
+                })
                 .collect();
             let (v, proof) = insecure::open(&p, &pd, &z, &[2u8; 32]).unwrap();
             assert_eq!(verify(&p, &root, &z, v, &proof), Ok(()));

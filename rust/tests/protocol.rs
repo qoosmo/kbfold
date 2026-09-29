@@ -29,7 +29,15 @@ fn setup<E: ExtField>(
     seed: u64,
 ) -> (Params, Vec<Fp>, Vec<E>) {
     let mut rng = Rng(seed);
-    let p = Params { basis, m, log_inv_rate: r, s, queries: q, salt_len: 32 };
+    let p = Params {
+        basis,
+        m,
+        log_inv_rate: r,
+        s,
+        queries: q,
+        salt_len: 32,
+        fold_log: 4,
+    };
     let table: Vec<Fp> = (0..1 << m).map(|_| rng.fp()).collect();
     let z: Vec<E> = (0..m).map(|_| rng.ext()).collect();
     (p, table, z)
@@ -39,14 +47,25 @@ fn completeness<E: ExtField>() {
     for m in 1..=9 {
         for s in 0..=m {
             for r in 1..=3 {
-                for basis in [Basis::Kernel, Basis::Monomial] {
-                    let (p, table, z) =
+                for (basis, k) in [
+                    (Basis::Kernel, 1),
+                    (Basis::Kernel, 2),
+                    (Basis::Kernel, 3),
+                    (Basis::Kernel, 4),
+                    (Basis::Monomial, 2),
+                ] {
+                    let (mut p, table, z) =
                         setup::<E>(basis, m, s, r, 8, 1000 + (m * 100 + s * 10 + r) as u64);
+                    p.fold_log = k;
                     let (root, pd) = commit(&p, &table).unwrap();
                     let (v, proof) = open(&p, &pd, &z).unwrap();
                     let t: Vec<E> = table.iter().map(|&x| E::from(x)).collect();
                     assert_eq!(v, mle_eval(&t, &z), "value m={m} s={s}");
-                    assert_eq!(verify(&p, &root, &z, v, &proof), Ok(()), "{basis:?} m={m} s={s} r={r}");
+                    assert_eq!(
+                        verify(&p, &root, &z, v, &proof),
+                        Ok(()),
+                        "{basis:?} m={m} s={s} r={r} k={k}"
+                    );
                 }
             }
         }
@@ -134,11 +153,16 @@ fn invalid_parameters_and_inputs() {
     let (p, table, z) = setup::<Fp2>(Basis::Kernel, 6, 3, 2, 8, 12);
     for bad in [
         Params { m: 0, ..p },
-        Params { log_inv_rate: 0, ..p },
+        Params {
+            log_inv_rate: 0,
+            ..p
+        },
         Params { m: 31, ..p },
         Params { s: 7, ..p },
         Params { queries: 0, ..p },
         Params { salt_len: 65, ..p },
+        Params { fold_log: 0, ..p },
+        Params { fold_log: 7, ..p },
     ] {
         assert!(matches!(bad.validate(), Err(Error::Params(_))));
         assert!(matches!(commit(&bad, &table), Err(Error::Params(_))));
@@ -147,9 +171,18 @@ fn invalid_parameters_and_inputs() {
     let (root, pd) = commit(&p, &table).unwrap();
     assert!(matches!(open(&p, &pd, &z[1..]), Err(Error::Input(_))));
     let (v, proof) = open(&p, &pd, &z).unwrap();
-    assert!(matches!(verify(&p, &root, &z[1..], v, &proof), Err(Error::Input(_))));
+    assert!(matches!(
+        verify(&p, &root, &z[1..], v, &proof),
+        Err(Error::Input(_))
+    ));
     // the verifier with other parameters rejects without panicking
-    for other in [Params { s: 2, ..p }, Params { queries: 9, ..p }, Params { salt_len: 16, ..p }, Params { s: 6, ..p }] {
+    for other in [
+        Params { s: 2, ..p },
+        Params { queries: 9, ..p },
+        Params { salt_len: 16, ..p },
+        Params { s: 6, ..p },
+        Params { fold_log: 2, ..p },
+    ] {
         assert!(verify(&other, &root, &z, v, &proof).is_err());
     }
 }

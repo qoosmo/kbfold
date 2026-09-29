@@ -100,7 +100,7 @@ cd paper && latexmk -pdf main.tex
 - **Unique decoding only.** The soundness analysis stays in the unique-decoding regime. List-decoding analyses need fewer queries; extending to them is planned for version 2 (see the [roadmap](docs/ROADMAP.md)).
 - **One opening per proof.** The analysis covers one commitment opened at one point per proof; batched and multiple openings are planned for version 2.
 - **Post-quantum parameters.** The corollary applies to the compiler of CDHZ25 (Construction 11.7). The Rust code follows its structure: salted Merkle trees, one round salt per round, challenges from all previous roots and salts. Use `Params::post_quantum(m)` with challenges in `Fp4`; `Params::classical(m)` with `Fp2` gives about 100 bits of classical security.
-- **Performance.** The protocol costs are those of Reed-Solomon BaseFold and DeepFold; what the kernel encoding adds is that the prover folds the table directly, with no conversion to coefficients.
+- **Performance.** With 20 variables at 100 bits of security (rate 1/4, one committed word in four, merged paths): prover 0.84 s single-threaded, proof 237 KiB, verifier 1.2 ms on a 2-vCPU cloud machine; the paper (Section 9) compares with WHIR on the same machine.
 - **Reference implementation.** Single-threaded and not audited; the verifier returns `Result` and never panics on malformed proofs.
 
 ## Citation

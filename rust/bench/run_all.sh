@@ -9,7 +9,7 @@ out=results/$tag; mkdir -p "$out"
 { uname -a; (lscpu 2>/dev/null || sysctl -n machdep.cpu.brand_string) | head -20; rustc --version; git rev-parse HEAD; } > "$out/machine.txt"
 cargo build -q --release --example bench
 cargo build -q --release --features parallel --example bench --target-dir target/par
-for mode in scaling pq salt stop rate breakdown; do
+for mode in scaling pq salt stop rate breakdown arity; do
   ./target/release/examples/bench "$mode" "$max" > "$out/$mode.csv"
   echo "$mode done"
 done

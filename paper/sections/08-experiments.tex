@@ -13,11 +13,11 @@ Times are medians over $11$ runs for $n \le 16$, $5$ for $n \in \{18, 20\}$ and 
 The machine is shared, and timings of identical work vary by up to about $20\%$ between runs (\cref{sec:exp:breakdown}).
 
 \paragraph{Parameters.}
-The \emph{classical parameters} are: rate $\rho = 1/4$ ($R = 2$), $\ell = n - 4$ folding rounds (final table of $16$ elements), $\kappa = 148$ queries, the quadratic extension $\K$, and $32$-byte salts.
+The \emph{classical parameters} are: rate $\rho = 1/4$ ($R = 2$), $\ell = n - 4$ folding rounds (final table of $16$ elements), $\kappa = 148$ queries, the quadratic extension $\K$, $32$-byte salts, and committed levels $\mathcal{J} = \{0, 4, 8, \dots\}$ ($k = 4$, \cref{sec:pcs:skip}).
 By \cref{thm:sound} with $\delta = (1-\rho)/2 = 3/8$, the query term is $(5/8)^{148} < 2^{-100}$, and $\varepsilon_{\mathrm{fold}} + 2\ell/|\K| < 2^{-100}$ for all sizes tested (\cref{rem:params}).
-The \emph{post-quantum parameters} are those of \cref{rem:pq-params}: the same rate and $\ell$, $\kappa = 248$ queries and the quartic extension.
+The \emph{post-quantum parameters} are those of \cref{rem:pq-params,rem:skip-params}: the same rate, $\ell$ and $k$, $\kappa = 248$ queries and the quartic extension.
 Tables $f$ are uniformly random over $\mathbb{F}_p$ and the point $z$ is uniformly random in $\F^n$.
-Proof sizes are the lengths of the canonical encoding of \cref{sec:impl:merkle}.
+Proof sizes are the lengths of the canonical encoding of \cref{sec:impl:merkle}; they depend slightly on the query points, through the number of distinct opened leaves.
 
 \paragraph{Baseline.}
 To isolate the effect of the encoding, the library has a second mode that differs from $\Pieval$ in exactly two places: the table is converted to the monomial coefficients of $\tilde f$ by M\"obius inversion (\cref{lem:mobius}) instead of the transform of \cref{cor:transforms}, and words are folded with the classical FRI fold $\mathrm{cfold}_\theta(w) = w_e + \theta\,w_o$ (\cref{def:cfold}) instead of the kernel fold (\cref{rem:coeff-form}).
@@ -35,21 +35,21 @@ It is \emph{not} the BaseFold or DeepFold code base, and \cref{tab:scaling} comp
  & \multicolumn{2}{c}{Commit (ms)} & \multicolumn{2}{c}{Open (ms)} & \multicolumn{2}{c}{Verify (ms)} & Proof \\
 $n$ & kernel & coeff. & kernel & coeff. & kernel & coeff. & (KiB) \\
 \midrule
-12 & 1.8 & 1.8 & 2.3 & 2.2 & 1.6 & 1.5 & 424 \\
-14 & 7.9 & 7.3 & 9.1 & 7.9 & 2.0 & 2.0 & 577 \\
-16 & 31.3 & 30.9 & 35.7 & 38.5 & 2.6 & 2.7 & 749 \\
-18 & 139.5 & 130.8 & 142.8 & 135.6 & 3.4 & 3.2 & 938 \\
-20 & 626.2 & 619.8 & 568.4 & 598.5 & 3.8 & 3.8 & 1147 \\
-22 & 3028.9 & 3326.5 & 3141.7 & 2976.7 & 4.6 & 4.7 & 1374 \\
+12 & 1.9 & 2.1 & 0.8 & 0.8 & 0.54 & 0.52 & 80 \\
+14 & 8.7 & 8.9 & 3.0 & 2.9 & 0.69 & 0.66 & 114 \\
+16 & 35.8 & 33.4 & 13.2 & 11.5 & 1.16 & 0.83 & 146 \\
+18 & 159.5 & 174.3 & 46.9 & 49.8 & 1.11 & 1.07 & 194 \\
+20 & 610.4 & 647.9 & 231.0 & 233.2 & 1.21 & 1.23 & 237 \\
+22 & 3574.1 & 3273.1 & 1056.5 & 1120.1 & 1.37 & 1.54 & 290 \\
 \bottomrule
 \end{tabular}
-\caption{Kernel encoding ($\Pieval$) versus the coefficient-form baseline, single-threaded, classical parameters ($\rho = 1/4$, $\ell = n-4$, $\kappa = 148$, $\F = \K$, salted trees). Proof sizes are identical for both encodings.}
+\caption{Kernel encoding versus the coefficient-form baseline, single-threaded, classical parameters ($\rho = 1/4$, $\ell = n-4$, $\kappa = 148$, $\F = \K$, salted trees, $k = 4$). Proof sizes (kernel encoding) agree within $3\%$ for the two encodings.}
 \label{tab:scaling}
 \end{table}
 
 \Cref{tab:scaling} reports commit, open and verify times for $n = 12,\dots,22$ ($N = 2^{12},\dots,2^{22}$).
-Proof sizes are identical because the proofs have the same shape.
-The differences between the two encodings change sign from one size to the next (the kernel encoding is $15\%$ slower to open at $n = 14$ and $9\%$ faster to commit at $n = 22$), and they are of the same size as the differences in steps whose code is identical in both modes: in \cref{tab:breakdown} the NTT times differ by $17\%$ between modes although the computation is the same.
+Proofs have the same shape in both modes; their sizes differ only through the number of distinct opened leaves.
+The differences between the two encodings change sign from one size to the next (the kernel encoding is $9\%$ faster to commit at $n = 18$ and $9\%$ slower at $n = 22$), and they are of the same size as the variation of identical work between runs: the kernel commitment at $n = 20$ takes $610$\,ms in \cref{tab:scaling} and $685$\,ms in the run of \cref{tab:breakdown}.
 The two encodings are therefore indistinguishable at the resolution of this machine.
 This is the outcome predicted by \cref{rem:basefold}: the kernel transform and M\"obius inversion both cost $\tfrac{n}{2}N$ additions, and in line form (\cref{lem:line}) the kernel fold costs one multiplication by $r$ per output element, the same as the classical fold.
 The kernel encoding thus provides its structural property (\cref{thm:fold-dictionary}) at no measurable cost.
@@ -64,12 +64,12 @@ The kernel encoding thus provides its structural property (\cref{thm:fold-dictio
  & \multicolumn{3}{c}{Classical ($\K$, $\kappa = 148$)} & \multicolumn{3}{c}{Post-quantum ($\F_{p^4}$, $\kappa = 248$)} \\
 $n$ & prover (ms) & verify (ms) & proof (KiB) & prover (ms) & verify (ms) & proof (KiB) \\
 \midrule
-12 & 4.1 & 1.6 & 424 & 6.4 & 3.0 & 765 \\
-14 & 17.0 & 2.0 & 577 & 24.4 & 3.9 & 1037 \\
-16 & 67.0 & 2.6 & 749 & 102.4 & 6.7 & 1339 \\
-18 & 282.3 & 3.4 & 938 & 485.9 & 6.6 & 1673 \\
-20 & 1194.6 & 3.8 & 1147 & 2003.5 & 6.9 & 2037 \\
-22 & 6170.6 & 4.6 & 1374 & 9246.4 & 8.4 & 2433 \\
+12 & 2.7 & 0.54 & 80 & 5.3 & 1.26 & 123 \\
+14 & 11.7 & 0.69 & 114 & 17.3 & 1.78 & 210 \\
+16 & 49.1 & 1.16 & 146 & 74.7 & 2.00 & 295 \\
+18 & 206.4 & 1.11 & 194 & 341.8 & 2.83 & 396 \\
+20 & 841.5 & 1.21 & 237 & 1319.2 & 2.70 & 498 \\
+22 & 4630.5 & 1.37 & 290 & 5915.8 & 5.13 & 616 \\
 \bottomrule
 \end{tabular}
 \caption{Classical and post-quantum parameters (\cref{rem:params,rem:pq-params}), kernel encoding, single-threaded; the prover time is commit plus open.}
@@ -77,16 +77,16 @@ $n$ & prover (ms) & verify (ms) & proof (KiB) & prover (ms) & verify (ms) & proo
 \end{table}
 
 \Cref{tab:pq} compares the two parameter sets.
-The post-quantum parameters cost $1.4$--$1.7$ times the prover time and $1.8$ times the proof size of the classical ones: the extension doubles the size of every folded value and of the sumcheck arithmetic, and the number of queries grows from $148$ to $248$.
-Commitment is unchanged, since $w_0$ lives over $\mathbb{F}_p$ in both cases.
+The post-quantum parameters cost $1.3$--$2$ times the prover time and $1.5$--$2.1$ times the proof size of the classical ones: the extension doubles the size of every folded value and of the sumcheck arithmetic, and the number of queries grows from $148$ to $248$.
+The commitment does not depend on the parameter set, since $w_0$ lives over $\mathbb{F}_p$ in both cases; the differences in prover time come from opening.
 
 \paragraph{Salts.}
-At $n = 20$ with the classical parameters, the prover takes $1214$\,ms with unsalted trees and $1268$\,ms with $32$-byte salts, a difference within the noise of the machine.
-Salts add $74.5$\,KiB to the proof ($1072$ to $1147$\,KiB): one salt per opened leaf ($148$ queries, $16$ levels) and $17$ round salts.
+At $n = 20$ with the classical parameters, the prover takes $809$\,ms with unsalted trees and $909$\,ms with $32$-byte salts.
+Salts add $49$\,KiB to the proof ($187$ to $236$\,KiB): one salt per distinct opened leaf (up to $8$ fibres per query in the commitment tree and one coset per query in each of the three other trees) and $17$ round salts.
 
 \paragraph{Parallelism.}
 With the feature \texttt{parallel}, the transforms, the NTT, the Merkle trees, the folds and the sumcheck run on all cores; the proofs are identical to the single-threaded ones, which the test vectors check.
-On the two vCPUs of this machine, the prover time with the classical parameters drops from $1195$ to $786$\,ms at $n = 20$ and from $6171$ to $3737$\,ms at $n = 22$ (speed-ups $1.5$ and $1.65$), and with the post-quantum parameters from $2004$ to $1179$\,ms and from $9246$ to $5864$\,ms ($1.7$ and $1.6$).
+On the two vCPUs of this machine, the prover time with the classical parameters drops from $842$ to $632$\,ms at $n = 20$ and from $4631$ to $2920$\,ms at $n = 22$ (speed-ups $1.3$ and $1.6$), and with the post-quantum parameters from $1319$ to $965$\,ms and from $5916$ to $4263$\,ms ($1.4$ both).
 The verifier stays single-threaded.
 
 \subsection{Where the time goes}\label{sec:exp:breakdown}
@@ -98,8 +98,8 @@ The verifier stays single-threaded.
 \toprule
  & transform & NTT & Merkle tree & commit & open \\
 \midrule
-kernel & 13.8 & 208.4 & 416.8 & 665.1 & 604.1 \\
-coefficient form & 10.4 & 177.8 & 435.6 & 583.2 & 567.8 \\
+kernel & 14.0 & 250.2 & 501.1 & 684.8 & 252.8 \\
+coefficient form & 13.9 & 238.3 & 505.9 & 649.5 & 210.0 \\
 \bottomrule
 \end{tabular}
 \caption{Components of the commitment in ms ($n = 20$, $M = 4N$, classical parameters, single-threaded), measured separately from \cref{tab:scaling}. The NTT and Merkle columns execute identical code in both modes.}
@@ -107,12 +107,12 @@ coefficient form & 10.4 & 177.8 & 435.6 & 583.2 & 567.8 \\
 \end{table}
 
 \Cref{tab:breakdown} splits the commitment into its three steps.
-The kernel transform takes about $2\%$ of the commitment; it is slower than M\"obius inversion by $3.4$\,ms because it writes both entries of each pair, against one for M\"obius inversion, while both perform $\tfrac{n}{2}N$ additions.
-The commitment is dominated by hashing: BLAKE3 over $M/2$ salted fibre leaves and $M/2 - 1$ internal nodes takes $2$ to $2.5$ times as long as the NTT.
-Opening costs about as much as committing: the folded words $w_1,\dots,w_{\ell-1}$ have total length below $M$ but live in $\F$, and each needs its own Merkle tree; the sumcheck ($O(N)$ multiplications in $\F$) is a minor term.
+The kernel transform takes $2\%$ of the commitment, as long as M\"obius inversion: both perform $\tfrac{n}{2}N$ additions.
+The commitment is dominated by hashing: BLAKE3 over $M/2$ salted fibre leaves and $M/2 - 1$ internal nodes takes twice as long as the NTT.
+Opening costs about a third of committing: the prover folds every word, but builds trees only for the committed words $w_4, w_8, w_{12}$, whose leaves hold $16$ values each; the sumcheck ($O(N)$ multiplications in $\F$) is a minor term.
 
-Verification takes $1.6$--$4.6$\,ms with the classical parameters and grows slowly with $n$, as expected from its $O(\kappa \ell \log M)$ hashing cost.
-Proof sizes ($0.4$--$1.4$\,MiB) are dominated by the $\kappa \ell$ authentication paths: each query opens one leaf per level, and paths are not merged across queries (\cref{sec:concl:future}).
+Verification takes $0.5$--$1.4$\,ms with the classical parameters and grows slowly with $n$: each query opens four leaves, and the merged paths share their upper nodes.
+Proofs take $80$--$290$\,KiB; at $n = 20$, about $44\%$ is opened values, $20\%$ salts and $35\%$ path nodes.
 
 \subsection{The number of folding rounds}\label{sec:exp:stop}
 
@@ -123,13 +123,13 @@ Proof sizes ($0.4$--$1.4$\,MiB) are dominated by the $\kappa \ell$ authenticatio
 \toprule
 $\ell$ & final table $N_\ell$ & open (ms) & verify (ms) & proof (KiB) \\
 \midrule
-8 & 4096 & 651.8 & 7.5 & 784 \\
-10 & 1024 & 633.1 & 4.2 & 870 \\
-12 & 256 & 663.3 & 3.4 & 974 \\
-14 & 64 & 588.4 & 4.5 & 1069 \\
-16 & 16 & 594.9 & 4.0 & 1147 \\
-18 & 4 & 549.8 & 5.2 & 1207 \\
-20 & 1 & 540.2 & 4.4 & 1249 \\
+8 & 4096 & 244.7 & 6.8 & 235 \\
+10 & 1024 & 249.8 & 2.5 & 218 \\
+12 & 256 & 255.9 & 1.5 & 226 \\
+14 & 64 & 257.5 & 1.2 & 235 \\
+16 & 16 & 275.6 & 1.3 & 236 \\
+18 & 4 & 244.8 & 1.4 & 237 \\
+20 & 1 & 227.9 & 1.3 & 241 \\
 \bottomrule
 \end{tabular}
 \caption{Effect of the number of folding rounds $\ell$ (\cref{rem:stop}), kernel encoding, $n = 20$, classical parameters otherwise.}
@@ -137,8 +137,8 @@ $\ell$ & final table $N_\ell$ & open (ms) & verify (ms) & proof (KiB) \\
 \end{table}
 
 \Cref{tab:stop} varies $\ell$ at $n = 20$.
-Each folding round adds $\kappa$ authentication paths and salts to the proof, while stopping earlier adds $16 N_\ell$ bytes for the final table; in this range the paths dominate, so proofs shrink as $\ell$ decreases, from $1249$\,KiB at $\ell = n$ to $784$\,KiB at $\ell = n-12$.
-Verification time is smallest around $\ell = 12$: for smaller $\ell$ the verifier's $\kappa$ evaluations of $G$, each of cost $O(N_\ell)$, take over.
+With committed levels, a folding round adds a committed word only every $k = 4$ rounds, so proof sizes vary little with $\ell$ ($218$--$241$\,KiB); stopping earlier adds $16 N_\ell$ bytes for the final table, which dominates at $\ell = 8$.
+Verification time is smallest around $\ell = 14$: for smaller $\ell$ the verifier's $\kappa$ evaluations of $G$, each of cost $O(N_\ell)$, take over.
 Opening time varies little with $\ell$, since the first folds dominate it.
 
 \subsection{The rate}\label{sec:exp:rate}
@@ -150,9 +150,9 @@ Opening time varies little with $\ell$, since the first folds dominate it.
 \toprule
 $\rho$ & $\delta$ & $\kappa$ & commit (ms) & open (ms) & verify (ms) & proof (KiB) \\
 \midrule
-$1/2$ & $1/4$ & 241 & 335.2 & 371.7 & 6.2 & 1746 \\
-$1/4$ & $3/8$ & 148 & 651.8 & 556.5 & 3.8 & 1147 \\
-$1/8$ & $7/16$ & 121 & 1281.9 & 1277.8 & 3.2 & 998 \\
+$1/2$ & $1/4$ & 241 & 300.8 & 143.0 & 1.8 & 320 \\
+$1/4$ & $3/8$ & 148 & 691.1 & 243.4 & 1.3 & 238 \\
+$1/8$ & $7/16$ & 121 & 1309.4 & 452.0 & 1.5 & 216 \\
 \bottomrule
 \end{tabular}
 \caption{Effect of the rate at $100$ bits of query security, $\delta = (1-\rho)/2$, kernel encoding, $n = 20$, $\ell = 16$.}
@@ -160,8 +160,35 @@ $1/8$ & $7/16$ & 121 & 1281.9 & 1277.8 & 3.2 & 998 \\
 \end{table}
 
 \Cref{tab:rate} fixes the query term of \cref{thm:sound} at $2^{-100}$ and varies the rate.
-Halving the rate doubles the domain and roughly doubles the prover's work; it also reduces the number of queries, which shortens proofs and speeds up verification.
+Halving the rate doubles the domain and roughly doubles the prover's work; it also reduces the number of queries, which shortens proofs.
 Within the unique-decoding analysis of this paper, $\rho = 1/4$ is a reasonable default.
+
+\subsection{Committed levels}\label{sec:exp:arity}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{l r rrr}
+\toprule
+parameters & $k$ & prover (ms) & verify (ms) & proof (KiB) \\
+\midrule
+classical & 1 & 1271.8 & 2.06 & 556 \\
+classical & 2 & 954.6 & 1.65 & 296 \\
+classical & 3 & 1035.1 & 1.54 & 233 \\
+classical & 4 & 989.1 & 1.22 & 237 \\
+post-quantum & 1 & 1874.0 & 5.61 & 952 \\
+post-quantum & 4 & 1220.2 & 4.14 & 502 \\
+\bottomrule
+\end{tabular}
+\caption{Committed levels $\mathcal{J} = \{0, k, 2k, \dots\}$ (\cref{sec:pcs:skip}), kernel encoding, $n = 20$, $\ell = 16$, single-threaded; $k = 1$ is $\Pieval$ with merged paths.}
+\label{tab:arity}
+\end{table}
+
+\Cref{tab:arity} varies the number $k$ of levels between committed words.
+With $k = 1$ ($\Pieval$), merging the paths alone gives $556$\,KiB, against $1147$\,KiB with one authentication path per query and level.
+Committing to one word in $k$ divides the number of opened leaves by about $k$, at the cost of $2^k$ values per leaf; the proof shrinks by a factor $1.9$ at $k = 2$ and $2.3$--$2.4$ at $k = 3$ and $4$, where the larger leaves offset the fewer paths.
+The prover gets faster because it builds fewer trees, and the verifier because it hashes fewer paths.
+We take $k = 4$, which gives the fastest verifier.
 
 \subsection{An independent reference point}\label{sec:exp:whir}
 
@@ -173,10 +200,10 @@ Within the unique-decoding analysis of this paper, $\rho = 1/4$ is a reasonable 
  & \multicolumn{3}{c}{\texttt{kbfold}, classical} & \multicolumn{3}{c}{WHIR, unique, $k = 1$} & \multicolumn{3}{c}{WHIR, Johnson, $k = 4$} \\
 $n$ & prover & verify & proof & prover & verify & proof & prover & verify & proof \\
 \midrule
-16 & 67 & 2.6 & 749 & 445 & 4.3 & 285 & 100 & 0.54 & 75 \\
-18 & 282 & 3.4 & 938 & 1738 & 3.8 & 392 & 377 & 0.59 & 88 \\
-20 & 1195 & 3.8 & 1147 & 7200 & 4.9 & 513 & 2638 & 0.77 & 108 \\
-22 & 6171 & 4.6 & 1374 & 30700 & 4.9 & 657 & 10800 & 0.86 & 121 \\
+16 & 49 & 1.16 & 146 & 445 & 4.3 & 285 & 100 & 0.54 & 75 \\
+18 & 206 & 1.11 & 194 & 1738 & 3.8 & 392 & 377 & 0.59 & 88 \\
+20 & 842 & 1.21 & 237 & 7200 & 4.9 & 513 & 2638 & 0.77 & 108 \\
+22 & 4631 & 1.37 & 290 & 30700 & 4.9 & 657 & 10800 & 0.86 & 121 \\
 \bottomrule
 \end{tabular}
 \caption{\texttt{kbfold} and the WHIR implementation, same machine, single-threaded, Goldilocks with its quadratic extension, rate $1/4$, $100$ bits of security, no proof of work. Prover and verifier times in ms, proof sizes in KiB. WHIR prints times of one second or more with a resolution of $0.1$\,s.}
@@ -185,9 +212,10 @@ $n$ & prover & verify & proof & prover & verify & proof & prover & verify & proo
 
 WHIR~\cite{ACFY24} is a multilinear polynomial commitment scheme from Reed--Solomon proximity testing.
 To place our implementation among existing systems, \cref{tab:whir} runs its implementation\footnote{Repository \url{https://github.com/WizardOfMenlo/whir}, commit \texttt{c03a4a5} of September 2026.} on the same machine with the same field, rate and security level, single-threaded, and without proof of work.
-We use two configurations: folding one variable per round with the unique-decoding analysis, the setting closest to ours, and WHIR's default of four variables per round with its analysis up to the Johnson bound.
+We use two configurations: folding one variable per round with the unique-decoding analysis, and WHIR's default of four variables per round with its analysis up to the Johnson bound, the configuration closest to ours in the number of committed words.
 The two code bases differ in many engineering choices (field arithmetic, Merkle trees, transcript, proof encoding), so \cref{tab:whir} is a reference point, not a comparison of protocols.
 
-On this machine the \texttt{kbfold} prover is $5$--$7$ times faster than WHIR with one variable per round and $1.3$--$2.2$ times faster than WHIR with four; WHIR's proofs are $2.1$--$2.6$ times smaller in the first configuration and $10$--$11.4$ times smaller in the second, where its verifier is also about $5$ times faster.
-The difference in proof size comes from three techniques that are independent of the encoding: the analysis up to the Johnson bound, which reduces the number of queries; folding several variables per round, which reduces the number of levels and hence of authentication paths per query; and the encoding of openings.
-Each of them applies to the kernel encoding, and they are part of the future work of \cref{sec:concl:future}.
+On this machine, \texttt{kbfold} with the classical parameters has a prover $6.6$--$9$ times faster than WHIR with one variable per round, with proofs $1.9$--$2.3$ times smaller and a verifier $3$--$4$ times faster.
+Against WHIR's default configuration, the \texttt{kbfold} prover is $1.8$--$3.1$ times faster, while WHIR's proofs are $1.9$--$2.4$ times smaller and its verifier $1.6$--$2.1$ times faster.
+Both schemes commit to one word in four; the remaining difference in proof size and verification time comes from the number of queries, which WHIR reduces by its analysis up to the Johnson bound.
+The list-decoding extension of \cref{thm:sound} in \cref{sec:concl:future} addresses exactly this term, and it is independent of the encoding.

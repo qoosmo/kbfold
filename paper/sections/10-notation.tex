@@ -96,6 +96,10 @@ $g$, $G$ & final table; its kernel polynomial & \S\ref{sec:pcs:protocol} \\
 $\omega$, $\iota$ & generator of $L$; generator of the extension field & \S\ref{sec:impl} \\
 $\xi^{(i)}_0$, $\xi_j$ & query points; $\xi_0^{2^j}$ & \S\ref{sec:pcs:protocol} \\
 $\Pieval$, $t_{\mathsf{H}}$ & evaluation protocol; cost of one hash & \S\ref{sec:pcs:protocol}, \S\ref{sec:pcs:costs} \\
+$\mathcal{J}$, $j^+$, $d_j$ & committed levels; next committed level (or $\ell$); $d_j = j^+ - j$ & \S\ref{sec:pcs:skip} \\
+$S_j(\xi)$, $\fold^{(j)}_r$ & coset of $\xi$ at level $j$ ($2^{d_j}$ points); $d_j$ successive folds & \S\ref{sec:pcs:skip} \\
+$\Pieval^{\mathcal{J}}$, $\mathrm{aug}$ & protocol with committed levels $\mathcal{J}$; augmentation to $\Pieval$ & \S\ref{sec:pcs:skip} \\
+$\Pieval^{\mathcal{J},\Sigma}$, $\Sigma_{\mathcal{J}}$, $\pi$ & its IOR form; alphabet; order of the fibres of $y$ & \S\ref{sec:sound:skip} \\
 \midrule
 \multicolumn{3}{l}{\emph{Soundness}} \\
 $\Delta^{\mathrm{fib}}_j$ & fibre distance at level $j$ & \Cref{def:fibre-dist} \\

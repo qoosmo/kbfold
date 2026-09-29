@@ -34,9 +34,9 @@
 pub mod error;
 pub mod field;
 pub mod merkle;
+mod par;
 pub mod pcs;
 pub mod poly;
-mod par;
 mod rand;
 
 /// Seeded provers for test vectors and reproducible digests (feature `insecure-test-vectors`).

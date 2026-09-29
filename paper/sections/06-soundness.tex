@@ -506,3 +506,54 @@ These unique-decoding parameters are conservative; list-decoding analyses of FRI
   \item The bounds also hold against classical adversaries in the random oracle model, with the same (quantum) extractor (\cref{sec:proofs:bcs}).
 \end{itemize}
 \end{remark}
+
+\subsection{Committed levels}\label{sec:sound:skip}
+
+We transfer the results of this section to the protocol $\Pieval^{\mathcal{J}}$ of \cref{sec:pcs:skip}, for any set $\mathcal{J} \subseteq \iv{0}{\ell-1}$ of committed levels with $0 \in \mathcal{J}$, where $1 \le \ell \le n$, using the augmentation $\mathrm{aug}$ of \cref{sec:pcs:skip}.
+It is computable in time polynomial in $M$.
+
+\paragraph{The IOR with committed levels.}
+$\Pieval^{\mathcal{J},\Sigma}$ is $\Pieval^{\mathcal{J}}$ encoded as an IOR as in \cref{sec:sound:pq}, with the following changes.
+\begin{itemize}
+  \item The alphabet is the disjoint union $\Sigma_{\mathcal{J}} = \F^2 \sqcup \bigsqcup_{d \in D} \F^{2^d}$, where $D = \{d_j : j \in \mathcal{J} \setminus \{0\}\} \setminus \{1\}$: a symbol is a fibre, as in $\Pieval^{\Sigma}$, or a coset of one of the sizes used.
+  \item The implicit instance is $y = \pi(\mathrm{fib}_0(w_0))$, where $\pi$ is the fixed permutation of the $M/2$ positions that makes the $2^{d_0 - 1}$ fibres of each coset $S_0(\xi)$ consecutive (the order of \cref{sec:impl:merkle}). The relation is $\mathcal{R}^{\mathcal{J}}_{\mathrm{eval}} = \{((z,v), y, f) : y = \pi(\mathrm{fib}_0(\Enc(f))),\ \tilde f(z) = v\}$; a symbol of $y$ that is not in $\F^2$ differs from every fibre, so $((z,v), y, f) \in (\mathcal{R}^{\mathcal{J}}_{\mathrm{eval}})_{\le\delta}$ if and only if $((z,v), \pi^{-1}(y), f) \in (\mathcal{R}_{\mathrm{eval}})_{\le\delta}$ when symbols outside $\F^2$ are replaced by $\bot$.
+  \item The round polynomials and the final table are written over $\F^2$ as in \cref{sec:sound:pq}. For $j \in \mathcal{J} \setminus \{0\}$, the oracle part of the round-$(j+1)$ message is the string of the $M_j/2^{d_j}$ cosets of $w_j$, one symbol of $\F^{2^{d_j}}$ per coset, the values of a coset being listed in the order of \cref{sec:impl:merkle}.
+  \item A query point reads the $2^{d_0 - 1}$ symbols of $y$ that form its coset at level $0$, and one symbol of each other committed word. The verifier rejects if a symbol that it reads is $\bot$ or does not lie in the expected component of $\Sigma_{\mathcal{J}}$.
+\end{itemize}
+The map $\mathrm{aug}^{\Sigma}$ sends a transcript of $\Pieval^{\mathcal{J},\Sigma}$ to one of $\Pieval^{\Sigma}$: it applies $\pi^{-1}$ to $y$; it replaces every symbol outside the expected component by $\bot$; it unpacks each coset symbol of $w_j$ into its $2^{d_j - 1}$ fibre symbols, a $\bot$ coset giving $\bot$ fibres; and it inserts, in round $j+1$ for $j \in \iv{1}{\ell-1} \setminus \mathcal{J}$, the full word $\mathrm{fib}_j(\fold_{r_j}(\bar w_{j-1}))$, where $\bar w_{j-1}$ is the filled word of level $j-1$ (\cref{sec:sound:pq}). The inserted word depends only on the part of $\mathrm{aug}^{\Sigma}(\tau)$ before round $j+1$.
+
+\begin{theorem}[Committed levels]\label{thm:skip}
+Let $\mathcal{J} \subseteq \iv{0}{\ell-1}$ with $0 \in \mathcal{J}$.
+\begin{enumerate}
+  \item \Cref{thm:sound} and \cref{cor:binding} hold for $\Pieval^{\mathcal{J}}$ with the same errors.
+  \item $\Pieval^{\mathcal{J}}$ is round-by-round knowledge sound for $\mathcal{R}^{\delta}_{\mathrm{eval}}$ with the errors of \cref{thm:rbr}.
+  \item $\Pieval^{\mathcal{J},\Sigma}$ is an IOR from $\mathcal{R}^{\mathcal{J}}_{\mathrm{eval}}$ to $\mathcal{R}_{\mathrm{acc}}$ with the relaxed round-by-round knowledge soundness errors of \cref{thm:rrbr}.
+  \item \Cref{cor:pq} holds for $\mathsf{BCS}[\Pieval^{\mathcal{J},\Sigma}]$, with $y$ read through $\pi^{-1}$, with the same $\nu$, $\beta_{\min}$ and $\varepsilon_{\mathrm{rr}}(\delta)$, with $l_{\max} = M/2$, and with $q_s \le \kappa\,(2^{d_0 - 1} + |\mathcal{J}| - 1) + 2\ell + \lceil N_\ell/2 \rceil$ positions read.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(1) By \cref{lem:skip}, for every instance the acceptance probability of a prover $\tilde{\mathsf{P}}$ of $\Pieval^{\mathcal{J}}$ is at most that of the prover $\tilde{\mathsf{P}}'$ of $\Pieval$, over the same challenges. \Cref{thm:sound,cor:binding} quantify over all provers of $\Pieval$, and apply to $\tilde{\mathsf{P}}'$.
+
+(2) Let $\Dd$ and $\mathsf{Ext}$ be as in \cref{thm:rbr}. Declare a partial transcript $\tau$ of $\Pieval^{\mathcal{J}}$ doomed if $\mathrm{aug}(\tau) \in \Dd$, and let $\mathsf{Ext}^{\mathcal{J}}(\tau, \mathsf{m}) = \mathsf{Ext}(\mathrm{aug}(\tau), \mathsf{m}')$, where $\mathsf{m}'$ is $\mathsf{m}$ together with the word that $\mathrm{aug}$ inserts in that round, if any.
+Condition~1 of \cref{def:rbr-knowledge} holds because $\mathrm{aug}$ does not change the empty transcript.
+For condition~2, $\mathrm{aug}(\tau, \mathsf{m}, \mathsf{c}) = (\mathrm{aug}(\tau), \mathsf{m}', \mathsf{c})$, because the inserted word depends only on $\mathrm{aug}(\tau)$; so the probability in condition~2 for $\Pieval^{\mathcal{J}}$ at $(\tau, \mathsf{m})$ equals the one for $\Pieval$ at $(\mathrm{aug}(\tau), \mathsf{m}')$, and the conclusion is the same.
+For condition~3, if the verifier of $\Pieval^{\mathcal{J}}$ accepted a doomed full transcript $\tau$, the verifier of $\Pieval$ would accept the doomed transcript $\mathrm{aug}(\tau)$, by \cref{lem:skip}.
+
+(3) Let $\mathsf{KState}$ and $\mathsf{E}$ be as in \cref{def:kstate}. Define
+\[
+  \mathsf{KState}^{\mathcal{J}}_\delta(\mathtt{x}, y, \mathrm{tr}, f) \;=\; \mathsf{KState}_\delta\bigl(\mathtt{x}, y', \mathrm{aug}^{\Sigma}(\mathrm{tr}), f\bigr)
+\]
+if $\mathrm{tr}$ is not full, where $y'$ is $y$ after $\pi^{-1}$ and the replacement of symbols outside $\F^2$ by $\bot$, and as acceptance by the verifier of $\Pieval^{\mathcal{J},\Sigma}$ if $\mathrm{tr}$ is full; and let $\mathsf{E}^{\mathcal{J}}$ run $\mathsf{E}$ on $y'$.
+Condition~1 of \cref{def:rrbr} holds by the description of $(\mathcal{R}^{\mathcal{J}}_{\mathrm{eval}})_{\le\delta}$ above, condition~2 because $\mathrm{aug}^{\Sigma}$ of a transcript followed by a prover message is $\mathrm{aug}^{\Sigma}$ of the transcript followed by a message, and condition~3 by definition.
+Fix a round $j$ and $\mathrm{tr} = \tau_{j-1} \| \Pi_j$. For $j \le \ell$, $\mathrm{tr} \| \mathsf{vr}_j$ is not full and $\mathrm{aug}^{\Sigma}(\mathrm{tr}\|\mathsf{vr}_j) = \mathrm{aug}^{\Sigma}(\mathrm{tr})\|\mathsf{vr}_j$, so the event of \cref{def:rrbr} for $\Pieval^{\mathcal{J},\Sigma}$ is the event for $\Pieval^{\Sigma}$ at $\mathrm{aug}^{\Sigma}(\mathrm{tr})$, bounded by \cref{thm:rrbr}, which holds for every transcript.
+For $j = \ell + 1$, suppose that the verifier of $\Pieval^{\mathcal{J},\Sigma}$ accepts. It read no $\bot$ and no symbol outside its component, so the values it read are those of the filled words, and the verifier of $\Pieval^{\mathcal{J}}$ accepts the transcript with the filled words. By \cref{lem:skip}, the verifier of $\Pieval$ accepts its augmentation, whose inserted words are those of $\mathrm{aug}^{\Sigma}$. The symbols that the verifier of $\Pieval^{\Sigma}$ reads in $\mathrm{aug}^{\Sigma}(\mathrm{tr} \| \mathsf{vr}_{\ell+1})$ are fibres of the cosets read above or of inserted full words, so none is $\bot$ and they agree with the filled words; hence the verifier of $\Pieval^{\Sigma}$ accepts. The event is therefore contained in the event for $\Pieval^{\Sigma}$, bounded by $(1-\delta)^{\kappa}$.
+
+(4) By (3) and \cref{thm:cdhz}, as in \cref{cor:pq}. The rounds and challenges are those of $\Pieval^{\Sigma}$, the query positions are determined by the challenges, the longest string is $y$, and a query point reads $2^{d_0-1}$ symbols of $y$ and one symbol of each of the $|\mathcal{J}| - 1$ other committed words.
+\end{proof}
+
+\begin{remark}[Parameters with committed levels]\label{rem:skip-params}
+For $\mathcal{J} = \{0, k, 2k, \dots\} \cap \iv{0}{\ell-1}$ with $k = 4$ and the parameters of \cref{rem:pq-params}, $q_s \le \kappa(2^{\min(4,\ell)-1} + \lceil \ell/4 \rceil - 1) + 2\ell + \lceil N_\ell/2 \rceil \le 2^{30}$, and the other quantities of \cref{rem:pq-params} are unchanged or smaller; so the bound $\varepsilon_{\mathrm{ext}}(2^{64}) < 2^{-31.8}$ of \cref{rem:pq-params} holds for $\mathsf{BCS}[\Pieval^{\mathcal{J},\Sigma}]$.
+The implementation encodes the openings of the positions read in one committed word by a merged authentication path (\cref{sec:impl:merkle}): the verifier hashes the same salted leaves and nodes, in the same tree, as with separate paths, and rejects unless every node of the merged path is used exactly once.
+An adversary that outputs proofs in this form is turned into one that outputs separate paths by recomputing, for each position read, its leaf hash and the nodes of its path, at most $q_s(\lceil \log_2 l_{\max} \rceil + 1)$ additional oracle queries; \cref{thm:cdhz} applied to this adversary gives the bound with $Q$ replaced by $Q + q_s(\lceil \log_2 l_{\max}\rceil + 1) \le Q + 2^{35}$, which does not change it at $Q = 2^{64}$ to the stated precision.
+\end{remark}

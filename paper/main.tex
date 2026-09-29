@@ -59,7 +59,8 @@ Its change of basis to monomials is the Kronecker power of a $2\times 2$ matrix 
 In this basis a normalised FRI fold is \emph{exactly} the restriction of one variable of the multilinear extension of the coordinate table, so folding the encoding of a table evaluates its multilinear extension directly.
 On this fold dictionary we build a transparent, hash-based multilinear polynomial commitment scheme and prove it sound, evaluation binding and round-by-round knowledge sound in the unique-decoding regime; the only external result about codes is the correlated-agreement theorem for Reed--Solomon codes.
 With the BCS theorem for interactive oracle reductions of Chiesa, Di, Hu and Zheng, the non-interactive scheme is knowledge sound, for a single opening, against quantum adversaries in the quantum random oracle model, with explicit bounds.
-A Rust implementation over the Goldilocks field matches the running time of a coefficient-form baseline sharing all other code, and companion Lean~4 files formalise the algebraic, probabilistic and soundness results, with correlated agreement as the only axiom.
+A Rust implementation over the Goldilocks field matches the running time of a coefficient-form baseline sharing all other code; for $20$ variables at $100$ bits of security it proves an evaluation in $0.84$\,s with a $237$\,KiB proof, about three times faster than the WHIR implementation on the same machine, whose proofs are about half as large.
+Companion Lean~4 files formalise the algebraic, probabilistic and soundness results, with correlated agreement as the only axiom.
 \end{abstract}
 
 \tableofcontents

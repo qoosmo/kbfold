@@ -34,6 +34,17 @@
 - All tables re-measured with 0.3.0 (salted trees). New: post-quantum parameters (Table 3), cost of salts, parallel speed-up, and WHIR on the same machine (Table 6), with the three techniques behind its smaller proofs added to future work (§10.1).
 - Introduction and conclusion describe the new measurements; stray characters before §10.1 removed.
 
+### Committed levels and merged paths (proof 1147 -> 237 KiB at n = 20)
+- **Committed levels** (`Params::fold_log`, k = 4 by default): the prover commits to w_0, w_k, w_2k, ...; a leaf of w_j (j > 0) holds a coset of 2^k values and the verifier folds k times locally. The commitment tree keeps one fibre per leaf, ordered so that the fibres of a coset are consecutive (the committed string and the relation are unchanged).
+- **Merged paths:** the openings of one committed word are the distinct leaves in increasing order plus one merged authentication path; the verifier rejects unless every node is used exactly once.
+- `Proof` now has `level0` and `levels` (`LevelOpening`: values, salts, nodes). The transcript absorbs k. Tests cover k = 1..4, all mutations of the new openings, and truncations; vectors regenerated.
+- `examples/bench.rs`: mode `arity`; breakdown measures the commitment tree.
+
+### Paper (committed levels)
+- §6.3 "Committing to fewer words": committed levels J, cosets, Lemma 6.x (local folding), the protocol Pi_eval^J and Lemma 6.x (skipping commitments, a reduction to Pi_eval for every transcript).
+- §7.9 "Committed levels": Theorem 7.x transfers soundness, binding, round-by-round knowledge soundness, the relaxed version (IOR over a disjoint-union alphabet, reordered implicit instance) and the post-quantum corollary with the same errors; Remark on parameters and merged paths. Reviewed by an independent pass; its corrections are included.
+- §8 describes committed levels, leaf order and merged openings; §9 re-measured, with a new table on k; abstract and introduction give the headline numbers; notation table and Lean appendix updated (the new lemma and theorem are not yet formalised in Lean).
+
 ### Docs
 - `docs/ROADMAP.md`: version 1 (first ePrint submission) and version 2 (revision of the same entry).
 

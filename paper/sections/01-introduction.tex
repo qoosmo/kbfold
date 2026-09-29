@@ -63,8 +63,9 @@ The BCS theorem in the quantum random oracle model of Chiesa, Manohar and Spoone
 
 \paragraph{Implementation and experiments (\cref{sec:impl,sec:exp}).}
 We give a Rust implementation over the Goldilocks field, with the quadratic extension for the classical parameters and the quartic extension for the post-quantum ones, compiled with salted Merkle trees as in~\cite{CDHZ25}.
+It commits to one folded word in four and merges authentication paths; a reduction lemma (\cref{lem:skip,thm:skip}) transfers every soundness result to this variant with the same errors.
 We compare it with a coefficient-form baseline that shares all other code: the two encodings are indistinguishable in running time at the resolution of our machine, as the operation counts predict, so the kernel encoding provides its structural property at no measurable cost.
-We also report the cost of the post-quantum parameters, and place the implementation next to the WHIR implementation on the same machine.
+We also report the cost of the post-quantum parameters, and place the implementation next to the WHIR implementation on the same machine: at $n = 20$, its prover is about three times faster, with proofs about twice as large.
 
 \paragraph{Formal verification (\cref{sec:lean}).}
 Companion Lean~4 files, of about $7000$ lines with no \texttt{sorry}, formalise the basis theorem, the fold dictionary, completeness, soundness, evaluation binding and round-by-round knowledge soundness. Correlated agreement (\cref{thm:bciks}) is the only axiom; the algebraic results and completeness do not use it.

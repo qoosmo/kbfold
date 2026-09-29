@@ -8,6 +8,7 @@
 //!   stop     number of folding rounds, m = 20
 //!   rate     rate 1/2, 1/4, 1/8, m = 20
 //!   breakdown  where the prover time goes (commit and open phases), m = 20
+//!   arity    variables folded between committed words, k = 1 .. 4, m = 20
 //! Every mode prints CSV with the machine columns `threads` and `parallel`.
 use kbfold::field::{ExtField, Field, Fp, Fp2, Fp4};
 use kbfold::merkle::MerkleTree;
@@ -49,7 +50,11 @@ fn threads() -> usize {
 }
 
 fn machine() -> String {
-    let t = if cfg!(feature = "parallel") { threads() } else { 1 };
+    let t = if cfg!(feature = "parallel") {
+        threads()
+    } else {
+        1
+    };
     format!("{t},{}", cfg!(feature = "parallel"))
 }
 
@@ -122,13 +127,19 @@ fn line(extra: String, r: &Row) {
 
 fn main() {
     let mode = std::env::args().nth(1).unwrap_or_else(|| "scaling".into());
-    let max_m: usize = std::env::args().nth(2).and_then(|s| s.parse().ok()).unwrap_or(22);
+    let max_m: usize = std::env::args()
+        .nth(2)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(22);
     match mode.as_str() {
         "scaling" => {
             header("basis,m,R,s,queries,field");
             for m in (12..=max_m).step_by(2) {
                 for basis in [Basis::Kernel, Basis::Monomial] {
-                    let p = Params { basis, ..Params::classical(m) };
+                    let p = Params {
+                        basis,
+                        ..Params::classical(m)
+                    };
                     let r = run::<Fp2>(&p, reps_for(m), 1 + m as u64);
                     line(format!("{basis:?},{m},2,{},{},p^2", p.s, p.queries), &r);
                 }
@@ -146,7 +157,10 @@ fn main() {
             header("m,salt_len");
             let m = max_m.min(20);
             for salt_len in [0, 32] {
-                let p = Params { salt_len, ..Params::classical(m) };
+                let p = Params {
+                    salt_len,
+                    ..Params::classical(m)
+                };
                 let r = run::<Fp2>(&p, 5, 3);
                 line(format!("{m},{salt_len}"), &r);
             }
@@ -155,7 +169,10 @@ fn main() {
             header("m,s,final_len");
             let m = max_m.min(20);
             for s in (8..=m).step_by(2) {
-                let p = Params { s, ..Params::classical(m) };
+                let p = Params {
+                    s,
+                    ..Params::classical(m)
+                };
                 let r = run::<Fp2>(&p, 3, 77);
                 line(format!("{m},{s},{}", 1 << (m - s)), &r);
             }
@@ -167,9 +184,33 @@ fn main() {
                 // queries: smallest kappa with (1 - delta)^kappa < 2^-100, delta = (1 - rho)/2
                 let delta = (1.0 - 1.0 / (1u64 << rr) as f64) / 2.0;
                 let q = (100.0 / -(1.0 - delta).log2()).ceil() as usize;
-                let p = Params { log_inv_rate: rr, queries: q, ..Params::classical(m) };
+                let p = Params {
+                    log_inv_rate: rr,
+                    queries: q,
+                    ..Params::classical(m)
+                };
                 let r = run::<Fp2>(&p, 3, 99);
                 line(format!("{m},{rr},{q}"), &r);
+            }
+        }
+        "arity" => {
+            header("m,k,field");
+            let m = max_m.min(20);
+            for k in 1..=4 {
+                let p = Params {
+                    fold_log: k,
+                    ..Params::classical(m)
+                };
+                let r = run::<Fp2>(&p, 5, 11);
+                line(format!("{m},{k},p^2"), &r);
+            }
+            for k in [1, 4] {
+                let p = Params {
+                    fold_log: k,
+                    ..Params::post_quantum(m)
+                };
+                let r = run::<Fp4>(&p, 5, 12);
+                line(format!("{m},{k},p^4"), &r);
             }
         }
         "breakdown" => {
@@ -178,7 +219,10 @@ fn main() {
             println!("basis,m,threads,parallel,transform_ms,ntt_ms,merkle_ms,commit_ms,open_ms");
             let m = max_m.min(20);
             for basis in [Basis::Kernel, Basis::Monomial] {
-                let p = Params { basis, ..Params::classical(m) };
+                let p = Params {
+                    basis,
+                    ..Params::classical(m)
+                };
                 let mut rng = Rng(5);
                 let table: Vec<Fp> = (0..1usize << m).map(|_| rng.fp()).collect();
                 let omega = Fp::two_adic_root((m + p.log_inv_rate) as u32);
@@ -191,7 +235,8 @@ fn main() {
                     w.resize(p.n(), Fp::ZERO);
                     ntt(&mut w, omega);
                     let t2 = Instant::now();
-                    let tree = MerkleTree::new(&w, &[0u8; 32], b"w0", p.salt_len);
+                    let tree =
+                        MerkleTree::new_fibres(&w, p.groups()[0].1, &[0u8; 32], b"w0", p.salt_len);
                     std::hint::black_box(tree.root());
                     tr.push((t1 - t0).as_secs_f64() * 1e3);
                     nt.push((t2 - t1).as_secs_f64() * 1e3);

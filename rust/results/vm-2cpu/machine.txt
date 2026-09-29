@@ -20,4 +20,4 @@ Virtualization type:                     full
 L1d cache:                               96 KiB (2 instances)
 L1i cache:                               64 KiB (2 instances)
 rustc 1.95.0 (59807616e 2026-04-14)
-1ea7919a22f681b7a865ab5be9f37535d505f73b
+8a14a32b61d222e96d5bee2e2faffbcf9722d487

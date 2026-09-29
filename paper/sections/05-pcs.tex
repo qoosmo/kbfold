@@ -95,6 +95,64 @@ With $\ell = n$, the final table is the single value $\tilde f(r_1,\dots,r_n)$ a
 Intermediate values trade the $N_\ell = 2^{n-\ell}$ field elements of the final message against $\ell$ folding rounds.
 \end{remark}
 
+\subsection{Committing to fewer words}\label{sec:pcs:skip}
+
+In $\Pieval$ the prover commits to every folded word $w_1,\dots,w_{\ell-1}$, and each query opens one fibre of each of them.
+Because the fold is local (\cref{lem:fold-word}(3)), the verifier can instead read a larger piece of one word and compute several folds itself; the prover then commits only to some of the words.
+
+\paragraph{Committed levels.}
+Let $1 \le \ell \le n$ and let $\mathcal{J} \subseteq \iv{0}{\ell-1}$ with $0 \in \mathcal{J}$, the set of \emph{committed levels}.
+The set $\mathcal{J}$ is a public parameter of the scheme, fixed with the commitment, like $\ell$.
+For $j \in \mathcal{J}$, let $j^+$ be the next element of $\mathcal{J}$ after $j$, or $\ell$ if there is none, and let $d_j = j^+ - j \ge 1$.
+For $\xi \in L_j$, the \emph{coset} of $\xi$ at level $j$ is
+\[
+  S_j(\xi) \;=\; \bigl\{\, \zeta \in L_j \;:\; \zeta^{2^{d_j}} = \xi^{2^{d_j}} \,\bigr\},
+\]
+the $2^{d_j}$ preimages of $\xi^{2^{d_j}} \in L_{j^+}$ under the $2^{d_j}$-th power map; it has $2^{d_j}$ elements because $L_j$ is cyclic of order $M_j = 2^{n+R-j}$, a multiple of $2^{d_j}$ since $d_j \le \ell - j < n + R - j$, and it is a union of $2^{d_j - 1}$ fibres, since $-1 \in L_j$ and $(-\zeta)^{2^{d_j}} = \zeta^{2^{d_j}}$.
+For $j \in \mathcal{J}$, challenges $r = (r_1,\dots,r_\ell)$ and a word $w \in \F^{L_j}$, write
+\[
+  \fold^{(j)}_r(w) \;=\; \fold_{r_{j^+}}\bigl(\cdots \fold_{r_{j+2}}(\fold_{r_{j+1}}(w))\cdots\bigr) \;\in\; \F^{L_{j^+}}.
+\]
+
+\begin{lemma}[Local folding]\label{lem:local-fold}
+Let $j \in \mathcal{J}$, $w \in \F^{L_j}$ and $\xi \in L_j$. The value $\fold^{(j)}_r(w)(\xi^{2^{d_j}})$ depends only on the values of $w$ on $S_j(\xi)$, and a verifier computes it from these $2^{d_j}$ values by $2^{d_j} - 1$ applications of \eqref{eq:fold-explicit}.
+\end{lemma}
+
+\begin{proof}
+For $0 \le i \le d_j$, the image $T_i = \{\zeta^{2^i} : \zeta \in S_j(\xi)\}$ is the set of $2^{d_j - i}$ points of $L_{j+i}$ whose $2^{d_j - i}$-th power is $\xi^{2^{d_j}}$ (the power map from $L_j$ onto $L_{j+i}$ is surjective); it is closed under negation for $i < d_j$, so it is the union of the fibres over the points of $T_{i+1}$.
+Call $w$ the $0$-th fold and $\fold_{r_{j+i}}$ of the $(i-1)$-th fold the $i$-th fold. By \cref{lem:fold-word}(3), the values of the $i$-th fold on $T_i$ are computed from the values of the $(i-1)$-th fold on $T_{i-1}$, one application of \eqref{eq:fold-explicit} per point of $T_i$. Induction on $i$, and $|T_1| + \dots + |T_{d_j}| = 2^{d_j - 1} + \dots + 1 = 2^{d_j} - 1$.
+\end{proof}
+
+\paragraph{The protocol $\Pieval^{\mathcal{J}}$.}
+$\Pieval^{\mathcal{J}}$ is $\Pieval$ with two changes.
+\begin{itemize}
+  \item In round $j \in \iv{2}{\ell}$, the prover sends the oracle $w_{j-1}$ only if $j - 1 \in \mathcal{J}$; the honest oracle is, as before, $w_{j-1} = \fold_{r_{j-1}}(\cdots\fold_{r_1}(w_0))$.
+  \item The query check is replaced by: for every query point $\xi_0 = \xi^{(i)}_0$ and every $j \in \mathcal{J}$, with $\xi_j = \xi_0^{2^j}$, the verifier reads $w_j$ on $S_j(\xi_j)$, computes $\fold^{(j)}_r(w_j)(\xi_{j^+})$ (\cref{lem:local-fold}), and checks that it equals $w_{j^+}(\xi_{j^+})$, a query to the oracle $w_{j^+}$ (which lies in $S_{j^+}(\xi_{j^+})$) if $j^+ < \ell$, and $G(\xi_\ell)$ if $j^+ = \ell$.
+\end{itemize}
+The sumcheck and closure checks are unchanged. For $\mathcal{J} = \iv{0}{\ell-1}$, every $d_j$ is $1$, every coset is a fibre, and $\Pieval^{\mathcal{J}} = \Pieval$.
+The honest prover of $\Pieval$, with the oracles of the levels outside $\mathcal{J}$ omitted, makes the verifier of $\Pieval^{\mathcal{J}}$ accept with probability $1$: its words satisfy $w_{j^+} = \fold^{(j)}_r(w_j)$ on all of $L_{j^+}$ (proof of \cref{thm:complete}).
+
+\paragraph{Augmentation.}
+For a transcript $\tau$ of $\Pieval^{\mathcal{J}}$ (partial or full), let $\mathrm{aug}(\tau)$ be the transcript of $\Pieval$ obtained by inserting, in round $j+1$ for every $j \in \iv{1}{\ell-1} \setminus \mathcal{J}$ that $\tau$ reaches, the oracle $w_j = \fold_{r_j}(w_{j-1})$; here $w_{j-1}$ is an oracle of $\tau$, the instance oracle $w_0$, or a word inserted before.
+The inserted word depends only on the part of $\mathrm{aug}(\tau)$ before round $j+1$.
+
+\begin{lemma}[Skipping commitments]\label{lem:skip}
+For every instance and every full transcript $\tau$ of $\Pieval^{\mathcal{J}}$, if the verifier of $\Pieval^{\mathcal{J}}$ accepts $\tau$, the verifier of $\Pieval$ accepts $\mathrm{aug}(\tau)$.
+Consequently, for every prover $\tilde{\mathsf{P}}$ of $\Pieval^{\mathcal{J}}$, the prover $\tilde{\mathsf{P}}'$ of $\Pieval$ that sends the messages and oracles of $\tilde{\mathsf{P}}$ and, in round $j+1$ for $j \in \iv{1}{\ell-1} \setminus \mathcal{J}$, the oracle $w_j = \fold_{r_j}(w_{j-1})$, is accepted, for every instance and every choice of the challenges, whenever $\tilde{\mathsf{P}}$ is.
+\end{lemma}
+
+\begin{proof}
+The round polynomials, the final table and the challenges are the same in $\tau$ and $\mathrm{aug}(\tau)$, so the sumcheck and closure checks are the same.
+Fix a query point $\xi_0$ and $j \in \mathcal{J}$. For $i \in \iv{j+1}{j^+ - 1}$, $i \notin \mathcal{J}$, so $w_i = \fold_{r_i}(w_{i-1})$ in $\mathrm{aug}(\tau)$, and by induction $w_{j^+ - 1} = \fold_{r_{j^+ - 1}}(\cdots\fold_{r_{j+1}}(w_j))$.
+The checks of $\Pieval$ at the levels $i \in \iv{j+1}{j^+ - 1}$ compare $\fold_{r_i}(w_{i-1})(\xi_i)$ with $w_i(\xi_i)$ and hold by construction.
+The check at level $j^+$ compares $\fold_{r_{j^+}}(w_{j^+ - 1})(\xi_{j^+}) = \fold^{(j)}_r(w_j)(\xi_{j^+})$ with $w_{j^+}(\xi_{j^+})$ (or $G(\xi_\ell)$), which is the check of $\Pieval^{\mathcal{J}}$ for $\xi_0$ and $j$.
+Every level $i \in \iv{1}{\ell}$ lies in exactly one interval $\iv{j+1}{j^+}$ with $j \in \mathcal{J}$, so all checks of $\Pieval$ pass.
+For the second statement, the transcript of $\tilde{\mathsf{P}}'$ is $\mathrm{aug}$ of the transcript of $\tilde{\mathsf{P}}$, and $\tilde{\mathsf{P}}'$ is a prover: its oracle in round $j+1$ depends only on $r_j$ and on messages already sent.
+\end{proof}
+
+\Cref{lem:skip} transfers soundness and evaluation binding from $\Pieval$ to $\Pieval^{\mathcal{J}}$ with the same errors; the round-by-round notions are transferred in \cref{sec:sound:skip}.
+\Cref{sec:impl} uses $\mathcal{J} = \{0, k, 2k, \dots\} \cap \iv{0}{\ell-1}$ with $k = 4$: the prover commits to one word in four, and each query reads $2^{d_j} \le 2^k$ values of each committed word $w_j$.
+
 \subsection{Completeness}\label{sec:pcs:complete}
 
 Recall from \cref{sec:prelim:bits} the notation $(r_{\le j}, b) = (r_1,\dots,r_j,b_1,\dots,b_{n-j})$ for an index $b$ with $n-j$ bits.
@@ -154,6 +212,7 @@ Let $t_{\mathsf{H}}$ denote the cost of one hash evaluation. We count field oper
   Merkle trees for $w_1,\dots,w_{\ell-1}$: $O(M)\cdot t_{\mathsf{H}}$ in total.
   \item \emph{Verifier.} Sumcheck: $O(\ell)$. Closure: $O(N_\ell)$. Queries: $O(\kappa \ell)$ field operations plus $O(\kappa \ell \log M)\cdot t_{\mathsf{H}}$ for authentication paths, plus $\kappa$ evaluations of $G$, $O(\kappa N_\ell)$.
   \item \emph{Proof size.} For $\ell \ge 1$: $3\ell$ field elements for the sumcheck, $N_\ell$ for the final table, $\ell-1$ Merkle roots besides the commitment, and $\kappa\ell$ opened leaves ($2\kappa \ell$ values) with their authentication paths. For $\ell = 0$: the table $g = f$ and $\kappa$ opened values of $w_0$.
+  \item \emph{With committed levels $\mathcal{J}$} (\cref{sec:pcs:skip}): Merkle trees only for the words $w_j$, $j \in \mathcal{J}$; per query, $2^{d_j}$ opened values of each $w_j$, $j \in \mathcal{J}$, and $O(2^{d_j})$ field operations to fold them. With $|\mathcal{J}| = \lceil \ell/k \rceil$ and the openings of one word merged into one path (\cref{sec:impl:merkle}), this divides the number of opened leaves and of path nodes by about $k$.
 \end{itemize}
 
 \begin{remark}[Relation to BaseFold and DeepFold]\label{rem:basefold}
