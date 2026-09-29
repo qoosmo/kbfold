@@ -21,7 +21,6 @@ The kernel encoding is compatible with the standard masking techniques for foldi
 
 \paragraph{Implementation.}
 \begin{itemize}
-  \item \emph{Conformance.} Implement the compiler of~\cite[Construction~11.7]{CDHZ25} (salted Merkle trees, their challenge derivation) and the quartic extension, so that \cref{cor:pq} applies to the code.
   \item \emph{Engineering.} Merkle multiproofs, batched openings, parallelism and SIMD field arithmetic would bring proof sizes and running times in line with production systems. None of them interacts with the encoding.
 \end{itemize}
 

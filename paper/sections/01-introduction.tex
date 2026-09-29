@@ -73,7 +73,7 @@ Companion Lean~4 files, of about $7000$ lines with no \texttt{sorry}, formalise 
 \paragraph{Scope.}
 The evaluation protocol is BaseFold's sumcheck-plus-folding applied to the kernel encoding, so its asymptotic and concrete costs are those of Reed--Solomon instantiations of BaseFold and DeepFold (\cref{rem:basefold}); what the kernel encoding adds is that the prover works on the table form throughout.
 The soundness analysis is in the unique-decoding regime and concerns one commitment opened at one point.
-The post-quantum statement (\cref{cor:pq}) applies to the compiler of~\cite{CDHZ25} (\cref{rem:fs}).
+The post-quantum statement (\cref{cor:pq}) applies to the compiler of~\cite{CDHZ25} (\cref{rem:fs}), whose structure the implementation follows, with the quartic extension of the Goldilocks field as challenge field.
 List decoding, batched and repeated openings, and zero knowledge are the subject of \cref{sec:concl:future}.
 
 \subsection{Related work}\label{sec:intro:related}

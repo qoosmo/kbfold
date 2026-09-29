@@ -18,12 +18,6 @@ The items of paper §10.1 that change the main results:
 - **Other domains.** A kernel-type basis for circle domains and additive subspaces.
 
 ### Implementation
-- **Conformance with CDHZ25, Construction 11.7:**
-  - salted Merkle trees;
-  - challenge derivation from the roots and salts;
-  - the quartic extension $\mathbb{F}_p[\iota]/(\iota^4 - 7)$.
-
-  With these, Corollary 7.26 applies to the code as released.
 - **Engineering:** Merkle multiproofs, parallel commit and open, SIMD field arithmetic.
 - **Documentation:** a stable API and documentation (`cargo doc`), and fuzzing of the verifier.
 

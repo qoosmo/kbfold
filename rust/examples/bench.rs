@@ -1,4 +1,4 @@
-//! Benchmarks for Section 8.  Single-threaded.  Usage:
+//! Benchmarks for Section 9.  Single-threaded, salted trees (32-byte salts).  Usage:
 //!   cargo run --release --example bench -- scaling | stop | rate
 use kbfold::field::{Field, Fp, Fp2};
 use kbfold::merkle::MerkleTree;
@@ -57,23 +57,23 @@ fn run(p: &Params, reps: usize, seed: u64) -> Row {
         w.resize(p.n(), Fp::ZERO);
         ntt(&mut w, omega);
         let t2 = Instant::now();
-        let tree = MerkleTree::new(&w);
+        let tree = MerkleTree::new(&w, &[0u8; 32], b"w0", p.salt_len);
         let t3 = Instant::now();
         std::hint::black_box(tree.root());
         tr.push((t1 - t0).as_secs_f64() * 1e3);
         nt.push((t2 - t1).as_secs_f64() * 1e3);
         mk.push((t3 - t2).as_secs_f64() * 1e3);
         let t4 = Instant::now();
-        let r = commit(p, &table);
+        let r = commit(p, &table).unwrap();
         cm.push(t4.elapsed().as_secs_f64() * 1e3);
         std::hint::black_box(r.0);
     }
-    let (root, pd) = commit(p, &table);
+    let (root, pd) = commit(p, &table).unwrap();
     let mut op = vec![];
     let mut last = None;
     for _ in 0..reps {
         let t = Instant::now();
-        let r = open(p, &pd, &z);
+        let r = open(p, &pd, &z).unwrap();
         op.push(t.elapsed().as_secs_f64() * 1e3);
         last = Some(r);
     }
@@ -81,7 +81,7 @@ fn run(p: &Params, reps: usize, seed: u64) -> Row {
     let mut ve = vec![];
     for _ in 0..21 {
         let t = Instant::now();
-        let ok = verify(p, &root, &z, v, &proof);
+        let ok = verify(p, &root, &z, v, &proof).is_ok();
         ve.push(t.elapsed().as_secs_f64() * 1e3);
         assert!(ok);
     }
@@ -104,7 +104,7 @@ fn main() {
             println!("basis,m,R,s,queries,commit_ms,transform_ms,ntt_ms,merkle_ms,open_ms,verify_ms,proof_kib");
             for m in (12..=22).step_by(2) {
                 for basis in [Basis::Kernel, Basis::Monomial] {
-                    let p = Params { basis, m, log_inv_rate: 2, s: m - 4, queries: queries_for(2) };
+                    let p = Params { basis, m, log_inv_rate: 2, s: m - 4, queries: queries_for(2), salt_len: 32 };
                     let reps = if m >= 22 { 3 } else if m >= 20 { 5 } else { 11 };
                     let r = run(&p, reps, 1 + m as u64);
                     println!(
@@ -118,7 +118,7 @@ fn main() {
             println!("m,s,final_len,open_ms,verify_ms,proof_kib");
             let m = 20;
             for s in [8, 10, 12, 14, 16, 18, 20] {
-                let p = Params { basis: Basis::Kernel, m, log_inv_rate: 2, s, queries: queries_for(2) };
+                let p = Params { basis: Basis::Kernel, m, log_inv_rate: 2, s, queries: queries_for(2), salt_len: 32 };
                 let r = run(&p, 3, 77);
                 println!("{},{},{},{:.2},{:.3},{:.1}", m, s, 1 << (m - s), r.open_ms, r.verify_ms, r.proof_kib);
             }
@@ -127,7 +127,7 @@ fn main() {
             println!("m,R,queries,commit_ms,open_ms,verify_ms,proof_kib");
             let m = 20;
             for rr in [1, 2, 3] {
-                let p = Params { basis: Basis::Kernel, m, log_inv_rate: rr, s: m - 4, queries: queries_for(rr) };
+                let p = Params { basis: Basis::Kernel, m, log_inv_rate: rr, s: m - 4, queries: queries_for(rr), salt_len: 32 };
                 let r = run(&p, 3, 99);
                 println!("{},{},{},{:.2},{:.2},{:.3},{:.1}", m, rr, p.queries, r.commit_ms, r.open_ms, r.verify_ms, r.proof_kib);
             }

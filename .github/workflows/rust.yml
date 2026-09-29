@@ -13,6 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --release
+      - name: Test vectors (seeded provers)
+        run: cargo test --release --features insecure-test-vectors
       - name: Documentation
         run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
       - name: Package

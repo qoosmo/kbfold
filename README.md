@@ -82,7 +82,8 @@ lake env lean KBFold/Audit.lean    # prints the axioms used by the main theorems
 **Rust** (Rust ≥ 1.85; the library is published on crates.io as [`kbfold`](https://crates.io/crates/kbfold)):
 ```bash
 cd rust
-cargo test --release                          # completeness, tampering, field facts
+cargo test --release                          # completeness, tampering, robustness, field facts
+cargo test --release --features insecure-test-vectors  # test vectors (vectors/)
 cargo run --release --example paper_checks    # numerical checks of the paper's lemmas
 cargo run --release --example pq_params       # exact post-quantum bound (Remark 7.28)
 cargo run --release --example bench           # benchmarks of Section 9
@@ -93,13 +94,13 @@ cargo run --release --example bench           # benchmarks of Section 9
 cd paper && latexmk -pdf main.tex
 ```
 
-## Scope and limitations
+## Scope
 
-- **Unique decoding only.** The soundness analysis stays in the unique-decoding regime. List-decoding analyses need fewer queries; extending to them is future work.
-- **One opening per proof.** The analysis covers one commitment opened at one point per proof; batching and multiple openings are not analysed.
-- **The code is not covered by the post-quantum corollary yet.** The corollary applies to the compiler of CDHZ25 (Construction 11.7: salted Merkle trees and their challenge derivation). The Rust code uses unsalted, domain-separated Merkle trees, a BLAKE3 transcript and a quadratic extension. Aligning the two is on the [roadmap](docs/ROADMAP.md).
-- **No speed claim.** The scheme is not claimed faster than BaseFold or DeepFold. The contribution is the basis and the dictionary.
-- **Not production code.** The implementation is single-threaded research code and has not been audited.
+- **Unique decoding only.** The soundness analysis stays in the unique-decoding regime. List-decoding analyses need fewer queries; extending to them is planned for version 2 (see the [roadmap](docs/ROADMAP.md)).
+- **One opening per proof.** The analysis covers one commitment opened at one point per proof; batched and multiple openings are planned for version 2.
+- **Post-quantum parameters.** The corollary applies to the compiler of CDHZ25 (Construction 11.7). The Rust code follows its structure: salted Merkle trees, one round salt per round, challenges from all previous roots and salts. Use `Params::post_quantum(m)` with challenges in `Fp4`; `Params::classical(m)` with `Fp2` gives about 100 bits of classical security.
+- **Performance.** The protocol costs are those of Reed-Solomon BaseFold and DeepFold; what the kernel encoding adds is that the prover folds the table directly, with no conversion to coefficients.
+- **Reference implementation.** Single-threaded and not audited; the verifier returns `Result` and never panics on malformed proofs.
 
 ## Citation
 

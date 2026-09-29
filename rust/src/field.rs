@@ -1,4 +1,5 @@
-//! Goldilocks field F_p, p = 2^64 - 2^32 + 1, and its quadratic extension `F_p[u]/(u^2 - 7)`.
+//! Goldilocks field F_p, p = 2^64 - 2^32 + 1, its quadratic extension F_p\[u\]/(u^2 - 7),
+//! and its quartic extension F_p\[i\]/(i^4 - 7) = F_{p^2}\[v\]/(v^2 - u) with v = i, u = i^2.
 
 use core::ops::{Add, Mul, Neg, Sub};
 
@@ -11,7 +12,17 @@ pub const GENERATOR: u64 = 7;
 pub const TWO_ADICITY: u32 = 32;
 
 pub trait Field:
-    Copy + Clone + PartialEq + Eq + core::fmt::Debug + Add<Output = Self> + Sub<Output = Self> + Mul<Output = Self> + Neg<Output = Self>
+    Copy
+    + Send
+    + Sync
+    + Clone
+    + PartialEq
+    + Eq
+    + core::fmt::Debug
+    + Add<Output = Self>
+    + Sub<Output = Self>
+    + Mul<Output = Self>
+    + Neg<Output = Self>
 {
     const ZERO: Self;
     const ONE: Self;
@@ -189,6 +200,109 @@ impl Field for Fp2 {
     }
 }
 
+/// Extension fields used as challenge fields: F_{p^e} with a fixed basis 1, i, ..., i^{e-1}.
+pub trait ExtField: Field + From<Fp> + Mul<Fp, Output = Self> + Send + Sync {
+    /// Degree e over F_p.
+    const DEGREE: usize;
+    /// Element with coordinates d_0, ..., d_{e-1} in the basis 1, i, ..., i^{e-1} (Section 8, map num).
+    fn from_digits(d: &[Fp]) -> Self;
+    /// Coordinates in the basis 1, i, ..., i^{e-1}.
+    fn digits(&self) -> Vec<Fp>;
+}
+
+impl ExtField for Fp2 {
+    const DEGREE: usize = 2;
+    fn from_digits(d: &[Fp]) -> Fp2 {
+        Fp2(d[0], d[1])
+    }
+    fn digits(&self) -> Vec<Fp> {
+        vec![self.0, self.1]
+    }
+}
+
+/// Quartic extension a + b v with a, b in F_{p^2} and v^2 = u (so v = i, i^4 = 7).
+/// In the basis 1, i, i^2, i^3 the element is a.0 + b.0 i + a.1 i^2 + b.1 i^3.
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Default, Hash)]
+pub struct Fp4(pub Fp2, pub Fp2);
+
+#[inline(always)]
+fn mul_by_u(x: Fp2) -> Fp2 {
+    // u (x0 + x1 u) = 7 x1 + x0 u
+    Fp2(W * x.1, x.0)
+}
+
+impl From<Fp> for Fp4 {
+    #[inline(always)]
+    fn from(x: Fp) -> Fp4 {
+        Fp4(Fp2(x, Fp::ZERO), Fp2::ZERO)
+    }
+}
+impl Add for Fp4 {
+    type Output = Fp4;
+    #[inline(always)]
+    fn add(self, o: Fp4) -> Fp4 {
+        Fp4(self.0 + o.0, self.1 + o.1)
+    }
+}
+impl Sub for Fp4 {
+    type Output = Fp4;
+    #[inline(always)]
+    fn sub(self, o: Fp4) -> Fp4 {
+        Fp4(self.0 - o.0, self.1 - o.1)
+    }
+}
+impl Mul for Fp4 {
+    type Output = Fp4;
+    #[inline(always)]
+    fn mul(self, o: Fp4) -> Fp4 {
+        let ac = self.0 * o.0;
+        let bd = self.1 * o.1;
+        let s = (self.0 + self.1) * (o.0 + o.1);
+        Fp4(ac + mul_by_u(bd), s - ac - bd)
+    }
+}
+impl Mul<Fp> for Fp4 {
+    type Output = Fp4;
+    #[inline(always)]
+    fn mul(self, o: Fp) -> Fp4 {
+        Fp4(self.0 * o, self.1 * o)
+    }
+}
+impl Neg for Fp4 {
+    type Output = Fp4;
+    #[inline(always)]
+    fn neg(self) -> Fp4 {
+        Fp4(-self.0, -self.1)
+    }
+}
+impl Field for Fp4 {
+    const ZERO: Fp4 = Fp4(Fp2::ZERO, Fp2::ZERO);
+    const ONE: Fp4 = Fp4(Fp2::ONE, Fp2::ZERO);
+    fn inv(self) -> Fp4 {
+        // (a + b v)^{-1} = (a - b v) / (a^2 - u b^2)
+        let norm = self.0 * self.0 - mul_by_u(self.1 * self.1);
+        let ni = norm.inv();
+        Fp4(self.0 * ni, -(self.1 * ni))
+    }
+    fn from_u64(x: u64) -> Fp4 {
+        Fp4::from(Fp::new(x))
+    }
+    fn to_bytes(&self, out: &mut Vec<u8>) {
+        for d in self.digits() {
+            d.to_bytes(out);
+        }
+    }
+}
+impl ExtField for Fp4 {
+    const DEGREE: usize = 4;
+    fn from_digits(d: &[Fp]) -> Fp4 {
+        Fp4(Fp2(d[0], d[2]), Fp2(d[1], d[3]))
+    }
+    fn digits(&self) -> Vec<Fp> {
+        vec![self.0.0, self.1.0, self.0.1, self.1.1]
+    }
+}
+
 /// Batch inversion (Montgomery's trick). All inputs must be nonzero.
 pub fn batch_inv<F: Field>(xs: &[F]) -> Vec<F> {
     let mut prefix = Vec::with_capacity(xs.len());
@@ -224,8 +338,14 @@ mod tests {
             let a = x % P;
             let b = x.rotate_left(29) % P;
             assert_eq!((Fp(a) * Fp(b)).0, naive_mul(a, b));
-            assert_eq!((Fp(a) + Fp(b)).0, ((a as u128 + b as u128) % P as u128) as u64);
-            assert_eq!((Fp(a) - Fp(b)).0, ((a as u128 + P as u128 - b as u128) % P as u128) as u64);
+            assert_eq!(
+                (Fp(a) + Fp(b)).0,
+                ((a as u128 + b as u128) % P as u128) as u64
+            );
+            assert_eq!(
+                (Fp(a) - Fp(b)).0,
+                ((a as u128 + P as u128 - b as u128) % P as u128) as u64
+            );
         }
         for a in [P - 1, P - 2, EPS, 1u64 << 63, 0, 1] {
             for b in [P - 1, P - 2, EPS, 1u64 << 63, 0, 1] {
@@ -241,6 +361,53 @@ mod tests {
         assert_eq!(w.pow(1 << 31), -Fp::ONE);
         // 7 is a quadratic non-residue: 7^((p-1)/2) = -1
         assert_eq!(Fp(7).pow((P - 1) / 2), -Fp::ONE);
+        // 7 generates F_p^*: p - 1 = 2^32 * 3 * 5 * 17 * 257 * 65537
+        assert_eq!((1u64 << 32) * 3 * 5 * 17 * 257 * 65537, P - 1);
+        for l in [2u64, 3, 5, 17, 257, 65537] {
+            assert_ne!(Fp(7).pow((P - 1) / l), Fp::ONE);
+        }
+    }
+
+    #[test]
+    fn quartic_extension() {
+        // i^4 = 7 in the digit basis
+        let i = Fp4::from_digits(&[Fp(0), Fp(1), Fp(0), Fp(0)]);
+        assert_eq!(i * i * i * i, Fp4::from(Fp(7)));
+        let mut x = 5u64;
+        let mut r = || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            Fp::new(x)
+        };
+        for _ in 0..200 {
+            let a = Fp4::from_digits(&[r(), r(), r(), r()]);
+            let b = Fp4::from_digits(&[r(), r(), r(), r()]);
+            let c = Fp4::from_digits(&[r(), r(), r(), r()]);
+            assert_eq!((a * b) * c, a * (b * c));
+            assert_eq!(a * (b + c), a * b + a * c);
+            assert_eq!(a * a.inv(), Fp4::ONE);
+            assert_eq!(Fp4::from_digits(&a.digits()), a);
+            // schoolbook product in the basis 1, i, i^2, i^3 with i^4 = 7
+            let (da, db) = (a.digits(), b.digits());
+            let mut prod = [Fp::ZERO; 7];
+            for k in 0..4 {
+                for l in 0..4 {
+                    prod[k + l] = prod[k + l] + da[k] * db[l];
+                }
+            }
+            let red: Vec<Fp> = (0..4)
+                .map(|k| {
+                    prod[k]
+                        + if k + 4 < 7 {
+                            Fp(7) * prod[k + 4]
+                        } else {
+                            Fp::ZERO
+                        }
+                })
+                .collect();
+            assert_eq!((a * b).digits(), red);
+        }
     }
 
     #[test]

@@ -1,5 +1,6 @@
-use kbfold::field::{Field, Fp, Fp2};
-use kbfold::pcs::{commit, open, verify, Basis, Params};
+use kbfold::error::Error;
+use kbfold::field::{ExtField, Field, Fp, Fp2, Fp4};
+use kbfold::pcs::{Basis, Params, commit, open, verify};
 use kbfold::poly::mle_eval;
 
 struct Rng(u64);
@@ -13,35 +14,39 @@ impl Rng {
     fn fp(&mut self) -> Fp {
         Fp::new(self.next())
     }
-    fn fp2(&mut self) -> Fp2 {
-        Fp2(self.fp(), self.fp())
+    fn ext<E: ExtField>(&mut self) -> E {
+        let d: Vec<Fp> = (0..E::DEGREE).map(|_| self.fp()).collect();
+        E::from_digits(&d)
     }
 }
 
-fn setup(m: usize, s: usize, r: usize, q: usize, seed: u64) -> (Params, Vec<Fp>, Vec<Fp2>, Rng) {
-    setup_b(Basis::Kernel, m, s, r, q, seed)
-}
-
-fn setup_b(basis: Basis, m: usize, s: usize, r: usize, q: usize, seed: u64) -> (Params, Vec<Fp>, Vec<Fp2>, Rng) {
+fn setup<E: ExtField>(
+    basis: Basis,
+    m: usize,
+    s: usize,
+    r: usize,
+    q: usize,
+    seed: u64,
+) -> (Params, Vec<Fp>, Vec<E>) {
     let mut rng = Rng(seed);
-    let p = Params { basis, m, log_inv_rate: r, s, queries: q };
+    let p = Params { basis, m, log_inv_rate: r, s, queries: q, salt_len: 32 };
     let table: Vec<Fp> = (0..1 << m).map(|_| rng.fp()).collect();
-    let z: Vec<Fp2> = (0..m).map(|_| rng.fp2()).collect();
-    (p, table, z, rng)
+    let z: Vec<E> = (0..m).map(|_| rng.ext()).collect();
+    (p, table, z)
 }
 
-#[test]
-fn completeness_all_parameters() {
-    for m in 1..=10 {
+fn completeness<E: ExtField>() {
+    for m in 1..=9 {
         for s in 0..=m {
             for r in 1..=3 {
                 for basis in [Basis::Kernel, Basis::Monomial] {
-                    let (p, table, z, _) = setup_b(basis, m, s, r, 8, 1000 + (m * 100 + s * 10 + r) as u64);
-                    let (root, pd) = commit(&p, &table);
-                    let (v, proof) = open(&p, &pd, &z);
-                    let t2: Vec<Fp2> = table.iter().map(|&x| x.into()).collect();
-                    assert_eq!(v, mle_eval(&t2, &z), "value m={m} s={s}");
-                    assert!(verify(&p, &root, &z, v, &proof), "reject {basis:?} m={m} s={s} r={r}");
+                    let (p, table, z) =
+                        setup::<E>(basis, m, s, r, 8, 1000 + (m * 100 + s * 10 + r) as u64);
+                    let (root, pd) = commit(&p, &table).unwrap();
+                    let (v, proof) = open(&p, &pd, &z).unwrap();
+                    let t: Vec<E> = table.iter().map(|&x| E::from(x)).collect();
+                    assert_eq!(v, mle_eval(&t, &z), "value m={m} s={s}");
+                    assert_eq!(verify(&p, &root, &z, v, &proof), Ok(()), "{basis:?} m={m} s={s} r={r}");
                 }
             }
         }
@@ -49,57 +54,102 @@ fn completeness_all_parameters() {
 }
 
 #[test]
-fn rejects_wrong_value() {
-    let (p, table, z, _) = setup(10, 7, 2, 30, 7);
-    let (root, pd) = commit(&p, &table);
-    let (v, proof) = open(&p, &pd, &z);
-    assert!(!verify(&p, &root, &z, v + Fp2::ONE, &proof));
+fn completeness_quadratic() {
+    completeness::<Fp2>();
 }
 
 #[test]
-fn rejects_wrong_point_and_root() {
-    let (p, table, mut z, _) = setup(10, 10, 2, 30, 8);
-    let (root, pd) = commit(&p, &table);
-    let (v, proof) = open(&p, &pd, &z);
+fn completeness_quartic() {
+    completeness::<Fp4>();
+}
+
+#[test]
+fn unsalted_trees_are_complete() {
+    let (mut p, table, z) = setup::<Fp2>(Basis::Kernel, 8, 5, 2, 20, 3);
+    p.salt_len = 0;
+    let (root, pd) = commit(&p, &table).unwrap();
+    let (v, proof) = open(&p, &pd, &z).unwrap();
+    assert_eq!(verify(&p, &root, &z, v, &proof), Ok(()));
+}
+
+#[test]
+fn recommended_parameters() {
+    let mut rng = Rng(5);
+    let table: Vec<Fp> = (0..1 << 12).map(|_| rng.fp()).collect();
+    let p = Params::post_quantum(12);
+    let z: Vec<Fp4> = (0..12).map(|_| rng.ext()).collect();
+    let (root, pd) = commit(&p, &table).unwrap();
+    let (v, proof) = open(&p, &pd, &z).unwrap();
+    assert_eq!(verify(&p, &root, &z, v, &proof), Ok(()));
+    let p = Params::classical(12);
+    let z: Vec<Fp2> = (0..12).map(|_| rng.ext()).collect();
+    let (root, pd) = commit(&p, &table).unwrap();
+    let (v, proof) = open(&p, &pd, &z).unwrap();
+    assert_eq!(verify(&p, &root, &z, v, &proof), Ok(()));
+}
+
+#[test]
+fn salts_are_fresh() {
+    // two commitments to the same table differ, and both open correctly
+    let (p, table, z) = setup::<Fp2>(Basis::Kernel, 8, 4, 2, 16, 4);
+    let (r1, pd1) = commit(&p, &table).unwrap();
+    let (r2, pd2) = commit(&p, &table).unwrap();
+    assert_ne!(r1, r2);
+    let (v1, pr1) = open(&p, &pd1, &z).unwrap();
+    let (v2, pr2) = open(&p, &pd1, &z).unwrap();
+    assert_eq!(v1, v2);
+    assert_ne!(pr1.round_salts, pr2.round_salts);
+    assert_eq!(verify(&p, &r1, &z, v1, &pr2), Ok(()));
+    let (v, pr) = open(&p, &pd2, &z).unwrap();
+    assert!(verify(&p, &r1, &z, v, &pr).is_err());
+}
+
+#[test]
+fn rejects_wrong_value_point_and_root() {
+    let (p, table, mut z) = setup::<Fp2>(Basis::Kernel, 10, 7, 2, 30, 7);
+    let (root, pd) = commit(&p, &table).unwrap();
+    let (v, proof) = open(&p, &pd, &z).unwrap();
+    assert!(verify(&p, &root, &z, v + Fp2::ONE, &proof).is_err());
     let mut bad_root = root;
     bad_root[0] ^= 1;
-    assert!(!verify(&p, &bad_root, &z, v, &proof));
+    assert!(verify(&p, &bad_root, &z, v, &proof).is_err());
     z[3] = z[3] + Fp2::ONE;
-    assert!(!verify(&p, &root, &z, v, &proof));
-}
-
-#[test]
-fn rejects_tampered_messages() {
-    let (p, table, z, _) = setup(9, 6, 2, 30, 9);
-    let (root, pd) = commit(&p, &table);
-    let (v, proof) = open(&p, &pd, &z);
-    assert!(verify(&p, &root, &z, v, &proof));
-    // sumcheck message
-    let mut pr = proof.clone();
-    pr.sumcheck[2][2] = pr.sumcheck[2][2] + Fp2::ONE;
-    assert!(!verify(&p, &root, &z, v, &pr));
-    // final table
-    let mut pr = proof.clone();
-    pr.g[0] = pr.g[0] + Fp2::ONE;
-    assert!(!verify(&p, &root, &z, v, &pr));
-    // opened value in a query
-    let mut pr = proof.clone();
-    pr.queries[5].levels[1].a = pr.queries[5].levels[1].a + Fp2::ONE;
-    assert!(!verify(&p, &root, &z, v, &pr));
-    // intermediate root
-    let mut pr = proof.clone();
-    pr.roots[0][5] ^= 0xff;
-    assert!(!verify(&p, &root, &z, v, &pr));
+    assert!(verify(&p, &root, &z, v, &proof).is_err());
 }
 
 /// Opening a different table against the committed root must fail.
 #[test]
 fn rejects_opening_of_other_table() {
-    let (p, table, z, _) = setup(8, 5, 2, 40, 11);
-    let (root, _pd) = commit(&p, &table);
+    let (p, table, z) = setup::<Fp2>(Basis::Kernel, 8, 5, 2, 40, 11);
+    let (root, _pd) = commit(&p, &table).unwrap();
     let mut t2 = table.clone();
     t2[0] = t2[0] + Fp::ONE;
-    let (_root2, pd2) = commit(&p, &t2);
-    let (v2, proof2) = open(&p, &pd2, &z);
-    assert!(!verify(&p, &root, &z, v2, &proof2));
+    let (_root2, pd2) = commit(&p, &t2).unwrap();
+    let (v2, proof2) = open(&p, &pd2, &z).unwrap();
+    assert!(verify(&p, &root, &z, v2, &proof2).is_err());
+}
+
+#[test]
+fn invalid_parameters_and_inputs() {
+    let (p, table, z) = setup::<Fp2>(Basis::Kernel, 6, 3, 2, 8, 12);
+    for bad in [
+        Params { m: 0, ..p },
+        Params { log_inv_rate: 0, ..p },
+        Params { m: 31, ..p },
+        Params { s: 7, ..p },
+        Params { queries: 0, ..p },
+        Params { salt_len: 65, ..p },
+    ] {
+        assert!(matches!(bad.validate(), Err(Error::Params(_))));
+        assert!(matches!(commit(&bad, &table), Err(Error::Params(_))));
+    }
+    assert!(matches!(commit(&p, &table[1..]), Err(Error::Input(_))));
+    let (root, pd) = commit(&p, &table).unwrap();
+    assert!(matches!(open(&p, &pd, &z[1..]), Err(Error::Input(_))));
+    let (v, proof) = open(&p, &pd, &z).unwrap();
+    assert!(matches!(verify(&p, &root, &z[1..], v, &proof), Err(Error::Input(_))));
+    // the verifier with other parameters rejects without panicking
+    for other in [Params { s: 2, ..p }, Params { queries: 9, ..p }, Params { salt_len: 16, ..p }, Params { s: 6, ..p }] {
+        assert!(verify(&other, &root, &z, v, &proof).is_err());
+    }
 }

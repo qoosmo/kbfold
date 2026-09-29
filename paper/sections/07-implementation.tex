@@ -1,6 +1,6 @@
 \section{Implementation}\label{sec:impl}
 
-We implemented $\Pieval$ of \cref{sec:pcs}, compiled with Merkle trees and Fiat--Shamir (\cref{sec:proofs:bcs}), as a self-contained Rust library, \texttt{kbfold} (about $1{,}200$ lines including tests and benchmarks; its only dependency is the BLAKE3 hash function).
+We implemented $\Pieval$ of \cref{sec:pcs}, compiled as in \cref{sec:proofs:bcs} with salted Merkle trees and Fiat--Shamir, as a self-contained Rust library, \texttt{kbfold} (about $2{,}200$ lines including tests and benchmarks; its dependencies are the BLAKE3 hash function and the operating system's random number generator, through the \texttt{getrandom} crate).
 The code follows the paper line by line; this section records the concrete choices, and \cref{sec:exp} reports measurements.
 The library also has a coefficient-form mode, used only as the baseline of \cref{sec:exp}.
 
@@ -17,10 +17,11 @@ The largest power of $2$ dividing $p - 1$ is $2^{32}$, so smooth domains of orde
 We take $L = \langle \omega \rangle$ with $\omega = 7^{(p-1)/M}$, where $7$ generates $\mathbb{F}_p^{\times}$: since $p - 1 = 2^{32}\cdot 3 \cdot 5 \cdot 17 \cdot 257 \cdot 65537$, this amounts to $7^{(p-1)/\ell'} \ne 1$ for each of the six prime factors $\ell'$, which the test suite checks.
 Multiplication uses the standard reduction of a $128$-bit product modulo $p$ based on $2^{64} \equiv 2^{32}-1$ and $2^{96} \equiv -1$; elements are kept in canonical form.
 
-\paragraph{Extension field.}
-The challenge field of \cref{sec:pcs:params} is the quadratic extension $\F = \K = \mathbb{F}_p[\iota]/(\iota^2 - 7)$, of size $p^2 \approx 2^{128}$: the challenges $r_j$, the evaluation point $z$, the value $v$, the sumcheck tables and all folded words $w_j$ ($j \ge 1$) live in $\K$, while tables and $w_0$ have entries in $\mathbb{F}_p$.
-The polynomial $\iota^2 - 7$ is irreducible because $7$, a generator of $\mathbb{F}_p^\times$, is a non-square.
-The post-quantum parameters of \cref{rem:pq-params} use the quartic extension; \cref{rem:fs} relates the implementation to the compiler of~\cite{CDHZ25}.
+\paragraph{Extension fields.}
+The code is generic in the challenge field $\F$ of \cref{sec:pcs:params}, with two instances: the quadratic extension $\K = \mathbb{F}_p[\iota]/(\iota^2 - 7)$, of size $p^2 \approx 2^{128}$, for the classical parameters of \cref{rem:params} and \cref{sec:exp}; and the quartic extension $\mathbb{F}_p[\iota]/(\iota^4 - 7)$, of size $p^4 \approx 2^{256}$, for the post-quantum parameters of \cref{rem:pq-params}.
+The challenges $r_j$, the evaluation point $z$, the value $v$, the sumcheck tables and all folded words $w_j$ ($j \ge 1$) live in $\F$, while tables and $w_0$ have entries in $\mathbb{F}_p$.
+The polynomial $\iota^2 - 7$ is irreducible because $7$, a generator of $\mathbb{F}_p^\times$, is a non-square; $\iota^4 - 7$ is irreducible by \cref{rem:pq-params}.
+The quartic extension is implemented as $\K[\upsilon]/(\upsilon^2 - \iota)$, where $\iota$ is the generator of $\K$; then $\upsilon^4 = 7$, and $\upsilon$ is the element written $\iota$ in $\mathbb{F}_p[\iota]/(\iota^4 - 7)$. Elements of $\F$ are written in the basis $1, \iota, \dots, \iota^{e-1}$, $e \in \{2, 4\}$ (the bijection $\mathrm{num}$ of \cref{sec:sound:pq}).
 Multiplication in $\K$ uses three base-field multiplications (Karatsuba) and one multiplication by the constant $7$.
 Mixing base-field words with extension-field challenges is only needed in the first fold, which the code handles generically.
 
@@ -60,15 +61,28 @@ Every query at level $j$ reads a whole fibre $\{w_j(\xi), w_j(-\xi)\}$ (\cref{se
 We therefore build each Merkle tree over the $M_{j+1}$ fibres of $w_j$, one leaf per fibre containing both values.
 A query at level $j$ costs one authentication path of length $\log_2 M_{j+1}$.
 The value $w_{j+1}(\xi_{j+1})$ needed for the fold check at level $j+1$ is one of the two entries of the fibre opened at level $j+1$, so each query opens exactly one leaf per level.
-Leaves and internal nodes are hashed with BLAKE3 in keyed mode under two distinct fixed keys, which separate the two domains as in \cref{sec:proofs:bcs}; an internal node is then $64$ bytes, one BLAKE3 compression. The measurements of \cref{sec:exp} were recorded with an earlier format, which separated the domains by one-byte prefixes.
+The trees are the salted Merkle trees of \cref{sec:proofs:bcs}: the leaf of a fibre is $\mathsf{H}_{K_0}(w_j(\xi) \,\|\, w_j(-\xi) \,\|\, \gamma)$ with a uniformly random salt $\gamma$ of $32$ bytes ($= \lambda_{\mathsf{H}}/8$), and an internal node is $\mathsf{H}_{K_1}(\text{left} \,\|\, \text{right})$, where $\mathsf{H}_K$ is BLAKE3 in keyed mode under one of two distinct fixed keys, which separate the two domains; an internal node is then $64$ bytes, one BLAKE3 compression.
+The salts of a tree are the output of BLAKE3 in keyed mode (as an extendable-output function) under a seed of $32$ bytes drawn from the operating system: one seed per commitment and one per opening, so that the salts are fresh and secret.
+An opening of a fibre consists of the two values, the salt and the authentication path.
 In the IOP view, this means that the oracle $w_j$ is presented as the word $\mathrm{fib}_j(w_j)$ over the alphabet $\F^2$ indexed by $L_{j+1}$, one pair per fibre (\cref{sec:sound:pq}); every query of $\Pieval$ reads whole fibres, so this changes neither the protocol nor the analysis of \cref{sec:sound}.
 
 \paragraph{Fiat--Shamir.}
-The transcript is a BLAKE3 hash chain.
-It absorbs the parameters $(n, R, \ell, \kappa)$, the root of $w_0$, the point $z$ and the value $v$.
-Then, for $j = 1,\dots,\ell$, it absorbs $s_j$ before deriving $r_j$, and (for $j < \ell$) the root of $w_j$ before deriving $r_{j+1}$.
-It then absorbs the final table $g$, and finally derives the $\kappa$ query indices.
-A challenge in $\K$ is obtained from $256$ output bits as two $128$-bit integers reduced modulo $p$, at statistical distance below $2^{-64}$ from uniform per coordinate.
+The transcript is a BLAKE3 hash chain, and follows the rounds of $\Pieval^{\Sigma}$ (\cref{sec:sound:pq}).
+It absorbs the parameters $(n, R, \ell, \kappa)$, the basis, the salt length and $e$, the root of $w_0$, the point $z$ and the value $v$.
+In round $j \in \iv{1}{\ell}$ it absorbs $s_j$, then (for $j \ge 2$) the root of $w_{j-1}$, then a fresh round salt of $32$ bytes, and derives $r_j$.
+In round $\ell+1$ it absorbs the final table $g$ and a round salt, and derives the $\kappa$ query points.
+A challenge in $\F$ is the image under the map $\phi$ of \cref{sec:sound:pq} of $\beta = 64(e+1)$ output bits ($192$ for $e = 2$, $320$ for $e = 4$): the bits are read as an integer, whose first $e$ digits in base $p$ are the coordinates of $r_j$.
+The $\kappa$ query points are $\kappa$ consecutive blocks of $n + R$ output bits, read as exponents of $\omega$ (the map $\mathrm{pos}$).
+
+\paragraph{Relation to the compiler of~\cite{CDHZ25}.}
+The implementation has the structure of $\mathsf{BCS}[\Pieval^{\Sigma}]$: salted trees, one round salt per round, challenges derived from the roots and salts of all previous rounds, and the maps $\phi$ and $\mathrm{pos}$.
+The messages that the verifier reads entirely (the round polynomials and $g$) are absorbed into the transcript in the clear rather than committed by a tree, which is the usual encoding of such messages.
+With the quartic extension, $\kappa = 248$ and $\beta = 320$, the implementation uses the parameters of \cref{rem:pq-params}.
+
+\paragraph{Proof format.}
+A proof consists of the $\ell$ round polynomials (three values each), the roots of $w_1,\dots,w_{\ell-1}$, the $\ell+1$ round salts, the final table $g$, and, for each query, one opening of a fibre per level (two values, a salt and an authentication path).
+Its encoding has no length prefixes, since every length is fixed by the parameters, and the verifier rejects a proof in which any length differs.
+The repository contains test vectors: transcript challenges in both extensions, and complete proofs produced from fixed seeds.
 
 \paragraph{Final message.}
 The verifier converts $g$ to monomial form with the transform $C^{\otimes (n-\ell)}$ and evaluates $G$ at each $\xi_\ell$ by Horner's rule.
@@ -78,8 +92,9 @@ It evaluates $\tilde g(z_{\ell+1},\dots,z_{n})$ for the closure check by $n-\ell
 
 The test suite checks each component against a direct definition (field arithmetic against $128$-bit integer arithmetic, the transforms against the expansion of \cref{cor:bool-coeff}, the NTT against Horner evaluation) and the protocol end to end:
 \begin{itemize}
-  \item \emph{Completeness.} Honest proofs verify for all $1 \le n \le 10$, all $0 \le \ell \le n$ and rates $\rho \in \{1/2, 1/4, 1/8\}$, and the returned value equals $\tilde f(z)$ computed independently.
-  \item \emph{Tampering.} Proofs are rejected after changing the claimed value, the point, the commitment, one sumcheck value, one entry of $g$, one opened value, or one intermediate root, and when a proof for a different table is checked against the original commitment.
+  \item \emph{Completeness.} Honest proofs verify for both extensions, all $1 \le n \le 9$, all $0 \le \ell \le n$ and rates $\rho \in \{1/2, 1/4, 1/8\}$, and the returned value equals $\tilde f(z)$ computed independently.
+  \item \emph{Tampering.} Proofs are rejected after changing the claimed value, the point or the commitment; after every single change of one sumcheck value, one entry of $g$, one root, one round salt, one opened value, one leaf salt or one node of an authentication path; after changing the length of any of these lists or strings; and when a proof for a different table is checked against the original commitment. The verifier returns an error and never panics on such inputs, which randomised truncations also check.
+  \item \emph{Fresh salts.} Two commitments to the same table have different roots, and two openings have different round salts; both verify.
   \item \emph{A consistent cheater.} Consider a prover that commits honestly and claims $v+1$. In every round it adds half of the current discrepancy to each of $s_j(0)$, $s_j(1)$ and $s_j(2)$, so that every sumcheck check passes; it folds honestly, and modifies $g(0)$ so that the closure check passes. This prover is rejected in every tested configuration, and always in the query phase, as predicted by case~2 of \cref{thm:sound}.
 \end{itemize}
 Independently, each algebraic statement of \cref{sec:kernel,sec:fold} and the two lemmas of \cref{sec:sound:lemmas} were checked numerically over small prime fields ($\mathbb{F}_{17}$ exhaustively where feasible, and $\mathbb{F}_{257}$); these scripts are part of the artefact.

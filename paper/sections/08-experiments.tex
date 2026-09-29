@@ -10,6 +10,7 @@ The implementation is a single-threaded reference implementation without SIMD, M
 All runs use one core of an Intel Xeon processor at $2.10$\,GHz (cloud virtual machine, $2$ vCPUs, $7$\,GB RAM), Rust $1.95.0$, release profile with fat LTO and one codegen unit, and no \texttt{target-cpu} flag.
 Times are medians over $11$ runs for $n \le 18$, $5$ for $n = 20$ and $3$ for $n = 22$ and for \cref{tab:stop,tab:rate}; verification times are medians over $21$ runs.
 The machine is a shared virtual machine, and timings of identical work vary by up to about $20\%$ between runs (see \cref{sec:exp:scaling}).
+The measurements were recorded with version~0.1 of the library, with the quadratic extension and unsalted trees whose domains are separated by one-byte prefixes; both encodings use the same trees, so the comparison is unaffected.
 
 \paragraph{Parameters.}
 Unless stated otherwise: rate $\rho = 1/4$ ($R = 2$), number of folding rounds $\ell = n - 4$ (final table of $16$ elements of $\K$), and $\kappa = 148$ queries.

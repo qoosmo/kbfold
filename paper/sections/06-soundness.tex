@@ -501,7 +501,7 @@ These unique-decoding parameters are conservative; list-decoding analyses of FRI
 \begin{remark}[Scope]\label{rem:fs}
 \begin{itemize}
   \item The analysis concerns one commitment opened at one point $z$ per proof. Reusing a commitment across several openings, batching, or choosing $z$ after the commitment inside a larger Fiat--Shamir transcript is not analysed here.
-  \item \Cref{cor:pq} applies to the compiler $\mathsf{BCS}$ of~\cite[Construction~11.7]{CDHZ25}, with salted Merkle trees and the challenge derivation described in \cref{sec:proofs:bcs}. The implementation of \cref{sec:impl} uses unsalted, domain-separated Merkle trees and a hash-chain transcript, and is therefore not covered by \cref{cor:pq} as it stands.
+  \item \Cref{cor:pq} applies to the compiler $\mathsf{BCS}$ of~\cite[Construction~11.7]{CDHZ25}, with salted Merkle trees and the challenge derivation described in \cref{sec:proofs:bcs}. The implementation of \cref{sec:impl} follows the structure of this compiler (\cref{sec:impl:merkle}).
   \item For $\ell = 0$ the same argument applies with $\Sigma = \F$, the implicit instance $y = w_0$ and the Hamming distance, giving the single error $(1-\delta)^{\kappa}$: the verifier rejects on $\bot$, $\mathsf{E}$ decodes the filled word at radius $\delta^*$, and, for a fixed final table $g$, the accepted query points lie in $\{\xi : y(\xi) \ne \bot,\ y(\xi) = G(\xi)\}$, whose density is less than $1-\delta$ unless $\Delta(y, \ev_L(G)) \le \delta$ and $v = \tilde g(z)$, in which case $\mathsf{E}(y) = g$ is a witness (as in \cref{prop:l0}).
   \item The bounds also hold against classical adversaries in the random oracle model, with the same (quantum) extractor (\cref{sec:proofs:bcs}).
 \end{itemize}

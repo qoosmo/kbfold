@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (v0.3.0, ePrint version)
+## v0.3.0 (unreleased, ePrint version)
 
 ### Paper
 - New title: "Post-Quantum Multilinear Polynomial Commitments from FRI Folding in the Boolean-Kernel Basis" (also in README, CITATION.cff, the crate description and the project page).
@@ -10,6 +10,20 @@
 - Scope statements in §5 (Remark on batching), §6, §7 and §8 point to the new §10.1 (Future work).
 - §10: future work (soundness, zero knowledge, implementation, formal verification, other domains) and §10.2 (Artefacts: repository, release, commands to reproduce each table and check, Lean toolchain).
 - Reference added: Libra (Xie et al., CRYPTO 2019).
+
+### Rust (breaking changes)
+- **Compiler of CDHZ25 (Construction 11.7).** Salted Merkle trees (leaf `H_K0(a || b || salt)`, 32-byte salts from a keyed BLAKE3 stream), one round salt per round, challenges derived from all previous roots and salts; salts from a fresh operating-system seed per commitment and per opening (`getrandom`). Transcript label `kbfold/v0.3/pcs`.
+- **Quartic extension** `Fp4 = F_p[i]/(i^4 - 7)` and the trait `ExtField`; the protocol is generic in the challenge field (`Fp2` or `Fp4`).
+- **Challenge maps of the paper:** `phi` from 64(e+1) bits (the integer reduced mod p^e, base-p digits), and `pos` (kappa blocks of m+R bits).
+- `Params` gains `salt_len`, `new`, `classical` (148 queries, `Fp2`), `post_quantum` (248 queries, `Fp4`) and `validate`.
+- `commit`, `open` and `verify` return `Result<_, Error>`; the verifier never panics on malformed proofs. `Proof` gains `round_salts`, leaf salts in each opening, and `to_bytes` (canonical encoding).
+- `#![forbid(unsafe_code)]`; feature `insecure-test-vectors` (seeded provers, never for production).
+- Tests: completeness in both extensions, every single mutation of a proof rejected, lengths and random truncations without panic, fresh salts, invalid parameters; test vectors in `rust/vectors/` (transcript challenges, complete proofs). CI runs the vector tests.
+
+### Paper (with the code)
+- §7: extension fields, salted trees, Fiat-Shamir by rounds, relation to the compiler of CDHZ25, proof format, tests.
+- Remark 7.30 (scope), introduction and §10.1 updated: the implementation follows the compiler; the conformance item leaves the future work.
+- §9: the measurements were recorded with version 0.1 (to be re-measured).
 
 ### Docs
 - `docs/ROADMAP.md`: version 1 (first ePrint submission) and version 2 (revision of the same entry).
