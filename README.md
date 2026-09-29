@@ -86,7 +86,8 @@ cargo test --release                          # completeness, tampering, robustn
 cargo test --release --features insecure-test-vectors  # test vectors (vectors/)
 cargo run --release --example paper_checks    # numerical checks of the paper's lemmas
 cargo run --release --example pq_params       # exact post-quantum bound (Remark 7.28)
-cargo run --release --example bench           # benchmarks of Section 9
+cargo run --release --example bench -- scaling   # one benchmark of Section 9 (modes: scaling pq salt stop rate breakdown)
+bench/run_all.sh mymachine 22 [path/to/whir]    # all benchmarks of Section 9, CSV in results/mymachine/
 ```
 
 **Paper**:

@@ -25,6 +25,15 @@
 - Remark 7.30 (scope), introduction and §10.1 updated: the implementation follows the compiler; the conformance item leaves the future work.
 - §9: the measurements were recorded with version 0.1 (to be re-measured).
 
+### Benchmarks
+- Feature `parallel` (rayon): transforms, NTT, Merkle trees, folds and sumcheck on all cores; the proofs are identical (CI checks them against the test vectors).
+- `examples/bench.rs`: modes `scaling`, `pq` (F_{p^4}, 248 queries), `salt`, `stop`, `rate`, `breakdown`; CSV with thread count. `bench/run_all.sh` runs all of them, in both threading modes, and optionally the WHIR implementation as an external reference.
+- New measurements in `rust/results/vm-2cpu/`; the version 0.1 data move to `rust/results/v0.1/`.
+
+### Paper (§9, measurements of 0.3.0)
+- All tables re-measured with 0.3.0 (salted trees). New: post-quantum parameters (Table 3), cost of salts, parallel speed-up, and WHIR on the same machine (Table 6), with the three techniques behind its smaller proofs added to future work (§10.1).
+- Introduction and conclusion describe the new measurements; stray characters before §10.1 removed.
+
 ### Docs
 - `docs/ROADMAP.md`: version 1 (first ePrint submission) and version 2 (revision of the same entry).
 

@@ -58,13 +58,14 @@ impl MerkleTree {
         if salt_len > 0 {
             salt_stream(seed, label).fill(&mut salts);
         }
-        let leaves: Vec<Digest> = (0..h)
-            .map(|i| hash_leaf(&w[i], &w[i + h], &salts[i * salt_len..(i + 1) * salt_len]))
-            .collect();
+        let leaves: Vec<Digest> = crate::par::map_range(h, |i| {
+            hash_leaf(&w[i], &w[i + h], &salts[i * salt_len..(i + 1) * salt_len])
+        });
         let mut layers = vec![leaves];
         while layers.last().unwrap().len() > 1 {
             let prev = layers.last().unwrap();
-            let next: Vec<Digest> = prev.chunks_exact(2).map(|c| hash_node(&c[0], &c[1])).collect();
+            let next: Vec<Digest> =
+                crate::par::map_range(prev.len() / 2, |i| hash_node(&prev[2 * i], &prev[2 * i + 1]));
             layers.push(next);
         }
         MerkleTree { layers, salts, salt_len }

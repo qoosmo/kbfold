@@ -238,12 +238,27 @@ fn fold_word<F: Field, E: ExtField + From<F>>(
     inv2: Fp,
 ) -> Vec<E> {
     let h = w.len() / 2;
-    (0..h)
-        .map(|i| {
-            let inv_2x = inv_x0[i << level] * inv2;
-            fold_pair(basis, E::from(w[i]), E::from(w[i + h]), inv_2x, t, inv2)
-        })
-        .collect()
+    crate::par::map_range(h, |i| {
+        let inv_2x = inv_x0[i << level] * inv2;
+        fold_pair(basis, E::from(w[i]), E::from(w[i + h]), inv_2x, t, inv2)
+    })
+}
+
+/// s_j(0), s_j(1), s_j(2) from the current tables (parallel over blocks of pairs).
+fn sumcheck_round<E: ExtField>(a: &[E], e: &[E]) -> [E; 3] {
+    let pairs = a.len() / 2;
+    let block = crate::par::GRAIN;
+    let parts = crate::par::map_range(pairs.div_ceil(block), |c| {
+        let mut h = [E::ZERO; 3];
+        for i in c * block..((c + 1) * block).min(pairs) {
+            let (a0, a1, e0, e1) = (a[2 * i], a[2 * i + 1], e[2 * i], e[2 * i + 1]);
+            h[0] = h[0] + a0 * e0;
+            h[1] = h[1] + a1 * e1;
+            h[2] = h[2] + (a1.double() - a0) * (e1.double() - e0);
+        }
+        h
+    });
+    parts.iter().fold([E::ZERO; 3], |s, h| [s[0] + h[0], s[1] + h[1], s[2] + h[2]])
 }
 
 fn eq1<E: ExtField>(a: E, c: E) -> E {
@@ -340,12 +355,7 @@ fn open_inner<E: ExtField>(
     let mut trees: Vec<MerkleTree> = Vec::new();
     // Round j (1 <= j <= s): message s_j, then (j >= 2) the oracle w_{j-1}; challenge r_j.
     for j in 1..=p.s {
-        let mut h = [E::ZERO; 3];
-        for (ap, ep) in a.chunks_exact(2).zip(e.chunks_exact(2)) {
-            h[0] = h[0] + ap[0] * ep[0];
-            h[1] = h[1] + ap[1] * ep[1];
-            h[2] = h[2] + (ap[1].double() - ap[0]) * (ep[1].double() - ep[0]);
-        }
+        let mut h = sumcheck_round(&a, &e);
         if cheat.is_some() {
             // shift every value of h by half the discrepancy: h(0) + h(1) then equals the claim
             let d = (claim - (h[0] + h[1])) * inv2;

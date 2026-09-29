@@ -1,8 +1,17 @@
-//! Benchmarks for Section 9.  Single-threaded, salted trees (32-byte salts).  Usage:
-//!   cargo run --release --example bench -- scaling | stop | rate
-use kbfold::field::{Field, Fp, Fp2};
+//! Benchmarks of Section 9. Usage:
+//!   cargo run --release --example bench -- <mode> [max_m]
+//!   cargo run --release --features parallel --example bench -- <mode> [max_m]
+//! Modes:
+//!   scaling  kernel vs coefficient-form encoding, F_{p^2}, classical parameters (148 queries)
+//!   pq       post-quantum parameters: F_{p^4}, 248 queries (Remark 7.28)
+//!   salt     cost of salting: salt_len 0 vs 32, m = 20
+//!   stop     number of folding rounds, m = 20
+//!   rate     rate 1/2, 1/4, 1/8, m = 20
+//!   breakdown  where the prover time goes (commit and open phases), m = 20
+//! Every mode prints CSV with the machine columns `threads` and `parallel`.
+use kbfold::field::{ExtField, Field, Fp, Fp2, Fp4};
 use kbfold::merkle::MerkleTree;
-use kbfold::pcs::{commit, open, to_coefficients, verify, Basis, Params};
+use kbfold::pcs::{Basis, Params, commit, open, to_coefficients, verify};
 use kbfold::poly::ntt;
 use std::time::Instant;
 
@@ -17,6 +26,10 @@ impl Rng {
     fn fp(&mut self) -> Fp {
         Fp::new(self.next())
     }
+    fn ext<E: ExtField>(&mut self) -> E {
+        let d: Vec<Fp> = (0..E::DEGREE).map(|_| self.fp()).collect();
+        E::from_digits(&d)
+    }
 }
 
 fn median(mut v: Vec<f64>) -> f64 {
@@ -24,48 +37,46 @@ fn median(mut v: Vec<f64>) -> f64 {
     v[v.len() / 2]
 }
 
-/// queries for >= 100 bits with delta = (1 - rho)/2
-fn queries_for(log_inv_rate: usize) -> usize {
-    let rho = 1.0 / (1u64 << log_inv_rate) as f64;
-    let delta = (1.0 - rho) / 2.0;
-    (100.0 / -(1.0 - delta).log2()).ceil() as usize
+fn ms(t: Instant) -> f64 {
+    t.elapsed().as_secs_f64() * 1e3
+}
+
+fn threads() -> usize {
+    std::env::var("RAYON_NUM_THREADS")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or_else(|| std::thread::available_parallelism().map_or(1, |n| n.get()))
+}
+
+fn machine() -> String {
+    let t = if cfg!(feature = "parallel") { threads() } else { 1 };
+    format!("{t},{}", cfg!(feature = "parallel"))
 }
 
 struct Row {
     commit_ms: f64,
-    transform_ms: f64,
-    ntt_ms: f64,
-    merkle_ms: f64,
     open_ms: f64,
     verify_ms: f64,
     proof_kib: f64,
 }
 
-fn run(p: &Params, reps: usize, seed: u64) -> Row {
+fn reps_for(m: usize) -> usize {
+    match m {
+        0..=16 => 11,
+        17..=20 => 5,
+        _ => 3,
+    }
+}
+
+fn run<E: ExtField>(p: &Params, reps: usize, seed: u64) -> Row {
     let mut rng = Rng(seed);
     let table: Vec<Fp> = (0..1usize << p.m).map(|_| rng.fp()).collect();
-    let z: Vec<Fp2> = (0..p.m).map(|_| Fp2(rng.fp(), rng.fp())).collect();
-    let omega = Fp::two_adic_root((p.m + p.log_inv_rate) as u32);
-
-    // commit breakdown (same steps as pcs::commit)
-    let (mut tr, mut nt, mut mk, mut cm) = (vec![], vec![], vec![], vec![]);
+    let z: Vec<E> = (0..p.m).map(|_| rng.ext()).collect();
+    let mut cm = vec![];
     for _ in 0..reps {
-        let t0 = Instant::now();
-        let mut w = table.clone();
-        to_coefficients(p.basis, &mut w);
-        let t1 = Instant::now();
-        w.resize(p.n(), Fp::ZERO);
-        ntt(&mut w, omega);
-        let t2 = Instant::now();
-        let tree = MerkleTree::new(&w, &[0u8; 32], b"w0", p.salt_len);
-        let t3 = Instant::now();
-        std::hint::black_box(tree.root());
-        tr.push((t1 - t0).as_secs_f64() * 1e3);
-        nt.push((t2 - t1).as_secs_f64() * 1e3);
-        mk.push((t3 - t2).as_secs_f64() * 1e3);
-        let t4 = Instant::now();
+        let t = Instant::now();
         let r = commit(p, &table).unwrap();
-        cm.push(t4.elapsed().as_secs_f64() * 1e3);
+        cm.push(ms(t));
         std::hint::black_box(r.0);
     }
     let (root, pd) = commit(p, &table).unwrap();
@@ -74,64 +85,131 @@ fn run(p: &Params, reps: usize, seed: u64) -> Row {
     for _ in 0..reps {
         let t = Instant::now();
         let r = open(p, &pd, &z).unwrap();
-        op.push(t.elapsed().as_secs_f64() * 1e3);
+        op.push(ms(t));
         last = Some(r);
     }
     let (v, proof) = last.unwrap();
     let mut ve = vec![];
     for _ in 0..21 {
         let t = Instant::now();
-        let ok = verify(p, &root, &z, v, &proof).is_ok();
-        ve.push(t.elapsed().as_secs_f64() * 1e3);
-        assert!(ok);
+        let ok = verify(p, &root, &z, v, &proof);
+        ve.push(ms(t));
+        assert_eq!(ok, Ok(()));
     }
     Row {
         commit_ms: median(cm),
-        transform_ms: median(tr),
-        ntt_ms: median(nt),
-        merkle_ms: median(mk),
         open_ms: median(op),
         verify_ms: median(ve),
-        proof_kib: proof.size_bytes() as f64 / 1024.0,
+        proof_kib: proof.to_bytes().len() as f64 / 1024.0,
     }
+}
+
+fn header(extra: &str) {
+    println!("{extra},threads,parallel,commit_ms,open_ms,prover_ms,verify_ms,proof_kib");
+}
+
+fn line(extra: String, r: &Row) {
+    println!(
+        "{extra},{},{:.2},{:.2},{:.2},{:.3},{:.1}",
+        machine(),
+        r.commit_ms,
+        r.open_ms,
+        r.commit_ms + r.open_ms,
+        r.verify_ms,
+        r.proof_kib
+    );
 }
 
 fn main() {
     let mode = std::env::args().nth(1).unwrap_or_else(|| "scaling".into());
-    let _ = Fp2::ONE;
+    let max_m: usize = std::env::args().nth(2).and_then(|s| s.parse().ok()).unwrap_or(22);
     match mode.as_str() {
         "scaling" => {
-            println!("basis,m,R,s,queries,commit_ms,transform_ms,ntt_ms,merkle_ms,open_ms,verify_ms,proof_kib");
-            for m in (12..=22).step_by(2) {
+            header("basis,m,R,s,queries,field");
+            for m in (12..=max_m).step_by(2) {
                 for basis in [Basis::Kernel, Basis::Monomial] {
-                    let p = Params { basis, m, log_inv_rate: 2, s: m - 4, queries: queries_for(2), salt_len: 32 };
-                    let reps = if m >= 22 { 3 } else if m >= 20 { 5 } else { 11 };
-                    let r = run(&p, reps, 1 + m as u64);
-                    println!(
-                        "{:?},{},{},{},{},{:.2},{:.2},{:.2},{:.2},{:.2},{:.3},{:.1}",
-                        basis, m, 2, p.s, p.queries, r.commit_ms, r.transform_ms, r.ntt_ms, r.merkle_ms, r.open_ms, r.verify_ms, r.proof_kib
-                    );
+                    let p = Params { basis, ..Params::classical(m) };
+                    let r = run::<Fp2>(&p, reps_for(m), 1 + m as u64);
+                    line(format!("{basis:?},{m},2,{},{},p^2", p.s, p.queries), &r);
                 }
             }
         }
+        "pq" => {
+            header("basis,m,R,s,queries,field");
+            for m in (12..=max_m).step_by(2) {
+                let p = Params::post_quantum(m);
+                let r = run::<Fp4>(&p, reps_for(m), 2 + m as u64);
+                line(format!("Kernel,{m},2,{},{},p^4", p.s, p.queries), &r);
+            }
+        }
+        "salt" => {
+            header("m,salt_len");
+            let m = max_m.min(20);
+            for salt_len in [0, 32] {
+                let p = Params { salt_len, ..Params::classical(m) };
+                let r = run::<Fp2>(&p, 5, 3);
+                line(format!("{m},{salt_len}"), &r);
+            }
+        }
         "stop" => {
-            println!("m,s,final_len,open_ms,verify_ms,proof_kib");
-            let m = 20;
-            for s in [8, 10, 12, 14, 16, 18, 20] {
-                let p = Params { basis: Basis::Kernel, m, log_inv_rate: 2, s, queries: queries_for(2), salt_len: 32 };
-                let r = run(&p, 3, 77);
-                println!("{},{},{},{:.2},{:.3},{:.1}", m, s, 1 << (m - s), r.open_ms, r.verify_ms, r.proof_kib);
+            header("m,s,final_len");
+            let m = max_m.min(20);
+            for s in (8..=m).step_by(2) {
+                let p = Params { s, ..Params::classical(m) };
+                let r = run::<Fp2>(&p, 3, 77);
+                line(format!("{m},{s},{}", 1 << (m - s)), &r);
             }
         }
         "rate" => {
-            println!("m,R,queries,commit_ms,open_ms,verify_ms,proof_kib");
-            let m = 20;
+            header("m,R,queries");
+            let m = max_m.min(20);
             for rr in [1, 2, 3] {
-                let p = Params { basis: Basis::Kernel, m, log_inv_rate: rr, s: m - 4, queries: queries_for(rr), salt_len: 32 };
-                let r = run(&p, 3, 99);
-                println!("{},{},{},{:.2},{:.2},{:.3},{:.1}", m, rr, p.queries, r.commit_ms, r.open_ms, r.verify_ms, r.proof_kib);
+                // queries: smallest kappa with (1 - delta)^kappa < 2^-100, delta = (1 - rho)/2
+                let delta = (1.0 - 1.0 / (1u64 << rr) as f64) / 2.0;
+                let q = (100.0 / -(1.0 - delta).log2()).ceil() as usize;
+                let p = Params { log_inv_rate: rr, queries: q, ..Params::classical(m) };
+                let r = run::<Fp2>(&p, 3, 99);
+                line(format!("{m},{rr},{q}"), &r);
             }
         }
-        _ => eprintln!("unknown mode"),
+        "breakdown" => {
+            // commit: transform, NTT, Merkle tree; the rest of the open time is the sumcheck,
+            // the folds and their trees, and the query phase.
+            println!("basis,m,threads,parallel,transform_ms,ntt_ms,merkle_ms,commit_ms,open_ms");
+            let m = max_m.min(20);
+            for basis in [Basis::Kernel, Basis::Monomial] {
+                let p = Params { basis, ..Params::classical(m) };
+                let mut rng = Rng(5);
+                let table: Vec<Fp> = (0..1usize << m).map(|_| rng.fp()).collect();
+                let omega = Fp::two_adic_root((m + p.log_inv_rate) as u32);
+                let (mut tr, mut nt, mut mk) = (vec![], vec![], vec![]);
+                for _ in 0..5 {
+                    let t0 = Instant::now();
+                    let mut w = table.clone();
+                    to_coefficients(p.basis, &mut w);
+                    let t1 = Instant::now();
+                    w.resize(p.n(), Fp::ZERO);
+                    ntt(&mut w, omega);
+                    let t2 = Instant::now();
+                    let tree = MerkleTree::new(&w, &[0u8; 32], b"w0", p.salt_len);
+                    std::hint::black_box(tree.root());
+                    tr.push((t1 - t0).as_secs_f64() * 1e3);
+                    nt.push((t2 - t1).as_secs_f64() * 1e3);
+                    mk.push(ms(t2));
+                }
+                let r = run::<Fp2>(&p, 5, 5);
+                println!(
+                    "{basis:?},{m},{},{:.2},{:.2},{:.2},{:.2},{:.2}",
+                    machine(),
+                    median(tr),
+                    median(nt),
+                    median(mk),
+                    r.commit_ms,
+                    r.open_ms
+                );
+            }
+        }
+        _ => eprintln!("unknown mode {mode}"),
     }
+    let _ = Fp2::ONE;
 }

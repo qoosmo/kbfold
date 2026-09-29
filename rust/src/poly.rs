@@ -2,43 +2,56 @@
 
 use crate::field::{Field, Fp};
 
+/// Applies `op` to every pair (v[i], v[i + half]) of every block of length 2 half, for half =
+/// 1, 2, ..., n/2 in turn (one tensor factor per pass). Parallel with the feature `parallel`.
+fn tensor_pass<F: Field>(v: &mut [F], op: impl Fn(&mut F, &mut F) + Sync + Send) {
+    let n = v.len();
+    let mut half = 1;
+    while half < n {
+        if half >= crate::par::GRAIN {
+            for block in v.chunks_exact_mut(2 * half) {
+                let (lo, hi) = block.split_at_mut(half);
+                crate::par::zip_chunks(lo, hi, |_, a, b| {
+                    for (x, y) in a.iter_mut().zip(b.iter_mut()) {
+                        op(x, y);
+                    }
+                });
+            }
+        } else {
+            crate::par::for_blocks(v, 2 * half, |block| {
+                let (lo, hi) = block.split_at_mut(half);
+                for (x, y) in lo.iter_mut().zip(hi.iter_mut()) {
+                    op(x, y);
+                }
+            });
+        }
+        half *= 2;
+    }
+}
+
 /// Kernel coordinates -> monomial coefficients:  `u = C^{(x)m} lambda`,  `C = [[0,1],[1,1]]`.
 /// Each tensor factor maps (v0, v1) -> (v1, v0 + v1).  Cost: (m/2) N additions.
 pub fn kernel_to_mono<F: Field>(v: &mut [F]) {
     let n = v.len();
     assert!(n.is_power_of_two());
-    let mut half = 1;
-    while half < n {
-        for block in v.chunks_exact_mut(2 * half) {
-            let (lo, hi) = block.split_at_mut(half);
-            for (a, b) in lo.iter_mut().zip(hi.iter_mut()) {
-                let v0 = *a;
-                let v1 = *b;
-                *a = v1;
-                *b = v0 + v1;
-            }
-        }
-        half *= 2;
-    }
+    tensor_pass(v, |a, b| {
+        let v0 = *a;
+        let v1 = *b;
+        *a = v1;
+        *b = v0 + v1;
+    });
 }
 
 /// Monomial coefficients -> kernel coordinates:  (C^{-1})^{(x)m},  (v0, v1) -> (v1 - v0, v0).
 pub fn mono_to_kernel<F: Field>(v: &mut [F]) {
     let n = v.len();
     assert!(n.is_power_of_two());
-    let mut half = 1;
-    while half < n {
-        for block in v.chunks_exact_mut(2 * half) {
-            let (lo, hi) = block.split_at_mut(half);
-            for (a, b) in lo.iter_mut().zip(hi.iter_mut()) {
-                let v0 = *a;
-                let v1 = *b;
-                *a = v1 - v0;
-                *b = v0;
-            }
-        }
-        half *= 2;
-    }
+    tensor_pass(v, |a, b| {
+        let v0 = *a;
+        let v1 = *b;
+        *a = v1 - v0;
+        *b = v0;
+    });
 }
 
 /// Table -> monomial coefficients of its multilinear extension (Moebius inversion, Lemma 2.3):
@@ -46,21 +59,12 @@ pub fn mono_to_kernel<F: Field>(v: &mut [F]) {
 pub fn mobius<F: Field>(v: &mut [F]) {
     let n = v.len();
     assert!(n.is_power_of_two());
-    let mut half = 1;
-    while half < n {
-        for block in v.chunks_exact_mut(2 * half) {
-            let (lo, hi) = block.split_at_mut(half);
-            for (a, b) in lo.iter().zip(hi.iter_mut()) {
-                *b = *b - *a;
-            }
-        }
-        half *= 2;
-    }
+    tensor_pass(v, |a, b| *b = *b - *a);
 }
 
 /// Restriction of the first (least significant) variable: `t -> (1-T) t[2b] + T t[2b+1]`  (Lemma 2.4).
 pub fn restrict<F: Field>(t: &[F], r: F) -> Vec<F> {
-    t.chunks_exact(2).map(|p| p[0] + r * (p[1] - p[0])).collect()
+    crate::par::map_range(t.len() / 2, |i| t[2 * i] + r * (t[2 * i + 1] - t[2 * i]))
 }
 
 /// Multilinear extension of a table at a point (little-endian variable order).
@@ -123,14 +127,29 @@ pub fn ntt(v: &mut [Fp], omega: Fp) {
             tw.push(w);
             w = w * w_len;
         }
-        for block in v.chunks_exact_mut(len) {
-            let (lo, hi) = block.split_at_mut(half);
-            for k in 0..half {
-                let u = lo[k];
-                let t = hi[k] * tw[k];
-                lo[k] = u + t;
-                hi[k] = u - t;
+        if half >= crate::par::GRAIN {
+            // few large blocks: split each block's butterflies
+            for block in v.chunks_exact_mut(len) {
+                let (lo, hi) = block.split_at_mut(half);
+                crate::par::zip_chunks(lo, hi, |s, a, b| {
+                    for k in 0..a.len() {
+                        let u = a[k];
+                        let t = b[k] * tw[s + k];
+                        a[k] = u + t;
+                        b[k] = u - t;
+                    }
+                });
             }
+        } else {
+            crate::par::for_blocks(v, len, |block| {
+                let (lo, hi) = block.split_at_mut(half);
+                for k in 0..half {
+                    let u = lo[k];
+                    let t = hi[k] * tw[k];
+                    lo[k] = u + t;
+                    hi[k] = u - t;
+                }
+            });
         }
         len *= 2;
     }

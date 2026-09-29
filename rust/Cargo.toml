@@ -20,8 +20,12 @@ lto = "fat"
 [dependencies]
 blake3 = "1.8.7"
 getrandom = "0.4"
+rayon = { version = "1.10", optional = true }
 
 [features]
+# Multithreaded prover (transforms, NTT, Merkle trees, folding, sumcheck) with rayon. The proofs
+# are identical with and without it.
+parallel = ["dep:rayon"]
 # Seeded provers (module `insecure`) for test vectors and reproducible digests. Insecure: never
 # enable in production.
 insecure-test-vectors = []

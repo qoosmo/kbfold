@@ -1,0 +1,3 @@
+basis,m,threads,parallel,transform_ms,ntt_ms,merkle_ms,commit_ms,open_ms
+Kernel,20,1,false,13.78,208.38,416.84,665.09,604.07
+Monomial,20,1,false,10.43,177.80,435.61,583.21,567.81

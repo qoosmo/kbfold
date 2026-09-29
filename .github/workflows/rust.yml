@@ -15,6 +15,8 @@ jobs:
       - run: cargo test --release
       - name: Test vectors (seeded provers)
         run: cargo test --release --features insecure-test-vectors
+      - name: Parallel prover (same proofs as the test vectors)
+        run: cargo test --release --features parallel,insecure-test-vectors
       - name: Documentation
         run: RUSTDOCFLAGS="-D warnings" cargo doc --no-deps
       - name: Package

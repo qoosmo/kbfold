@@ -2,10 +2,10 @@
 //! check themselves against `vectors/`. Regenerate with `KBFOLD_BLESS=1` (only after an intended
 //! change of the proof format, together with `pcs::LABEL`).
 
-use kbfold::field::{ExtField, Fp, Fp2, Fp4};
+use kbfold::field::{ExtField, Fp2, Fp4};
 use kbfold::merkle::Transcript;
-use kbfold::pcs::{Params, verify};
 
+#[cfg(feature = "insecure-test-vectors")]
 fn hex(b: &[u8]) -> String {
     b.iter().map(|x| format!("{x:02x}")).collect()
 }
@@ -44,7 +44,9 @@ fn transcript_vectors() {
 #[cfg(feature = "insecure-test-vectors")]
 #[test]
 fn proof_vectors() {
+    use kbfold::field::Fp;
     use kbfold::insecure;
+    use kbfold::pcs::{Params, verify};
     let mut out = String::new();
     for (m, s, e) in [(6usize, 3usize, 2usize), (6, 6, 4)] {
         let p = Params::new(m, 2, s, 8);

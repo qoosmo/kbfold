@@ -1,0 +1,4 @@
+m,R,queries,threads,parallel,commit_ms,open_ms,prover_ms,verify_ms,proof_kib
+20,1,241,1,false,335.21,371.66,706.87,6.192,1745.5
+20,2,148,1,false,651.78,556.47,1208.25,3.756,1146.7
+20,3,121,1,false,1281.93,1277.83,2559.76,3.227,998.4

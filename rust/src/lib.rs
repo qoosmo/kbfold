@@ -25,7 +25,9 @@
 //! coefficient-form baseline), `error`.
 //!
 //! The prover draws its salts from the operating system (`getrandom`). The verifier returns
-//! `Result` and never panics on a malformed proof. Research code, single-threaded, not audited.
+//! `Result` and never panics on a malformed proof. With the feature `parallel` the prover
+//! runs on all cores (rayon); the proofs are identical with and without it. Research code, not
+//! audited.
 
 #![forbid(unsafe_code)]
 
@@ -34,6 +36,7 @@ pub mod field;
 pub mod merkle;
 pub mod pcs;
 pub mod poly;
+mod par;
 mod rand;
 
 /// Seeded provers for test vectors and reproducible digests (feature `insecure-test-vectors`).

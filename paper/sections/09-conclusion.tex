@@ -6,9 +6,9 @@ In kernel coordinates the normalised fold $\mathrm{pfold}_r$ \emph{is} the restr
 A Reed--Solomon codeword can therefore carry a table directly, and the BaseFold paradigm runs on it with no change of representation.
 We gave a self-contained proof of soundness, evaluation binding and round-by-round knowledge soundness in the unique-decoding regime, whose only external input about codes is the correlated-agreement theorem for Reed--Solomon codes (with efficient unique decoding for the extractor).
 With the BCS theorem for interactive oracle reductions of~\cite{CDHZ25}, this makes the non-interactive scheme knowledge sound, for a single opening, against quantum adversaries in the quantum random oracle model (\cref{cor:pq}).
-We also gave an implementation, in which the kernel encoding and coefficient-form folding are indistinguishable in running time at the resolution of our machine.
+We also gave an implementation that follows the compiler of~\cite{CDHZ25}, with classical and post-quantum parameters, in which the kernel encoding and coefficient-form folding are indistinguishable in running time at the resolution of our machine.
 
-Se\subsection{Future work}\label{sec:concl:future}
+\subsection{Future work}\label{sec:concl:future}
 
 \paragraph{Soundness.}
 \begin{itemize}
@@ -21,7 +21,8 @@ The kernel encoding is compatible with the standard masking techniques for foldi
 
 \paragraph{Implementation.}
 \begin{itemize}
-  \item \emph{Engineering.} Merkle multiproofs, batched openings, parallelism and SIMD field arithmetic would bring proof sizes and running times in line with production systems. None of them interacts with the encoding.
+  \item \emph{Proof size.} Folding several variables per round, with the kernel fold applied to $2^k$-element fibres, and merging authentication paths across queries reduce the number of paths per proof; together with list decoding, these are the techniques behind the smaller proofs of WHIR in \cref{tab:whir}.
+  \item \emph{Engineering.} SIMD field arithmetic and a parallel verifier. None of them interacts with the encoding.
 \end{itemize}
 
 \paragraph{Formal verification.}
