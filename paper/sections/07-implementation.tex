@@ -20,7 +20,7 @@ Multiplication uses the standard reduction of a $128$-bit product modulo $p$ bas
 \paragraph{Extension field.}
 The challenge field of \cref{sec:pcs:params} is the quadratic extension $\F = \K = \mathbb{F}_p[\iota]/(\iota^2 - 7)$, of size $p^2 \approx 2^{128}$: the challenges $r_j$, the evaluation point $z$, the value $v$, the sumcheck tables and all folded words $w_j$ ($j \ge 1$) live in $\K$, while tables and $w_0$ have entries in $\mathbb{F}_p$.
 The polynomial $\iota^2 - 7$ is irreducible because $7$, a generator of $\mathbb{F}_p^\times$, is a non-square.
-The post-quantum parameters of \cref{rem:pq-params} use the quartic extension instead; the code does not implement it yet, and its Merkle trees and transcript differ from the compiler of~\cite{CDHZ25} (\cref{rem:fs}).
+The post-quantum parameters of \cref{rem:pq-params} use the quartic extension; \cref{rem:fs} relates the implementation to the compiler of~\cite{CDHZ25}.
 Multiplication in $\K$ uses three base-field multiplications (Karatsuba) and one multiplication by the constant $7$.
 Mixing base-field words with extension-field challenges is only needed in the first fold, which the code handles generically.
 

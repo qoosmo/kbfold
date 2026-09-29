@@ -1,7 +1,7 @@
 //! kbfold: a multilinear polynomial commitment scheme from the Boolean-kernel basis.
 //!
-//! Reference implementation of "The Boolean-Kernel Basis: Native Evaluation-Form FRI Folding
-//! over Multiplicative Domains, with an Application to Multilinear Polynomial Commitments",
+//! Reference implementation of "Post-Quantum Multilinear Polynomial Commitments from FRI Folding
+//! in the Boolean-Kernel Basis",
 //! <https://github.com/qoosmo/kbfold/blob/main/paper/kbfold.pdf>.
 //!
 //! ```

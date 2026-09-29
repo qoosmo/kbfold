@@ -482,7 +482,7 @@ So if $f \ne f'$, some $\eta \in A \cap A'$ has $y(\eta) \ne y'(\eta)$, and the 
 If $z = z'$ and $v \ne v'$, then $\tilde f(z) = v \ne v' = \tilde f'(z)$, so $f \ne f'$.
 \end{proof}
 
-\Cref{lem:cr-unique} is deterministic. We do not state a probability bound for an adversary that produces two accepting proofs for one root, since that would require running the extractor of \cref{thm:cdhz} on two proofs of one adversary, which the theorem does not address.
+\Cref{lem:cr-unique} is deterministic. A probability bound for an adversary that produces two accepting proofs for one root would require running the extractor of \cref{thm:cdhz} on two proofs of one adversary, which lies outside the statement of that theorem. For the interactive oracle proof, evaluation binding is \cref{cor:binding}.
 
 \begin{remark}[Post-quantum parameters]\label{rem:pq-params}
 Take $\rho = 1/4$, $\delta = \delta^* = 3/8$, $M \le 2^{32}$ (so $\ell \le n \le 30$), the quartic extension $\F = \mathbb{F}_p[\iota]/(\iota^4 - 7)$ of the Goldilocks field, of size $p^4 > 2^{255.99}$ ($\iota^4 - 7$ is irreducible over $\mathbb{F}_p$ because $7$ is a non-square in $\mathbb{F}_p$ and $p \equiv 1 \pmod 4$~\cite[Theorem~3.75]{LN97}), $\beta = 320$, hash output length $\lambda_{\mathsf{H}} = 256$, and $\kappa = 248$ queries, so that $(5/8)^{\kappa} < 2^{-168}$ and $(M_1+2)(1/|\F| + 2^{-\beta}) < 2^{-224}$.
@@ -495,7 +495,7 @@ The parameters of \cref{sec:exp} (quadratic extension, $\kappa = 148$) give $\va
 \begin{remark}[Parameters]\label{rem:params}
 For $\rho = 1/4$ and $\delta = (1-\rho)/2 = 3/8$, one query passes with probability at most $5/8$; $\kappa = 148$ queries give $(5/8)^{\kappa} < 2^{-100}$.
 With $M = 2^{24}$ and $|\F| = p^2 > 2^{127.9}$ (the quadratic extension of \cref{sec:impl}), $\varepsilon_{\mathrm{fold}} + 2\ell/|\F| < 2^{-103}$.
-These unique-decoding parameters are conservative; list-decoding analyses of FRI-type folding~\cite{BCIKS23} allow fewer queries, and we leave that extension to future work.
+These unique-decoding parameters are conservative; list-decoding analyses of FRI-type folding~\cite{BCIKS23} allow fewer queries (\cref{sec:concl:future}).
 \end{remark}
 
 \begin{remark}[Scope]\label{rem:fs}

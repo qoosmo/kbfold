@@ -1,6 +1,6 @@
 # KBFold
 
-**The Boolean-Kernel Basis: native evaluation-form FRI folding over multiplicative domains, with an application to multilinear polynomial commitments.**
+**Post-Quantum Multilinear Polynomial Commitments from FRI Folding in the Boolean-Kernel Basis.**
 
 [![Lean](https://github.com/qoosmo/kbfold/actions/workflows/lean.yml/badge.svg)](https://github.com/qoosmo/kbfold/actions/workflows/lean.yml)
 [![Rust](https://github.com/qoosmo/kbfold/actions/workflows/rust.yml/badge.svg)](https://github.com/qoosmo/kbfold/actions/workflows/rust.yml)
@@ -106,8 +106,8 @@ cd paper && latexmk -pdf main.tex
 ```bibtex
 @misc{Mkhida2026KBFold,
   author = {Abdelali Mkhida},
-  title  = {The Boolean-Kernel Basis: Native Evaluation-Form {FRI} Folding over Multiplicative Domains,
-            with an Application to Multilinear Polynomial Commitments},
+  title  = {Post-Quantum Multilinear Polynomial Commitments from {FRI} Folding
+            in the {Boolean}-Kernel Basis},
   year   = {2026},
   note   = {Paper, Lean 4 formalisation and Rust implementation},
   howpublished = {\url{https://github.com/qoosmo/kbfold}}

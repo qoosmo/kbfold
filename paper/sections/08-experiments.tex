@@ -1,8 +1,8 @@
 \section{Experiments}\label{sec:exp}
 
 This section measures the implementation of \cref{sec:impl}.
-The goals are modest and specific: to check that the kernel encoding costs the same as coefficient-form folding at identical engineering (as predicted by \cref{rem:basefold}), to locate where the time goes, and to quantify the two protocol parameters $\ell$ and $\rho$.
-We do not claim competitive absolute performance: the code is single-threaded and uses no SIMD, no Merkle multiproofs and no hash-specific batching.
+It has three goals: to check that the kernel encoding costs the same as coefficient-form folding at identical engineering (as predicted by \cref{rem:basefold}), to locate where the time goes, and to quantify the two protocol parameters $\ell$ and $\rho$.
+The implementation is a single-threaded reference implementation without SIMD, Merkle multiproofs or hash-specific batching, so the comparison is between encodings; the engineering items of \cref{sec:concl:future} apply equally to both.
 
 \subsection{Setup}\label{sec:exp:setup}
 

@@ -164,5 +164,5 @@ What differs is structural: by \cref{thm:fold-dictionary}, the committed word, t
 
 \begin{remark}[Batching and zero knowledge]\label{rem:batch}
 Because $\Enc$ and $\fold_r$ are linear, several tables can be opened at the same point by running $\Pieval$ on a random linear combination of them, the verifier answering queries to the combined word from queries to each committed word.
-We do not analyse batching in this paper, and zero knowledge is out of scope.
+The soundness analysis of \cref{sec:sound} covers a single table; batched openings and a zero-knowledge variant are described in \cref{sec:concl:future}.
 \end{remark}

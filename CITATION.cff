@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this work, please cite it as below."
-title: "The Boolean-Kernel Basis: Native Evaluation-Form FRI Folding over Multiplicative Domains, with an Application to Multilinear Polynomial Commitments"
+title: "Post-Quantum Multilinear Polynomial Commitments from FRI Folding in the Boolean-Kernel Basis"
 authors:
   - family-names: Mkhida
     given-names: Abdelali

@@ -7,6 +7,7 @@
 \usepackage{longtable,array}
 \usepackage[hidelinks]{hyperref}
 \usepackage[capitalise,nameinlink]{cleveref}
+\usepackage{tikz-cd}
 
 % ---------- theorem environments ----------
 \newtheorem{theorem}{Theorem}[section]
@@ -41,25 +42,24 @@
 \newcommand{\F}{\mathbb{F}}
 \newcommand{\hi}{\mathrm{hi}}
 \newcommand{\Pieval}{\Pi_{\mathrm{eval}}}
+\newcommand{\kbversion}{0.3.0}
 
-\title{The Boolean-Kernel Basis:\\ Native Evaluation-Form FRI Folding over Multiplicative Domains,\\ with an Application to Multilinear Polynomial Commitments}
-\author{Abdelali Mkhida\\ Algorizk Labs\\ \texttt{ali.mkhida@algorizk.xyz}}
+\title{Post-Quantum Multilinear Polynomial Commitments\\ from FRI Folding in the Boolean-Kernel Basis}
+\author{Abdelali Mkhida\\ Algorizk Labs\\ \texttt{ali.mkhida@algorizk.xyz}\\ ORCID \href{https://orcid.org/0009-0009-2101-9070}{\texttt{0009-0009-2101-9070}}}
 \date{September 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Multilinear polynomial commitment schemes in the BaseFold paradigm commit to a Reed--Solomon encoding of a multilinear polynomial and prove evaluations by interleaving a sumcheck with FRI-style folding.
-Over smooth multiplicative domains, the classical fold acts on monomial coefficients, so a prover holding the polynomial as a table of values on the Boolean hypercube must first convert it to coefficient form.
+Hash-based multilinear polynomial commitment schemes in the BaseFold paradigm are candidates for post-quantum security; they commit to a Reed--Solomon encoding and prove evaluations by interleaving a sumcheck with FRI-style folding.
+Over smooth multiplicative domains the classical fold acts on monomial coefficients, so a prover holding a table of values on the Boolean hypercube must first convert it to coefficient form.
 We introduce the \emph{Boolean-kernel basis} $K_b(X) = \prod_{k=1}^{n}(X^{2^{k-1}} + b_k)$, $b \in \{0,1\}^n$, of the univariate polynomials of degree $< 2^n$.
 Its change of basis to monomials is the Kronecker power of a $2\times 2$ matrix and costs $\tfrac{n}{2}2^n$ additions or subtractions.
-In this basis a suitably normalised FRI fold is \emph{exactly} the restriction of one variable of the multilinear extension of the coordinate table; hence folding the Reed--Solomon encoding of $\sum_b f(b)K_b$ evaluates the multilinear extension $\tilde f$ of the table $f$ directly.
-We also characterise low degree in kernel coordinates by a sign condition and express univariate evaluation as a scaled multilinear evaluation.
-Building on this fold dictionary, we describe a transparent, hash-based multilinear polynomial commitment scheme.
-We prove it sound, evaluation binding and round-by-round knowledge sound in the unique-decoding regime, with a self-contained argument whose only external ingredient about codes is the correlated-agreement theorem for Reed--Solomon codes (together with efficient unique decoding, for the extractor). From round-by-round knowledge soundness we derive the relaxed round-by-round knowledge soundness of Chiesa, Di, Hu and Zheng; by their theorem on the BCS transformation for interactive oracle reductions, the non-interactive scheme, in which the commitment is a Merkle root chosen by the adversary, is knowledge sound, for a single opening, against quantum adversaries in the quantum random oracle model, with explicit concrete bounds.
-We implement the scheme in Rust over the Goldilocks field and compare it with a coefficient-form baseline sharing all other code: the two encodings are indistinguishable in running time at the resolution of our machine, so the structural property comes at no measurable cost.
-The paper is self-contained: every notion used in the proofs is defined in the paper, every result specific to the paper is proved, and the external results are stated in \cref{sec:prelim,sec:proofs}; the post-quantum corollary uses the quantum extraction model of~\cite{CDHZ25}, whose definitions we restate only as far as the statement requires. Companion Lean~4 files formalise the algebraic, probabilistic and soundness results, with the correlated-agreement theorem as the only axiom.
+In this basis a normalised FRI fold is \emph{exactly} the restriction of one variable of the multilinear extension of the coordinate table, so folding the encoding of a table evaluates its multilinear extension directly.
+On this fold dictionary we build a transparent, hash-based multilinear polynomial commitment scheme and prove it sound, evaluation binding and round-by-round knowledge sound in the unique-decoding regime; the only external result about codes is the correlated-agreement theorem for Reed--Solomon codes.
+With the BCS theorem for interactive oracle reductions of Chiesa, Di, Hu and Zheng, the non-interactive scheme is knowledge sound, for a single opening, against quantum adversaries in the quantum random oracle model, with explicit bounds.
+A Rust implementation over the Goldilocks field matches the running time of a coefficient-form baseline sharing all other code, and companion Lean~4 files formalise the algebraic, probabilistic and soundness results, with correlated agreement as the only axiom.
 \end{abstract}
 
 \tableofcontents
@@ -74,6 +74,11 @@ The paper is self-contained: every notion used in the proofs is defined in the p
 \input{sections/07-implementation}
 \input{sections/08-experiments}
 \input{sections/09-conclusion}
+
+\section*{Acknowledgments}
+The author thanks the developers of Lean, Mathlib and the Rust ecosystem, on which the companion artefacts are built.
+Generative AI tools (Anthropic's Claude) were used to assist with writing and editing the text, with the Rust code and the Lean proofs, and with checking computations.
+The author checked all results and takes full responsibility for the content of the paper and the artefacts; every Lean proof is checked by the Lean kernel.
 
 \bibliographystyle{alpha}
 \bibliography{refs}

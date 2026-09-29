@@ -1,4 +1,4 @@
-\section{Conclusion and Open Problems}\label{sec:concl}
+\section{Conclusion and Future Work}\label{sec:concl}
 
 The Boolean-kernel basis $\{K_b\}$ gives an exact dictionary between two operations that are usually treated separately.
 One is even--odd folding of univariate polynomials over smooth multiplicative domains; the other is restriction of a variable of a multilinear polynomial in table form.
@@ -8,16 +8,35 @@ We gave a self-contained proof of soundness, evaluation binding and round-by-rou
 With the BCS theorem for interactive oracle reductions of~\cite{CDHZ25}, this makes the non-interactive scheme knowledge sound, for a single opening, against quantum adversaries in the quantum random oracle model (\cref{cor:pq}).
 We also gave an implementation, in which the kernel encoding and coefficient-form folding are indistinguishable in running time at the resolution of our machine.
 
-Several questions remain open.
+Se\subsection{Future work}\label{sec:concl:future}
+
+\paragraph{Soundness.}
 \begin{itemize}
-  \item \emph{List decoding.} Extend \cref{thm:sound} to proximity parameters up to the Johnson bound, in the spirit of~\cite{Hab24,Zei26}. The line form of \cref{lem:line} reduces each fold to a Reed--Solomon line, so correlated agreement beyond unique decoding~\cite{BCIKS23} is the natural tool. The main work is to replace the unique codewords $c_j$ of the passing-set argument by lists.
-  \item \emph{Several openings.} Extend \cref{cor:pq} to several openings of one commitment, and to batched openings (\cref{rem:batch}).
-  \item \emph{Conformance of the implementation.} Implement the compiler of~\cite[Construction~11.7]{CDHZ25} (salted Merkle trees, their challenge derivation) and the quartic extension, so that \cref{cor:pq} applies to the code.
-  \item \emph{Tighter post-quantum parameters.} The quadratic loss in the number of queries in \cref{thm:cdhz} makes the post-quantum parameters of \cref{rem:pq-params} conservative; a list-decoding version of \cref{thm:rbr} would reduce the number of queries.
-  \item \emph{Other domains.} The dictionary uses a smooth multiplicative subgroup in odd characteristic. Is there a kernel-type basis whose natural fold is table-form restriction on circle domains~\cite{HLP24} or on additive subspaces~\cite{LCH14,DP24}?
-  \item \emph{Engineering.} Merkle multiproofs, batched openings (\cref{rem:batch}), parallelism and SIMD field arithmetic would bring proof sizes and running times in line with production systems. None of them interacts with the encoding.
-  \item \emph{Zero knowledge.} Adapt standard masking techniques for folding-based schemes to the kernel encoding.
+  \item \emph{List decoding.} Extend \cref{thm:sound,thm:rbr} to proximity parameters up to the Johnson bound, in the spirit of~\cite{Hab24,Zei26}. The line form of \cref{lem:line} reduces each fold to a Reed--Solomon line, so correlated agreement beyond unique decoding~\cite{BCIKS23} is the natural tool; the main work is to replace the unique codewords $c_j$ of the passing-set argument by lists. This would reduce the number of queries, in the classical parameters of \cref{rem:params} and in the post-quantum parameters of \cref{rem:pq-params}, where the quadratic loss of \cref{thm:cdhz} makes the query count conservative.
+  \item \emph{Batched and repeated openings.} Prove soundness of the batched opening of \cref{rem:batch}, by correlated agreement applied to the random linear combination of the committed words, and extend \cref{cor:pq} to several openings of one commitment.
 \end{itemize}
 
-\paragraph{Code availability.}
-The Rust implementation of \cref{sec:impl}, the benchmark scripts of \cref{sec:exp} and the numerical checks of \cref{sec:impl:tests} are released as open source together with this paper.
+\paragraph{Zero knowledge.}
+The kernel encoding is compatible with the standard masking techniques for folding-based schemes: committing to $U_f + X^N R$ for a random polynomial $R$ of small degree, masking the sumcheck with a random polynomial in the manner of Libra~\cite{XZZPS19}, and masking the folded words with a random codeword. The task is to prove that the fold dictionary and the soundness argument survive the extra degree, and that the resulting view is simulable.
+
+\paragraph{Implementation.}
+\begin{itemize}
+  \item \emph{Conformance.} Implement the compiler of~\cite[Construction~11.7]{CDHZ25} (salted Merkle trees, their challenge derivation) and the quartic extension, so that \cref{cor:pq} applies to the code.
+  \item \emph{Engineering.} Merkle multiproofs, batched openings, parallelism and SIMD field arithmetic would bring proof sizes and running times in line with production systems. None of them interacts with the encoding.
+\end{itemize}
+
+\paragraph{Formal verification.}
+Replace the axiom \texttt{bciks\_unique} by a formal proof of correlated agreement in the unique-decoding regime, state relaxed round-by-round knowledge soundness for a general interactive oracle reduction in Lean, and link the Rust implementation to the Lean specification, for instance through test vectors extracted from Lean.
+
+\paragraph{Other domains.}
+The dictionary uses a smooth multiplicative subgroup in odd characteristic. Is there a kernel-type basis whose natural fold is table-form restriction on circle domains~\cite{HLP24} or on additive subspaces~\cite{LCH14,DP24}?
+
+\subsection{Artefacts}\label{sec:concl:artefacts}
+The Rust library, the Lean files, the benchmark data and the numerical checks are available at \url{https://github.com/qoosmo/kbfold} under the MIT or Apache-2.0 licences (code) and CC~BY~4.0 (paper); this version of the paper corresponds to the release tagged \texttt{v\kbversion}, and the library is published on crates.io as \texttt{kbfold}~\kbversion.
+\begin{itemize}
+  \item \emph{Tests} (\cref{sec:impl:tests}): \texttt{cargo test --release} in \texttt{rust/}.
+  \item \emph{Tables of \cref{sec:exp}}:\\ \texttt{cargo run --release --example bench -- scaling}, and likewise with \texttt{stop} and \texttt{rate}; the recorded data are in \texttt{rust/results/}.
+  \item \emph{Numerical checks} (\cref{sec:impl:tests}):\\ \texttt{cargo run --release --example paper\_checks}.
+  \item \emph{Post-quantum parameters} (\cref{rem:pq-params}):\\ \texttt{cargo run --release --example pq\_params}.
+  \item \emph{Lean}: \texttt{lake build} in \texttt{lean/} (Lean~4.23.0, Mathlib \texttt{v4.23.0}); \texttt{lean/KBFold/Audit.lean} prints the axioms of the main theorems.
+\end{itemize}

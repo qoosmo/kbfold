@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased (v0.3.0, ePrint version)
+
+### Paper
+- New title: "Post-Quantum Multilinear Polynomial Commitments from FRI Folding in the Boolean-Kernel Basis" (also in README, CITATION.cff, the crate description and the project page).
+- Shorter abstract; plain-text abstract, keywords, category and license for ePrint in `paper/EPRINT.md`.
+- Author block with ORCID; acknowledgments with a statement on the use of generative AI tools.
+- Introduction: Figure 1 (the fold dictionary as a commutative diagram), a contribution paragraph on the Lean formalisation, a scope paragraph, and the statement that the paper is self-contained.
+- Scope statements in §5 (Remark on batching), §6, §7 and §8 point to the new §10.1 (Future work).
+- §10: future work (soundness, zero knowledge, implementation, formal verification, other domains) and §10.2 (Artefacts: repository, release, commands to reproduce each table and check, Lean toolchain).
+- Reference added: Libra (Xie et al., CRYPTO 2019).
+
+### Docs
+- `docs/ROADMAP.md`: version 1 (first ePrint submission) and version 2 (revision of the same entry).
+
 ## v0.2.0 — 2026-09-27
 
 ### License and crate

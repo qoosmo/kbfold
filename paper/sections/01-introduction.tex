@@ -36,7 +36,22 @@ Let $U = \sum_b \lambda(b) K_b$ and $U = U_e(X^2) + X U_o(X^2)$. Then the kernel
 \]
 are exactly $(1-r)\lambda(2b') + r\lambda(2b'+1)$, the restriction of the first variable of the table $\lambda$.
 Consequently, encoding a table $f$ as the Reed--Solomon codeword of $U_f = \sum_b f(b) K_b$ and folding it $n$ times with challenges $r_1,\dots,r_n$ yields the constant $\tilde f(r_1,\dots,r_n)$ (\cref{cor:codeword-fold}), with no change of representation at any point.
-The kernel fold agrees with the classical FRI fold up to a nonzero scalar and a reparametrisation of the challenge (\cref{sec:fold:fri}); mixing the two parametrisations breaks correctness (\cref{ex:pitfall}), a mistake we made in an early implementation.
+\Cref{fig:dictionary} summarises the dictionary.
+
+\begin{figure}[t]
+\centering
+\begin{tikzcd}[column sep=6em, row sep=2.8em]
+  \lambda \in \F^{\iv{0}{N-1}} \arrow[r, "\res_r"] \arrow[d, "\sum_b \lambda(b) K^{(n)}_b"'] &
+  \res_r(\lambda) \in \F^{\iv{0}{N/2-1}} \arrow[d, "\sum_{b'} \res_r(\lambda)(b') K^{(n-1)}_{b'}"] \\
+  U \in \F[X]_{<N} \arrow[r, "\mathrm{pfold}_r"] \arrow[d, "\ev_L"'] &
+  \mathrm{pfold}_r(U) \in \F[X]_{<N/2} \arrow[d, "\ev_{L^2}"] \\
+  w \in \F^{L} \arrow[r, "\fold_r"] &
+  \fold_r(w) \in \F^{L^2}
+\end{tikzcd}
+\caption{The fold dictionary. Top square: in kernel coordinates, the polynomial fold is the restriction of the first variable of the table (\cref{thm:fold-dictionary}). Bottom square: on a smooth domain $L$ of order $M \ge N$, the word fold is the polynomial fold evaluated on $L^2$ (\cref{prop:fold-consistency}). Iterating the whole diagram $n$ times sends the codeword of a table $f$ to the constant $\tilde f(r_1,\dots,r_n)$ (\cref{cor:codeword-fold}).}
+\label{fig:dictionary}
+\end{figure}
+The kernel fold agrees with the classical FRI fold up to a nonzero scalar and a reparametrisation of the challenge (\cref{sec:fold:fri}); mixing the two parametrisations breaks correctness (\cref{ex:pitfall}), a pitfall that implementations must avoid.
 
 \paragraph{A multilinear PCS with a self-contained soundness proof (\cref{sec:pcs,sec:sound}).}
 We instantiate the BaseFold paradigm with the kernel encoding and prove it sound in the unique-decoding regime (\cref{thm:sound}).
@@ -52,13 +67,14 @@ We compare it with a coefficient-form baseline that shares all other code.
 The two encodings are indistinguishable in running time at the resolution of our machine, as the operation counts predict.
 The kernel encoding thus provides its structural property at no measurable cost.
 
-\paragraph{What we do not claim.}
-The scheme is not asymptotically or concretely faster than Reed--Solomon instantiations of BaseFold or DeepFold (\cref{rem:basefold}).
-Its evaluation protocol is BaseFold's sumcheck-plus-folding, applied to a different encoding.
-Our soundness analysis is restricted to the unique-decoding regime, which needs more queries than list-decoding analyses~\cite{Hab24,Zei26}.
-Zero knowledge is out of scope, and we analyse one commitment opened at one point.
-The post-quantum statement (\cref{cor:pq}) uses the theorem of~\cite{CDHZ25}, which we quote and do not reprove, and it applies to their compiler (salted Merkle trees, their challenge derivation), not to our implementation as it stands (\cref{rem:fs}).
-The contribution is the basis and the dictionary: a precise, elementary account of why FRI folding and table-form multilinear restriction are the same operation over multiplicative domains in odd characteristic.
+\paragraph{Formal verification (\cref{sec:lean}).}
+Companion Lean~4 files, of about $7000$ lines with no \texttt{sorry}, formalise the basis theorem, the fold dictionary, completeness, soundness, evaluation binding and round-by-round knowledge soundness. Correlated agreement (\cref{thm:bciks}) is the only axiom; the algebraic results and completeness do not use it.
+
+\paragraph{Scope.}
+The evaluation protocol is BaseFold's sumcheck-plus-folding applied to the kernel encoding, so its asymptotic and concrete costs are those of Reed--Solomon instantiations of BaseFold and DeepFold (\cref{rem:basefold}); what the kernel encoding adds is that the prover works on the table form throughout.
+The soundness analysis is in the unique-decoding regime and concerns one commitment opened at one point.
+The post-quantum statement (\cref{cor:pq}) applies to the compiler of~\cite{CDHZ25} (\cref{rem:fs}).
+List decoding, batched and repeated openings, and zero knowledge are the subject of \cref{sec:concl:future}.
 
 \subsection{Related work}\label{sec:intro:related}
 
@@ -66,7 +82,7 @@ The contribution is the basis and the dictionary: a precise, elementary account 
 FRI~\cite{BBHR18} tests proximity to Reed--Solomon codes by repeated even--odd folding.
 Its soundness in the unique-decoding and list-decoding regimes rests on proximity gaps for Reed--Solomon codes~\cite{BCIKS23}.
 WHIR~\cite{ACFY24} tests proximity to constrained Reed--Solomon codes with very fast verification and supports multilinear evaluation claims.
-Our soundness proof uses only the unique-decoding correlated-agreement theorem of~\cite{BCIKS23}; extending it to the list-decoding regime is the most natural next step.
+Our soundness proof uses only the unique-decoding correlated-agreement theorem of~\cite{BCIKS23}; extending it to the list-decoding regime is the most natural next step (\cref{sec:concl:future}).
 
 \paragraph{Multilinear commitments from folding.}
 BaseFold~\cite{ZCF24} introduced foldable codes and the interleaving of sumcheck rounds with folding rounds under shared challenges.
@@ -95,7 +111,7 @@ In ours, the univariate polynomial is committed through a Reed--Solomon code, an
 Brakedown~\cite{GLSTW23} and related schemes avoid FFTs by using linear-time encodable codes.
 Circle STARKs~\cite{HLP24} obtain smooth folding domains over the Mersenne prime $2^{31}-1$ from the circle curve.
 The fold dictionary as stated needs a smooth multiplicative subgroup in odd characteristic.
-Whether a Boolean-kernel-type basis exists for circle domains and for additive domains is an open question that we leave to future work.
+Whether a Boolean-kernel-type basis exists for circle domains and for additive domains is an open question (\cref{sec:concl:future}).
 
 \subsection{Organisation}\label{sec:intro:org}
 
@@ -103,5 +119,7 @@ Whether a Boolean-kernel-type basis exists for circle domains and for additive d
 \Cref{sec:proofs} recalls interactive oracle proofs and their probability space, round-by-round (knowledge) soundness, the sumcheck protocol, polynomial commitments, and the definitions and the theorem of~\cite{CDHZ25} on the BCS transformation for interactive oracle reductions, which we use for the non-interactive scheme.
 \Cref{sec:kernel} develops the Boolean-kernel basis, and \cref{sec:fold} proves the fold dictionary.
 \Cref{sec:pcs} defines the commitment scheme and \cref{sec:sound} proves its soundness.
-\Cref{sec:impl,sec:exp} describe the implementation and the measurements, and \cref{sec:concl} lists open problems.
-\Cref{app:notation} collects the notation.
+\Cref{sec:impl,sec:exp} describe the implementation and the measurements, and \cref{sec:concl} describes future work.
+\Cref{app:notation} collects the notation, and \cref{sec:lean} describes the Lean formalisation.
+
+The paper is self-contained: every notion used in the proofs is defined, every result specific to the paper is proved, and the external results are stated in \cref{sec:prelim,sec:proofs}. The post-quantum corollary uses the quantum extraction model of~\cite{CDHZ25}, whose definitions we restate as far as the statement requires.

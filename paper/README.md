@@ -1,6 +1,6 @@
 # Paper
 
-*The Boolean-Kernel Basis: Native Evaluation-Form FRI Folding over Multiplicative Domains, with an Application to Multilinear Polynomial Commitments* — Abdelali Mkhida, September 2026.
+*Post-Quantum Multilinear Polynomial Commitments from FRI Folding in the Boolean-Kernel Basis* — Abdelali Mkhida, September 2026.
 
 - Compiled PDF: [`kbfold.pdf`](kbfold.pdf)
 - Build: `latexmk -pdf main.tex` (or `make`)
