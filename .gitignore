@@ -16,3 +16,12 @@ paper/main.pdf
 __pycache__/
 # CI logs
 rust/checks.log
+sumfri/paper/*.aux
+sumfri/paper/*.log
+sumfri/paper/*.out
+sumfri/paper/*.toc
+sumfri/paper/*.bbl
+sumfri/paper/*.blg
+sumfri/paper/*.fls
+sumfri/paper/*.fdb_latexmk
+sumfri/paper/main.pdf

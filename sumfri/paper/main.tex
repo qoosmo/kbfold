@@ -1,0 +1,81 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\IfFileExists{lmodern.sty}{\usepackage[T1]{fontenc}\usepackage{lmodern}}{\DeclareTextCommand{\k}{OT1}[1]{\c{##1}}}% ogonek fallback when Latin Modern is not installed
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{stmaryrd}
+\usepackage{booktabs}
+\usepackage{longtable,array}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink]{cleveref}
+\usepackage{tikz-cd}
+
+% ---------- theorem environments (as in KBFold) ----------
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{fact}[theorem]{Fact}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+% ---------- notation (KBFold notation, plus the monomial-basis objects of this paper) ----------
+\newcommand{\Fq}{\mathbb{F}_q}
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\iv}[2]{\llbracket #1, #2 \rrbracket}
+\newcommand{\wt}{\mathrm{wt}}
+\newcommand{\eq}{\mathrm{eq}}
+\newcommand{\RS}{\mathrm{RS}}
+\newcommand{\Enc}{\mathrm{Enc}}
+\newcommand{\fold}{\mathrm{fold}}
+\newcommand{\cfold}{\mathrm{cfold}}
+\newcommand{\coef}[2]{[X^{#1}]\,#2}
+\newcommand{\Cc}{\mathcal{C}}
+\newcommand{\lo}{\mathrm{lo}}
+\newcommand{\res}{\mathrm{res}}
+\newcommand{\ev}{\mathrm{ev}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\mlin}{\mathrm{mlin}}
+\newcommand{\Pieval}{\Pi_{\mathrm{eval}}}
+\newcommand{\Pisum}{\Pi_{\mathrm{sum}}}
+\newcommand{\KB}[1]{KBFold~#1}% reference to a numbered result of the companion paper [Mkh26]
+\newcommand{\sfversion}{0.1.0}
+
+\title{Sum-FRI: Hypercube Sums and Coefficient-Form Multilinear Evaluations\\ from Shared-Challenge FRI Folding}
+\author{Abdelali Mkhida\\ Algorizk Labs\\ \texttt{ali.mkhida@algorizk.xyz}\\ ORCID \href{https://orcid.org/0009-0009-2101-9070}{\texttt{0009-0009-2101-9070}}}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+% Written last, once the results of every section are fixed.
+\end{abstract}
+
+\tableofcontents
+
+\input{sections/01-introduction}
+% \input{sections/02-preliminaries}
+% \input{sections/03-proof-systems}
+% \input{sections/04-restriction}
+% \input{sections/05-scheme}
+% \input{sections/06-soundness}
+% \input{sections/07-implementation}
+% \input{sections/08-experiments}
+% \input{sections/09-conclusion}
+
+\section*{Acknowledgments}
+The author thanks the developers of Lean, Mathlib and the Rust ecosystem, on which the companion artefacts are built.
+Generative AI tools (Anthropic's Claude) were used to assist with writing and editing the text, with the Rust code and the Lean proofs, and with checking computations.
+The author checked all results and takes full responsibility for the content of the paper and the artefacts; every Lean proof is checked by the Lean kernel.
+
+\bibliographystyle{alpha}
+\bibliography{refs}
+
+% \appendix
+% \input{sections/10-notation}
+% \input{sections/11-lean}
+
+\end{document}

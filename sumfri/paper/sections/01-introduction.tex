@@ -1,0 +1,135 @@
+\section{Introduction}\label{sec:intro}
+
+Let $f$ be a table of $N = 2^n$ field elements indexed by the Boolean hypercube $B_n = \{0,1\}^n$.
+Two claims about $f$ recur in succinct arguments: the \emph{hypercube sum}
+\[
+  S \;=\; \sum_{b \in B_n} f(b),
+\]
+which is the statement of the sumcheck protocol~\cite{LFKN92}, and the \emph{evaluation} of a multilinear polynomial attached to $f$ at a point $z \in \F^n$, which is the statement of a multilinear polynomial commitment scheme.
+Hash-based schemes in the BaseFold paradigm~\cite{ZCF24} commit to a Reed--Solomon encoding of $f$ and prove such claims by interleaving a sumcheck with FRI folding~\cite{BBHR18}, the two sharing their random challenges.
+
+This paper studies the simplest member of this family: the table is committed \emph{as the coefficient vector} of a univariate polynomial, and the scalar claim is reduced by a restriction of one variable per round, with no sumcheck.
+Put
+\[
+  V_f(X) \;=\; \sum_{b=0}^{N-1} f(b)\, X^{b},
+  \qquad
+  P_f(x_1,\dots,x_n) \;=\; \sum_{b \in B_n} f(b) \prod_{k=1}^{n} x_k^{b_k},
+\]
+so that $P_f$ is the multilinear polynomial whose \emph{monomial coefficients} are the entries of $f$, and $V_f$ is its Kronecker substitution, $V_f(X) = P_f(X, X^2, \dots, X^{2^{n-1}})$.
+Then
+\[
+  \sum_{b \in B_n} f(b) \;=\; P_f(1,\dots,1) \;=\; V_f(1).
+\]
+The classical FRI fold $\cfold_\theta(U) = U_e + \theta\, U_o$, where $U(X) = U_e(X^2) + X U_o(X^2)$, substitutes $\theta$ for the first variable of the coefficient-form multilinear polynomial (\cref{sec:restriction}).
+For a claim $P_f(z) = v$, the round message of the prover is the affine polynomial
+\[
+  g_j(T) \;=\; P_{f}(\theta_1,\dots,\theta_{j-1},\, T,\, z_{j+1},\dots,z_n),
+\]
+the verifier checks $g_j(z_j)$ against the current claim, draws $\theta_j$, and the same $\theta_j$ folds the committed codeword.
+For the hypercube sum, $z = (1,\dots,1)$ and $g_j(T) = U_e(1) + T\, U_o(1)$, where $U$ is the current folded polynomial.
+After $n$ rounds the folded codeword is the constant $P_f(\theta_1,\dots,\theta_n)$, and the verifier compares it with the reduced claim.
+Three states thus move under one challenge sequence: the scalar claim, the coefficient-form polynomial, and the Reed--Solomon word.
+
+The round structure is that of the evaluation protocol of DeepFold~\cite{GLHQTZ25}, which proves coefficient-form evaluations by the same restrictions; DeepFold adds out-of-domain points to reach the list-decoding regime.
+The present paper gives the unique-decoding version a complete, self-contained treatment, with the hypercube sum as its distinguished instance, and develops it as the coefficient-form companion of the Boolean-kernel scheme KBFold~\cite{Mkh26}, on the same code and with the same proof machinery.
+
+\subsection{Contributions}\label{sec:intro:contrib}
+
+\paragraph{The restriction dictionary (\cref{sec:restriction}).}
+We state the monomial-basis counterpart of the KBFold fold dictionary: the classical fold of $V_f$ is the Kronecker substitution of the restriction of $P_f$ in its first variable, and $n$ folds with $\theta_1,\dots,\theta_n$ give the constant $P_f(\theta_1,\dots,\theta_n)$.
+For a word $w$ on a smooth domain $L$, the classical word fold is the line $w_e + \theta\, w_o$ whose generators determine $w$.
+This is the property through which correlated agreement enters the soundness proof, and it holds for the classical fold without the reparametrisation of the kernel fold (\KB{Proposition~5.11}).
+We record the relation between the two encodings of the same sum: $V_f(1)$ in the monomial basis, and $[X^{N-1}]\,U_f$ in the Boolean-kernel basis.
+
+\paragraph{The scheme and its completeness (\cref{sec:scheme}).}
+We define the commitment, the evaluation protocol $\Pieval$ for claims $P_f(z) = v$, and its specialisation $\Pisum$ to hypercube sums, with a stopping parameter, committed levels and the local query checks of KBFold.
+The prover sends one affine polynomial per round, that is, one field element once the check $g_j(z_j) = S_{j-1}$ is used to recover the other.
+It never forms an equality table, and the commitment requires no change of basis: the table is the coefficient vector.
+
+\paragraph{Soundness (\cref{sec:sound}).}
+We prove soundness and evaluation binding in the unique-decoding regime, round-by-round knowledge soundness with a decoding extractor, and the relaxed round-by-round knowledge soundness of Chiesa, Di, Hu and Zheng~\cite{CDHZ25}, which yields post-quantum knowledge soundness of the compiled scheme in the quantum random oracle model.
+The proof follows KBFold: the codeword chain and the passing sets carry over unchanged, the folding lemmas are re-proved for the classical fold, and the sumcheck step is replaced by a one-line restriction step.
+That step costs $1/|\F|$ per round, against $2/|\F|$ for the degree-$2$ sumcheck of KBFold, and in every round it is dominated by the folding error $|L_j|/|\F|$.
+The only external result about codes is again the correlated-agreement theorem of Ben-Sasson, Carmon, Ishai, Kopparty and Saraf~\cite{BCIKS23}.
+
+\paragraph{Formal verification (\cref{app:lean}).}
+A Lean~4 formalisation, built on the KBFold Lean library and checked against the same single axiom (correlated agreement), covers the restriction dictionary, completeness, soundness, binding and round-by-round knowledge soundness.
+
+\paragraph{Implementation and experiments (\cref{sec:impl,sec:exp}).}
+A Rust implementation reuses the field, NTT, salted Merkle trees and transcript of the KBFold crate.
+We compare it on the same machine with four alternatives for the same statements:
+\begin{itemize}
+  \item the KBFold scheme, which proves the sum as $2^n \tilde f(\tfrac12,\dots,\tfrac12)$;
+  \item the coefficient-form scheme with a degree-$2$ sumcheck, as in BaseFold and in the baseline of KBFold;
+  \item the quotient opening of $V_f$ at $X = 1$ on a coset domain;
+  \item WHIR~\cite{ACFY24}.
+\end{itemize}
+
+\subsection{Positioning}\label{sec:intro:position}
+
+\Cref{tab:position} lists the protocols that prove hypercube sums or coefficient-form evaluations with univariate encodings, and how each one enters this paper.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}p{0.2\textwidth}p{0.36\textwidth}p{0.36\textwidth}@{}}
+\toprule
+Work & Mechanism & Role in this paper \\
+\midrule
+Sumcheck~\cite{LFKN92} & one variable per round, round polynomial of degree $d$, final evaluation query & the reduction that the restriction step replaces for linear statements (\cref{sec:restriction}) \\
+Aurora~\cite{BCRSVW19} & univariate sumcheck over a multiplicative subgroup, for evaluation-form polynomials & different encoding; not compared \\
+Gemini~\cite{BCHO22}, PolyFRIM~\cite{ZLGSCLD24} & coefficient-form evaluation by folding at the evaluation point $z$; one commitment per fold & same identity $P_f(z)$ by even--odd splitting; our folds use fresh random challenges and need no extra commitment \\
+Zeromorph~\cite{KT24} & the table as univariate coefficients, $\sum_b f(b) X^{b}$; quotients and degree checks with KZG & the same encoding $V_f$ with a pairing-based proof; not hash-based \\
+BaseFold~\cite{ZCF24} & FRI folds whose last constant is a random evaluation; degree-$2$ sumcheck on $f\cdot\eq_z$ & source of the final-value identity; the coefficient-form sumcheck baseline of \cref{sec:exp} \\
+DeepFold~\cite{GLHQTZ25} & coefficient-form evaluation by restrictions sharing the FRI challenges; out-of-domain points for list decoding & the round structure of $\Pieval$; we treat its unique-decoding version, with full proofs \\
+FriEval~\cite{Zha25} & FRI as a protocol evaluating a committed multilinear at challenge points & the same reading of FRI, in a functional framework \\
+Fold-DCS~\cite{LMN25} & sumcheck in $O(\log n)$ rounds by divide and conquer & different technique; not compared \\
+WHIR~\cite{ACFY24}, Hab\"ock~\cite{Hab24} & constrained Reed--Solomon codes; list decoding via subcode correlated agreement & external baseline; route to the list-decoding version (\cref{sec:concl}) \\
+KBFold~\cite{Mkh26} & table encoded in the Boolean-kernel basis; kernel fold evaluates $\tilde f$ & companion scheme: same code, soundness machinery and Lean library \\
+\bottomrule
+\end{tabular}
+\caption{Protocols for hypercube sums and coefficient-form evaluations with univariate encodings.}
+\label{tab:position}
+\end{table}
+
+The coefficient-form polynomial $P_f$ is not the multilinear extension $\tilde f$ of the table: $P_f(b) = \sum_{c \preceq b} f(c)$ on $B_n$.
+A system whose statements concern $\tilde f$, such as a sumcheck-based argument that ends with a claim $\tilde f(r) = v$, can use $\Pieval$ after the M\"obius transform of the table, which is what BaseFold and DeepFold do, or use KBFold, which avoids the transform.
+The hypercube sum is the one statement on which the two polynomials agree without any transform, since $\sum_b f(b) = P_f(1,\dots,1)$ and, in odd characteristic, $\sum_b f(b) = 2^n \tilde f(\tfrac12,\dots,\tfrac12)$.
+
+\subsection{Related work}\label{sec:intro:related}
+
+\paragraph{Proximity tests and their soundness.}
+FRI~\cite{BBHR18} tests proximity to Reed--Solomon codes by repeated even--odd folding, and its soundness rests on proximity gaps for Reed--Solomon codes~\cite{BCIKS23}.
+DEEP-FRI~\cite{BGKS20} samples outside the evaluation domain to bind a word to one codeword in the list-decoding regime, the technique DeepFold uses for multilinear evaluations.
+WHIR~\cite{ACFY24} tests proximity to constrained Reed--Solomon codes with very fast verification.
+Hab\"ock~\cite{Hab24} proves BaseFold sound up to the Johnson bound through correlated agreement for linear subcodes.
+Zhang~\cite{Zha25} recasts FRI as a functional proof system evaluating committed multilinear polynomials and builds the security of BaseFold on the theorems of FRI.
+Our analysis stays in the unique-decoding regime and uses only the correlated-agreement theorem.
+
+\paragraph{Multilinear commitments from folding.}
+BaseFold~\cite{ZCF24} introduced the interleaving of sumcheck rounds with folding rounds under shared challenges and the observation that the last FRI constant is a random evaluation of the committed coefficient-form polynomial.
+DeepFold~\cite{GLHQTZ25} replaces the sumcheck by restrictions for coefficient-form polynomials and reaches the list-decoding regime; it also batches polynomials of different sizes and adds zero knowledge.
+KBFold~\cite{Mkh26} encodes the table in the Boolean-kernel basis so that the folds evaluate the multilinear extension of the table itself.
+
+\paragraph{Multilinear-to-univariate reductions.}
+Gemini~\cite{BCHO22} reduces a coefficient-form claim $P(z) = v$ to univariate claims by folding at the coordinates of $z$ and committing to every folded polynomial; PolyFRIM~\cite{ZLGSCLD24} instantiates this approach with FRI.
+Zeromorph~\cite{KT24} maps the table to univariate coefficients, which is the encoding $V_f$ of this paper, and proves evaluations of $\tilde f$ with quotients and degree checks.
+Mohamed~\cite{Moh25} classifies these adaptors by how they map multilinear to univariate polynomials and gives a values-to-values reduction.
+These works treat the univariate commitment as a black box; here the univariate polynomial is committed through a Reed--Solomon code whose own folding carries the reduction.
+
+\paragraph{Sumcheck variants.}
+The sumcheck protocol~\cite{LFKN92} reduces a hypercube sum to one evaluation, with one round polynomial of degree $d$ per variable.
+Aurora~\cite{BCRSVW19} proves sums over multiplicative subgroups for univariate polynomials in one round.
+Fold-DCS~\cite{LMN25} reduces the number of rounds to $O(\log n)$ by a divide-and-conquer recursion.
+For the linear statement $\sum_b f(b) = S$ about a committed coefficient vector, the restriction step of this paper plays the role of the sumcheck, with affine round polynomials and no final evaluation query.
+
+\subsection{Organisation}\label{sec:intro:org}
+
+\Cref{sec:prelim,sec:proofs} recall, without proofs, the notation and the results of KBFold that we use: multilinear polynomials, smooth domains, Reed--Solomon codes, correlated agreement, interactive oracle proofs, round-by-round soundness and the theorem of~\cite{CDHZ25}.
+\Cref{sec:restriction} proves the restriction dictionary and the line form of the classical fold.
+\Cref{sec:scheme} defines the scheme and proves completeness, and \cref{sec:sound} proves soundness, evaluation binding, round-by-round knowledge soundness and post-quantum knowledge soundness.
+\Cref{sec:impl,sec:exp} describe the implementation and the measurements, and \cref{sec:concl} concludes.
+\Cref{app:lean} maps the paper to the Lean formalisation.
+
+Results of KBFold are cited by their numbers in~\cite{Mkh26}, as in \KB{Theorem~2.23}.
+Every result specific to this paper is proved here.
