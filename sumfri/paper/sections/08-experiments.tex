@@ -1,0 +1,148 @@
+\section{Experiments}\label{sec:exp}
+
+This section measures the implementation of \cref{sec:impl} against three schemes that prove the same statement with the same commitment machinery, and against an independent implementation.
+For each measurement, every scheme runs on the same machine with the same field, NTT, Merkle trees, transcript, rate, number of queries and committed levels; they differ only in the protocol.
+
+\subsection{Setup}\label{sec:exp:setup}
+
+\paragraph{Machine and code.}
+All runs use a cloud virtual machine with an Intel Xeon processor at $2.10$\,GHz ($2$ vCPUs, $7$\,GB RAM), the machine class of \KB{\S9}, Rust $1.97.0$, release profile with fat LTO and one codegen unit, and no \texttt{target-cpu} flag.
+The libraries are \texttt{sumfri}~\sfversion{} and \texttt{kbfold}~0.3.0; the script \texttt{sumfri/rust/bench/run\_all.sh} runs every measurement of this section and writes the data of the tables to \texttt{sumfri/rust/results/}.
+Runs are single-threaded.
+Times are medians over $11$ runs for $n \le 16$, $5$ for $n \in \{18, 20\}$ and $3$ for $n = 22$; verification times are medians over $21$ runs.
+The machine is shared; we repeated the measurements of \cref{tab:sum,tab:pq} in a second, independent run, whose figures are in the repository and lead to the same conclusions.
+
+\paragraph{Parameters.}
+The \emph{classical parameters} are those of \KB{\S9.1}: rate $\rho = 1/4$, $\ell = n - 4$ folding rounds (final table of $16$ elements), $\kappa = 148$ queries, the quadratic extension $\K$, $32$-byte salts, and committed levels $\mathcal{J} = \{0, 4, 8, \dots\}$.
+By \cref{thm:sound} with $\delta = 3/8$, the soundness error is below $2^{-100}$ (\cref{rem:params}).
+The \emph{post-quantum parameters} are those of \cref{rem:pq-params}: the same rate, $\ell$ and $\mathcal{J}$, $\kappa = 248$ queries and the quartic extension.
+Tables are uniformly random over $\mathbb{F}_p$; evaluation points are uniformly random in $\F^n$.
+Proof sizes are the lengths of the canonical encodings; they depend slightly on the query points, through the number of distinct opened leaves.
+
+\paragraph{Schemes.}
+\begin{itemize}
+  \item \emph{Sum-FRI}: $\Pisum$, and $\Pieval$ at a random point (\cref{sec:impl}).
+  \item \emph{KBFold}: the scheme of~\cite{Mkh26} (\texttt{kbfold}, kernel encoding), which proves the sum of its committed table as $2^n \tilde f(\tfrac12, \dots, \tfrac12)$ with a degree-$2$ sumcheck, and $\tilde f(z)$ at a random point.
+  \item \emph{Coefficient form with sumcheck}: the coefficient-form mode of \texttt{kbfold} (\KB{\S9.1}), which commits to the Kronecker embedding of the coefficients of $\tilde f$ (after M\"obius inversion) and proves $\tilde f(z)$ with a degree-$2$ sumcheck and the classical fold, as in Reed--Solomon instantiations of BaseFold. For the sum, $z = (\tfrac12, \dots, \tfrac12)$.
+  \item \emph{Quotient}: the opening of $V_f$ at $X = 1$ with a quotient and FRI (\cref{sec:impl:quotient}); it proves the sum only.
+\end{itemize}
+In all four schemes the commitment is one NTT of size $M$ and one salted tree of $M/2$ leaves, and the prover commits to the same number of folded words; the schemes differ in the transform before the NTT (none, kernel, M\"obius, none on a coset), in the round messages and the work that produces them, and, for the quotient, in the computation of the quotient word.
+Every scheme commits to a table of $N$ field elements and proves the sum of its entries, so the four rows of \cref{tab:sum} prove the same statement about the same data.
+For evaluations, Sum-FRI proves $P_f(z)$ and the other schemes $\tilde f(z)$, two different statements of the same cost class.
+
+\subsection{The sum}\label{sec:exp:sum}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{r r rrrr r r}
+\toprule
+ & Commit & \multicolumn{4}{c}{Open (ms)} & Verify & Proof \\
+$n$ & (ms) & Sum-FRI & KBFold & coeff.+sc. & quotient & (ms) & (KiB) \\
+\midrule
+12 & 1.6 & 0.47 & 0.73 & 0.70 & 0.80 & 0.45 & 79 \\
+14 & 7.2 & 2.1 & 3.2 & 3.0 & 3.1 & 0.60 & 115 \\
+16 & 26.7 & 7.7 & 11.1 & 10.8 & 13.8 & 0.57 & 149 \\
+18 & 136.4 & 31.9 & 43.6 & 45.3 & 61.5 & 0.90 & 193 \\
+20 & 589.3 & 144.5 & 246.4 & 219.3 & 322.3 & 1.06 & 237 \\
+22 & 3021.5 & 782.4 & 1150.1 & 1113.8 & 1474.4 & 1.32 & 288 \\
+\bottomrule
+\end{tabular}
+\caption{Proving $\sum_a f(a)$ for a committed table of $N = 2^n$ elements, classical parameters, single-threaded. Commit, verify and proof size are those of Sum-FRI; the other three schemes are within the run-to-run variation of these figures (\cref{sec:exp:sum}). The verification time at $n = 20$ is from the second run (the first gave $2.2$\,ms for Sum-FRI and $1.1$\,ms for the other schemes).}
+\label{tab:sum}
+\end{table}
+
+\Cref{tab:sum} reports the four schemes on the sum.
+The opening phase of Sum-FRI is $27$--$41\%$ faster than that of KBFold and $27$--$36\%$ faster than the coefficient-form scheme with sumcheck, over both runs and all sizes; it is $33$--$55\%$ faster than the quotient opening.
+Commit times agree within the run-to-run variation (the four commitments perform the same NTT and the same tree; the transforms of KBFold and of the coefficient-form scheme cost $\tfrac n2 N$ additions, invisible next to the NTT), and so do verification times and proof sizes, which are dominated by the $\kappa$ authentication paths and opened cosets.
+The round messages, $\ell$ field elements for Sum-FRI and $3\ell$ for the sumcheck schemes, differ by at most $0.6$\,KiB.
+
+The saving is the one predicted in \cref{sec:scheme:costs}.
+With $z = \mathbf 1$, a restriction round of Sum-FRI costs one multiplication per entry of the table (the restriction $\mathrm{cres}_\theta$) and no multiplication for the round message (two sums), while a sumcheck round restricts two tables (the table and the equality table) and computes three products per pair.
+The folds, the trees of the committed words and the openings are identical in the three schemes, and they account for the remaining time.
+The quotient opening is slowest: it computes the quotient word on the whole domain, with one batched inversion of $M$ elements, before folding it.
+
+\subsection{Evaluations}\label{sec:exp:eval}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{r rrr r}
+\toprule
+ & \multicolumn{3}{c}{Open (ms)} & Proof \\
+$n$ & Sum-FRI, $P_f(z)$ & KBFold, $\tilde f(z)$ & coeff.+sc., $\tilde f(z)$ & (KiB) \\
+\midrule
+12 & 0.75 & 0.76 & 0.75 & 79 \\
+14 & 2.7 & 3.3 & 2.8 & 115 \\
+16 & 12.1 & 14.1 & 13.6 & 148 \\
+18 & 39.7 & 47.8 & 46.7 & 194 \\
+20 & 219.3 & 256.8 & 264.0 & 236 \\
+22 & 1064.7 & 1115.9 & 1123.8 & 290 \\
+\bottomrule
+\end{tabular}
+\caption{Evaluation at a random point, classical parameters, single-threaded. Commit and verify times and proof sizes agree with \cref{tab:sum} within the run-to-run variation.}
+\label{tab:eval}
+\end{table}
+
+At a random point (\cref{tab:eval}), the opening of Sum-FRI is $0$--$17\%$ faster than both sumcheck schemes.
+The restriction round now needs the tensor $\tau_j$ (\cref{sec:impl:enc}): two inner products with $\tau_j$ per round, plus $N$ multiplications once to build $\tau_0$, against three products per pair and the restriction of the equality table for the sumcheck.
+The gap is smaller than for the sum, and at $n = 22$ it is within the run-to-run variation.
+
+\subsection{Post-quantum parameters}\label{sec:exp:pq}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{r rr rr rr}
+\toprule
+ & \multicolumn{2}{c}{Open, sum (ms)} & \multicolumn{2}{c}{Open, evaluation (ms)} & Verify & Proof \\
+$n$ & Sum-FRI & KBFold & Sum-FRI & KBFold & (ms) & (KiB) \\
+\midrule
+12 & 0.87 & 1.42 & 1.03 & 1.42 & 1.07 & 131 \\
+14 & 3.3 & 7.1 & 5.1 & 7.6 & 1.38 & 215 \\
+16 & 14.1 & 29.0 & 21.6 & 26.5 & 1.68 & 295 \\
+18 & 58.2 & 116.1 & 88.1 & 121.9 & 2.00 & 390 \\
+20 & 269.3 & 626.5 & 468.9 & 605.9 & 3.30 & 498 \\
+22 & 1443.5 & 2469.5 & 1971.6 & 2536.5 & 2.87 & 619 \\
+\bottomrule
+\end{tabular}
+\caption{Post-quantum parameters (quartic extension, $\kappa = 248$), single-threaded. Verify and proof size are those of Sum-FRI for the sum. Commit times are those of \cref{tab:sum} within the run-to-run variation: the commitment does not depend on the extension.}
+\label{tab:pq}
+\end{table}
+
+With the post-quantum parameters (\cref{tab:pq}), every operation of the rounds is in the quartic extension, built over $\K$ by Karatsuba (three multiplications in $\K$ per product).
+Sum-FRI opens the sum $34$--$57\%$ faster than KBFold over both runs, and evaluations $19$--$33\%$ faster.
+Proofs are $1.7$--$2.2$ times larger than with the classical parameters, as in \KB{\S9.3}: $100$ more queries, each opening elements of $\mathbb{F}_{p^4}$.
+
+\subsection{Where the time goes}\label{sec:exp:breakdown}
+
+At $n = 20$ with the classical parameters, the commitment spends $251$\,ms in the NTT and $490$\,ms in the salted tree of $M/2 = 2^{21}$ leaves (medians of separate runs of each step, whose sum exceeds the median commit time of the same run, $657$\,ms, by the run-to-run variation).
+The opening of the sum takes $161$\,ms and that of an evaluation $203$\,ms: the $42$\,ms difference is the cost of the tensor $\tau_0$ and of the products with it.
+For all four schemes the commitment dominates the prover, and its cost is shared: Sum-FRI changes only the opening.
+
+\subsection{An independent reference point}\label{sec:exp:whir}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{r rrr rrr rrr}
+\toprule
+ & \multicolumn{3}{c}{Sum-FRI, classical} & \multicolumn{3}{c}{WHIR, unique, $k = 1$} & \multicolumn{3}{c}{WHIR, Johnson, $k = 4$} \\
+$n$ & prover & verify & proof & prover & verify & proof & prover & verify & proof \\
+\midrule
+12 & 2.1 & 0.45 & 79 & 18.4 & 1.40 & 131 & 4.6 & 0.38 & 45 \\
+14 & 9.2 & 0.60 & 115 & 87.7 & 2.30 & 199 & 19.2 & 0.53 & 56 \\
+16 & 34.4 & 0.57 & 149 & 335.1 & 2.80 & 285 & 71.2 & 0.66 & 75 \\
+18 & 168.3 & 0.90 & 193 & 1318 & 3.90 & 392 & 340.6 & 0.48 & 88 \\
+20 & 733.8 & 1.06 & 237 & 6183 & 3.40 & 513 & 2470 & 0.54 & 108 \\
+22 & 3803.9 & 1.32 & 288 & 27000 & 5.50 & 657 & 9700 & 0.54 & 121 \\
+\bottomrule
+\end{tabular}
+\caption{Sum-FRI ($\Pisum$, prover $=$ commit $+$ open) and the WHIR implementation, same machine, single-threaded, Goldilocks with its quadratic extension, rate $1/4$, $100$ bits of security, no proof of work. Times in ms, proof sizes in KiB. WHIR prints times of one second or more with a resolution of $0.1$\,s.}
+\label{tab:whir}
+\end{table}
+
+As in \KB{\S9.8}, we run the WHIR implementation~\cite{ACFY24}\footnote{Repository \url{https://github.com/WizardOfMenlo/whir}, commit \texttt{c03a4a5}, the version used in KBFold.} on the same machine with the same field, rate and security level, single-threaded and without proof of work, in two configurations: one variable per round with the unique-decoding analysis, and four variables per round with its analysis up to the Johnson bound (\cref{tab:whir}).
+WHIR proves a multilinear evaluation, and the two code bases differ in many engineering choices, so \cref{tab:whir} is a reference point, not a comparison of protocols.
+The Sum-FRI prover is $7$--$10$ times faster than WHIR with one variable per round, with proofs $1.7$--$2.3$ times smaller and a verifier $3$--$5$ times faster.
+Against WHIR's default configuration, the Sum-FRI prover is $2$--$3.4$ times faster, while WHIR's proofs are $1.8$--$2.4$ times smaller; the verification times are comparable for $n \le 16$, and WHIR's verifier is $1.9$--$2.4$ times faster for $n \ge 18$. As in KBFold, the difference in proof size and verification time comes from the number of queries, which WHIR reduces by its analysis up to the Johnson bound.

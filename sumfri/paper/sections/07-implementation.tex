@@ -1,0 +1,63 @@
+\section{Implementation}\label{sec:impl}
+
+We implemented $\Pieval^{\mathcal{J}}$ and $\Pisum$, compiled as in \cref{sec:proofs:bcs}, as a Rust library, \texttt{sumfri}, in the subdirectory \texttt{sumfri/rust} of the KBFold repository.
+It depends on the \texttt{kbfold} crate (\KB{\S8}), from which it takes the field arithmetic, the NTT, the salted Merkle trees with merged openings, and the Fiat--Shamir transcript with the challenge maps $\phi$ and $\mathrm{pos}$; it adds the encoding, the restriction rounds, the classical fold, the prover and the verifier (about $700$ lines), the quotient baseline of \cref{sec:impl:quotient} (about $400$ lines), and about $500$ lines of tests and benchmarks.
+Its only other dependencies are BLAKE3 and \texttt{getrandom}, as for \texttt{kbfold}.
+This section records what differs from KBFold; \cref{sec:exp} reports measurements.
+
+\paragraph{Index conventions.}
+As in \KB{\S8}: bit $a_k$ of the paper is bit $k-1$ of the code, so that $a = a_1 + 2a'$ with $a_1$ the least significant bit; the coordinate $z_k$, the challenge $\theta_k$ and the round message of round $k$ are entries $k-1$ of their arrays.
+A table $f$ with $n$ variables is an array of length $N$, and $f(a)$ is the coefficient of $X^a$ in $V_f$.
+
+\subsection{Fields and domains}\label{sec:impl:fields}
+
+Tables and $w_0$ live over the Goldilocks field $\mathbb{F}_p$, $p = 2^{64} - 2^{32} + 1$; the challenges $\theta_j$, the point $z$, the value $v$, the restricted tables $f_j$ ($j \ge 1$) and the folded words $w_j$ ($j \ge 1$) live in the quadratic extension $\K = \mathbb{F}_p[\iota]/(\iota^2 - 7)$ for the classical parameters, or in the quartic extension $\mathbb{F}_p[\iota]/(\iota^4 - 7)$ for the post-quantum parameters of \cref{rem:pq-params}.
+The smooth domain is $L = \langle \omega \rangle$ with $\omega = 7^{(p-1)/M}$, stored in natural order; the fibre of index $i$ of $L_j$ is the pair of positions $(i, i + M_{j+1})$.
+These are the choices of \KB{\S8.1--8.2}, unchanged.
+
+\subsection{Encoding, rounds and folding}\label{sec:impl:enc}
+
+\paragraph{Commit.}
+$\Enc(f) = \ev_L(V_f)$ (\cref{def:encoding}) is computed by zero-padding the table to length $M$ and one radix-$2$ NTT. Since $V_f$ has coefficient vector $f$, there is no transform before the NTT; KBFold applies the kernel-to-monomial transform there ($\tfrac n2 N$ additions), and the coefficient-form baseline of KBFold applies M\"obius inversion (as many additions).
+
+\paragraph{Round messages.}
+The prover keeps the current table $f_{j-1}$ as an array over $\F$.
+In round $j$ it sends only the linear coefficient $b_j$ of $s_j(T) = a_j + b_j T$ (\cref{rem:compress}); the verifier sets $a_j = v_{j-1} - z_j b_j$, so the restriction check holds by construction.
+By \eqref{eq:honest-sj} and \cref{def:coeff-poly}, $b_j = \sum_{b'} f_{j-1}(2b'+1)\, \tau_j(b')$ with $\tau_j(b') = m_{b'}(z_{>j})$.
+All the tensors $\tau_j$ are read from the single table $\tau_0 = (m_a(z))_{a}$ of length $N$: $\tau_j(b') = \tau_0(2^j b')$, since the low $j$ bits of $2^j b'$ vanish.
+$\tau_0$ is built in $N$ multiplications, by doubling its length once per coordinate.
+For $\Pisum$, $\tau_0 = \mathbf 1$; the code detects $z = \mathbf 1$ and replaces the inner products by sums.
+After the challenge, the table is restricted in place, $f_j(b') = f_{j-1}(2b') + \theta_j f_{j-1}(2b'+1)$ (\cref{def:cres}): one multiplication per output entry, against two tables to restrict and three products per pair for the degree-$2$ sumcheck of KBFold (\KB{\S8.2}).
+
+\paragraph{Fold.}
+Prover and verifier compute $\cfold_\theta(w)(\xi^2) = a_e + \theta a_o$ with $a_e = (a + a')/2$ and $a_o = (a - a')/(2\xi)$, $a = w(\xi)$, $a' = w(-\xi)$ (\cref{lem:cword}(3)); the inverses $(2\xi)^{-1}$ come from one table of $\omega^{-i}$ shared by all levels, as in KBFold.
+The same function serves the prover on whole words and the verifier on opened cosets.
+
+\paragraph{Final message and closure.}
+The verifier evaluates $G = V_g$ at the points $\xi_\ell$ by Horner's rule on $g$ directly: the final table is the coefficient vector of $G$, so the transform $C^{\otimes(n-\ell)}$ of \KB{\S8.3} disappears.
+The closure value $P_g(z_{\ell+1},\dots,z_n)$ is computed by $n - \ell$ successive coefficient restrictions, in $O(N_\ell)$ operations; for $\Pisum$ it is $\sum_b g(b)$.
+
+\subsection{Commitments and transcript}\label{sec:impl:merkle}
+
+Committed levels, leaves, salts, openings, merged paths and local folds are those of \KB{\S8.3}, with $\mathcal{J} = \{0, k, 2k, \dots\}$, $k = 4$ by default.
+The transcript has its own domain separator and absorbs the parameters $(n, R, \ell, \kappa)$, the salt length, the extension degree $e$ and $k$, the root of $w_0$, the point $z$ and the value $v$; in round $j$ it absorbs $b_j$, then the root of $w_{j-1}$ if $j-1 \in \mathcal{J}$, then a fresh round salt, and derives $\theta_j$ with the map $\phi$; in round $\ell+1$ it absorbs $g$ and a round salt, and derives the query points with $\mathrm{pos}$.
+A proof consists of the $\ell$ values $b_j$, the roots, the $\ell+1$ round salts, $g$, and the openings of the committed words; it differs from a KBFold proof in the round messages, $\ell$ field elements instead of $3\ell$.
+
+\subsection{The quotient baseline}\label{sec:impl:quotient}
+
+For \cref{sec:exp}, the library also implements the standard univariate way to prove $\sum_a f(a) = v$ for the same commitment polynomial $V_f$: open $V_f$ at $X = 1$ with the quotient $q = (V_f - v)/(X-1)$, of degree less than $N - 1$, and test $q$ with FRI.
+Since $1 \in L$, this baseline commits to $V_f$ on the coset $cL$, $c = 7$; the verifier computes the values of $q$ at the opened points from those of $V_f$ (with one batched inversion of the denominators $\xi - 1$), and the folding, committed levels, trees and transcript are those of $\Pisum$.
+The final message is the coefficient vector of the folded quotient, $\mathrm{cres}_\theta(q)$ by \cref{thm:dictionary}, obtained from the coefficients $q_k = \sum_{a > k} f(a)$; there are no round messages.
+This is the protocol that \cref{rem:deepfold} contrasts with $\Pisum$: the claim enters through a quotient word instead of through the shared challenges.
+
+\subsection{Testing}\label{sec:impl:tests}
+
+The test suite of \texttt{sumfri} checks:
+\begin{itemize}
+  \item \emph{Completeness.} Honest proofs of $\Pieval$ at random points and of $\Pisum$ verify for both extensions, $n \in \{1, 3, 6, 8, 10, 11\}$, several $\ell$ including $0$ and $n$, $k \in \{1, 2, 3, 4\}$ and $\rho \in \{1/2, 1/4, 1/8\}$, and the returned value equals $P_f(z)$, respectively $\sum_a f(a)$, computed independently from the definition.
+  \item \emph{The restriction dictionary.} For $n \le 8$ and random $\theta \in \K^n$: $n$ restrictions give $P_f(\theta)$; $n$ classical folds of $\Enc(f)$ on a domain of size $4N$ give the constant word $P_f(\theta)$ (\cref{cor:cword-chain}); and $V_f(\zeta) = P_f(\zeta, \zeta^2, \dots)$ (\cref{lem:kronecker}).
+  \item \emph{\Cref{ex:f17}}, step by step over $\mathbb{F}_{17}$.
+  \item \emph{Tampering.} Proofs are rejected after changing the claimed value, one round message, one entry of $g$, one opened value, one round salt, the length of a list, or the commitment root.
+  \item \emph{A consistent cheater.} A prover that commits honestly, claims $v + 1$, sends the honest $b_j$ (so that every restriction check holds), folds honestly and modifies $g(0)$ so that the closure check holds, is rejected in every tested configuration, at random points and at $z = \mathbf 1$, and always in the query phase, as case~2 of \cref{thm:sound} predicts.
+  \item \emph{The quotient baseline}: completeness and rejection of a wrong value.
+\end{itemize}

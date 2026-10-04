@@ -1,0 +1,29 @@
+[package]
+name = "sumfri"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+authors = ["Abdelali Mkhida <ali.mkhida@algorizk.xyz>"]
+description = "Sum-FRI: hypercube sums and coefficient-form multilinear evaluations from shared-challenge FRI folding"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/qoosmo/kbfold"
+readme = "README.md"
+keywords = ["commitment", "fri", "post-quantum", "multilinear", "sumcheck"]
+categories = ["cryptography", "mathematics"]
+publish = false
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+
+[dependencies]
+kbfold = { path = "../../rust" }
+blake3 = "1.8.7"
+getrandom = "0.4"
+rayon = { version = "1.10", optional = true }
+
+[features]
+# Multithreaded prover (rayon), here and in the kbfold dependency. Proofs are identical.
+parallel = ["dep:rayon", "kbfold/parallel"]
+# Seeded provers for reproducible tests and digests. Insecure: never enable in production.
+insecure-test-vectors = ["kbfold/insecure-test-vectors"]
