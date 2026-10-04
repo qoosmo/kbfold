@@ -1,0 +1,37 @@
+\section{Conclusion and Future Work}\label{sec:concl}
+
+Classical FRI folding of the Kronecker encoding $V_f$ restricts the coefficient polynomial $P_f$ in its first variable (\cref{thm:dictionary}).
+When the folding challenges also drive the claim, an evaluation $P_f(z)$, and in particular the hypercube sum $\sum_a f(a) = P_f(\mathbf 1)$, is reduced to a claim on the final table by one affine round polynomial per round, with no equality table and no change of basis.
+This round structure is DeepFold's~\cite{GLHQTZ25}.
+We gave a complete proof of its soundness, evaluation binding, round-by-round knowledge soundness and, through the theorem of Chiesa, Di, Hu and Zheng~\cite{CDHZ25}, post-quantum knowledge soundness of the compiled scheme for a single opening, in the unique-decoding regime.
+The proof follows KBFold: correlated agreement enters through the line $w_e + \theta w_o$, and the sumcheck step becomes a restriction step that costs one bad challenge per round.
+All of it except the quantum compiler and the Merkle-tree statements is checked in Lean, against the single axiom of correlated agreement.
+The implementation shares everything with KBFold except the protocol, and opening a sum is $27$--$41\%$ faster than with KBFold or with a coefficient-form sumcheck at equal commitment cost, verification time and proof size, and $34$--$57\%$ faster with post-quantum parameters.
+
+\subsection{Future work}\label{sec:concl:future}
+
+\paragraph{Soundness beyond unique decoding.}
+\begin{itemize}
+  \item \emph{List decoding.} Extend \cref{thm:sound,thm:rbr} to proximity parameters up to the Johnson bound. The classical word fold is directly a Reed--Solomon line (\cref{lem:cword}(2)), so correlated agreement beyond unique decoding~\cite{BCIKS23}, or its subcode form~\cite{Hab24}, applies to it; the main work is to replace the unique codewords of the codeword chain by lists, and to carry the restriction step through the list. This would reduce the number of queries, which dominates the proof size and the verification time in \cref{tab:whir}.
+  \item \emph{Out-of-domain samples.} DeepFold~\cite{GLHQTZ25} adds out-of-domain evaluations to reach list decoding; with them, the analysis of \cref{sec:sound} would have to account for the additional claims on the folded polynomials.
+\end{itemize}
+
+\paragraph{Batching and composition.}
+\begin{itemize}
+  \item \emph{Several sums.} Sums of several committed tables, or of one table against several points, by a random linear combination before the first round; soundness by correlated agreement applied to the combination, as for batched FRI.
+  \item \emph{Linear claims.} $\Pieval$ proves the inner product of the committed table with the tensor $(m_a(z))_a$. Other structured public vectors, and the use of $\Pisum$ as the final step of protocols that reduce their claims to a sum of one committed table, are natural next steps.
+\end{itemize}
+
+\paragraph{Zero knowledge.}
+Masking the committed polynomial with $X^N R$ for a random $R$ of small degree, masking the round polynomials, and masking the folded words with a random codeword, as proposed in \KB{\S10.1}; the restriction dictionary has to be extended to the masked polynomial, and the view shown to be simulable.
+
+\paragraph{Formal verification.}
+Formalise \cref{lem:local-fold} and items 2--4 of \cref{thm:skip}; replace the axiom \texttt{bciks\_unique} by a proof of correlated agreement in the unique-decoding regime; and link the Rust implementation to the Lean specification.
+
+\subsection{Artefacts}\label{sec:concl:artefacts}
+The paper, the Rust library \texttt{sumfri}, the Lean library \texttt{SumFRI} and the benchmark data are in the KBFold repository, \url{https://github.com/qoosmo/kbfold}, under the MIT or Apache-2.0 licences (code) and CC~BY~4.0 (paper).
+\begin{itemize}
+  \item \emph{Tests} (\cref{sec:impl:tests}): \texttt{cargo test --release} in \texttt{sumfri/rust/}.
+  \item \emph{Tables of \cref{sec:exp}}: in \texttt{sumfri/rust/},\\ \texttt{bench/run\_all.sh <tag> 22 <whir\_dir>}, or \texttt{cargo run --release --example bench -- sum} (and \texttt{eval}, \texttt{pq}, \texttt{breakdown}); the recorded data are in \texttt{sumfri/rust/results/}.
+  \item \emph{Lean} (Lean~4.23.0, Mathlib \texttt{v4.23.0}): \texttt{lake build SumFRI} in \texttt{lean/};\\ \texttt{lake env lean SumFRI/Audit.lean} prints the axioms of the main theorems.
+\end{itemize}

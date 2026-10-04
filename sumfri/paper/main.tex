@@ -8,6 +8,7 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage[capitalise,nameinlink]{cleveref}
 \usepackage{tikz-cd}
+\setlength{\emergencystretch}{2em}
 
 % ---------- theorem environments (as in KBFold) ----------
 \newtheorem{theorem}{Theorem}[section]
@@ -53,7 +54,14 @@
 \maketitle
 
 \begin{abstract}
-% Written last, once the results of every section are fixed.
+We prove hypercube sums $\sum_a f(a)$ and coefficient-form multilinear evaluations $P_f(z) = \sum_a f(a) \prod_k z_k^{a_k}$ for a table $f$ committed as the Reed--Solomon codeword of $V_f = \sum_a f(a) X^a$ on a smooth domain.
+Classical FRI folding of $V_f$ restricts $P_f$ in its first variable, and $n$ folds give $P_f(\theta_1, \dots, \theta_n)$.
+When the folding challenges also drive the claim, each round costs one affine round polynomial, sent as a single field element, with no equality table and no change of basis; for the sum, the round messages are plain sums of the table.
+This round structure is that of the evaluation protocol of DeepFold.
+We give a complete proof of soundness, evaluation binding and round-by-round knowledge soundness in the unique-decoding regime, whose only external input about codes is the correlated-agreement theorem of Ben-Sasson, Carmon, Ishai, Kopparty and Saraf, and derive post-quantum knowledge soundness of the compiled scheme in the quantum random oracle model from the theorem of Chiesa, Di, Hu and Zheng.
+A restriction round costs one bad challenge, against two for a degree-$2$ sumcheck.
+The proofs are formalised in Lean~4 on top of the KBFold library, with correlated agreement as the only axiom.
+A Rust implementation that shares its field, NTT, Merkle trees and transcript with KBFold opens a sum $27$--$41\%$ faster than KBFold and than a coefficient-form sumcheck scheme, at equal commitment cost, verification time and proof size, and $34$--$57\%$ faster with post-quantum parameters.
 \end{abstract}
 
 \tableofcontents
@@ -66,7 +74,7 @@
 \input{sections/06-soundness}
 \input{sections/07-implementation}
 \input{sections/08-experiments}
-% \input{sections/09-conclusion}
+\input{sections/09-conclusion}
 
 \section*{Acknowledgments}
 The author thanks the developers of Lean, Mathlib and the Rust ecosystem, on which the companion artefacts are built.
@@ -76,8 +84,8 @@ The author checked all results and takes full responsibility for the content of 
 \bibliographystyle{alpha}
 \bibliography{refs}
 
-% \appendix
-% \input{sections/10-notation}
-% \input{sections/11-lean}
+\appendix
+\input{sections/10-notation}
+\input{sections/11-lean}
 
 \end{document}

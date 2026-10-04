@@ -32,3 +32,5 @@ lake env lean KBFold/Audit.lean   # #print axioms for the main theorems
 Full correspondence: [`../docs/LEAN_MAP.md`](../docs/LEAN_MAP.md).
 
 **Modelling notes.** Bit vectors are `Fin n → Bool`; Lean bit `k` is paper bit `k+1`. A single field `F` is used, and the domain is a subgroup `L ≤ Fˣ`. Probabilities are rationals, computed by counting over finite uniform spaces. Provers are deterministic, with explicit causality hypotheses. Decoding is non-constructive, and running times are not formalised.
+
+**Sum-FRI.** The second library `SumFRI` (`lake build SumFRI`, axioms: `lake env lean SumFRI/Audit.lean`) formalises the companion paper in [`../sumfri`](../sumfri); see [`../sumfri/LEAN_MAP.md`](../sumfri/LEAN_MAP.md).

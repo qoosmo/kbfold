@@ -132,8 +132,8 @@ Let $l_{\max}$ be the largest length of $y$ and of the messages, $q_{\mathsf{V}}
 Then there is a polynomial-time quantum straightline extractor such that, for every $\delta$ and every query bound $Q$, $\mathsf{BCS}[\Pi]$ is post-quantum straightline knowledge sound from $(\mathsf{CR}[\mathcal{R}], \widehat{\mathsf{CR}}[\mathcal{R},\delta])$, with extraction error
 \begin{align*}
   \varepsilon_{\mathrm{ext}}(Q) \;\le\;\;& 320\,(Q+\nu+1)(Q+\nu)\,\varepsilon_{\mathrm{rr}}(\delta) \;+\; \frac{4\,(Q+\nu+1)\,\nu}{2^{\beta_{\min}}} \\
-  &+\; \frac{32\, l_{\max} + 1280\, Q\,(2Q+1)^2 + 128\, q_s \lceil \log_2 l_{\max} \rceil}{2^{\lambda_{\mathsf{H}}}}
-  \;+\; \frac{960\,(Q+1)\,T_1^2 + 480\, q_{\mathsf{V}}^2\,(Q + \nu + q_{\mathsf{V}} + 2)}{2^{\lambda_{\mathsf{H}}}},
+  &+\; \frac{32\, l_{\max} + 1280\, Q\,(2Q+1)^2 + 128\, q_s \lceil \log_2 l_{\max} \rceil}{2^{\lambda_{\mathsf{H}}}} \\
+  &+\; \frac{960\,(Q+1)\,T_1^2 + 480\, q_{\mathsf{V}}^2\,(Q + \nu + q_{\mathsf{V}} + 2)}{2^{\lambda_{\mathsf{H}}}},
 \end{align*}
 and commutativity error $\varepsilon_{\mathrm{com}}(q) \le 240\,(q+1)/2^{\lambda_{\mathsf{H}}}$, where $\lambda_{\mathsf{H}}$ is the output length of the random oracle.
 \end{theorem}

@@ -1,0 +1,42 @@
+\section{Lean formalisation}\label{app:lean}
+
+The Lean~4 library \texttt{SumFRI} (Lean~4.23.0, Mathlib at the tag \texttt{v4.23.0}; about $3400$ lines in $9$ modules, in the directory \texttt{lean/SumFRI} of the KBFold repository) is a second library of the KBFold Lean project.
+It imports the KBFold library~\cite{Mkh26} and reuses its multilinear tables, smooth domains, Reed--Solomon codes, fibre distance, probability lemmas, generic round-by-round framework, fibre strings and sampling lemmas.
+It contains no \texttt{sorry}. Its only axiom is KBFold's \texttt{bciks\_unique}, the correlated-agreement theorem (\cref{thm:bciks}); \texttt{\#print axioms} (file \texttt{SumFRI/Audit.lean}) shows that the restriction dictionary, completeness, the case $\ell = 0$ and the deterministic core of \cref{lem:cr-unique} do not use it, and that soundness, binding, round-by-round knowledge soundness and relaxed round-by-round knowledge soundness use it and the three standard axioms of Lean (\texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}) only.
+
+\paragraph{Modelling.}
+The modelling is that of KBFold (\KB{Appendix~B}).
+Bit vectors are functions $\mathtt{Fin}\ n \to \mathtt{Bool}$, with bit $0$ of Lean the bit $a_1$ of the paper; one field $\F$ contains the smooth domain $L \le \F^\times$; probabilities are rationals computed by counting; rounds and challenges are indexed from $0$.
+A deterministic prover is a family of messages indexed by the challenges, with a causality hypothesis and the hypothesis that round polynomials have degree at most $1$ (they are transmitted as two coefficients, or as one with \cref{rem:compress}).
+The point $z$ is given by its first $\ell$ coordinates and its last $n - \ell$ coordinates, so that the table has $n = m + \ell$ variables with $m = n - \ell$.
+
+\paragraph{Correspondence.}
+\begin{center}
+\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.34\linewidth}>{\raggedright\arraybackslash}p{0.18\linewidth}>{\raggedright\arraybackslash}p{0.42\linewidth}@{}}
+\toprule
+Paper & Lean module & Main declarations \\
+\midrule
+\endhead
+\Cref{def:coeff-poly,def:vf,lem:kronecker,def:cres,lem:cres,thm:dictionary}, \eqref{eq:sum-is-eval} & \texttt{Monomial} & \texttt{cpoly}, \texttt{vpoly}, \texttt{vpoly\_eval}, \texttt{vpoly\_eval\_one}, \texttt{cres}, \texttt{cpoly\_cres}, \texttt{cpoly\_cresSeq}, \texttt{cfold\_vpoly}, \texttt{cfoldSeq\_vpoly\_full}, \texttt{cpoly\_one} \\
+\Cref{lem:cword}(4), \cref{def:round-poly,lem:round-poly} & \texttt{Monomial} & \texttt{cwfold\_ev}, \texttt{rnd0}, \texttt{rnd1}, \texttt{hround\_eq}, \texttt{hround\_one}, \texttt{affine\_agree} \\
+\Cref{def:encoding,cor:cword-chain,lem:honest,thm:complete} & \texttt{Scheme} & \texttt{cEnc}, \texttt{cfoldUp\_Enc}, \texttt{hS}, \texttt{hS\_eval}, \texttt{hS\_zp}, \texttt{SumProver}, \texttt{completeness}, \texttt{completeness\_sum} \\
+\Cref{lem:encoding,def:decoded}, \cref{lem:cword}(1), \cref{lem:far,lem:survive,def:good,lem:good,lem:step} & \texttt{Fibre} & \texttt{vpoly\_ccoeffs}, \texttt{cEnc\_injective}, \texttt{cdecTable}, \texttt{cwfold\_congr}, \texttt{cfar\_fold}, \texttt{csurvive}, \texttt{CGood}, \texttt{ncard\_not\_cgood\_le}, \texttt{cone\_step} \\
+\Cref{lem:passing,lem:chain,thm:sound,cor:binding,cor:sum,prop:l0} & \texttt{Soundness} & \texttt{cPass\_card}, \texttt{cchain}, \texttt{cchain\_final}, \texttt{csoundness\_far}, \texttt{csoundness\_close}, \texttt{ceval\_binding}, \texttt{soundness\_sum}, \texttt{sum\_binding}, \texttt{cno\_folding} \\
+\Cref{def:state,lem:rbr-step,lem:rbr-restr,thm:rbr,prop:rbr-l0} & \texttt{RBR} & \texttt{cNotDoomed}, \texttt{cExt}, \texttt{crbr\_step}, \texttt{ccoeffs\_cwfold}, \texttt{csRw\_zp}, \texttt{csRw\_eval}, \texttt{crbr\_round\_one}, \texttt{crbr\_round}, \texttt{crbr\_final}, \texttt{crbr\_l0} \\
+\Cref{thm:rbr} (``Consequently''), \cref{rem:bgtz} & \texttt{RBRGeneric} & \texttt{crbr\_knowledge}, \texttt{crbr\_binding} \\
+\Cref{def:kstate,lem:rbr-erasures,thm:rrbr}, \cref{lem:cr-unique} (core) & \texttt{NonInteractive} & \texttt{cKState}, \texttt{crbr\_stepE}, \texttt{crbr\_erasures\_one}, \texttt{crbr\_erasures\_round}, \texttt{crbr\_erasures\_final}, \texttt{crrbr\_round}, \texttt{crrbr\_final}, \texttt{ccr\_unique\_core} \\
+\Cref{lem:skip}, \cref{thm:skip}(1) & \texttt{Skip} & \texttt{SumProver.augW}, \texttt{caccepts\_aug}, \texttt{csoundness\_far\_J}, \texttt{csoundness\_close\_J}, \texttt{ceval\_binding\_J}, \texttt{soundness\_sum\_J} \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\paragraph{Reused from KBFold.}
+\Cref{lem:sequential,lem:queries,lem:randomised,def:rbr-knowledge,lem:rbr-overall,lem:rbr-binding} (module \texttt{RoundByRound} and \texttt{Probability}), \cref{lem:power,def:fibre,def:rs,lem:metric,lem:rs-params,lem:split-words} (\texttt{Domain}), \cref{def:fibre-dist,lem:fibre-dist,lem:unique} (\texttt{Fibre}), \cref{lem:sampling} and the fibre strings of \cref{sec:sound:pq} (\texttt{NonInteractive}).
+
+\paragraph{Not formalised.}\leavevmode\\
+\Cref{thm:cdhz} and \cref{cor:pq}, which rest on the quantum analysis of~\cite{CDHZ25}; the Merkle-tree statements and the collision step of \cref{lem:cr-unique}; \cref{fact:decode} and \cref{lem:descent}; running times and operation counts; \cref{lem:local-fold}, and items 2--4 of \cref{thm:skip}; \cref{sec:impl,sec:exp}.
+As in KBFold, the Lean verifier of $\Pieval^{\mathcal{J}}$ states each check with the classical fold of the augmented word, which \cref{lem:local-fold} shows the verifier computes from the opened coset, and \cref{lem:rbr-erasures,thm:rrbr} are stated for a model of transcripts by stages.
+
+\paragraph{Findings of the formalisation.}
+The formalisation found no false statement. As in KBFold, case~2 of \cref{thm:sound} holds without its hypothesis $\Delta^{\mathrm{fib}}_0(w_0, \Cc_0) \le \delta$, and the Lean statement is in this form.

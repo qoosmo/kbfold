@@ -1,0 +1,60 @@
+\section{Notation}\label{app:notation}
+
+\begin{center}
+\small
+\begin{longtable}{@{}p{0.27\textwidth} p{0.49\textwidth} >{\raggedright\arraybackslash}p{0.17\textwidth}@{}}
+\toprule
+Symbol & Meaning & Where \\
+\midrule
+\endhead
+\multicolumn{3}{l}{\emph{Integers, bits and fields}} \\
+$\iv{a}{c}$; $n$, $N = 2^n$ & integers $a \le i \le c$; number of variables; size of a table & \S\ref{sec:prelim:bits} \\
+$a_k$, $a = a_1 + 2a'$ & bit $k$ of an index (least significant first); splitting off the first bit & \S\ref{sec:prelim:bits} \\
+$\Fq$, $\F$, $\K$ & base field; challenge field $\F \supseteq \Fq$; extension field & \S\ref{sec:prelim:fields}, \S\ref{sec:scheme:params} \\
+$\F[X]_{<d}$, $\coef{a}{P}$, $P_e$, $P_o$ & polynomials of degree $< d$; coefficient of $X^a$; even and odd parts & \Cref{lem:splits} \\
+\midrule
+\multicolumn{3}{l}{\emph{Tables and polynomials}} \\
+$f$, $f(a)$ & table, $a \in \iv{0}{N-1}$ & \S\ref{sec:prelim:ml} \\
+$m_a$, $\eq$, $\tilde f$ & canonical monomial; equality polynomial; multilinear extension & \Cref{def:bases,prop:mle} \\
+$P_f$ & coefficient polynomial $\sum_a f(a)\, m_a$ & \Cref{def:coeff-poly} \\
+$V_f$ & Kronecker encoding $\sum_a f(a) X^a$ & \Cref{def:vf} \\
+$\mathbf 1$ & the point $(1, \dots, 1)$; $P_f(\mathbf 1) = V_f(1) = \sum_a f(a)$ & \eqref{eq:sum-is-eval}, \Cref{lem:kronecker} \\
+$g_e$, $g_o$ & $g_e(b') = g(2b')$, $g_o(b') = g(2b'+1)$ & \Cref{def:round-poly} \\
+$\mathrm{cres}_\theta(f)$, $\mathrm{cres}_{\theta_{\le j}}(f)$ & coefficient restriction $f_e + \theta f_o$; iterated & \Cref{def:cres} \\
+$\res_r(f)$ & restriction of the multilinear extension (KBFold) & \Cref{def:restriction} \\
+$U_f$ & kernel encoding of KBFold, $\sum_b f(b) K_b$ & \Cref{rem:kernel-relation} \\
+\midrule
+\multicolumn{3}{l}{\emph{Domains, codes and folds}} \\
+$L$, $M$; $L_j$, $M_j$ & smooth domain and its order; $L^{2^j}$ and its order $M/2^j$ & \Cref{def:domain}, \S\ref{sec:scheme:params} \\
+fibre $\{\xi, -\xi\}$ & the two square roots of $\xi^2$ & \Cref{def:fibre} \\
+$\ev_L$, $\RS_\F[L,d]$, $\rho$, $\Delta$ & evaluation map; Reed--Solomon code; rate; relative Hamming distance & \Cref{def:rs} \\
+$w_e$, $w_o$ & even and odd parts of a word & \eqref{eq:even-odd} \\
+$\cfold_\theta(U)$, $\cfold_\theta(w)$ & classical fold $U_e + \theta U_o$ of a polynomial, $w_e + \theta w_o$ of a word & \Cref{def:cfold,lem:cword} \\
+$\mathrm{pfold}_r$ & kernel fold of KBFold & \Cref{rem:kernel-relation} \\
+$h_{g,y}$ & round polynomial $P_{g_e}(y) + T P_{g_o}(y)$ & \Cref{def:round-poly} \\
+\midrule
+\multicolumn{3}{l}{\emph{The scheme}} \\
+$R$, $\ell$, $\kappa$ & $\rho = 2^{-R}$; number of folding rounds; number of queries & \S\ref{sec:scheme:params} \\
+$N_j$, $\Cc_j$ & $N/2^j$; $\RS_\F[L_j, N_j]$ & \S\ref{sec:scheme:params} \\
+$\Enc(f)$ & $\ev_L(V_f)$ & \Cref{def:encoding} \\
+$\Pieval$, $\Pisum$ & evaluation protocol; sum protocol ($z = \mathbf 1$) & \S\ref{sec:scheme:protocol} \\
+$z$, $v$, $z_{>j}$ & point and claimed value; $(z_{j+1}, \dots, z_n)$ & \S\ref{sec:scheme:protocol} \\
+$s_j = a_j + b_j T$, $\theta_j$, $v_j$ & round polynomial; challenge; running claim $s_j(\theta_j)$ & \S\ref{sec:scheme:protocol} \\
+$f_j$, $g$, $G$, $w_\ell$ & honest tables $\mathrm{cres}_{\theta_{\le j}}(f)$; final table; $V_g$; $\ev_{L_\ell}(G)$ & \S\ref{sec:scheme:protocol} \\
+$\tau_j$ & monomial tensor $(m_{b'}(z_{>j}))_{b'}$ & \S\ref{sec:scheme:costs} \\
+$\mathcal{J}$, $d_j$, $\Pieval^{\mathcal{J}}$ & committed levels; folds between committed levels; protocol with committed levels & \S\ref{sec:scheme:skip} \\
+\midrule
+\multicolumn{3}{l}{\emph{Soundness}} \\
+$\delta$, $\delta^*$ & proximity parameter; $(1-\rho)/2$ & \S\ref{sec:sound}, \S\ref{sec:sound:pq} \\
+$\Delta^{\mathrm{fib}}_j$ & fibre distance & \Cref{def:fibre-dist} \\
+$\mathrm{dec}_j(w)$, $f^*$ & decoded codeword; decoded table & \Cref{def:decoded} \\
+$\mathsf{Good}_j(w, \theta)$ & good challenge & \Cref{def:good} \\
+$\Pp_j$, $\pi$ & passing sets; fraction of passing query points & \S\ref{sec:sound:thm} \\
+$\varepsilon_{\mathrm{fold}}$ & $\sum_{j=1}^\ell M_j/|\F|$ & \Cref{thm:sound} \\
+$\lambda[c]$, $\sigma_j(c)$ & coefficient vector of $P_c$; $P_{\lambda[c]}(z_{>j})$ & \S\ref{sec:sound:rbr} \\
+$\hat w_j$, $\mathcal{B}_j$, $\mathcal{W}_j(c)$, $\mathrm{dens}_j$ & folded word; disagreement set; witness set; its density & \S\ref{sec:sound:rbr} \\
+$\Dd$, $\mathsf{Ext}$ & doomed set; extractor & \Cref{def:state} \\
+$\Sigma$, $\mathrm{fib}_j$, $\phi$, $\mathrm{pos}$, $\beta$ & alphabet $\F^2$; fibre string; challenge maps; challenge length & \S\ref{sec:sound:pq} \\
+\bottomrule
+\end{longtable}
+\end{center}
