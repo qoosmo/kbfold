@@ -1,0 +1,143 @@
+\section{Preliminaries}\label{sec:prelim}
+
+This section fixes notation and recalls the algebraic facts that we use.
+All of them are proved in KBFold~\cite{Mkh26}; we restate them without proof and give the number of each result there.
+The only external result about codes is the correlated-agreement theorem (\cref{thm:bciks}).
+
+\subsection{Integers, bits and points}\label{sec:prelim:bits}
+
+$\N = \{0,1,2,\dots\}$, and for integers $a, c$ we write $\iv{a}{c} = \{i \in \mathbb{Z} : a \le i \le c\}$.
+The letter $n \in \N$ denotes a number of variables and $N = 2^n$.
+Every $b \in \iv{0}{N-1}$ has a unique binary decomposition $b = \sum_{k=1}^n b_k 2^{k-1}$ with $b_k \in \{0,1\}$; bit $b_1$ is the least significant one, and we identify $b$ with its bit vector $(b_1,\dots,b_n) \in B_n = \{0,1\}^n$.
+For $n \ge 1$ we write $b = b_1 + 2b'$, where $b' = \lfloor b/2 \rfloor$ has bit vector $(b_2,\dots,b_n)$.
+For $b, c \in \iv{0}{N-1}$, $c \preceq b$ means $c_k \le b_k$ for every $k$.
+
+For a commutative ring $A$, points $x \in A^j$ and $y \in A^{n-j}$, we write $(x,y) \in A^n$ for their concatenation, and $r_{\le j} = (r_1,\dots,r_j)$ for $r \in A^m$ and $j \le m$.
+For $x \in A^j$ and $b \in \iv{0}{2^{n-j}-1}$, $(x,b)$ is the point $(x_1,\dots,x_j,b_1,\dots,b_{n-j})$.
+
+\subsection{Fields and univariate polynomials}\label{sec:prelim:fields}
+
+Throughout, $\Fq$ is a finite field of \emph{odd characteristic}, so that $2$ is invertible.
+In \cref{sec:sound} the results are also applied over an extension field $\K \supseteq \Fq$, from which the challenges are drawn.
+For a field $\F$, $\F[X]_{<d}$ is the space of polynomials of degree less than $d$, and $\coef{a}{P}$ is the coefficient of $X^a$ in $P$.
+
+\begin{lemma}[Root counting, \KB{Lemma~2.1}]\label{lem:roots}
+A nonzero $P \in \F[X]$ of degree $d$ has at most $d$ roots in $\F$; two polynomials of $\F[X]_{<d}$ that agree on $d$ distinct points are equal.
+\end{lemma}
+
+\begin{lemma}[Even--odd split, \KB{Lemma~2.3}]\label{lem:splits}
+Let $d \ge 1$. Every $P \in \F[X]_{<2d}$ can be written uniquely as $P(X) = P_e(X^2) + X P_o(X^2)$ with $P_e, P_o \in \F[X]_{<d}$, namely $\coef{i}{P_e} = \coef{2i}{P}$ and $\coef{i}{P_o} = \coef{2i+1}{P}$.
+The map $P \mapsto (P_e, P_o)$ is $\F$-linear.
+\end{lemma}
+
+The even--odd split is also defined for every $P \in \F[X]$, by the same coefficient formulas; then $P(X) = P_e(X^2) + X P_o(X^2)$, and $P_e = P_o = 0$ if and only if $P = 0$.
+
+\subsection{Multilinear polynomials}\label{sec:prelim:ml}
+
+Let $A$ be a commutative ring.
+A polynomial in $A[x_1,\dots,x_n]$ is \emph{multilinear} if its degree in each variable is at most~$1$; these polynomials form an $A$-module $\mathcal{L}_n(A)$.
+A \emph{table} over $A$ with $n$ variables is a function $f : \iv{0}{N-1} \to A$.
+
+\begin{definition}[Monomials, equality and Lagrange polynomials, \KB{Definition~2.4}]\label{def:bases}
+For $a \in \iv{0}{N-1}$ the \emph{canonical monomial} is $m_a(x) = \prod_{k=1}^n x_k^{a_k}$.
+The \emph{equality polynomials} are $\eq_1(y,z) = yz + (1-y)(1-z)$ and $\eq(y,z) = \prod_{k=1}^n \eq_1(y_k,z_k)$, and the \emph{Lagrange polynomials} are $e_b(x) = \eq(b,x)$ for $b \in \iv{0}{N-1}$.
+\end{definition}
+
+The canonical monomials form a basis of $\mathcal{L}_n(A)$.
+Every $P \in \mathcal{L}_n(A)$ is written uniquely as $P = P_0 + x_1 P_1$ with $P_0, P_1$ multilinear in $x_2,\dots,x_n$.
+
+\begin{proposition}[Multilinear extension, \KB{Proposition~2.6}]\label{prop:mle}
+For every table $f$ there is a unique $\tilde f \in \mathcal{L}_n(A)$ with $\tilde f(b) = f(b)$ for all $b \in B_n$, namely $\tilde f = \sum_{b} f(b)\, e_b$.
+The map $f \mapsto \tilde f$ is an $A$-linear bijection from tables onto $\mathcal{L}_n(A)$.
+\end{proposition}
+
+\begin{lemma}[Table form and coefficient form, \KB{Lemma~2.9}]\label{lem:mobius}
+If $\tilde f = \sum_a \alpha_a m_a$, then $f(b) = \sum_{a \preceq b} \alpha_a$ and $\alpha_a = \sum_{b \preceq a} (-1)^{\wt(a)-\wt(b)} f(b)$, where $\wt$ is the Hamming weight.
+\end{lemma}
+
+The table $(\alpha_a)_a$ of \cref{lem:mobius} is the \emph{coefficient form} of $\tilde f$ (\KB{Definition~2.8}), and the map $f \mapsto (\alpha_a)_a$ is the \emph{M\"obius transform}.
+
+\begin{definition}[Restriction, \KB{Definition~2.10}]\label{def:restriction}
+Let $n \ge 1$, $f$ a table over $A$ with $n$ variables and $r \in A$. The \emph{restriction} of $f$ at $r$ is the table with $n-1$ variables
+\[
+  \res_r(f)(b') \;=\; (1-r)\, f(2b') + r\, f(2b'+1), \qquad b' \in \iv{0}{N/2-1}.
+\]
+\end{definition}
+
+\begin{lemma}[Restriction evaluates the first variable, \KB{Lemma~2.11}]\label{lem:restriction}
+$\widetilde{\res_r(f)}(y) = \tilde f(r, y)$ as polynomials in $y = (y_1,\dots,y_{n-1})$.
+\end{lemma}
+
+\Cref{sec:restriction} develops the counterpart of \cref{def:restriction,lem:restriction} for the coefficient form, which is the object that the classical FRI fold acts on.
+
+\subsection{Smooth domains and Reed--Solomon codes}\label{sec:prelim:rs}
+
+\begin{definition}[Smooth domain, \KB{Definition~2.14}]\label{def:domain}
+A \emph{smooth domain} is a subgroup $L \le \Fq^\times$ of order $M = 2^\mu$ with $\mu \in \N$.
+For $j \in \iv{0}{\mu}$, $L^{2^j} = \{\xi^{2^j} : \xi \in L\}$.
+\end{definition}
+
+\begin{lemma}[Power maps, \KB{Lemma~2.15}]\label{lem:power}
+Let $L$ be a smooth domain of order $M = 2^\mu$ and $j \in \iv{0}{\mu}$.
+The map $\xi \mapsto \xi^{2^j}$ is a homomorphism from $L$ onto $L^{2^j}$, the smooth domain of order $M/2^j$, and every element of $L^{2^j}$ has exactly $2^j$ preimages.
+If $\mu \ge 1$, then $-1 \in L$ and the preimages of $\xi^2$ under squaring are $\xi$ and $-\xi$, which are distinct.
+\end{lemma}
+
+\begin{definition}[Fibres, \KB{Definition~2.16}]\label{def:fibre}
+For a smooth domain $L$ of order $M \ge 2$, the \emph{fibre} over $\eta \in L^2$ is the set $\{\xi,-\xi\}$ of its square roots in $L$.
+The $M/2$ fibres partition $L$.
+\end{definition}
+
+\begin{definition}[Reed--Solomon code, \KB{Definition~2.17}]\label{def:rs}
+Let $\F \supseteq \Fq$ be a finite field, $L$ a smooth domain of order $M$ and $1 \le d \le M$.
+The evaluation map is $\ev_L : \F[X] \to \F^L$, $P \mapsto (P(\xi))_{\xi \in L}$, and $\RS_\F[L,d] = \ev_L(\F[X]_{<d})$, of rate $\rho = d/M$; we write $\RS[L,d]$ when $\F = \Fq$.
+Elements of $\F^L$ are \emph{words}.
+The relative Hamming distance is $\Delta(w,w') = |\{\xi : w(\xi) \ne w'(\xi)\}|/M$, and $\Delta(w,\Cc) = \min_{c \in \Cc}\Delta(w,c)$ for a nonempty set $\Cc$ of words.
+\end{definition}
+
+\begin{lemma}[Parameters of Reed--Solomon codes, \KB{Lemma~2.19}]\label{lem:rs-params}
+Let $\Cc = \RS_\F[L,d]$ with $|L| = M$.
+\begin{enumerate}
+  \item $\ev_L : \F[X]_{<d} \to \Cc$ is an $\F$-linear bijection; for $c \in \Cc$, $P_c$ denotes the polynomial with $\ev_L(P_c) = c$.
+  \item Two distinct codewords agree on at most $d-1$ points of $L$.
+  \item If $\delta \le (1-\rho)/2$, every word is within distance $\delta$ of at most one codeword.
+\end{enumerate}
+\end{lemma}
+
+\begin{fact}[Efficient unique decoding, \KB{Fact~2.20}]\label{fact:decode}
+There is an algorithm that, given $L$, $d$ and $w \in \F^L$, outputs the unique codeword $c \in \RS_\F[L,d]$ with $\Delta(w,c) < \frac12(1-(d-1)/M)$ whenever it exists, with a number of operations in $\F$ polynomial in $M$.
+\end{fact}
+
+\begin{lemma}[Decoding over an extension field, \KB{Lemma~2.21}]\label{lem:descent}
+Let $\K \supseteq \Fq$ be a finite field and $w \in \Fq^L$.
+If $c \in \RS_\K[L,d]$ satisfies $\Delta(w,c) < \frac12(1-(d-1)/M)$, then $P_c \in \Fq[X]_{<d}$.
+\end{lemma}
+
+\paragraph{Even--odd split of words.}
+Let $L$ be a smooth domain of order $M \ge 2$ and $w \in \F^L$. The words $w_e, w_o \in \F^{L^2}$ are
+\begin{equation}\label{eq:even-odd}
+  w_e(\xi^2) \;=\; \frac{w(\xi) + w(-\xi)}{2},
+  \qquad
+  w_o(\xi^2) \;=\; \frac{w(\xi) - w(-\xi)}{2\xi}
+  \qquad (\xi \in L).
+\end{equation}
+
+\begin{lemma}[Even--odd split of words, \KB{Lemma~2.22}]\label{lem:split-words}
+Let $w \in \F^L$ with $|L| = M \ge 2$.
+\begin{enumerate}
+  \item $w_e$ and $w_o$ are well defined, and $w \mapsto (w_e,w_o)$ is $\F$-linear.
+  \item For $\eta \in L^2$, $w_e(\eta)$ and $w_o(\eta)$ depend only on the values of $w$ on the fibre over $\eta$.
+  \item $w(\pm\xi) = w_e(\xi^2) \pm \xi\, w_o(\xi^2)$ for every $\xi \in L$. Consequently, $w$ vanishes on the fibre over $\eta$ if and only if $w_e(\eta) = w_o(\eta) = 0$.
+  \item If $1 \le d \le M/2$, $P \in \F[X]_{<2d}$ and $w = \ev_L(P)$, then $w_e = \ev_{L^2}(P_e)$ and $w_o = \ev_{L^2}(P_o)$.
+\end{enumerate}
+\end{lemma}
+
+\subsection{Correlated agreement}\label{sec:prelim:gaps}
+
+\begin{theorem}[{\cite[Theorem~4.1]{BCIKS23}}; \KB{Theorem~2.23}]\label{thm:bciks}
+Let $\F \supseteq \Fq$ be a finite field, $\Cc = \RS_\F[L,d]$ with $|L| = M$ and rate $\rho = d/M$, and $0 < \delta \le (1-\rho)/2$.
+Let $u^0, u^1 \in \F^L$ and $S = \{r \in \F : \Delta(u^0 + r u^1, \Cc) \le \delta\}$.
+If $|S| > M$, there are a set $L' \subseteq L$ with $|L'| \ge (1-\delta)M$ and codewords $\hat c^0, \hat c^1 \in \Cc$ such that $u^0$ agrees with $\hat c^0$, and $u^1$ with $\hat c^1$, on $L'$.
+\end{theorem}
+
+This theorem is the only axiom of the Lean formalisation of KBFold, and of the present one (\cref{app:lean}).

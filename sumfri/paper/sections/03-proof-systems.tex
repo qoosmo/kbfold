@@ -1,0 +1,141 @@
+\section{Interactive Oracle Proofs and Polynomial Commitments}\label{sec:proofs}
+
+This section recalls the proof-system notions of KBFold~\cite[\S3]{Mkh26} that we use, and adapts the definition of a polynomial commitment scheme to coefficient-form evaluations and to hypercube sums.
+The lemmas are proved in KBFold, and \cref{thm:cdhz} is quoted from Chiesa, Di, Hu and Zheng~\cite{CDHZ25}.
+
+\subsection{Interactive oracle proofs and the probability space}\label{sec:proofs:iop}
+
+A \emph{relation} $\mathcal{R}$ is a set of pairs $(\mathtt{x},\mathtt{w})$ of an instance and a witness, and $L_{\mathcal{R}} = \{\mathtt{x} : \exists\,\mathtt{w},\ (\mathtt{x},\mathtt{w}) \in \mathcal{R}\}$ is its language.
+An instance may have an \emph{oracle part}, a word to which the verifier has query access only.
+
+\begin{definition}[Interactive oracle proof, \KB{Definition~3.1}]\label{def:iop}
+A \emph{public-coin interactive oracle proof} (IOP)~\cite{BCS16} with $\nu \ge 1$ rounds and finite nonempty challenge sets $\mathsf{Ch}_1,\dots,\mathsf{Ch}_\nu$ is a pair $(\mathsf{P},\mathsf{V})$.
+In round $i = 1,\dots,\nu$, $\mathsf{P}$ sends a message $\mathsf{m}_i$, parts of which may be designated as oracles, and $\mathsf{V}$ replies with a challenge $\mathsf{c}_i \in \mathsf{Ch}_i$.
+After the last round, $\mathsf{V}$ reads the non-oracle parts of the instance and of the messages, queries the oracles at positions determined by these and by the challenges, and accepts or rejects as a deterministic function of what it has read.
+\end{definition}
+
+A \emph{partial transcript} of $i$ rounds is $\tau = (\mathtt{x}, \mathsf{m}_1,\mathsf{c}_1,\dots,\mathsf{m}_i,\mathsf{c}_i)$; for $i = 0$ it is the empty transcript $(\mathtt{x})$, and for $i = \nu$ a full transcript.
+Checks made ``during'' a round are predicates on the full transcript, evaluated at the end.
+A \emph{deterministic prover} maps each partial transcript of $i-1$ rounds to a message $\mathsf{m}_i$.
+Probabilities are over the uniform distribution on $\Omega = \mathsf{Ch}_1 \times \dots \times \mathsf{Ch}_\nu$; $\tau_i$ denotes the partial transcript after $i$ rounds and $\mathsf{m}_i$ the $i$-th message, functions of $(\mathsf{c}_1,\dots,\mathsf{c}_i)$ and $(\mathsf{c}_1,\dots,\mathsf{c}_{i-1})$.
+
+\begin{lemma}[Sequential challenges, \KB{Lemma~3.2}]\label{lem:sequential}
+For $i \in \iv{1}{\nu}$ let $E_i \subseteq \mathsf{Ch}_1\times\dots\times\mathsf{Ch}_i$, and suppose that for every $(\mathsf{c}_1,\dots,\mathsf{c}_{i-1})$ at most $k_i$ values $\mathsf{c}_i$ satisfy $(\mathsf{c}_1,\dots,\mathsf{c}_i) \in E_i$.
+Then $\Pr_\Omega[\exists\, i : (\mathsf{c}_1,\dots,\mathsf{c}_i) \in E_i] \le \sum_{i} k_i/|\mathsf{Ch}_i|$.
+\end{lemma}
+
+\begin{lemma}[Independent queries, \KB{Lemma~3.3}]\label{lem:queries}
+Let $\Omega'$ and $L$ be finite nonempty sets, $\kappa \ge 1$, $\varpi \mapsto \mathcal{S}(\varpi) \subseteq L$ and $\mathcal{A} \subseteq \Omega'$.
+If $|\mathcal{S}(\varpi)| \le \pi |L|$ for every $\varpi \in \mathcal{A}$, then, under the uniform distribution on $\Omega' \times L^{\times\kappa}$,
+$\Pr[\varpi \in \mathcal{A} \text{ and } \xi^{(1)},\dots,\xi^{(\kappa)} \in \mathcal{S}(\varpi)] \le \Pr[\mathcal{A}]\,\pi^\kappa$.
+\end{lemma}
+
+\begin{lemma}[Randomised provers, \KB{Lemma~3.4}]\label{lem:randomised}
+A bound on the probability of a set of full transcripts that holds for every deterministic prover also holds for every randomised prover whose randomness is independent of the challenges.
+\end{lemma}
+
+\begin{definition}[Completeness and soundness, \KB{Definition~3.5}]\label{def:iop-sound}
+The IOP is \emph{complete} for $\mathcal{R}$ if the honest prover makes $\mathsf{V}$ accept with probability $1$ on every $(\mathtt{x},\mathtt{w}) \in \mathcal{R}$.
+It has \emph{soundness error} $\varepsilon$ if, for every $\mathtt{x} \notin L_{\mathcal{R}}$ and every deterministic prover, $\mathsf{V}$ accepts with probability at most $\varepsilon$.
+\end{definition}
+
+\subsection{Round-by-round soundness}\label{sec:proofs:rbr}
+
+\begin{definition}[Round-by-round soundness, \KB{Definition~3.6}]\label{def:rbr}
+An IOP with $\nu$ rounds has \emph{round-by-round soundness error} $(\varepsilon_1,\dots,\varepsilon_\nu)$ for $\mathcal{R}$ if there is a set $\Dd$ of partial transcripts, the \emph{doomed} ones, such that:
+(1) if $\mathtt{x} \notin L_{\mathcal{R}}$, then $(\mathtt{x}) \in \Dd$;
+(2) for every $i$, every doomed $\tau$ of $i-1$ rounds and every message $\mathsf{m}_i$, $\Pr_{\mathsf{c}_i}[(\tau,\mathsf{m}_i,\mathsf{c}_i) \notin \Dd] \le \varepsilon_i$;
+(3) $\mathsf{V}$ rejects every doomed full transcript.
+\end{definition}
+
+\begin{definition}[Round-by-round knowledge soundness, \KB{Definition~3.7}]\label{def:rbr-knowledge}
+An IOP with $\nu$ rounds is \emph{round-by-round knowledge sound} for $\mathcal{R}$ with error $(\varepsilon_1,\dots,\varepsilon_\nu)$ if there are a set $\Dd$ of partial transcripts and a polynomial-time extractor $\mathsf{Ext}$, defined on pairs of a partial transcript and a next message, such that:
+(1) $(\mathtt{x}) \in \Dd$ for every instance $\mathtt{x}$;
+(2) for every $i$, every doomed $\tau$ of $i-1$ rounds and every $\mathsf{m}_i$, if $\Pr_{\mathsf{c}_i}[(\tau,\mathsf{m}_i,\mathsf{c}_i) \notin \Dd] > \varepsilon_i$, then $(\mathtt{x}, \mathsf{Ext}(\tau,\mathsf{m}_i)) \in \mathcal{R}$;
+(3) $\mathsf{V}$ rejects every doomed full transcript.
+\end{definition}
+
+\begin{lemma}[Round-by-round implies overall, \KB{Lemma~3.8}]\label{lem:rbr-overall}
+Let $\mathsf{P}^*$ be a deterministic prover and $\mathtt{x}$ an instance.
+\begin{enumerate}
+  \item Under \cref{def:rbr}, if $\mathtt{x} \notin L_{\mathcal{R}}$, then $\mathsf{V}$ accepts with probability at most $\sum_i \varepsilon_i$.
+  \item Under \cref{def:rbr-knowledge}, if $\mathsf{V}$ accepts with probability greater than $\sum_i \varepsilon_i$, then there are $i$ and challenges $\mathsf{c}_1,\dots,\mathsf{c}_{i-1}$ with $\tau_{i-1} \in \Dd$ and $(\mathtt{x}, \mathsf{Ext}(\tau_{i-1},\mathsf{m}_i)) \in \mathcal{R}$.
+\end{enumerate}
+\end{lemma}
+
+\subsection{Coefficient-form commitments and hypercube sums}\label{sec:proofs:pcs}
+
+KBFold commits to a table $f$ and proves claims $\tilde f(z) = v$ about its multilinear extension (\KB{Definition~3.10}).
+The scheme of this paper proves claims about the multilinear polynomial whose \emph{coefficients} are the entries of $f$.
+
+\begin{definition}[Coefficient polynomial]\label{def:coeff-poly}
+For a table $f$ over a commutative ring $A$ with $n$ variables, the \emph{coefficient polynomial} of $f$ is
+\[
+  P_f \;=\; \sum_{a=0}^{N-1} f(a)\, m_a \;\in\; \mathcal{L}_n(A).
+\]
+\end{definition}
+
+By \cref{lem:mobius}, $P_f = \tilde g$ where $g(b) = \sum_{a \preceq b} f(a)$; equivalently, $P_f = \tilde f$ after the M\"obius transform of $f$.
+For every $a \in \iv{0}{N-1}$, $m_a(1,\dots,1) = 1$, so
+\begin{equation}\label{eq:sum-is-eval}
+  \sum_{a=0}^{N-1} f(a) \;=\; P_f(1,\dots,1).
+\end{equation}
+
+\begin{definition}[Coefficient-form commitment in the IOP model]\label{def:pcs}
+A \emph{coefficient-form commitment scheme} in the IOP model consists of an encoding $\Enc$, mapping each table $f$ to a word $\Enc(f)$, and an \emph{evaluation protocol}, a public-coin IOP whose instance is $(w; z, v)$ with a word $w$ as oracle part, a point $z \in \F^n$ and a value $v \in \F$, for a finite field $\F \supseteq \Fq$.
+It is \emph{complete} if the evaluation protocol accepts with probability~$1$ when the prover is honest, $w = \Enc(f)$ and $P_f(z) = v$.
+The \emph{sum protocol} is the evaluation protocol on the instances $(w; \mathbf 1, v)$, where $\mathbf 1 = (1,\dots,1)$; by \eqref{eq:sum-is-eval}, it proves $\sum_a f(a) = v$.
+\end{definition}
+
+As in KBFold, fix a function $\mathrm{dist}$ on pairs of words and a threshold $\delta$ such that
+\begin{equation}\label{eq:dist-unique}
+  \text{for every word } w, \text{ at most one table } f \text{ satisfies } \mathrm{dist}(w, \Enc(f)) \le \delta,
+\end{equation}
+and define the relations
+\begin{align*}
+  \mathcal{R}^{\delta}_{\mathrm{eval}} &\;=\; \bigl\{\, ((w; z, v), f) \;:\; \mathrm{dist}(w,\Enc(f)) \le \delta \ \text{ and } \ P_f(z) = v \,\bigr\}, \\
+  \mathcal{R}^{\delta}_{\mathrm{sum}} &\;=\; \bigl\{\, ((w; v), f) \;:\; \mathrm{dist}(w,\Enc(f)) \le \delta \ \text{ and } \ \textstyle\sum_a f(a) = v \,\bigr\}.
+\end{align*}
+\Cref{sec:sound} takes for $\mathrm{dist}$ the fibre distance to the encoding, as in KBFold.
+By \eqref{eq:sum-is-eval}, $((w;v),f) \in \mathcal{R}^\delta_{\mathrm{sum}}$ if and only if $((w;\mathbf 1, v),f) \in \mathcal{R}^\delta_{\mathrm{eval}}$, so every result for the evaluation protocol specialises to the sum protocol.
+
+\begin{definition}[Evaluation binding, \KB{Definition~3.11}]\label{def:binding}
+The evaluation protocol is \emph{$\varepsilon$-evaluation binding} if for every word $w$, point $z$ and values $v \ne v'$, it is not the case that deterministic provers make the verifier accept $(w;z,v)$ and $(w;z,v')$, each with probability greater than $\varepsilon$.
+\end{definition}
+
+\begin{lemma}[Knowledge soundness implies binding, \KB{Lemma~3.12}]\label{lem:rbr-binding}
+If the evaluation protocol is round-by-round knowledge sound for $\mathcal{R}^\delta_{\mathrm{eval}}$ with error $(\varepsilon_i)_i$ and \eqref{eq:dist-unique} holds, then it is $\varepsilon$-evaluation binding with $\varepsilon = \sum_i \varepsilon_i$.
+\end{lemma}
+
+The proof in KBFold uses only \eqref{eq:dist-unique} and \cref{lem:rbr-overall}, and applies verbatim with $P_f$ in place of $\tilde f$.
+
+\subsection{Non-interactive arguments}\label{sec:proofs:bcs}
+
+This subsection concerns only the post-quantum corollary (\cref{cor:pq}).
+We use the definitions of KBFold~\cite[\S3.4]{Mkh26}, which restate those of~\cite{CDHZ25}: Merkle trees and their binding (\KB{Lemma~3.13}), relations with an implicit instance and their relaxations $\mathcal{R}_{\le\delta}$, IOPs viewed as interactive oracle reductions (IORs) to the accepting relation $\mathcal{R}_{\mathrm{acc}}$, salted Merkle commitments, committed relations $\mathsf{CR}[\mathcal{R}]$ and relaxed committed relations $\widehat{\mathsf{CR}}[\mathcal{R},\delta]$ (\KB{Definition~3.15}), and the compiler $\mathsf{BCS}[\Pi]$ of~\cite[Construction~11.7]{CDHZ25}.
+We restate the hypothesis and the conclusion of the theorem, which are what \cref{sec:sound} checks and uses.
+
+\begin{definition}[Relaxed round-by-round knowledge soundness~\cite{CDHZ25}, \KB{Definition~3.14}]\label{def:rrbr}
+A \emph{knowledge state function} for an IOR from $\mathcal{R}$ to $\mathcal{R}_{\mathrm{acc}}$ is a deterministic function $\mathsf{KState}$ that, on a proximity bound $\delta$, a statement $(\mathtt{x}, y)$, a transcript $\mathrm{tr}$ and a witness $\mathtt{w}$, outputs a bit $\mathsf{KState}_\delta(\mathtt{x},y,\mathrm{tr},\mathtt{w})$ such that:
+(1) on the empty transcript it is $1$ if and only if $(\mathtt{x},y,\mathtt{w}) \in \mathcal{R}_{\le\delta}$;
+(2) if it is $0$ when the prover is about to move, it stays $0$ after every prover message;
+(3) on a full transcript it is $1$ if and only if the verifier accepts.
+The IOR has \emph{relaxed round-by-round knowledge soundness errors} $(\varepsilon^{\mathrm{rr}}_i)_i$ if there are such a function and a deterministic polynomial-time algorithm $\mathsf{E}$, independent of $\delta$, such that for every $\delta$, statement $(\mathtt{x},y)$, round $i$ and transcript $\mathrm{tr} = (\Pi_1,\mathsf{vr}_1,\dots,\Pi_{i-1},\mathsf{vr}_{i-1},\Pi_i)$,
+\[
+  \Pr_{\mathsf{vr}_i}\bigl[\, \exists\,\mathtt{w} : \mathsf{KState}_\delta(\mathtt{x},y,\mathrm{tr},\mathsf{E}(\mathtt{x},y,\mathrm{tr}\|\mathsf{vr}_i,\mathtt{w})) = 0 \text{ and } \mathsf{KState}_\delta(\mathtt{x},y,\mathrm{tr}\|\mathsf{vr}_i,\mathtt{w}) = 1 \,\bigr] \;\le\; \varepsilon^{\mathrm{rr}}_i(\mathtt{x},y,\delta).
+\]
+\end{definition}
+
+\begin{theorem}[{\cite[Theorems~6.10, 8.3 and~11.3]{CDHZ25}}; \KB{Theorem~3.16}]\label{thm:cdhz}
+Let $\Pi$ be an IOR from $\mathcal{R}$ to $\mathcal{R}_{\mathrm{acc}}$ with $\nu$ rounds, challenge lengths $\beta_i$ with $\beta_{\min} = \min_i \beta_i$, and relaxed round-by-round knowledge soundness errors $(\varepsilon^{\mathrm{rr}}_i)_i$; let $\varepsilon_{\mathrm{rr}}(\delta)$ be their maximum over the statements under consideration.
+Let $l_{\max}$ be the largest length of $y$ and of the messages, $q_{\mathsf{V}}$ the number of random-oracle queries of the verifier of $\mathsf{BCS}[\Pi]$, $q_{\widehat{\mathsf{CR}}}$ that of the decider of $\widehat{\mathsf{CR}}[\mathcal{R},\delta]$, $q_s$ the number of positions read by the IOR verifier, and $T_1 = Q + 1 + q_{\mathsf{V}} + \nu + q_{\widehat{\mathsf{CR}}}$.
+Then there is a polynomial-time quantum straightline extractor such that, for every $\delta$ and every query bound $Q$, $\mathsf{BCS}[\Pi]$ is post-quantum straightline knowledge sound from $(\mathsf{CR}[\mathcal{R}], \widehat{\mathsf{CR}}[\mathcal{R},\delta])$, with extraction error
+\begin{align*}
+  \varepsilon_{\mathrm{ext}}(Q) \;\le\;\;& 320\,(Q+\nu+1)(Q+\nu)\,\varepsilon_{\mathrm{rr}}(\delta) \;+\; \frac{4\,(Q+\nu+1)\,\nu}{2^{\beta_{\min}}} \\
+  &+\; \frac{32\, l_{\max} + 1280\, Q\,(2Q+1)^2 + 128\, q_s \lceil \log_2 l_{\max} \rceil}{2^{\lambda_{\mathsf{H}}}}
+  \;+\; \frac{960\,(Q+1)\,T_1^2 + 480\, q_{\mathsf{V}}^2\,(Q + \nu + q_{\mathsf{V}} + 2)}{2^{\lambda_{\mathsf{H}}}},
+\end{align*}
+and commutativity error $\varepsilon_{\mathrm{com}}(q) \le 240\,(q+1)/2^{\lambda_{\mathsf{H}}}$, where $\lambda_{\mathsf{H}}$ is the output length of the random oracle.
+\end{theorem}
+
+The derivation of this specialisation from~\cite{CDHZ25} is given in KBFold; it depends only on the structure of the IOR (number of rounds, message lengths, positions read), not on the encoding.
