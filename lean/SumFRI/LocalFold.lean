@@ -41,7 +41,7 @@ theorem cfoldUp_local {D : Subgroup Fˣ} (θ : ℕ → F) :
       apply cwfold_congr
       intro ζ' hζ'
       obtain ⟨ζ, rfl⟩ := ptAt_surjective (L := D) d ζ'
-      apply cfoldUp_local d w w' ζ
+      apply cfoldUp_local θ d w w' ζ
       intro ζ'' h''
       apply h
       have e1 : ptAt ζ'' (d + 1) = sqPt (ptAt ζ'' d) := rfl
