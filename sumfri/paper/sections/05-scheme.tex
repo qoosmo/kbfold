@@ -1,0 +1,160 @@
+\section{The Commitment Scheme}\label{sec:scheme}
+
+We now build the coefficient-form commitment scheme of \cref{def:pcs} on the restriction dictionary.
+The prover commits to a table $f$ as the Reed--Solomon codeword of $V_f$, with no change of basis.
+A claim $P_f(z) = v$ is proved by restriction rounds (\cref{lem:round-poly}) whose challenges are also the fold challenges; for $z = \mathbf 1$ this proves $\sum_a f(a) = v$.
+The structure, the stopping parameter and the committed levels are those of the KBFold scheme (\KB{\S6}), with the classical fold in place of the kernel fold and the restriction step in place of the sumcheck.
+
+\subsection{Parameters and encoding}\label{sec:scheme:params}
+
+\paragraph{Fields.}
+The smooth domain lies in the base field $\Fq$; tables, words, the evaluation point and the challenges live in a finite field $\F \supseteq \Fq$, the \emph{challenge field}.
+Taking $\F = \K$, an extension of $\Fq$, gives the scheme with extension-field challenges of \cref{sec:impl}, in which honest tables have entries in $\Fq$.
+All results of \cref{sec:scheme,sec:sound} hold for every such $\F$, with $|\F|$ in the error bounds.
+
+\paragraph{Parameters.}
+As in \KB{\S6.1}:
+\begin{itemize}
+  \item the number of variables $n \ge 1$, and $N = 2^n$;
+  \item a rate $\rho = 2^{-R}$ with $R \ge 1$, and a smooth domain $L \le \Fq^\times$ of order $M = N/\rho = 2^{n+R}$;
+  \item a number of folding rounds $\ell \in \iv{0}{n}$, and a number of queries $\kappa \ge 1$.
+\end{itemize}
+For $j \in \iv{0}{\ell}$ let $L_j = L^{2^j}$, of order $M_j = M/2^j \ge 2$, let $N_j = N/2^j$, and $\Cc_j = \RS_\F[L_j, N_j]$; every $\Cc_j$ has rate $\rho$, and $L_{j+1} = (L_j)^2$.
+
+\begin{definition}[Encoding]\label{def:encoding}
+The \emph{encoding} of a table $f : \iv{0}{N-1} \to \F$ is $\Enc(f) = \ev_L(V_f) \in \Cc_0$, with $V_f$ as in \cref{def:vf}.
+\end{definition}
+
+\begin{lemma}[Encoding]\label{lem:encoding}
+$\Enc$ is an $\F$-linear bijection from the tables over $\F$ onto $\Cc_0$; for $c \in \Cc_0$, the table $f$ with $\Enc(f) = c$ is the coefficient vector of $P_c$, $f(a) = \coef{a}{P_c}$.
+\end{lemma}
+
+\begin{proof}
+$f \mapsto V_f$ is a linear bijection onto $\F[X]_{<N}$, and $\ev_L$ is a linear bijection from $\F[X]_{<N}$ onto $\Cc_0$ with inverse $c \mapsto P_c$ (\cref{lem:rs-params}(1)).
+\end{proof}
+
+$\Enc$ is computed by one number-theoretic transform (NTT) of size $M$ on the zero-padded table: the table \emph{is} the coefficient vector, and no transform precedes the NTT.
+KBFold spends $\tfrac{n}{2}N$ additions on the kernel transform (\KB{Corollary~4.11}), and a coefficient-form scheme proving claims about $\tilde f$ spends as many on the M\"obius transform (\cref{lem:mobius}).
+
+\subsection{The evaluation protocol}\label{sec:scheme:protocol}
+
+The commitment to $f$ is $w_0 = \Enc(f)$.
+The evaluation protocol $\Pieval$ proves the claim $P_f(z) = v$ for a public point $z = (z_1,\dots,z_n) \in \F^n$ and a public value $v \in \F$; its instance is $(w_0; z, v)$, with oracle access to $w_0$.
+The \emph{sum protocol} $\Pisum$ is $\Pieval$ with $z = \mathbf 1 = (1,\dots,1)$; it proves $\sum_a f(a) = v$ (\cref{def:pcs}).
+
+\paragraph{Round structure.}
+$\Pieval$ is a public-coin IOP with $\ell + 1$ rounds.
+\begin{itemize}
+  \item In round $j \in \iv{1}{\ell}$, the prover sends a \emph{round polynomial} $s_j \in \F[T]_{<2}$, together with, if $j \ge 2$, an oracle $w_{j-1} \in \F^{L_{j-1}}$; the verifier replies with a uniformly random challenge $\theta_j \in \F$.
+  \item In round $\ell + 1$, the prover sends a \emph{final table} $g : \iv{0}{N_\ell - 1} \to \F$ in the clear; the verifier replies with $\kappa$ independent uniformly random query points $\xi^{(1)}_0,\dots,\xi^{(\kappa)}_0 \in L$, and decides.
+\end{itemize}
+The challenge sets are $\mathsf{Ch}_j = \F$ for $j \in \iv{1}{\ell}$ and $\mathsf{Ch}_{\ell+1} = L^{\times\kappa}$.
+A round polynomial is transmitted as its two coefficients; \cref{rem:compress} halves this.
+
+\paragraph{Honest prover.}
+The honest prover keeps one table, initialised to $f_0 = f$, and after round $j$ replaces it by its coefficient restriction $f_j = \mathrm{cres}_{\theta_j}(f_{j-1})$ (\cref{def:cres}).
+In round $j$ it sends the honest round polynomial of $f_{j-1}$ at the remaining coordinates (\cref{def:round-poly}),
+\begin{equation}\label{eq:honest-sj}
+  s_j(T) \;=\; h_{f_{j-1},\, z_{>j}}(T) \;=\; P_{(f_{j-1})_e}(z_{>j}) + T\, P_{(f_{j-1})_o}(z_{>j}),
+  \qquad z_{>j} = (z_{j+1},\dots,z_n),
+\end{equation}
+and, if $j \ge 2$, the oracle $w_{j-1} = \cfold_{\theta_{j-1}}(w_{j-2})$ (\cref{def:cfold}).
+In round $\ell + 1$ it sends $g = f_\ell$.
+For $\Pisum$, $s_j(T) = \sum_{b} f_{j-1}(2b) + T \sum_b f_{j-1}(2b+1)$, by \cref{lem:round-poly}(2) and \cref{lem:kronecker}.
+
+\paragraph{Verifier.}
+Set $v_0 = v$ and $v_j = s_j(\theta_j)$ for $j \in \iv{1}{\ell}$.
+Let $G = V_g \in \F[X]_{<N_\ell}$ and $w_\ell = \ev_{L_\ell}(G)$; the verifier computes values of $w_\ell$ itself.
+The verifier accepts if and only if all of the following checks pass.
+\begin{enumerate}
+  \item \emph{Restriction.} $s_j(z_j) = v_{j-1}$ for every $j \in \iv{1}{\ell}$.
+  \item \emph{Closure.} $v_\ell = P_g(z_{\ell+1},\dots,z_n)$.
+  \item \emph{Queries.} For every $i \in \iv{1}{\kappa}$, with $\xi_0 = \xi_0^{(i)}$ and $\xi_j = \xi_0^{2^j}$:
+  \begin{itemize}
+    \item if $\ell \ge 1$: for every $j \in \iv{1}{\ell}$, the value $\cfold_{\theta_j}(w_{j-1})(\xi_j)$, computed by \cref{lem:cword}(3) from the two queried values $w_{j-1}(\pm\xi_{j-1})$, equals $w_j(\xi_j)$ (a query to the oracle $w_j$ if $j < \ell$, and $G(\xi_\ell)$ if $j = \ell$);
+    \item if $\ell = 0$: $w_0(\xi_0) = G(\xi_0)$.
+  \end{itemize}
+\end{enumerate}
+For $\Pisum$, the restriction check reads $s_j(1) = v_{j-1}$ and the closure check reads $v_\ell = \sum_b g(b)$.
+Unlike in KBFold (\KB{\S6.2}), the closure check carries no factor $\prod_j \eq_1(\theta_j, z_j)$: the reduced claim after round $j$ is directly a claim on $P_{f_j}$.
+
+\begin{remark}[Stopping parameter]\label{rem:stop}
+With $\ell = n$, the final table is the single value $P_f(\theta_1,\dots,\theta_n)$ and $G$ is a constant; with $\ell = 0$, the prover sends $f$ in the clear.
+Intermediate values trade the $N_\ell = 2^{n-\ell}$ field elements of the final message against $\ell$ folding rounds, as in \KB{Remark~6.3}.
+\end{remark}
+
+\begin{remark}[One field element per round]\label{rem:compress}
+Since the verifier checks $s_j(z_j) = v_{j-1}$, the prover may send only the linear coefficient $b_j$ of $s_j(T) = a_j + b_j T$, the verifier setting $a_j = v_{j-1} - z_j b_j$; the restriction check then holds by construction, and the protocol is the same IOP up to this bijective re-encoding of the messages that pass the check.
+Every soundness result below therefore holds for the compressed protocol.
+\end{remark}
+
+\subsection{Committing to fewer words}\label{sec:scheme:skip}
+
+As in \KB{\S6.3}, the prover may commit only to the words $w_j$ for $j$ in a public set $\mathcal{J} \subseteq \iv{0}{\ell-1}$ with $0 \in \mathcal{J}$, and the verifier folds the intermediate levels itself.
+For $j \in \mathcal{J}$ let $j^+$ be the next element of $\mathcal{J}$, or $\ell$, let $d_j = j^+ - j$, let $S_j(\xi) = \{\zeta \in L_j : \zeta^{2^{d_j}} = \xi^{2^{d_j}}\}$, and $\cfold^{(j)}_\theta = \cfold_{\theta_{j^+}} \circ \dots \circ \cfold_{\theta_{j+1}}$.
+
+\begin{lemma}[Local folding, \KB{Lemma~6.4}]\label{lem:local-fold}
+For $j \in \mathcal{J}$, $w \in \F^{L_j}$ and $\xi \in L_j$, the value $\cfold^{(j)}_\theta(w)(\xi^{2^{d_j}})$ depends only on the values of $w$ on $S_j(\xi)$, and is computed from them by $2^{d_j} - 1$ applications of \cref{lem:cword}(3).
+\end{lemma}
+
+The protocol $\Pieval^{\mathcal{J}}$ is $\Pieval$ in which the oracle $w_{j-1}$ is sent only if $j - 1 \in \mathcal{J}$, and in which, for every query point and every $j \in \mathcal{J}$, the verifier reads $w_j$ on $S_j(\xi_j)$, computes $\cfold^{(j)}_\theta(w_j)(\xi_{j^+})$, and compares it with $w_{j^+}(\xi_{j^+})$, or $G(\xi_\ell)$ if $j^+ = \ell$.
+For $\mathcal{J} = \iv{0}{\ell-1}$ it is $\Pieval$.
+
+\begin{lemma}[Skipping commitments, \KB{Lemma~6.5}]\label{lem:skip}
+For every prover $\tilde{\mathsf{P}}$ of $\Pieval^{\mathcal{J}}$, the prover of $\Pieval$ that sends the messages of $\tilde{\mathsf{P}}$ and, in round $j+1$ for $j \in \iv{1}{\ell-1} \setminus \mathcal{J}$, the oracle $w_j = \cfold_{\theta_j}(w_{j-1})$, is accepted, for every instance and every choice of the challenges, whenever $\tilde{\mathsf{P}}$ is.
+\end{lemma}
+
+The proofs of \KB{Lemmas~6.4 and~6.5} use only the locality and the composition of the word fold, and apply verbatim to $\cfold$ by \cref{lem:cword}(1).
+\Cref{lem:skip} transfers soundness and evaluation binding from $\Pieval$ to $\Pieval^{\mathcal{J}}$ with the same errors.
+
+\subsection{Completeness}\label{sec:scheme:complete}
+
+\begin{lemma}[Honest prover]\label{lem:honest}
+Let $f$ be a table over $\F$, $z \in \F^n$ and $\theta_1,\dots,\theta_\ell \in \F$, and let $f_j$ and $s_j$ be computed by the honest prover. Then, for $j \in \iv{0}{\ell}$:
+\begin{enumerate}
+  \item $f_j = \mathrm{cres}_{\theta_{\le j}}(f)$, and $P_{f_j}(y) = P_f(\theta_{\le j}, y)$ for every $y \in \F^{n-j}$;
+  \item for $j \ge 1$, $s_j \in \F[T]_{<2}$, $s_j(z_j) = P_{f_{j-1}}(z_{\ge j})$ and $s_j(\theta_j) = P_{f_j}(z_{>j})$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(1) is the definition and \cref{lem:cres}(2).
+(2) By \cref{lem:round-poly}(1), $s_j(t) = P_{f_{j-1}}(t, z_{>j})$ for every $t$; take $t = z_j$, and $t = \theta_j$ together with $P_{f_{j-1}}(\theta_j, y) = P_{\mathrm{cres}_{\theta_j}(f_{j-1})}(y) = P_{f_j}(y)$ (\cref{lem:cres}(1)).
+\end{proof}
+
+\begin{theorem}[Completeness]\label{thm:complete}
+If $w_0 = \Enc(f)$, $v = P_f(z)$ and the prover is honest, the verifier of $\Pieval$ (and of $\Pieval^{\mathcal{J}}$) accepts with probability $1$.
+In particular, if $v = \sum_a f(a)$, the verifier of $\Pisum$ accepts with probability $1$.
+\end{theorem}
+
+\begin{proof}
+\emph{Restriction.} By \cref{lem:honest}(2) and induction, $v_j = P_{f_j}(z_{>j})$ for every $j \in \iv{0}{\ell}$: for $j = 0$ it is the hypothesis $v = P_f(z)$, and $v_j = s_j(\theta_j) = P_{f_j}(z_{>j})$. Hence $s_j(z_j) = P_{f_{j-1}}(z_{\ge j}) = v_{j-1}$.
+
+\emph{Closure.} $v_\ell = P_{f_\ell}(z_{>\ell}) = P_g(z_{>\ell})$, since $g = f_\ell$.
+
+\emph{Queries.} If $\ell = 0$, $G = V_f$ and $w_0 = \ev_L(G)$.
+If $\ell \ge 1$, extend $(\theta_1,\dots,\theta_\ell)$ arbitrarily to $\theta \in \F^n$; by \cref{cor:cword-chain}, $\cfold_{\theta_{\le j}}(w_0) = \ev_{L_j}(V_{f_j})$ for $j \in \iv{0}{\ell}$.
+The honest oracles are these words for $j < \ell$, and $V_{f_\ell} = V_g = G$.
+Hence $\cfold_{\theta_j}(w_{j-1}) = w_j$ on all of $L_j$ for every $j \in \iv{1}{\ell}$, and every query check passes; for $\Pieval^{\mathcal{J}}$, the same identities give $\cfold^{(j)}_\theta(w_j) = w_{j^+}$.
+The last statement is the case $z = \mathbf 1$, by \cref{lem:kronecker}.
+\end{proof}
+
+\subsection{Costs}\label{sec:scheme:costs}
+
+Let $t_{\mathsf{H}}$ be the cost of one hash evaluation; field operations are counted up to constant factors.
+
+\begin{itemize}
+  \item \emph{Commit.} One NTT of size $M$, $O(M \log M)$ operations, and a Merkle tree over the $M/2$ fibres of $w_0$, $O(M) \cdot t_{\mathsf{H}}$. No basis transform.
+  \item \emph{Prover, evaluation.} The tensors $\tau_j = \bigl(m_a(z_{>j})\bigr)_a$, $j = n-1, \dots, 0$, are computed backwards by $\tau_{j-1}(a_1 + 2a') = z_j^{a_1}\, \tau_j(a')$, in $O(N)$ operations in total; round $j$ then costs $O(N_{j-1})$ for $s_j$ (two inner products with $\tau_j$) and for $f_j$, hence $O(N)$ over all rounds.
+  For $\Pisum$, $\tau_j = \mathbf 1$ and the round polynomials cost only additions.
+  The folds cost $O(M)$ in total, and the Merkle trees of $w_1,\dots,w_{\ell-1}$ cost $O(M)\cdot t_{\mathsf{H}}$.
+  \item \emph{Verifier.} Restriction checks: $O(\ell)$. Closure: $O(N_\ell)$ (a sum for $\Pisum$). Queries: $O(\kappa\ell)$ field operations, $O(\kappa\ell\log M)\cdot t_{\mathsf{H}}$ for the authentication paths, and $\kappa$ evaluations of $G$, $O(\kappa N_\ell)$.
+  \item \emph{Proof size.} For $\ell \ge 1$: $\ell$ field elements for the round polynomials (\cref{rem:compress}), against $3\ell$ for the degree-$2$ sumcheck of KBFold; $N_\ell$ for the final table; $\ell - 1$ Merkle roots; $\kappa\ell$ opened fibres with their paths. With committed levels $\mathcal{J}$, the openings are those of \KB{\S6.4}.
+\end{itemize}
+
+\begin{remark}[Relation to DeepFold, BaseFold and Gemini]\label{rem:deepfold}
+For $\mathcal{J} = \iv{0}{\ell-1}$, $\ell = n$ and without its out-of-domain points, the evaluation protocol of DeepFold~\cite{GLHQTZ25} has the round structure of $\Pieval$: the prover sends $P_{f_{j-1}}(T, z_{>j})$, the verifier checks it at $z_j$ and evaluates it at the fold challenge.
+BaseFold~\cite{ZCF24} proves a coefficient-form claim with a degree-$2$ sumcheck instead.
+Gemini~\cite{BCHO22} folds at the coordinates of $z$ rather than at random challenges, and therefore commits to every folded polynomial and tests each one against the previous; at $z = \mathbf 1$ its folds compute $\sum_a f(a)$ by repeated pairwise sums.
+In $\Pieval$ the folds are random and the scalar claim follows them, so the folded words need no proof beyond the query checks of FRI.
+\end{remark}

@@ -115,7 +115,7 @@ theorem vpoly_split {n : ℕ} (f : Table F (n + 1)) :
   simp only [bitsToNat_cons, map_sum, map_mul, expand_C, map_pow, expand_X, Finset.mul_sum,
     ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun b' _ => ?_)
-  simp only [Bool.false_eq_true, eq_self_iff_true, if_true, if_false, ↓reduceIte, zero_add,
+  simp only [Bool.false_eq_true, ↓reduceIte, zero_add,
     pow_add, pow_mul, pow_one]
   ring
 
