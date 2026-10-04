@@ -7,7 +7,7 @@ A subproject of [KBFold](../README.md): the coefficient-form companion of the Bo
 | | What | Where |
 |---|---|---|
 | 📄 | Paper | [`paper/`](paper/) |
-| ✅ | Lean 4 formalisation, built on the KBFold library | [`lean/`](lean/) |
+| ✅ | Lean 4 formalisation, built on the KBFold library | [`../lean/SumFRI/`](../lean/SumFRI/) (library `SumFRI` of the KBFold Lean project) |
 | ⚙️ | Rust implementation and benchmarks, built on the `kbfold` crate | [`rust/`](rust/) |
 
 **Paper:** `cd paper && latexmk -pdf main.tex`

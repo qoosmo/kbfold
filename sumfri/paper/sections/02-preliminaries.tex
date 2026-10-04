@@ -95,6 +95,10 @@ Elements of $\F^L$ are \emph{words}.
 The relative Hamming distance is $\Delta(w,w') = |\{\xi : w(\xi) \ne w'(\xi)\}|/M$, and $\Delta(w,\Cc) = \min_{c \in \Cc}\Delta(w,c)$ for a nonempty set $\Cc$ of words.
 \end{definition}
 
+\begin{lemma}[Hamming distance, \KB{Lemma~2.18}]\label{lem:metric}
+$\Delta$ is a metric on $\F^L$. In particular, if $w$ agrees with $w'$ on at least $\alpha M$ points and $w'$ agrees with $w''$ on at least $\beta M$ points, then $w$ agrees with $w''$ on at least $(\alpha + \beta - 1)M$ points.
+\end{lemma}
+
 \begin{lemma}[Parameters of Reed--Solomon codes, \KB{Lemma~2.19}]\label{lem:rs-params}
 Let $\Cc = \RS_\F[L,d]$ with $|L| = M$.
 \begin{enumerate}

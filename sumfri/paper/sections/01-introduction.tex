@@ -43,7 +43,7 @@ We record the relation between the two encodings of the same sum: $V_f(1)$ in th
 
 \paragraph{The scheme and its completeness (\cref{sec:scheme}).}
 We define the commitment, the evaluation protocol $\Pieval$ for claims $P_f(z) = v$, and its specialisation $\Pisum$ to hypercube sums, with a stopping parameter, committed levels and the local query checks of KBFold.
-The prover sends one affine polynomial per round, that is, one field element once the check $g_j(z_j) = S_{j-1}$ is used to recover the other.
+The prover sends one affine polynomial per round, that is, one field element once the restriction check $s_j(z_j) = v_{j-1}$ is used to recover the other.
 It never forms an equality table, and the commitment requires no change of basis: the table is the coefficient vector.
 
 \paragraph{Soundness (\cref{sec:sound}).}
