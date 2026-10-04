@@ -31,3 +31,5 @@ open SumFRI
 #print axioms SumFRI.crbr_round_one_J
 #print axioms SumFRI.crbr_round_J
 #print axioms SumFRI.crbr_final_J
+#print axioms SumFRI.crrbr_round_J
+#print axioms SumFRI.crrbr_final_J

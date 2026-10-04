@@ -26,7 +26,7 @@ The implementation shares everything with KBFold except the protocol, and openin
 Masking the committed polynomial with $X^N R$ for a random $R$ of small degree, masking the round polynomials, and masking the folded words with a random codeword, as proposed in \KB{\S10.1}; the restriction dictionary has to be extended to the masked polynomial, and the view shown to be simulable.
 
 \paragraph{Formal verification.}
-Formalise item 3 of \cref{thm:skip}; replace the axiom \texttt{bciks\_unique} by a proof of correlated agreement in the unique-decoding regime; and link the Rust implementation to the Lean specification.
+Replace the axiom \texttt{bciks\_unique} by a proof of correlated agreement in the unique-decoding regime; and link the Rust implementation to the Lean specification.
 
 \subsection{Artefacts}\label{sec:concl:artefacts}
 The paper, the Rust library \texttt{sumfri}, the Lean library \texttt{SumFRI} and the benchmark data are in the KBFold repository, \url{https://github.com/qoosmo/kbfold}, under the MIT or Apache-2.0 licences (code) and CC~BY~4.0 (paper).

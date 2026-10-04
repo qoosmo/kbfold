@@ -9,3 +9,4 @@ import SumFRI.RBRGeneric
 import SumFRI.NonInteractive
 import SumFRI.Skip
 import SumFRI.SkipRBR
+import SumFRI.SkipNonInteractive

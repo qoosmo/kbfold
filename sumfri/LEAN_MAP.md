@@ -2,7 +2,7 @@
 
 Numbers refer to the compiled paper (`sumfri/paper`, `make` builds `sumfri.pdf`); Lean modules are in
 [`lean/SumFRI/`](../lean/SumFRI/), a second library of the KBFold Lean project (Lean `4.23.0`,
-Mathlib `v4.23.0`), about 3,600 lines in 11 modules. **No `sorry`.** The only axiom is KBFold's
+Mathlib `v4.23.0`), about 3,900 lines in 12 modules. **No `sorry`.** The only axiom is KBFold's
 `bciks_unique` (correlated agreement, Theorem 2.17).
 
 ```bash
@@ -24,6 +24,7 @@ lake env lean SumFRI/Audit.lean   # #print axioms for the main theorems
 | Definition 6.24, Lemma 6.25, Theorem 6.26, Lemma 6.28 (core) | `NonInteractive` | `cKState`, `crbr_stepE`, `crbr_erasures_one`, `crbr_erasures_round`, `crbr_erasures_final`, `crrbr_round`, `crrbr_final`, `ccr_unique_core` |
 | Lemma 5.6, Theorem 6.32 item 1 | `Skip` | `SumProver.augW`, `caccepts_aug`, `csoundness_far_J`, `csoundness_close_J`, `ceval_binding_J`, `soundness_sum_J` |
 | Theorem 6.32 item 2 | `SkipRBR` | `augPT`, `augWord_updR`, `crbr_round_one_J`, `crbr_round_J`, `crbr_final_J` |
+| Theorem 6.32 item 3 | `SkipNonInteractive` | `augE`, `cNotDoomedE_congr`, `cAcceptsSigJ_aug`, `crrbr_round_J`, `crrbr_final_J` |
 
 **Reused from KBFold** (`lean/KBFold/`): probability lemmas (Lemmas 3.2–3.4), the generic
 round-by-round framework (Definition 3.7, Lemmas 3.8, 3.12), smooth domains and Reed–Solomon
@@ -41,4 +42,4 @@ codes (Lemmas 2.9, 2.12, 2.13, 2.16), fibre distance and decoding (Definition 6.
 
 **Not formalised.** Theorem 3.14 and Corollary 6.27 (quantum random oracle model, quoted from
 CDHZ25); Merkle-tree statements and the collision step of Lemma 6.28; Fact 2.14 and Lemma 2.15;
-running times and operation counts (including the count in Lemma 5.5); items 3–4 of Theorem 6.32; Sections 7–8.
+running times and operation counts (including the count in Lemma 5.5); item 4 of Theorem 6.32 (the compiler, as Theorem 3.14); Sections 7–8.
