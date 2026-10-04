@@ -53,7 +53,7 @@ That step costs $1/|\F|$ per round, against $2/|\F|$ for the degree-$2$ sumcheck
 The only external result about codes is again the correlated-agreement theorem of Ben-Sasson, Carmon, Ishai, Kopparty and Saraf~\cite{BCIKS23}.
 
 \paragraph{Formal verification (\cref{app:lean}).}
-A Lean~4 formalisation, built on the KBFold Lean library and checked against the same single axiom (correlated agreement), covers the restriction dictionary, completeness, soundness, binding, round-by-round knowledge soundness, the combinatorial part of relaxed round-by-round knowledge soundness, and the transfer to committed levels.
+A Lean~4 formalisation, built on the KBFold Lean library and checked against the same single axiom (correlated agreement), covers the restriction dictionary, completeness, soundness, binding, round-by-round knowledge soundness, the combinatorial part of relaxed round-by-round knowledge soundness, local folding, and the transfer of soundness, binding and round-by-round knowledge soundness to committed levels.
 
 \paragraph{Implementation and experiments (\cref{sec:impl,sec:exp}).}
 A Rust implementation reuses the field, NTT, salted Merkle trees and transcript of the KBFold crate.

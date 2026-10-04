@@ -26,3 +26,8 @@ open SumFRI
 #print axioms SumFRI.ccr_unique_core
 #print axioms SumFRI.csoundness_close_J
 #print axioms SumFRI.soundness_sum_J
+#print axioms SumFRI.cwfold_sqPt
+#print axioms SumFRI.cfoldUp_local
+#print axioms SumFRI.crbr_round_one_J
+#print axioms SumFRI.crbr_round_J
+#print axioms SumFRI.crbr_final_J
