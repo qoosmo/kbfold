@@ -103,10 +103,6 @@ section Aug
 
 variable {L : Subgroup Fˣ}
 
-/-- Filling a full string gives it back. -/
-lemma fill_some {ι : Type*} (x : ι → F × F) : fill (fun η => some (x η)) = x := by
-  funext η; simp [fill]
-
 /-- The augmented strings: `U_0 = y`; the string of a committed level; and, at an omitted level
 `k+1 ∉ J`, the full fibre string of `cfold_{θ_{k+1}}` of the preceding filled augmented word. -/
 noncomputable def augU (J : Finset ℕ) (τ : PTransE F L) : (i : ℕ) → lv L (i + 1) → Option (F × F)
@@ -155,7 +151,6 @@ lemma augW_eq_augEword {m ℓ : ℕ} (J : Finset ℕ) (hneg : ∀ i < ℓ, (-1 :
         show cwfold (τ.r k) ((augE J τ).word k) =
           unfib (D := lv L (k + 1)) (fill (augU J τ (k + 1)))
         simp only [augU, if_neg hJ]
-        rw [fill_some]
         exact (unfib_fib (hneg (k + 1) hk) _).symm
 
 /-- The verifier words of the augmented prover are those of the augmented transcript. -/
@@ -229,18 +224,17 @@ theorem crrbr_round_J [Fintype F] [DecidableEq F] {R : ℕ} (J : Finset ℕ)
       cKState (κ := κ) ℓ zp zs v R symOK δ (augE J (τ.updR j a)) f (.mid (j + 1)) ↔
         cKState (κ := κ) ℓ zp zs v R symOK δ ((augE J τ).updR j a) f (.mid (j + 1)) :=
     fun a _ => imp_congr_right fun _ => cNotDoomedE_augE_updR J τ j a
-  refine le_trans (le_of_eq ?_)
+  refine le_trans (prob_mono ?_)
     (crrbr_round (zp := zp) (zs := zs) (v := v) hL hδ0 hδ symOK κ num int (augE J τ) hj hdeg)
-  congr 1
-  funext vr
-  exact propext (exists_congr fun f => and_congr_right' (key _ f))
+  rintro vr ⟨f, h1, h2⟩
+  exact ⟨f, h1, (key _ f).1 h2⟩
 
 /-- **Theorem 6.32(3), round `ℓ+1`.**  The bound `(1-δ)^κ` of Theorem 6.26 for the verifier of
 `Π_eval^{J,Σ}`. -/
 theorem crrbr_final_J [Fintype L] {R : ℕ} (J : Finset ℕ) (hL : IsSmoothDomain L (m + ℓ + R))
     (hℓ : 1 ≤ ℓ) (hδ0 : 0 < δ) (hδ : δ ≤ δstar R) (symOK : Prop) {κ : ℕ} {Ω : Type*}
     [Fintype Ω] (pos : Ω ≃ (Fin κ → L)) (τ : PTransE F L) (g : Table F m) :
-    prob (fun ω : Ω => ∃ f : Table F (m + ℓ),
+    prob (fun ω : Ω => ∃ _f : Table F (m + ℓ),
         ¬ cKState (κ := κ) ℓ zp zs v R symOK δ (augE J τ) (cEsig ℓ R (augE J τ)) (.mid ℓ) ∧
         cAcceptsSigJ ℓ J zp zs v symOK τ g (pos ω)) ≤ (1 - δ) ^ κ := by
   have hneg : ∀ i < ℓ, (-1 : Fˣ) ∈ lv L i := fun i hi => lv_neg_one_mem hL (by omega)
