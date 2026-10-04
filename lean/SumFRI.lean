@@ -5,3 +5,5 @@ import SumFRI.Fibre
 import SumFRI.Soundness
 import SumFRI.RBR
 import SumFRI.RBRGeneric
+import SumFRI.NonInteractive
+import SumFRI.Skip
