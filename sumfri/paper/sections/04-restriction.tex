@@ -1,0 +1,186 @@
+\section{The Restriction Dictionary}\label{sec:restriction}
+
+This section is the coefficient-form counterpart of the fold dictionary of KBFold (\KB{Theorem~5.3}).
+The table is committed as the coefficient vector of a univariate polynomial; the classical FRI fold then restricts one variable of the coefficient polynomial $P_f$ (\cref{def:coeff-poly}), and the scalar claim of the protocol is reduced by the same restriction.
+The mechanism is the one recorded in \KB{Remark~5.14} and used by BaseFold~\cite{ZCF24} and DeepFold~\cite{GLHQTZ25}; we state it in the form needed by \cref{sec:scheme,sec:sound}.
+
+Throughout, $A$ is a commutative ring in which $2$ need not be invertible, except where a smooth domain appears.
+
+\subsection{Encoding a table as a coefficient vector}\label{sec:restriction:enc}
+
+\begin{definition}[Coefficient encoding polynomial]\label{def:vf}
+For a table $f$ over $A$ with $n$ variables, put
+\[
+  V_f(X) \;=\; \sum_{a=0}^{N-1} f(a)\, X^{a} \;\in\; A[X]_{<N}.
+\]
+\end{definition}
+
+The map $f \mapsto V_f$ is an $A$-linear bijection from the tables with $n$ variables onto $A[X]_{<N}$, since the monomials $X^a$, $a \in \iv{0}{N-1}$, form a basis.
+
+\begin{lemma}[Kronecker substitution]\label{lem:kronecker}
+For every table $f$ over $A$ with $n$ variables and every $\zeta \in A$,
+\[
+  V_f(\zeta) \;=\; P_f\bigl(\zeta, \zeta^{2}, \zeta^{4}, \dots, \zeta^{2^{n-1}}\bigr).
+\]
+In particular $V_f(1) = P_f(1,\dots,1) = \sum_a f(a)$.
+\end{lemma}
+
+\begin{proof}
+For $a \in \iv{0}{N-1}$, $m_a(\zeta,\zeta^2,\dots,\zeta^{2^{n-1}}) = \prod_{k=1}^n \zeta^{2^{k-1} a_k} = \zeta^{\sum_k a_k 2^{k-1}} = \zeta^a$.
+Multiply by $f(a)$ and sum over $a$. The last statement is the case $\zeta = 1$ together with \eqref{eq:sum-is-eval}.
+\end{proof}
+
+\subsection{Coefficient restriction}\label{sec:restriction:cres}
+
+\begin{definition}[Coefficient restriction]\label{def:cres}
+Let $n \ge 1$, $f$ a table over $A$ with $n$ variables and $\theta \in A$.
+The \emph{coefficient restriction} of $f$ at $\theta$ is the table with $n-1$ variables
+\[
+  \mathrm{cres}_\theta(f)(b') \;=\; f(2b') + \theta\, f(2b'+1), \qquad b' \in \iv{0}{N/2-1}.
+\]
+For $j \in \iv{0}{n}$ and $\theta = (\theta_1,\dots,\theta_j) \in A^j$, the iterated coefficient restriction is $\mathrm{cres}_{()}(f) = f$ and $\mathrm{cres}_{(\theta_1,\dots,\theta_j)}(f) = \mathrm{cres}_{\theta_j}(\mathrm{cres}_{(\theta_1,\dots,\theta_{j-1})}(f))$, a table with $n-j$ variables.
+\end{definition}
+
+The coefficient restriction is $A$-linear in $f$.
+It differs from the restriction of \cref{def:restriction}, which reads $(1-r) f(2b') + r f(2b'+1)$: the latter restricts the multilinear extension $\tilde f$, the former restricts the coefficient polynomial $P_f$.
+
+\begin{lemma}[Coefficient restriction evaluates the first variables]\label{lem:cres}
+Let $f$ be a table over $A$ with $n$ variables.
+\begin{enumerate}
+  \item If $n \ge 1$ and $\theta \in A$, then $P_{\mathrm{cres}_\theta(f)}(y) = P_f(\theta, y)$ as polynomials in $y = (y_1,\dots,y_{n-1})$.
+  \item For $j \in \iv{0}{n}$ and $\theta \in A^j$, $P_{\mathrm{cres}_\theta(f)}(y) = P_f(\theta, y)$ as polynomials in $y = (y_1,\dots,y_{n-j})$. For $j = n$, the table $\mathrm{cres}_\theta(f)$ has the single entry $P_f(\theta)$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(1) Write $a = a_1 + 2a'$. Then $m_a(x_1, y) = x_1^{a_1}\, m_{a'}(y)$, where $m_{a'}$ has $n-1$ variables. Substituting $x_1 = \theta$ and grouping the terms $a_1 = 0$ and $a_1 = 1$,
+\[
+  P_f(\theta, y) \;=\; \sum_{a'=0}^{N/2-1} \bigl( f(2a') + \theta f(2a'+1) \bigr)\, m_{a'}(y) \;=\; P_{\mathrm{cres}_\theta(f)}(y).
+\]
+(2) Induction on $j$, as in \KB{Lemma~2.11}: by (1) applied to $\mathrm{cres}_{\theta_{\le j-1}}(f)$ and the induction hypothesis, $P_{\mathrm{cres}_\theta(f)}(y) = P_{\mathrm{cres}_{\theta_{\le j-1}}(f)}(\theta_j, y) = P_f(\theta_{\le j-1}, \theta_j, y)$.
+For $j = n$ the polynomial $P$ of a table with $0$ variables is its single entry.
+\end{proof}
+
+\subsection{The classical fold}\label{sec:restriction:fold}
+
+\begin{definition}[Classical FRI fold, \KB{Definition~5.10}]\label{def:cfold}
+For $\theta \in A$ and $U \in A[X]$, $\cfold_\theta(U) = U_e + \theta\, U_o$, where $U = U_e(X^2) + X U_o(X^2)$ is the even--odd split.
+For a word $w$ on a smooth domain $L$ of order at least $2$ over a field $\F \supseteq \Fq$, $\cfold_\theta(w) = w_e + \theta\, w_o \in \F^{L^2}$, with $w_e, w_o$ as in \eqref{eq:even-odd}.
+For $\theta = (\theta_1,\dots,\theta_j)$, the iterated fold is $\cfold_{()} = \mathrm{id}$ and $\cfold_{(\theta_1,\dots,\theta_j)} = \cfold_{\theta_j} \circ \cfold_{(\theta_1,\dots,\theta_{j-1})}$, on polynomials and on words.
+\end{definition}
+
+If $U \in A[X]_{<2d}$ then $\cfold_\theta(U) \in A[X]_{<d}$, by \cref{lem:splits}.
+
+\begin{theorem}[Restriction dictionary]\label{thm:dictionary}
+Let $n \ge 1$, let $f$ be a table over $A$ with $n$ variables, and $\theta \in A$. Then
+\[
+  \cfold_\theta(V_f) \;=\; V_{\mathrm{cres}_\theta(f)}.
+\]
+Consequently, for $j \in \iv{0}{n}$ and $\theta \in A^j$, $\cfold_\theta(V_f) = V_{\mathrm{cres}_\theta(f)}$, and for $j = n$ this is the constant polynomial $P_f(\theta_1,\dots,\theta_n)$.
+\end{theorem}
+
+\begin{proof}
+By \cref{lem:splits}, $\coef{b'}{(V_f)_e} = \coef{2b'}{V_f} = f(2b')$ and $\coef{b'}{(V_f)_o} = f(2b'+1)$ for $b' \in \iv{0}{N/2-1}$, so the coefficient of $X^{b'}$ in $(V_f)_e + \theta (V_f)_o$ is $f(2b') + \theta f(2b'+1) = \mathrm{cres}_\theta(f)(b')$.
+The iterated statement follows by induction on $j$, and the case $j = n$ from \cref{lem:cres}(2), since $V_g$ is the constant $g(0)$ for a table $g$ with $0$ variables.
+\end{proof}
+
+\begin{figure}[t]
+\centering
+\begin{tikzcd}[column sep=6em, row sep=2.8em]
+  f \in A^{\iv{0}{N-1}} \arrow[r, "\mathrm{cres}_\theta"] \arrow[d, "V"'] &
+  \mathrm{cres}_\theta(f) \in A^{\iv{0}{N/2-1}} \arrow[d, "V"] \\
+  V_f \in \F[X]_{<N} \arrow[r, "\cfold_\theta"] \arrow[d, "\ev_L"'] &
+  \cfold_\theta(V_f) \in \F[X]_{<N/2} \arrow[d, "\ev_{L^2}"] \\
+  w \in \F^{L} \arrow[r, "\cfold_\theta"] &
+  \cfold_\theta(w) \in \F^{L^2}
+\end{tikzcd}
+\caption{The restriction dictionary, with $A = \F$. Top square: in the monomial basis the classical fold is the coefficient restriction, which restricts the first variable of $P_f$ (\cref{thm:dictionary,lem:cres}). Bottom square: the word fold is the polynomial fold evaluated on $L^2$ (\cref{lem:cword}). Iterating $n$ times sends the codeword of $f$ to the constant $P_f(\theta_1,\dots,\theta_n)$ (\cref{cor:cword-chain}).}
+\label{fig:dictionary}
+\end{figure}
+
+\begin{remark}[Relation to the kernel fold]\label{rem:kernel-relation}
+KBFold encodes the same table as $U_f = \sum_b f(b) K_b$, where $K_b(X) = \prod_{k=1}^n (X^{2^{k-1}} + b_k)$ (\KB{Definition~4.1}), and its kernel fold $\mathrm{pfold}_r$ restricts $\tilde f$ (\KB{Theorem~5.3}).
+The two folds are related by $\cfold_\theta = (1 + 2\theta)\,\mathrm{pfold}_r$ with $r = (1+\theta)/(1+2\theta)$ for $\theta \ne -1/2$ (\KB{Proposition~5.11}).
+The two encodings put the sum of the table at different places: $\sum_b f(b) = V_f(1)$ by \cref{lem:kronecker}, and $\sum_b f(b) = \coef{N-1}{U_f}$, since each $K_b$ is monic of degree $\sum_k 2^{k-1} = N-1$.
+In odd characteristic, also $\sum_b f(b) = 2^n \tilde f(\tfrac12,\dots,\tfrac12)$, since $\eq(b, (\tfrac12,\dots,\tfrac12)) = 2^{-n}$ for every $b \in B_n$; this is the claim that the KBFold scheme proves for a sum.
+\end{remark}
+
+\subsection{Folding words}\label{sec:restriction:words}
+
+In this subsection $\F \supseteq \Fq$ is a finite field and $L$ is a smooth domain of order $M \ge 2$, so that \cref{lem:split-words} applies.
+
+\begin{lemma}[The classical word fold]\label{lem:cword}
+Let $w \in \F^L$ and $\theta \in \F$.
+\begin{enumerate}
+  \item (Linearity and locality.) $w \mapsto \cfold_\theta(w)$ is $\F$-linear, and $\cfold_\theta(w)(\eta)$ depends only on the values of $w$ on the fibre over $\eta \in L^2$.
+  \item (Line form.) $\cfold_\theta(w) = u^0 + \theta\, u^1$ with $u^0 = w_e$ and $u^1 = w_o$, which do not depend on $\theta$; and $w$ vanishes on the fibre over $\eta$ if and only if $u^0(\eta) = u^1(\eta) = 0$.
+  \item (Explicit formula.) For $\xi \in L$,
+  \[
+    \cfold_\theta(w)(\xi^2) \;=\; \frac{(\xi + \theta)\, w(\xi) + (\xi - \theta)\, w(-\xi)}{2\xi}.
+  \]
+  \item (Consistency with the polynomial fold.) If $1 \le d \le M/2$, $U \in \F[X]_{<2d}$ and $w = \ev_L(U)$, then $\cfold_\theta(w) = \ev_{L^2}(\cfold_\theta(U)) \in \RS_\F[L^2, d]$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(1) and (2) follow from \cref{lem:split-words}(1)--(3).
+(3) Substitute \eqref{eq:even-odd}: $\frac{w(\xi)+w(-\xi)}{2} + \theta \frac{w(\xi)-w(-\xi)}{2\xi}$ has the stated numerator over $2\xi$.
+(4) By \cref{lem:split-words}(4), $w_e = \ev_{L^2}(U_e)$ and $w_o = \ev_{L^2}(U_o)$; $\ev_{L^2}$ is linear, and $\cfold_\theta(U) \in \F[X]_{<d}$ with $d \le |L^2|$.
+\end{proof}
+
+Item 2 is the property through which correlated agreement enters the soundness proof (\cref{sec:sound}).
+For the kernel fold, KBFold has to rewrite the fold as a line with generators $w_o - w_e$ and $2w_e - w_o$ (\KB{Lemma~5.7}); for the classical fold the generators are the even and odd parts themselves.
+
+\begin{corollary}[Folding a committed codeword]\label{cor:cword-chain}
+Let $L$ be a smooth domain of order $M \ge N = 2^n$, $f$ a table over $\F$ with $n$ variables, $w_0 = \ev_L(V_f)$, and $\theta \in \F^n$.
+For $j \in \iv{0}{n}$ put $w_j = \cfold_{\theta_{\le j}}(w_0) \in \F^{L^{2^j}}$. Then
+\[
+  w_j \;=\; \ev_{L^{2^j}}\bigl(V_{\mathrm{cres}_{\theta_{\le j}}(f)}\bigr) \;\in\; \RS_\F\bigl[L^{2^j}, N/2^j\bigr],
+\]
+and $w_n$ is the constant word on $L^{2^n}$ with value $P_f(\theta_1,\dots,\theta_n)$.
+\end{corollary}
+
+\begin{proof}
+Induction on $j$. For the step, apply \cref{lem:cword}(4) on the domain $L^{2^{j-1}}$, of order $M/2^{j-1} \ge 2$ (\cref{lem:power}), with $2d = N/2^{j-1} \le M/2^{j-1}$, and use \cref{thm:dictionary}. The value of $w_n$ is given by \cref{thm:dictionary} with $j = n$.
+\end{proof}
+
+\subsection{The round polynomial}\label{sec:restriction:round}
+
+The scalar claim of the protocol has the form $P_g(z) = v$ for the current table $g$ and the remaining coordinates $z$ of the evaluation point.
+One round replaces the first coordinate of $z$ by a fresh challenge.
+
+\begin{definition}[Honest round polynomial]\label{def:round-poly}
+Let $k \ge 1$, $g$ a table over $A$ with $k$ variables, and $y \in A^{k-1}$.
+Let $g_e$ and $g_o$ be the tables with $k-1$ variables $g_e(b') = g(2b')$ and $g_o(b') = g(2b'+1)$.
+The \emph{honest round polynomial} of $(g, y)$ is
+\[
+  h_{g,y}(T) \;=\; P_{g_e}(y) + T\, P_{g_o}(y) \;\in\; A[T]_{<2}.
+\]
+\end{definition}
+
+\begin{lemma}[Round polynomial]\label{lem:round-poly}
+With the notation of \cref{def:round-poly}:
+\begin{enumerate}
+  \item $h_{g,y}(t) = P_g(t, y)$ for every $t \in A$; in particular $h_{g,y}(t) = P_{\mathrm{cres}_t(g)}(y)$.
+  \item For $y = (1,\dots,1)$, $h_{g,y}(T) = U_e(1) + T\, U_o(1)$, where $U = V_g$ and $U = U_e(X^2) + XU_o(X^2)$.
+  \item Let $A = \F$ be a field and $s \in \F[T]_{<2}$ with $s \ne h_{g,y}$. Then $s(\theta) = h_{g,y}(\theta)$ for at most one $\theta \in \F$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(1) $\mathrm{cres}_t(g) = g_e + t\, g_o$ and $P$ is linear in the table, so $P_{\mathrm{cres}_t(g)}(y) = P_{g_e}(y) + t P_{g_o}(y) = h_{g,y}(t)$; and $P_{\mathrm{cres}_t(g)}(y) = P_g(t,y)$ by \cref{lem:cres}(1).
+(2) By \cref{lem:splits}, $\coef{b'}{U_e} = g(2b') = g_e(b')$ and $\coef{b'}{U_o} = g(2b'+1) = g_o(b')$, so $U_e = V_{g_e}$ and $U_o = V_{g_o}$; by \cref{lem:kronecker}, $V_{g_e}(1) = P_{g_e}(\mathbf 1)$ and $V_{g_o}(1) = P_{g_o}(\mathbf 1)$.
+(3) $s - h_{g,y}$ is a nonzero polynomial of degree at most $1$; apply \cref{lem:roots}.
+\end{proof}
+
+By \cref{lem:round-poly}(1), $h_{g,y}(z_1) = P_g(z_1, y)$, so the claim $P_g(z_1, y) = v$ is checked as $h_{g,y}(z_1) = v$, and the new claim after the challenge $\theta$ is $P_{\mathrm{cres}_\theta(g)}(y) = h_{g,y}(\theta)$.
+This is the restriction step of the protocol of \cref{sec:scheme}.
+It replaces the round of the sumcheck protocol of KBFold (\KB{Lemma~3.9}), whose round polynomials have degree $2$ because they carry the factor $\eq(\cdot, z)$, by an affine polynomial with no equality table.
+
+\begin{example}\label{ex:f17}
+Over $\mathbb{F}_{17}$ with $n = 2$, let $f = (1, 2, 3, 4)$, so $V_f = 1 + 2X + 3X^2 + 4X^3$, $P_f(x_1,x_2) = 1 + 2x_1 + 3x_2 + 4x_1x_2$, and $\sum_a f(a) = 10 = V_f(1)$.
+For the sum, $z = (1,1)$ and the first round polynomial is $h(T) = (1 + 3) + T(2 + 4) = 4 + 6T$, with $h(1) = 10$.
+With $\theta_1 = 5$: $\mathrm{cres}_5(f) = (1 + 5\cdot 2,\ 3 + 5 \cdot 4) = (11, 6)$, so $\cfold_5(V_f) = 11 + 6X$, and the new claim is $h(5) = 34 = 0 = 11 + 6$.
+The second round polynomial is $11 + 6T$; with $\theta_2 = 7$ the final constant is $11 + 42 = 53 = 2$, and indeed $P_f(5, 7) = 1 + 10 + 21 + 140 = 172 = 2$ in $\mathbb{F}_{17}$.
+A prover claiming the sum $11$ must send an affine $s$ with $s(1) = 11$, for instance $s(T) = 1 + 10T$; then $s - h = 4T - 3$ vanishes only at $T = 5$, so the false claim survives the first round only if $\theta_1 = 5$ (\cref{lem:round-poly}(3)).
+\end{example}

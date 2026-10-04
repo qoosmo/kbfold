@@ -9,3 +9,6 @@ require mathlib from git
 
 @[default_target]
 lean_lib KBFold where
+
+/-- The Sum-FRI subproject (`../sumfri`): coefficient-form companion, built on `KBFold`. -/
+lean_lib SumFRI where
