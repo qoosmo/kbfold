@@ -22,7 +22,7 @@ lake env lean SumFRI/Audit.lean   # #print axioms for the main theorems
 | Definition 6.17, Lemmas 6.18, 6.19, Theorem 6.20 (items 1–3), Proposition 6.22 | `RBR` | `cNotDoomed`, `cExt`, `crbr_step`, `ccoeffs_cwfold`, `csRw_zp`, `csRw_eval`, `crbr_round_one`, `crbr_round`, `crbr_final`, `crbr_l0` |
 | Theorem 6.20 ("Consequently"), Remark 6.21 | `RBRGeneric` | `crbr_knowledge`, `crbr_binding` |
 | Definition 6.24, Lemma 6.25, Theorem 6.26, Lemma 6.28 (core) | `NonInteractive` | `cKState`, `crbr_stepE`, `crbr_erasures_one`, `crbr_erasures_round`, `crbr_erasures_final`, `crrbr_round`, `crrbr_final`, `ccr_unique_core` |
-| Lemma 5.6, Theorem 6.32 item 1 | `Skip` | `SumProver.augW`, `caccepts_aug`, `csoundness_far_J`, `csoundness_close_J`, `ceval_binding_J`, `soundness_sum_J` |
+| Lemma 5.6, Theorem 5.8 for Π_eval^J, Theorem 6.32 item 1 | `Skip` | `SumProver.augW`, `caccepts_aug`, `completeness_J`, `completeness_sum_J`, `csoundness_far_J`, `csoundness_close_J`, `ceval_binding_J`, `ceval_binding'_J`, `soundness_sum_J`, `sum_binding_J` |
 | Theorem 6.32 item 2 | `SkipRBR` | `augPT`, `augWord_updR`, `crbr_round_one_J`, `crbr_round_J`, `crbr_final_J` |
 | Theorem 6.32 item 3 | `SkipNonInteractive` | `augE`, `cNotDoomedE_congr`, `cAcceptsSigJ_aug`, `crrbr_round_J`, `crrbr_final_J` |
 
@@ -35,11 +35,11 @@ codes (Lemma 2.9, Definitions 2.10, 2.11, Lemmas 2.12, 2.13, 2.16), fibre distan
 
 - Lean's standard three only (`propext`, `Classical.choice`, `Quot.sound`): `cfoldSeq_vpoly_full`,
   `vpoly_eval_one`, `completeness`, `completeness_sum`, `cno_folding`, `crbr_l0`, `crrbr_final`,
-  `ccr_unique_core`, `cwfold_sqPt`, `cfoldUp_local`, `crbr_final_J`, `crrbr_final_J`;
+  `ccr_unique_core`, `cwfold_sqPt`, `cfoldUp_local`, `crbr_final_J`, `crrbr_final_J`, `completeness_J`, `completeness_sum_J`;
 - additionally `KBFold.bciks_unique`: `cfar_fold`, `csoundness_far`, `csoundness_close`,
   `ceval_binding`, `soundness_sum`, `sum_binding`, `crbr_knowledge`, `crbr_binding`,
-  `crrbr_round`, `csoundness_close_J`, `soundness_sum_J`, `crbr_round_one_J`, `crbr_round_J`, `crrbr_round_J`.
+  `crrbr_round`, `csoundness_close_J`, `soundness_sum_J`, `crbr_round_one_J`, `crbr_round_J`, `crrbr_round_J`, `ceval_binding'_J`, `sum_binding_J`.
 
 **Not formalised.** Theorem 3.14 and Corollary 6.27 (quantum random oracle model, quoted from
 CDHZ25); Merkle-tree statements and the collision step of Lemma 6.28; Fact 2.14 and Lemma 2.15;
-running times and operation counts (including the count in Lemma 5.5); item 4 of Theorem 6.32 (the compiler, as Theorem 3.14); Theorem 5.8 for Π_eval^J and the binding forms of Corollaries 6.14, 6.15 for Π_eval^J; Sections 7–8.
+running times and operation counts (including the count in Lemma 5.5); item 4 of Theorem 6.32 (the compiler, as Theorem 3.14); Sections 7–8.

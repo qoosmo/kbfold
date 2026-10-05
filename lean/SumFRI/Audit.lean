@@ -33,3 +33,7 @@ open SumFRI
 #print axioms SumFRI.crbr_final_J
 #print axioms SumFRI.crrbr_round_J
 #print axioms SumFRI.crrbr_final_J
+#print axioms SumFRI.completeness_J
+#print axioms SumFRI.completeness_sum_J
+#print axioms SumFRI.ceval_binding'_J
+#print axioms SumFRI.sum_binding_J

@@ -217,4 +217,89 @@ theorem soundness_sum_J [Fintype F] [DecidableEq F] [Fintype L] {R : ℕ}
   rw [catPt_one, cpoly_one]
   exact hwrong
 
+/-! ### Theorem 5.8 and the binding forms of Corollaries 6.14, 6.15 for `Π_eval^J` -/
+
+section HonestJ
+
+variable {ℓ : ℕ} (f : Table F (m + ℓ)) (zp : ℕ → F) (zs : Fin m → F)
+
+/-- The augmented words of the honest prover are the successive classical folds of `Enc(f)`. -/
+theorem honest_augW {μ : ℕ} (hL : IsSmoothDomain L μ) (hℓ : ℓ ≤ μ) (J : Finset ℕ)
+    (θ : ℕ → F) :
+    ∀ j ≤ ℓ, (honestProver L f zp zs).augW ℓ J (cEnc L f) θ j = cfoldUp θ (cEnc L f) j
+  | 0, _ => rfl
+  | k + 1, hk => by
+      simp only [SumProver.augW]
+      split_ifs with h hJ
+      · subst h
+        rw [cfoldUp_Enc hL hℓ θ f]
+        rfl
+      · rfl
+      · rw [honest_augW hL hℓ J θ k (by omega)]
+        rfl
+
+/-- The honest prover passes every check of `Π_eval^J`, for every `θ` and `ξ`. -/
+theorem honest_acceptsJ {μ : ℕ} (hL : IsSmoothDomain L μ) (hℓ : ℓ ≤ μ) (J : Finset ℕ) {κ : ℕ}
+    (θ : ℕ → F) (ξ : Fin κ → L) :
+    (honestProver L f zp zs).AcceptsJ ℓ J (cEnc L f) zp zs (cpoly f (catPt ℓ zp zs)) θ ξ := by
+  obtain ⟨h1, h2, h3⟩ := honest_accepts f zp zs hL hℓ θ ξ
+  refine ⟨h1, h2, fun t => ⟨fun j hj _ => ?_, (h3 t).2⟩⟩
+  rw [honest_augW f zp zs hL hℓ J θ j hj.le, honest_augW f zp zs hL hℓ J θ (j + 1) hj]
+  rfl
+
+/-- **Theorem 5.8 for `Π_eval^J` (completeness).** -/
+theorem completeness_J [Fintype F] [Fintype L] {μ : ℕ} (hL : IsSmoothDomain L μ) (hℓ : ℓ ≤ μ)
+    (J : Finset ℕ) (κ : ℕ) :
+    sumAccProbJ (honestProver L f zp zs) ℓ J κ (cEnc L f) zp zs (cpoly f (catPt ℓ zp zs)) = 1 := by
+  unfold sumAccProbJ
+  have : (fun ω : (Fin ℓ → F) × (Fin κ → L) =>
+      (honestProver L f zp zs).AcceptsJ ℓ J (cEnc L f) zp zs (cpoly f (catPt ℓ zp zs))
+        (extR ω.1) ω.2) = fun _ => True := by
+    funext ω
+    simp only [eq_iff_iff, iff_true]
+    exact honest_acceptsJ f zp zs hL hℓ J (extR ω.1) ω.2
+  rw [this]
+  haveI : Nonempty L := ⟨1⟩
+  exact prob_true
+
+end HonestJ
+
+/-- **Theorem 5.8 for `Π_sum^J`.** -/
+theorem completeness_sum_J [Fintype F] [Fintype L] {ℓ : ℕ} (f : Table F (m + ℓ)) {μ : ℕ}
+    (hL : IsSmoothDomain L μ) (hℓ : ℓ ≤ μ) (J : Finset ℕ) (κ : ℕ) :
+    sumAccProbJ (honestProver L f (fun _ => 1) (fun _ => 1)) ℓ J κ (cEnc L f) (fun _ => 1)
+      (fun _ => 1) (∑ a, f a) = 1 := by
+  rw [← cpoly_one f, ← catPt_one ℓ]
+  exact completeness_J f _ _ hL hℓ J κ
+
+/-- **Theorem 6.32, item 1 — Corollary 6.14, "in particular":** `Π_eval^J` is `ε`-evaluation
+binding. -/
+theorem ceval_binding'_J [Fintype F] [DecidableEq F] [Fintype L] {R : ℕ}
+    (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) (zp : ℕ → F) (zs : Fin m → F) (δ : ℚ)
+    (hL : IsSmoothDomain L (m + ℓ + R)) (hℓ : 1 ≤ ℓ) (hδ0 : 0 < δ)
+    (hδ : δ ≤ (1 - 1 / 2 ^ R) / 2) (κ : ℕ) {v v' : F} (hvv : v ≠ v')
+    (P P' : SumProver F L m) (hC : P.Causal) (hdeg : P.DegOK) (hC' : P'.Causal)
+    (hdeg' : P'.DegOK) :
+    ¬ (epsFold F (m + ℓ + R) ℓ + ℓ / Fintype.card F + (1 - δ) ^ κ
+          < sumAccProbJ P ℓ J κ w0 zp zs v ∧
+        epsFold F (m + ℓ + R) ℓ + ℓ / Fintype.card F + (1 - δ) ^ κ
+          < sumAccProbJ P' ℓ J κ w0 zp zs v') := by
+  rintro ⟨h1, h2⟩
+  have e1 := (ceval_binding_J P ℓ J w0 zp zs v δ hL hℓ hδ0 hδ hC hdeg κ h1).2
+  have e2 := (ceval_binding_J P' ℓ J w0 zp zs v' δ hL hℓ hδ0 hδ hC' hdeg' κ h2).2
+  exact hvv (e1.trans e2.symm)
+
+/-- **Theorem 6.32, item 1 — Corollary 6.15, binding form, for `Π_sum^J`.** -/
+theorem sum_binding_J [Fintype F] [DecidableEq F] [Fintype L] {R : ℕ}
+    (P : SumProver F L m) (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) (v : F) (δ : ℚ)
+    (hL : IsSmoothDomain L (m + ℓ + R)) (hℓ : 1 ≤ ℓ) (hδ0 : 0 < δ)
+    (hδ : δ ≤ (1 - 1 / 2 ^ R) / 2) (hC : P.Causal) (hdeg : P.DegOK) (κ : ℕ)
+    (hacc : epsFold F (m + ℓ + R) ℓ + ℓ / Fintype.card F + (1 - δ) ^ κ
+      < sumAccProbJ P ℓ J κ w0 (fun _ => 1) (fun _ => 1) v) :
+    FibDistLE w0 (RS L (2 ^ (m + ℓ)) : Set (L → F)) δ ∧
+      v = ∑ a, cdecTable L (m + ℓ) δ w0 a := by
+  obtain ⟨h1, h2⟩ := ceval_binding_J P ℓ J w0 _ _ v δ hL hℓ hδ0 hδ hC hdeg κ hacc
+  refine ⟨h1, ?_⟩
+  rw [h2, catPt_one, cpoly_one]
+
 end SumFRI
