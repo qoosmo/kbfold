@@ -46,9 +46,9 @@ A proof consists of the $\ell$ values $b_j$, the roots, the $\ell+1$ round salts
 \subsection{The quotient baseline}\label{sec:impl:quotient}
 
 For \cref{sec:exp}, the library also implements the standard univariate way to prove $\sum_a f(a) = v$ for the same commitment polynomial $V_f$: open $V_f$ at $X = 1$ with the quotient $q = (V_f - v)/(X-1)$, of degree less than $N - 1$, and test $q$ with FRI.
-Since $1 \in L$, this baseline commits to $V_f$ on the coset $cL$, $c = 7$; the verifier computes the values of $q$ at the opened points from those of $V_f$ (with one batched inversion of the denominators $\xi - 1$), and the folding, committed levels, trees and transcript are those of $\Pisum$.
+Since $1 \in L$, this baseline commits to $V_f$ on the coset $cL$, $c = 7$; the verifier computes the values of $q$ at the opened points from those of $V_f$ (with one batched inversion of the denominators $\xi - 1$), and the folding, committed levels and trees are those of $\Pisum$; its transcript, under its own domain separator, absorbs the same data except the point, the extension degree and the round messages.
 The final message is the coefficient vector of the folded quotient, $\mathrm{cres}_\theta(q)$ by \cref{thm:dictionary}, obtained from the coefficients $q_k = \sum_{a > k} f(a)$; there are no round messages.
-This is the protocol that \cref{rem:deepfold} contrasts with $\Pisum$: the claim enters through a quotient word instead of through the shared challenges.
+In this baseline the claim enters through a quotient word, instead of through challenges shared with the folding as in $\Pisum$.
 
 \subsection{Testing}\label{sec:impl:tests}
 

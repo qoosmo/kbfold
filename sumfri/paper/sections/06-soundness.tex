@@ -9,7 +9,7 @@ The sumcheck step of KBFold is replaced by a restriction step (\cref{lem:round-p
 
 Throughout this section we use the notation of \cref{sec:scheme}: the challenge field $\F \supseteq \Fq$, the domains $L_j$ of order $M_j$, and the codes $\Cc_j = \RS_\F[L_j, N_j]$, all of rate $\rho$.
 We fix a proximity parameter $0 < \delta \le (1-\rho)/2$.
-We assume $1 \le \ell \le n$, except in \cref{sec:sound:l0}, which treats $\ell = 0$.
+We assume $1 \le \ell \le n$, except in \cref{sec:sound:l0}, \cref{prop:rbr-l0} and the third item of \cref{rem:fs}, which treat $\ell = 0$.
 Probabilities are over the challenge space $\F^\ell \times L^{\times\kappa}$ of $\Pieval$ (\cref{sec:scheme:protocol}).
 
 \subsection{Fibre distance and decoding}\label{sec:sound:fibre}
@@ -53,7 +53,7 @@ For $j = 0$, the \emph{decoded table} of $w$ is the unique table $f^*$ over $\F$
 
 \begin{remark}[Computing the decoded table]\label{rem:ext}
 Since $\Delta(w, \mathrm{dec}_0(w)) \le \delta < \tfrac12(1 - (N-1)/M)$ (\cref{lem:rs-params}), the algorithm of \cref{fact:decode} finds $\mathrm{dec}_0(w)$, and an inverse NTT gives $P_{\mathrm{dec}_0(w)}$, whose coefficient vector is $f^*$; unlike in KBFold (\KB{Remark~7.5}), no basis transform follows.
-Checking whether $\Delta^{\mathrm{fib}}_0(w, \mathrm{dec}_0(w)) \le \delta$ costs $O(M)$ comparisons, so decoding followed by this check decides whether $\Delta^{\mathrm{fib}}_0(w, \Cc_0) \le \delta$.
+For an arbitrary $w$, if the algorithm of \cref{fact:decode} returns a codeword $c$, checking whether $\Delta^{\mathrm{fib}}_0(w, c) \le \delta$ costs $O(M)$ comparisons; this decides whether $\Delta^{\mathrm{fib}}_0(w, \Cc_0) \le \delta$.
 If $w \in \Fq^L$, then $f^*$ has entries in $\Fq$, by \cref{lem:descent}.
 \end{remark}
 
@@ -346,7 +346,7 @@ For the sum protocol, the same holds for $\mathcal{R}^{\delta}_{\mathrm{sum}}$ b
 \end{remark}
 
 \begin{proposition}[Round-by-round knowledge soundness for $\ell = 0$]\label{prop:rbr-l0}
-Let $\ell = 0$, and define $\mathcal{R}^{\delta}_{\mathrm{eval}}$ with $\mathrm{dist} = \Delta$; condition~\eqref{eq:dist-unique} holds by \cref{lem:rs-params}(3).
+Let $\ell = 0$, and define $\mathcal{R}^{\delta}_{\mathrm{eval}}$ with $\mathrm{dist} = \Delta$; condition~\eqref{eq:dist-unique} holds by \cref{lem:rs-params}(3) and the injectivity of $\Enc$ (\cref{lem:encoding}).
 Let $\mathsf{Ext}$ output the table $f^H$ of \cref{prop:l0} if $\Delta(w_0, \Cc_0) \le \delta$ (computed with \cref{fact:decode} and an inverse NTT), and the zero table otherwise, and let $\Dd$ consist of $\tau_0$ and the rejected full transcripts.
 Then $\Pieval$ is round-by-round knowledge sound for $\mathcal{R}^{\delta}_{\mathrm{eval}}$ with error $\varepsilon_1 = (1-\delta)^\kappa$.
 \end{proposition}
@@ -496,7 +496,7 @@ In particular, if $z = z'$ and $v \ne v'$, such a collision is obtained.
 Let $A = \{\eta \in L_1 : y(\eta) = \mathrm{fib}_0(\Enc(f))(\eta)\}$ and $A' = \{\eta \in L_1 : y'(\eta) = \mathrm{fib}_0(\Enc(f'))(\eta)\}$.
 Then $A \subseteq \mathrm{Dom}(y)$ and $A' \subseteq \mathrm{Dom}(y')$, and $|A|, |A'| \ge (1-\delta)M/2$, so $|A \cap A'| \ge (1-2\delta)M/2 \ge \rho M/2 = N/2$.
 If $y = y'$ on $A \cap A'$, then $\Enc(f)$ and $\Enc(f')$ agree on the at least $N$ points of the fibres over $A \cap A'$, hence are equal (\cref{lem:rs-params}(2)), and $f = f'$ (\cref{lem:encoding}).
-So if $f \ne f'$, some $\eta \in A \cap A'$ has $y(\eta) \ne y'(\eta)$, and the openings of $\eta$ computed from $\mathrm{td}$ and $\mathrm{td}'$ are both accepted under $\mathrm{cm}$, with the same random oracle since the commitment index is fixed by the scheme; by the binding of salted Merkle trees (\KB{Lemma~3.13}), this yields a collision.
+So if $f \ne f'$, some $\eta \in A \cap A'$ has $y(\eta) \ne y'(\eta)$, and the openings of $\eta$ computed from $\mathrm{td}$ and $\mathrm{td}'$ are both accepted under $\mathrm{cm}$, with the same random oracle since the commitment index is fixed by the scheme; by the salted form of \KB{Lemma~3.13(1)} (\KB{\S3.5}), this yields a collision.
 If $z = z'$ and $v \ne v'$, then $P_f(z) = v \ne v' = P_{f'}(z)$, so $f \ne f'$.
 \end{proof}
 
@@ -505,21 +505,21 @@ If $z = z'$ and $v \ne v'$, then $P_f(z) = v \ne v' = P_{f'}(z)$, so $f \ne f'$.
 \begin{remark}[Post-quantum parameters]\label{rem:pq-params}
 Take the parameters of \KB{Remark~7.28}: $\rho = 1/4$, $\delta = \delta^* = 3/8$, $M \le 2^{32}$ (so $\ell \le n \le 30$), the quartic extension $\F = \mathbb{F}_p[\iota]/(\iota^4 - 7)$ of the Goldilocks field, of size $p^4 > 2^{255.99}$, $\beta = 320$, hash output length $\lambda_{\mathsf{H}} = 256$, and $\kappa = 248$ queries.
 Then $(5/8)^{\kappa} < 2^{-168}$ and $(M_1+1)(1/|\F| + 2^{-\beta}) < 2^{-224}$, so $\varepsilon_{\mathrm{rr}}(\delta) = (5/8)^\kappa$.
-The quantities of \cref{thm:cdhz} satisfy $q_s \le \kappa(\ell+1) + \ell + \lceil N_\ell/2 \rceil \le 2^{30}$ (positions read: one per query and level, one symbol per round polynomial, and the final table), $q_{\mathsf{V}} \le \nu + q_s(\lceil\log_2 l_{\max}\rceil + 1) \le 2^{36}$, and $q_{\widehat{\mathsf{CR}}} \le (M/2)\log_2 M \le 2^{36}$.
+The quantities of \cref{thm:cdhz} satisfy $q_s \le \kappa\ell + \ell + \lceil N_\ell/2 \rceil \le 2^{30}$ (positions read: one per query and level, one symbol per round polynomial, and the final table), $q_{\mathsf{V}} \le \nu + q_s(\lceil\log_2 l_{\max}\rceil + 1) \le 2^{36}$, and $q_{\widehat{\mathsf{CR}}} \le (M/2)\log_2 M \le 2^{36}$.
 For an adversary making $Q = 2^{64}$ queries, \cref{thm:cdhz} then gives $\varepsilon_{\mathrm{ext}}(2^{64}) < 2^{-31.8}$: the first term is $2^{-31.84}$ and the other terms together are below $2^{-51}$, for every $n \le 30$ and $\ell \in \iv{1}{n}$ (computed exactly in rational arithmetic).
 These are the figures of KBFold: the dominant term $320\, Q^2 \varepsilon_{\mathrm{rr}}(\delta)$ depends only on $(1-\delta)^\kappa$, and the smaller number of positions read does not change the other terms at this precision.
 \end{remark}
 
 \begin{remark}[Parameters]\label{rem:params}
 For $\rho = 1/4$ and $\delta = (1-\rho)/2 = 3/8$, one query passes with probability at most $5/8$; $\kappa = 148$ queries give $(5/8)^{\kappa} < 2^{-100}$.
-With $M = 2^{24}$ and $|\F| = p^2 > 2^{127.9}$ (the quadratic extension of \cref{sec:impl}), $\varepsilon_{\mathrm{fold}} + \ell/|\F| < 2^{-103}$.
+With $M = 2^{24}$ and $|\F| = p^2 > 2^{127.9}$ (the quadratic extension of \cref{sec:impl}), $\varepsilon_{\mathrm{fold}} + \ell/|\F| < 2^{-103}$, so the error of \cref{thm:sound} is below $2^{-100.2}$, also for $\Pieval^{\mathcal{J}}$ by \cref{thm:skip}(1).
 These unique-decoding parameters are conservative; list-decoding analyses of FRI-type folding allow fewer queries (\cref{sec:concl}).
 \end{remark}
 
 \begin{remark}[Scope]\label{rem:fs}
 \begin{itemize}
   \item The analysis concerns one commitment opened at one point $z$ per proof. Reusing a commitment across several openings, batching, or choosing $z$ after the commitment inside a larger Fiat--Shamir transcript is not analysed here.
-  \item \Cref{cor:pq} applies to the compiler $\mathsf{BCS}$ of~\cite[Construction~11.7]{CDHZ25}, with salted Merkle trees and the challenge derivation of KBFold (\KB{\S3.4}).
+  \item \Cref{cor:pq} applies to the compiler $\mathsf{BCS}$ of~\cite[Construction~11.7]{CDHZ25}, with salted Merkle trees and the challenge derivation of KBFold (\KB{\S3.5}).
   \item For $\ell = 0$ the same argument applies with $\Sigma = \F$, the implicit instance $y = w_0$ and the Hamming distance, giving the single error $(1-\delta)^{\kappa}$, as in \KB{Remark~7.30}.
   \item The bounds also hold against classical adversaries in the random oracle model, with the same (quantum) extractor.
 \end{itemize}
@@ -529,7 +529,7 @@ These unique-decoding parameters are conservative; list-decoding analyses of FRI
 
 We transfer the results of this section to the protocol $\Pieval^{\mathcal{J}}$ of \cref{sec:scheme:skip}, for any set $\mathcal{J} \subseteq \iv{0}{\ell-1}$ of committed levels with $0 \in \mathcal{J}$, where $1 \le \ell \le n$.
 The \emph{augmentation} $\mathrm{aug}$ maps a transcript of $\Pieval^{\mathcal{J}}$ to one of $\Pieval$ by inserting, in round $j+1$ for $j \in \iv{1}{\ell-1} \setminus \mathcal{J}$, the word $w_j = \cfold_{\theta_j}(w_{j-1})$ computed from the transcript, as in \cref{lem:skip}; it is computable in time polynomial in $M$, and the inserted word depends only on the part of the transcript before round $j+1$.
-The IOR $\Pieval^{\mathcal{J},\Sigma}$, with the alphabet $\Sigma_{\mathcal{J}}$ of fibres and cosets, the permuted implicit instance $\pi(\mathrm{fib}_0(w_0))$, the relation $\mathcal{R}^{\mathcal{J}}_{\mathrm{eval}}$ and the map $\mathrm{aug}^{\Sigma}$ on transcripts over $\Sigma_{\mathcal{J}}$, is defined as in \KB{\S7.8}, with $\cfold$ in place of the kernel fold and $P_f$ in place of $\tilde f$; the round polynomials are written over $\F^2$ as in \cref{sec:sound:pq}.
+The IOR $\Pieval^{\mathcal{J},\Sigma}$, with the alphabet $\Sigma_{\mathcal{J}}$ of fibres and cosets, the permuted implicit instance $\varpi(\mathrm{fib}_0(w_0))$, the relation $\mathcal{R}^{\mathcal{J}}_{\mathrm{eval}}$ and the map $\mathrm{aug}^{\Sigma}$ on transcripts over $\Sigma_{\mathcal{J}}$, is defined as in \KB{\S7.8}, with $\cfold$ in place of the kernel fold and $P_f$ in place of $\tilde f$; the round polynomials are written over $\F^2$ as in \cref{sec:sound:pq}.
 
 \begin{theorem}[Committed levels]\label{thm:skip}
 Let $\mathcal{J} \subseteq \iv{0}{\ell-1}$ with $0 \in \mathcal{J}$.
@@ -537,7 +537,7 @@ Let $\mathcal{J} \subseteq \iv{0}{\ell-1}$ with $0 \in \mathcal{J}$.
   \item \Cref{thm:sound}, \cref{cor:binding} and \cref{cor:sum} hold for $\Pieval^{\mathcal{J}}$ with the same errors.
   \item $\Pieval^{\mathcal{J}}$ is round-by-round knowledge sound for $\mathcal{R}^{\delta}_{\mathrm{eval}}$ with the errors of \cref{thm:rbr}.
   \item $\Pieval^{\mathcal{J},\Sigma}$ is an IOR from $\mathcal{R}^{\mathcal{J}}_{\mathrm{eval}}$ to $\mathcal{R}_{\mathrm{acc}}$ with the relaxed round-by-round knowledge soundness errors of \cref{thm:rrbr}.
-  \item \Cref{cor:pq} holds for $\mathsf{BCS}[\Pieval^{\mathcal{J},\Sigma}]$, with $y$ read through $\pi^{-1}$, with the same $\nu$, $\beta_{\min}$ and $\varepsilon_{\mathrm{rr}}(\delta)$, with $l_{\max} = M/2$, and with $q_s \le \kappa\,(2^{d_0 - 1} + |\mathcal{J}| - 1) + \ell + \lceil N_\ell/2 \rceil$ positions read.
+  \item \Cref{cor:pq} holds for $\mathsf{BCS}[\Pieval^{\mathcal{J},\Sigma}]$, with $y$ read through $\varpi^{-1}$, with the same $\nu$, $\beta_{\min}$ and $\varepsilon_{\mathrm{rr}}(\delta)$, with $l_{\max} = M/2$, and with $q_s \le \kappa\,(2^{d_0 - 1} + |\mathcal{J}| - 1) + \ell + \lceil N_\ell/2 \rceil$ positions read.
 \end{enumerate}
 \end{theorem}
 
@@ -552,3 +552,8 @@ For condition~3, if the verifier of $\Pieval^{\mathcal{J}}$ accepted a doomed fu
 (3) and (4). The proofs of \KB{Theorem~7.31(3)--(4)} use only \KB{Lemma~6.5}, the form of $\mathrm{aug}^{\Sigma}$ and \KB{Theorem~7.25}; they apply verbatim with \cref{lem:skip} and \cref{thm:rrbr}.
 The count of positions read differs from KBFold only in the round polynomials, which take one symbol per round instead of two.
 \end{proof}
+
+\begin{remark}[Parameters with committed levels]\label{rem:pq-skip}
+For $\mathcal{J} = \{0, k, 2k, \dots\} \cap \iv{0}{\ell-1}$ with $k = 4$ and the parameters of \cref{rem:pq-params}, $q_s \le \kappa\,(2^{\min(4,\ell)-1} + \lceil \ell/4 \rceil - 1) + \ell + \lceil N_\ell/2 \rceil \le 2^{30}$, and the other quantities of \cref{rem:pq-params} are unchanged or smaller; so $\varepsilon_{\mathrm{ext}}(2^{64}) < 2^{-31.8}$ holds for $\mathsf{BCS}[\Pieval^{\mathcal{J},\Sigma}]$.
+The implementation encodes the openings of one committed word by a merged authentication path (\cref{sec:impl:merkle}); as in \KB{Remark~7.32}, an adversary that outputs merged paths is turned into one that outputs separate paths with at most $q_s(\lceil\log_2 l_{\max}\rceil + 1) \le 2^{35}$ additional oracle queries, which does not change the bound at $Q = 2^{64}$ to the stated precision.
+\end{remark}

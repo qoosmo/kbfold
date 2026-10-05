@@ -73,7 +73,7 @@ variable (ℓ κ) (δ : ℚ)
 def cVE (x : InstE L m) (τ : List (cEntE (F := F) (L := L) (m := m) ℓ κ)) : Prop :=
   cFullAccepts ℓ x.1 x.2.1.1 x.2.1.2 x.2.2 (cparse τ) (cgOf τ) (cξOf τ)
 
-/-- The relation `R^δ_eval` with `dist = Δ^fib₀` (§6.6), in the form `evalRel` of §3.4. -/
+/-- The relation `R^δ_eval` with `dist = Δ^fib₀` (§6.6), in the form `evalRel` of §3.3. -/
 def cRE : InstE L m → Table F (m + ℓ) → Prop :=
   evalRel (cEnc L) fibDist δ (fun f (z : (ℕ → F) × (Fin m → F)) => cpoly f (catPt ℓ z.1 z.2))
 

@@ -5,8 +5,8 @@ When the folding challenges also drive the claim, an evaluation $P_f(z)$, and in
 This round structure is DeepFold's~\cite{GLHQTZ25}.
 We gave a complete proof of its soundness, evaluation binding, round-by-round knowledge soundness and, through the theorem of Chiesa, Di, Hu and Zheng~\cite{CDHZ25}, post-quantum knowledge soundness of the compiled scheme for a single opening, in the unique-decoding regime.
 The proof follows KBFold: correlated agreement enters through the line $w_e + \theta w_o$, and the sumcheck step becomes a restriction step that costs one bad challenge per round.
-All of it except the quantum compiler and the Merkle-tree statements is checked in Lean, against the single axiom of correlated agreement.
-The implementation shares everything with KBFold except the protocol, and opening a sum is $27$--$41\%$ faster than with KBFold or with a coefficient-form sumcheck at equal commitment cost, verification time and proof size, and $34$--$57\%$ faster with post-quantum parameters.
+All of it except the quantum compiler, the Merkle-tree statements, the decoding algorithm and running times is checked in Lean, against the single axiom of correlated agreement.
+The implementation shares everything with KBFold except the protocol, and opening a sum is $27$--$41\%$ faster than with KBFold or with a coefficient-form sumcheck at equal commitment cost, verification time and proof size, and, with post-quantum parameters, $34$--$57\%$ faster than with KBFold.
 
 \subsection{Future work}\label{sec:concl:future}
 

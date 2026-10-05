@@ -58,7 +58,7 @@ In round $j$ it sends the honest round polynomial of $f_{j-1}$ at the remaining 
   s_j(T) \;=\; h_{f_{j-1},\, z_{>j}}(T) \;=\; P_{(f_{j-1})_e}(z_{>j}) + T\, P_{(f_{j-1})_o}(z_{>j}),
   \qquad z_{>j} = (z_{j+1},\dots,z_n),
 \end{equation}
-and, if $j \ge 2$, the oracle $w_{j-1} = \cfold_{\theta_{j-1}}(w_{j-2})$ (\cref{def:cfold}).
+where also $z_{\ge j} = (z_j, z_{>j})$, and, if $j \ge 2$, the oracle $w_{j-1} = \cfold_{\theta_{j-1}}(w_{j-2})$ (\cref{def:cfold}).
 In round $\ell + 1$ it sends $g = f_\ell$.
 For $\Pisum$, $s_j(T) = \sum_{b} f_{j-1}(2b) + T \sum_b f_{j-1}(2b+1)$, by \cref{lem:round-poly}(2) and \cref{lem:kronecker}.
 
@@ -90,7 +90,7 @@ Every soundness result below therefore holds for the compressed protocol.
 
 \subsection{Committing to fewer words}\label{sec:scheme:skip}
 
-As in \KB{\S6.3}, the prover may commit only to the words $w_j$ for $j$ in a public set $\mathcal{J} \subseteq \iv{0}{\ell-1}$ with $0 \in \mathcal{J}$, and the verifier folds the intermediate levels itself.
+As in \KB{\S6.3}, let $1 \le \ell \le n$; the prover may commit only to the words $w_j$ for $j$ in a public set $\mathcal{J} \subseteq \iv{0}{\ell-1}$ with $0 \in \mathcal{J}$, and the verifier folds the intermediate levels itself.
 For $j \in \mathcal{J}$ let $j^+$ be the next element of $\mathcal{J}$, or $\ell$, let $d_j = j^+ - j$, let $S_j(\xi) = \{\zeta \in L_j : \zeta^{2^{d_j}} = \xi^{2^{d_j}}\}$, and $\cfold^{(j)}_\theta = \cfold_{\theta_{j^+}} \circ \dots \circ \cfold_{\theta_{j+1}}$.
 
 \begin{lemma}[Local folding, \KB{Lemma~6.4}]\label{lem:local-fold}
@@ -149,7 +149,7 @@ Let $t_{\mathsf{H}}$ be the cost of one hash evaluation; field operations are co
   For $\Pisum$, $\tau_j = \mathbf 1$ and the round polynomials cost only additions.
   The folds cost $O(M)$ in total, and the Merkle trees of $w_1,\dots,w_{\ell-1}$ cost $O(M)\cdot t_{\mathsf{H}}$.
   \item \emph{Verifier.} Restriction checks: $O(\ell)$. Closure: $O(N_\ell)$ (a sum for $\Pisum$). Queries: $O(\kappa\ell)$ field operations, $O(\kappa\ell\log M)\cdot t_{\mathsf{H}}$ for the authentication paths, and $\kappa$ evaluations of $G$, $O(\kappa N_\ell)$.
-  \item \emph{Proof size.} For $\ell \ge 1$: $\ell$ field elements for the round polynomials (\cref{rem:compress}), against $3\ell$ for the degree-$2$ sumcheck of KBFold; $N_\ell$ for the final table; $\ell - 1$ Merkle roots; $\kappa\ell$ opened fibres with their paths. With committed levels $\mathcal{J}$, the openings are those of \KB{\S6.4}.
+  \item \emph{Proof size.} For $\ell \ge 1$: $\ell$ field elements for the round polynomials (\cref{rem:compress}), against $3\ell$ for the degree-$2$ sumcheck of KBFold; $N_\ell$ for the final table; $\ell - 1$ Merkle roots; $\kappa\ell$ opened fibres with their paths. With committed levels $\mathcal{J}$, the openings are those of \KB{\S6.5}.
 \end{itemize}
 
 \begin{remark}[Relation to DeepFold, BaseFold and Gemini]\label{rem:deepfold}

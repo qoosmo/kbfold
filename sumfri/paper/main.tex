@@ -61,7 +61,7 @@ This round structure is that of the evaluation protocol of DeepFold.
 We give a complete proof of soundness, evaluation binding and round-by-round knowledge soundness in the unique-decoding regime, whose only external input about codes is the correlated-agreement theorem of Ben-Sasson, Carmon, Ishai, Kopparty and Saraf, and derive post-quantum knowledge soundness of the compiled scheme in the quantum random oracle model from the theorem of Chiesa, Di, Hu and Zheng.
 A restriction round costs one bad challenge, against two for a degree-$2$ sumcheck.
 The proofs are formalised in Lean~4 on top of the KBFold library, with correlated agreement as the only axiom.
-A Rust implementation that shares its field, NTT, Merkle trees and transcript with KBFold opens a sum $27$--$41\%$ faster than KBFold and than a coefficient-form sumcheck scheme, at equal commitment cost, verification time and proof size, and $34$--$57\%$ faster with post-quantum parameters.
+A Rust implementation that shares its field, NTT, Merkle trees and transcript with KBFold opens a sum $27$--$41\%$ faster than KBFold and than a coefficient-form sumcheck scheme, at equal commitment cost, verification time and proof size, and, with post-quantum parameters, $34$--$57\%$ faster than KBFold.
 \end{abstract}
 
 \tableofcontents

@@ -38,10 +38,11 @@ $R$, $\ell$, $\kappa$ & $\rho = 2^{-R}$; number of folding rounds; number of que
 $N_j$, $\Cc_j$ & $N/2^j$; $\RS_\F[L_j, N_j]$ & \S\ref{sec:scheme:params} \\
 $\Enc(f)$ & $\ev_L(V_f)$ & \Cref{def:encoding} \\
 $\Pieval$, $\Pisum$ & evaluation protocol; sum protocol ($z = \mathbf 1$) & \S\ref{sec:scheme:protocol} \\
-$z$, $v$, $z_{>j}$ & point and claimed value; $(z_{j+1}, \dots, z_n)$ & \S\ref{sec:scheme:protocol} \\
+$z$, $v$, $z_{>j}$, $z_{\ge j}$ & point and claimed value; $(z_{j+1}, \dots, z_n)$; $(z_j, \dots, z_n)$ & \S\ref{sec:scheme:protocol} \\
 $s_j = a_j + b_j T$, $\theta_j$, $v_j$ & round polynomial; challenge; running claim $s_j(\theta_j)$ & \S\ref{sec:scheme:protocol} \\
 $f_j$, $g$, $G$, $w_\ell$ & honest tables $\mathrm{cres}_{\theta_{\le j}}(f)$; final table; $V_g$; $\ev_{L_\ell}(G)$ & \S\ref{sec:scheme:protocol} \\
 $\tau_j$ & monomial tensor $(m_{b'}(z_{>j}))_{b'}$ & \S\ref{sec:scheme:costs} \\
+$\tau_j$ (\S\ref{sec:sound}) & partial transcript after $j$ rounds & \S\ref{sec:sound:rbr} \\
 $\mathcal{J}$, $d_j$, $\Pieval^{\mathcal{J}}$ & committed levels; folds between committed levels; protocol with committed levels & \S\ref{sec:scheme:skip} \\
 \midrule
 \multicolumn{3}{l}{\emph{Soundness}} \\

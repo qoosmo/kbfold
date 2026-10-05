@@ -45,7 +45,7 @@ variable {L : Subgroup Fˣ}
 least `(1-δ)M/2` fibres, `pDist_le_iff`).  If `f ≠ f'`, then some position `η` is opened in both
 (`y η ≠ ⊥ ≠ y' η`) to different values.  The remaining step of the paper — two accepting openings
 of one position to different values under one root yield a collision of the random oracle
-(salted form of Lemma KBFold Lemma 3.13) — concerns the hash function and is not formalised. -/
+(salted form of KBFold Lemma 3.13) — concerns the hash function and is not formalised. -/
 theorem ccr_unique_core [Finite L] (hD : (-1 : Fˣ) ∈ L) (h2 : (2 : F) ≠ 0) {n : ℕ}
     (hn : 2 ^ n ≤ Nat.card L) {δ : ℚ} (hδ : δ ≤ (1 - rate L (2 ^ n)) / 2)
     (y y' : sqDom L → Option (F × F)) (f f' : Table F n)
@@ -314,7 +314,7 @@ the decoded table of `w₀` at radius `δ*` if `Δ^fib₀(w₀, 𝒞₀) ≤ δ*
 on `δ`. -/
 noncomputable def cEsig (R : ℕ) (τ : PTransE F L) : Table F (m + ℓ) := cExt ℓ τ.w0 (δstar R)
 
-/-- **Lemma 5.2 (encoding)**, inverse: a table is the table of kernel coordinates of its
+/-- **Lemma 5.2 (encoding)**, inverse: a table is the coefficient vector of the polynomial of its
 encoding (used for `E(y) = λ[c]` in Lemma 6.25(1)). -/
 lemma ccoeffs_polyOf_cEnc [Finite L] {n : ℕ} (hn : 2 ^ n ≤ Nat.card L) (f : Table F n) :
     ccoeffs n (polyOf (cEnc L f)) = f := by

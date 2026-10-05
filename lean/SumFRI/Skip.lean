@@ -23,7 +23,7 @@ namespace SumProver
 
 variable {L : Subgroup Fˣ} {m : ℕ} (P : SumProver F L m)
 
-/-- The augmented words of §5.3 (augmentation in Lemma "Skipping commitments").
+/-- The augmented words of §5.3 (augmentation in Lemma 5.6).
 `augW 0 = w₀`; a committed level is supplied by the prover, an omitted level is the honest local
 fold of the preceding augmented word, and level `ℓ` is the verifier-computed word `ev(G)`. -/
 noncomputable def augW (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) (r : ℕ → F) :
@@ -37,7 +37,7 @@ noncomputable def augW (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) (r : ℕ → 
       else
         cwfold (r k) (augW ℓ J w0 r k)
 
-/-- The augmented prover from Lemma "Skipping commitments".  It has the same round polynomials
+/-- The augmented prover from Lemma 5.6.  It has the same round polynomials
 and final table as `P`.  For `j < ℓ` its oracle is `augW j`; for `j ≥ ℓ` we use the zero word,
 which is ignored by the verifier (at `j = ℓ`, `W` is computed from `g`). -/
 noncomputable def aug (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) : SumProver F L m where
@@ -86,7 +86,7 @@ variable {L : Subgroup Fˣ} {m : ℕ}
 construction, the honest fold and no check is needed.
 
 The left-hand side of the displayed check is the value that the paper's verifier obtains by
-locally folding the opened coset of the committed word below (Lemma "Local folding").  In this
+locally folding the opened coset of the committed word below (Lemma 5.5).  In this
 word-level model the omitted intermediate words have already been inserted by `augW`, so the
 same computation appears as one final `cwfold` step. -/
 def SumProver.AcceptsJ (P : SumProver F L m) (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) {κ : ℕ}
@@ -104,7 +104,7 @@ noncomputable def sumAccProbJ [Fintype F] [Fintype L] (P : SumProver F L m)
   prob (fun ω : (Fin ℓ → F) × (Fin κ → L) =>
     P.AcceptsJ ℓ J w0 zp zs v (extR ω.1) ω.2)
 
-/-- **Lemma (Skipping commitments), §5.3.** Every accepting transcript of `Π_eval^J` becomes an
+/-- **Lemma 5.6 (skipping commitments).** Every accepting transcript of `Π_eval^J` becomes an
 accepting transcript of `Π_eval` after insertion of the omitted honest folds. -/
 theorem caccepts_aug (P : SumProver F L m) (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) {κ : ℕ}
     (zp : ℕ → F) (zs : Fin m → F) (v : F) (r : ℕ → F) (ξ : Fin κ → L) :
@@ -126,7 +126,7 @@ theorem caccepts_aug (P : SumProver F L m) (ℓ : ℕ) (J : Finset ℕ) (w0 : L 
     · intro hzero
       simpa [SumProver.aug] using (hQ t).2 hzero
 
-/-- Acceptance probability can only increase under augmentation (Lemma "Skipping commitments"). -/
+/-- Acceptance probability can only increase under augmentation (Lemma 5.6). -/
 theorem csumAccProbJ_le [Fintype F] [Fintype L] (P : SumProver F L m)
     (ℓ : ℕ) (J : Finset ℕ) (κ : ℕ) (w0 : L → F) (zp : ℕ → F) (zs : Fin m → F) (v : F) :
     sumAccProbJ P ℓ J κ w0 zp zs v ≤ sumAccProb (P.aug ℓ J w0) ℓ κ w0 zp zs v := by
@@ -153,7 +153,7 @@ theorem caug_degOK (P : SumProver F L m) (ℓ : ℕ) (J : Finset ℕ) (w0 : L �
   intro hdeg i r
   exact hdeg i r
 
-/-- **Theorem (Committed levels), item 1 — far commitment.** Theorem 6.13(1) transfers to
+/-- **Theorem 6.32, item 1 — far commitment.** Theorem 6.13(1) transfers to
 `Π_eval^J` with exactly the same error. -/
 theorem csoundness_far_J [Fintype F] [DecidableEq F] [Fintype L] {R : ℕ}
     (P : SumProver F L m) (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) (zp : ℕ → F)
@@ -170,7 +170,7 @@ theorem csoundness_far_J [Fintype F] [DecidableEq F] [Fintype L] {R : ℕ}
       csoundness_far (P := P.aug ℓ J w0) (ℓ := ℓ) (w0 := w0) (zp := zp) (zs := zs)
         (v := v) (δ := δ) hL hℓ hδ0 hδ (caug_causal P ℓ J w0 hC) κ hfar
 
-/-- **Theorem (Committed levels), item 1 — wrong value.** Theorem 6.13(2) transfers to
+/-- **Theorem 6.32, item 1 — wrong value.** Theorem 6.13(2) transfers to
 `Π_eval^J` with exactly the same error. -/
 theorem csoundness_close_J [Fintype F] [DecidableEq F] [Fintype L] {R : ℕ}
     (P : SumProver F L m) (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) (zp : ℕ → F)
@@ -189,7 +189,7 @@ theorem csoundness_close_J [Fintype F] [DecidableEq F] [Fintype L] {R : ℕ}
         (v := v) (δ := δ) hL hℓ hδ0 hδ (caug_causal P ℓ J w0 hC)
         (caug_degOK P ℓ J w0 hdeg) κ hwrong
 
-/-- **Theorem (Committed levels), item 1 — evaluation binding.** Corollary 6.14 transfers to
+/-- **Theorem 6.32, item 1 — evaluation binding.** Corollary 6.14 transfers to
 `Π_eval^J` with exactly the same error. -/
 theorem ceval_binding_J [Fintype F] [DecidableEq F] [Fintype L] {R : ℕ}
     (P : SumProver F L m) (ℓ : ℕ) (J : Finset ℕ) (w0 : L → F) (zp : ℕ → F)

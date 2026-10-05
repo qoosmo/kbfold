@@ -2,7 +2,7 @@
 
 Numbers refer to the compiled paper (`sumfri/paper`, `make` builds `sumfri.pdf`); Lean modules are in
 [`lean/SumFRI/`](../lean/SumFRI/), a second library of the KBFold Lean project (Lean `4.23.0`,
-Mathlib `v4.23.0`), about 3,900 lines in 12 modules. **No `sorry`.** The only axiom is KBFold's
+Mathlib `v4.23.0`), about 3,900 lines in 11 modules and an audit file. **No `sorry`.** The only axiom is KBFold's
 `bciks_unique` (correlated agreement, Theorem 2.17).
 
 ```bash
@@ -28,18 +28,18 @@ lake env lean SumFRI/Audit.lean   # #print axioms for the main theorems
 
 **Reused from KBFold** (`lean/KBFold/`): probability lemmas (Lemmas 3.2–3.4), the generic
 round-by-round framework (Definition 3.7, Lemmas 3.8, 3.12), smooth domains and Reed–Solomon
-codes (Lemmas 2.9, 2.12, 2.13, 2.16), fibre distance and decoding (Definition 6.1, Lemmas 6.2,
-6.3), sampling and fibre strings (Lemma 6.23, §6.7).
+codes (Lemma 2.9, Definitions 2.10, 2.11, Lemmas 2.12, 2.13, 2.16), fibre distance and decoding (Definition 6.1, Lemmas 6.2,
+6.3), sampling and fibre strings (Lemma 6.23, §6.7), the classical fold (Definition 4.5, Lemma 4.8(2), `WordFold`).
 
 **`#print axioms`** (`lean/SumFRI/Audit.lean`):
 
 - Lean's standard three only (`propext`, `Classical.choice`, `Quot.sound`): `cfoldSeq_vpoly_full`,
   `vpoly_eval_one`, `completeness`, `completeness_sum`, `cno_folding`, `crbr_l0`, `crrbr_final`,
-  `ccr_unique_core`, `cwfold_sqPt`, `cfoldUp_local`, `crbr_final_J`;
+  `ccr_unique_core`, `cwfold_sqPt`, `cfoldUp_local`, `crbr_final_J`, `crrbr_final_J`;
 - additionally `KBFold.bciks_unique`: `cfar_fold`, `csoundness_far`, `csoundness_close`,
   `ceval_binding`, `soundness_sum`, `sum_binding`, `crbr_knowledge`, `crbr_binding`,
-  `crrbr_round`, `csoundness_close_J`, `soundness_sum_J`, `crbr_round_one_J`, `crbr_round_J`.
+  `crrbr_round`, `csoundness_close_J`, `soundness_sum_J`, `crbr_round_one_J`, `crbr_round_J`, `crrbr_round_J`.
 
 **Not formalised.** Theorem 3.14 and Corollary 6.27 (quantum random oracle model, quoted from
 CDHZ25); Merkle-tree statements and the collision step of Lemma 6.28; Fact 2.14 and Lemma 2.15;
-running times and operation counts (including the count in Lemma 5.5); item 4 of Theorem 6.32 (the compiler, as Theorem 3.14); Sections 7–8.
+running times and operation counts (including the count in Lemma 5.5); item 4 of Theorem 6.32 (the compiler, as Theorem 3.14); Theorem 5.8 for Π_eval^J and the binding forms of Corollaries 6.14, 6.15 for Π_eval^J; Sections 7–8.

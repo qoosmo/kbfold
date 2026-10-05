@@ -8,7 +8,7 @@ Machine-checked proofs of the mathematics of the paper (§2–§7).
 
 ```bash
 lake exe cache get      # prebuilt Mathlib
-lake build              # builds all modules
+lake build              # builds the KBFold library (`lake build SumFRI` for the second)
 lake env lean KBFold/Audit.lean   # #print axioms for the main theorems
 ```
 

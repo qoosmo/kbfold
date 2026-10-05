@@ -75,7 +75,7 @@ For a table $f$ over a commutative ring $A$ with $n$ variables, the \emph{coeffi
 \]
 \end{definition}
 
-By \cref{lem:mobius}, $P_f = \tilde g$ where $g(b) = \sum_{a \preceq b} f(a)$; equivalently, $P_f = \tilde f$ after the M\"obius transform of $f$.
+By \cref{lem:mobius}, $P_f = \tilde g$ where $g(b) = \sum_{a \preceq b} f(a)$; equivalently, $\tilde f = P_{\alpha}$, where $\alpha$ is the M\"obius transform of $f$.
 For every $a \in \iv{0}{N-1}$, $m_a(1,\dots,1) = 1$, so
 \begin{equation}\label{eq:sum-is-eval}
   \sum_{a=0}^{N-1} f(a) \;=\; P_f(1,\dots,1).
@@ -112,7 +112,7 @@ The proof in KBFold uses only \eqref{eq:dist-unique} and \cref{lem:rbr-overall},
 \subsection{Non-interactive arguments}\label{sec:proofs:bcs}
 
 This subsection concerns only the post-quantum corollary (\cref{cor:pq}).
-We use the definitions of KBFold~\cite[\S3.4]{Mkh26}, which restate those of~\cite{CDHZ25}: Merkle trees and their binding (\KB{Lemma~3.13}), relations with an implicit instance and their relaxations $\mathcal{R}_{\le\delta}$, IOPs viewed as interactive oracle reductions (IORs) to the accepting relation $\mathcal{R}_{\mathrm{acc}}$, salted Merkle commitments, committed relations $\mathsf{CR}[\mathcal{R}]$ and relaxed committed relations $\widehat{\mathsf{CR}}[\mathcal{R},\delta]$ (\KB{Definition~3.15}), and the compiler $\mathsf{BCS}[\Pi]$ of~\cite[Construction~11.7]{CDHZ25}.
+We use the definitions of KBFold~\cite[\S3.5]{Mkh26}, which restate those of~\cite{CDHZ25}: Merkle trees and their binding (\KB{Lemma~3.13}), relations with an implicit instance and their relaxations $\mathcal{R}_{\le\delta}$, IOPs viewed as interactive oracle reductions (IORs) to the accepting relation $\mathcal{R}_{\mathrm{acc}}$, salted Merkle commitments, committed relations $\mathsf{CR}[\mathcal{R}]$ and relaxed committed relations $\widehat{\mathsf{CR}}[\mathcal{R},\delta]$ (\KB{Definition~3.15}), and the compiler $\mathsf{BCS}[\Pi]$ of~\cite[Construction~11.7]{CDHZ25}.
 We restate the hypothesis and the conclusion of the theorem, which are what \cref{sec:sound} checks and uses.
 
 \begin{definition}[Relaxed round-by-round knowledge soundness~\cite{CDHZ25}, \KB{Definition~3.14}]\label{def:rrbr}

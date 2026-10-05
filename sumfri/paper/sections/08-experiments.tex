@@ -14,7 +14,7 @@ The machine is shared; we repeated the measurements of \cref{tab:sum,tab:pq} in 
 
 \paragraph{Parameters.}
 The \emph{classical parameters} are those of \KB{\S9.1}: rate $\rho = 1/4$, $\ell = n - 4$ folding rounds (final table of $16$ elements), $\kappa = 148$ queries, the quadratic extension $\K$, $32$-byte salts, and committed levels $\mathcal{J} = \{0, 4, 8, \dots\}$.
-By \cref{thm:sound} with $\delta = 3/8$, the soundness error is below $2^{-100}$ (\cref{rem:params}).
+By \cref{thm:sound,thm:skip} with $\delta = 3/8$, the soundness error is below $2^{-100}$ (\cref{rem:params}).
 The \emph{post-quantum parameters} are those of \cref{rem:pq-params}: the same rate, $\ell$ and $\mathcal{J}$, $\kappa = 248$ queries and the quartic extension.
 Tables are uniformly random over $\mathbb{F}_p$; evaluation points are uniformly random in $\F^n$.
 Proof sizes are the lengths of the canonical encodings; they depend slightly on the query points, through the number of distinct opened leaves.
@@ -48,13 +48,13 @@ $n$ & (ms) & Sum-FRI & KBFold & coeff.+sc. & quotient & (ms) & (KiB) \\
 22 & 3021.5 & 782.4 & 1150.1 & 1113.8 & 1474.4 & 1.32 & 288 \\
 \bottomrule
 \end{tabular}
-\caption{Proving $\sum_a f(a)$ for a committed table of $N = 2^n$ elements, classical parameters, single-threaded. Commit, verify and proof size are those of Sum-FRI; the other three schemes are within the run-to-run variation of these figures (\cref{sec:exp:sum}). The verification time at $n = 20$ is from the second run (the first gave $2.2$\,ms for Sum-FRI and $1.1$\,ms for the other schemes).}
+\caption{Proving $\sum_a f(a)$ for a committed table of $N = 2^n$ elements, classical parameters, single-threaded. Commit, verify and proof size are those of Sum-FRI; the other three schemes are within the run-to-run variation of these figures, except the verifier of the quotient scheme, which is $6$--$56\%$ slower (\cref{sec:exp:sum}). The verification time at $n = 20$ is from the second run (the first gave $2.2$\,ms for Sum-FRI and $1.1$\,ms for the other schemes).}
 \label{tab:sum}
 \end{table}
 
 \Cref{tab:sum} reports the four schemes on the sum.
 The opening phase of Sum-FRI is $27$--$41\%$ faster than that of KBFold and $27$--$36\%$ faster than the coefficient-form scheme with sumcheck, over both runs and all sizes; it is $33$--$55\%$ faster than the quotient opening.
-Commit times agree within the run-to-run variation (the four commitments perform the same NTT and the same tree; the transforms of KBFold and of the coefficient-form scheme cost $\tfrac n2 N$ additions, invisible next to the NTT), and so do verification times and proof sizes, which are dominated by the $\kappa$ authentication paths and opened cosets.
+Commit times agree within the run-to-run variation (the four commitments perform the same NTT and the same tree; the transforms of KBFold and of the coefficient-form scheme cost $\tfrac n2 N$ additions, invisible next to the NTT), and so do proof sizes and the verification times of the two sumcheck schemes, which are dominated by the $\kappa$ authentication paths and opened cosets; the quotient verifier is $6$--$56\%$ slower, since it recomputes the quotient at the opened points.
 The round messages, $\ell$ field elements for Sum-FRI and $3\ell$ for the sumcheck schemes, differ by at most $0.6$\,KiB.
 
 The saving is the one predicted in \cref{sec:scheme:costs}.
@@ -138,7 +138,7 @@ $n$ & prover & verify & proof & prover & verify & proof & prover & verify & proo
 22 & 3803.9 & 1.32 & 288 & 27000 & 5.50 & 657 & 9700 & 0.54 & 121 \\
 \bottomrule
 \end{tabular}
-\caption{Sum-FRI ($\Pisum$, prover $=$ commit $+$ open) and the WHIR implementation, same machine, single-threaded, Goldilocks with its quadratic extension, rate $1/4$, $100$ bits of security, no proof of work. Times in ms, proof sizes in KiB. WHIR prints times of one second or more with a resolution of $0.1$\,s.}
+\caption{Sum-FRI ($\Pisum$, prover $=$ commit $+$ open) and the WHIR implementation, same machine, single-threaded, Goldilocks with its quadratic extension, rate $1/4$, $100$ bits of security, no proof of work. Times in ms, proof sizes in KiB. WHIR prints times of one second or more with a resolution of $0.1$\,s; its figures are those of the median, by commit time, of three invocations, each with \texttt{--reps 21}. The Sum-FRI verification time at $n = 20$ is from the second run, as in \cref{tab:sum}.}
 \label{tab:whir}
 \end{table}
 

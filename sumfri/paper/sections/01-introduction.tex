@@ -23,10 +23,10 @@ Then
 The classical FRI fold $\cfold_\theta(U) = U_e + \theta\, U_o$, where $U(X) = U_e(X^2) + X U_o(X^2)$, substitutes $\theta$ for the first variable of the coefficient-form multilinear polynomial (\cref{sec:restriction}).
 For a claim $P_f(z) = v$, the round message of the prover is the affine polynomial
 \[
-  g_j(T) \;=\; P_{f}(\theta_1,\dots,\theta_{j-1},\, T,\, z_{j+1},\dots,z_n),
+  s_j(T) \;=\; P_{f}(\theta_1,\dots,\theta_{j-1},\, T,\, z_{j+1},\dots,z_n),
 \]
-the verifier checks $g_j(z_j)$ against the current claim, draws $\theta_j$, and the same $\theta_j$ folds the committed codeword.
-For the hypercube sum, $z = (1,\dots,1)$ and $g_j(T) = U_e(1) + T\, U_o(1)$, where $U$ is the current folded polynomial.
+the verifier checks $s_j(z_j)$ against the current claim, draws $\theta_j$, and the same $\theta_j$ folds the committed codeword.
+For the hypercube sum, $z = (1,\dots,1)$ and $s_j(T) = U_e(1) + T\, U_o(1)$, where $U$ is the current folded polynomial.
 After $n$ rounds the folded codeword is the constant $P_f(\theta_1,\dots,\theta_n)$, and the verifier compares it with the reduced claim.
 Three states thus move under one challenge sequence: the scalar claim, the coefficient-form polynomial, and the Reed--Solomon word.
 
@@ -38,7 +38,7 @@ The present paper gives the unique-decoding version a complete, self-contained t
 \paragraph{The restriction dictionary (\cref{sec:restriction}).}
 We state the monomial-basis counterpart of the KBFold fold dictionary: the classical fold of $V_f$ is the Kronecker substitution of the restriction of $P_f$ in its first variable, and $n$ folds with $\theta_1,\dots,\theta_n$ give the constant $P_f(\theta_1,\dots,\theta_n)$.
 For a word $w$ on a smooth domain $L$, the classical word fold is the line $w_e + \theta\, w_o$ whose generators determine $w$.
-This is the property through which correlated agreement enters the soundness proof, and it holds for the classical fold without the reparametrisation of the kernel fold (\KB{Proposition~5.11}).
+This is the property through which correlated agreement enters the soundness proof, and it holds for the classical fold without the rewriting of the line generators that the kernel fold needs (\KB{Lemma~5.7}).
 We record the relation between the two encodings of the same sum: $V_f(1)$ in the monomial basis, and $[X^{N-1}]\,U_f$ in the Boolean-kernel basis.
 
 \paragraph{The scheme and its completeness (\cref{sec:scheme}).}
@@ -53,7 +53,7 @@ That step costs $1/|\F|$ per round, against $2/|\F|$ for the degree-$2$ sumcheck
 The only external result about codes is again the correlated-agreement theorem of Ben-Sasson, Carmon, Ishai, Kopparty and Saraf~\cite{BCIKS23}.
 
 \paragraph{Formal verification (\cref{app:lean}).}
-A Lean~4 formalisation, built on the KBFold Lean library and checked against the same single axiom (correlated agreement), covers the restriction dictionary, completeness, soundness, binding, round-by-round knowledge soundness, the combinatorial part of relaxed round-by-round knowledge soundness, local folding, and the transfer of soundness, binding and round-by-round knowledge soundness to committed levels.
+A Lean~4 formalisation, built on the KBFold Lean library and checked against the same single axiom (correlated agreement), covers the restriction dictionary, completeness, soundness, binding, round-by-round knowledge soundness, the combinatorial part of relaxed round-by-round knowledge soundness, local folding, and the transfer of soundness, binding, round-by-round knowledge soundness and the combinatorial part of relaxed round-by-round knowledge soundness to committed levels.
 
 \paragraph{Implementation and experiments (\cref{sec:impl,sec:exp}).}
 A Rust implementation reuses the field, NTT, salted Merkle trees and transcript of the KBFold crate.
@@ -64,7 +64,7 @@ We compare it on the same machine with four alternatives for the same statements
   \item the quotient opening of $V_f$ at $X = 1$ on a coset domain;
   \item WHIR~\cite{ACFY24}.
 \end{itemize}
-With the same commitment, verification time and proof size, the opening of a sum is $27$--$41\%$ faster than with KBFold or with the coefficient-form sumcheck scheme, and $34$--$57\%$ faster with post-quantum parameters.
+With the same commitment, verification time and proof size, the opening of a sum is $27$--$41\%$ faster than with KBFold or with the coefficient-form sumcheck scheme, and, with post-quantum parameters, $34$--$57\%$ faster than with KBFold.
 
 \subsection{Positioning}\label{sec:intro:position}
 
