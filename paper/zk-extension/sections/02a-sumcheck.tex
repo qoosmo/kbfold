@@ -1,0 +1,92 @@
+\subsection{The algebraic origin: sumcheck}\label{sec:history:sumcheck}
+
+The sumcheck protocol originates in the algebraic techniques of Lund, Fortnow, Karloff and Nisan~\cite{LFKN1992}. We give a self-contained version to fix the precise leakage surface that motivates the later masking constructions.
+
+\begin{definition}[Sumcheck instance]\label{def:history:sumcheck}
+Let $\F$ be a finite field of cardinality $q$, let $m\geq 1$, and let
+$G\in\F[X_0,\ldots,X_{m-1}]$ satisfy
+$\deg_{X_i}G\leq d_i$ for prescribed integers $d_i\geq0$.
+Define
+\[
+  S_G:=\sum_{b\in\{0,1\}^{m}}G(b)\in\F.
+\]
+A sumcheck instance is a claimed value $a\in\F$ for the equality $a=S_G$.
+We assume that the verifier can evaluate $G$ at one final random point.
+\end{definition}
+
+\begin{definition}[Honest partial-sum polynomial]\label{def:history:partial}
+For $0\leq i<m$ and a fixed prefix $r_{<i}=(r_0,\ldots,r_{i-1})\in\F^i$,
+define the univariate polynomial
+\[
+ h_i(T;r_{<i})
+ :=\sum_{b\in\{0,1\}^{m-i-1}}
+ G(r_0,\ldots,r_{i-1},T,b).
+\]
+This polynomial has degree at most $d_i$.
+\end{definition}
+
+\begin{lemma}[Partial-sum telescoping]\label{lem:history:telescoping}
+For $i=0$,
+\[
+ h_0(0)+h_0(1)=S_G.
+\]
+For $1\leq i<m$ and every prefix $r_{<i}$,
+\[
+ h_i(0;r_{<i})+h_i(1;r_{<i})
+ =h_{i-1}(r_{i-1};r_{<i-1}).
+\]
+\end{lemma}
+\begin{proof}
+For the first identity, partition $\{0,1\}^m$ according to its first bit and use the definition of $h_0$. For the second, partition the remaining Boolean suffix of $h_{i-1}(r_{i-1};r_{<i-1})$ according to the $i$-th bit. The two resulting finite sums are precisely $h_i(0;r_{<i})$ and $h_i(1;r_{<i})$. All equalities are rearrangements of finite sums.
+\end{proof}
+
+\begin{definition}[Sumcheck verifier]\label{def:history:verifier}
+Set $a_0=a$. In round $i=0,\ldots,m-1$, the prover sends a polynomial $g_i(T)$ of degree at most $d_i$; the verifier checks
+\[
+  g_i(0)+g_i(1)=a_i,
+\]
+rejecting if the equation fails. If it passes, the verifier samples
+$r_i\overset{\$}{\leftarrow}\F$ and sets $a_{i+1}=g_i(r_i)$.
+After the last round the verifier accepts exactly if
+\[
+  a_m=G(r_0,\ldots,r_{m-1}).
+\]
+The prover's round-$i$ polynomial is fixed before the verifier samples $r_i$.
+\end{definition}
+
+\begin{lemma}[Completeness]\label{lem:history:sumcheck-complete}
+If $a=S_G$ and the prover sends
+$g_i=h_i(\,\cdot\,;r_{<i})$ in every round, the verifier accepts for every challenge sequence.
+\end{lemma}
+\begin{proof}
+The first test is true by Lemma~\ref{lem:history:telescoping}.
+Assume inductively that $a_i$ equals the honest partial sum of round $i-1$ evaluated at $r_{i-1}$ (with $a_0=S_G$).
+Lemma~\ref{lem:history:telescoping} gives the required endpoint equality for $h_i$.
+By the update rule $a_{i+1}=h_i(r_i;r_{<i})$, the induction continues.
+At $i=m-1$, the Boolean suffix is empty and $h_{m-1}(r_{m-1};r_{<m-1})=G(r_0,\ldots,r_{m-1})$, so the final check succeeds.
+\end{proof}
+
+\begin{lemma}[Root bound]\label{lem:history:roots}
+If $A,B\in\F[T]$ are distinct and each has degree at most $d$, then for uniform $r\in\F$,
+\[
+  \Pr[A(r)=B(r)]\leq \min\{1,d/q\}.
+\]
+\end{lemma}
+\begin{proof}
+The polynomial $A-B$ is nonzero, has degree at most $d$, and therefore has at most $d$ distinct roots in the field $\F$. Divide the root count by $q$.
+\end{proof}
+
+\begin{theorem}[Sumcheck soundness]\label{thm:history:sumcheck-sound}
+If $a\neq S_G$, the acceptance probability of any prover obeying the timing and degree rules in Definition~\ref{def:history:verifier} is at most
+\[
+ \min\left\{1,\frac{\sum_{i=0}^{m-1}d_i}{q}\right\}.
+\]
+\end{theorem}
+\begin{proof}
+At the beginning of round zero the asserted value $a_0$ differs from the correct Boolean sum. More generally, say that round $i$ begins with a \emph{false partial claim} when $a_i$ differs from the correct sum of $G(r_{<i},b_i,\ldots,b_{m-1})$ over the remaining Boolean variables.
+Suppose round $i$ begins with such a false partial claim and the verifier does not reject the endpoint check. The honest polynomial $h_i(\,\cdot\,;r_{<i})$ has endpoint sum equal to the correct partial sum by Lemma~\ref{lem:history:telescoping}. Therefore $g_i\neq h_i$, since equal polynomials would give equal endpoint sums, contradicting the false claim. Conditioned on the full transcript before sampling $r_i$, these two distinct degree-$\leq d_i$ polynomials are fixed. By Lemma~\ref{lem:history:roots}, with conditional probability at most $d_i/q$ they agree at $r_i$; outside that event the next partial claim remains false. If it remains false through the final round, the explicit evaluation test rejects. Acceptance therefore entails an agreement event in at least one round. The union bound over these first-agreement events gives the claimed upper bound.
+\end{proof}
+
+\begin{remark}[Why this historical construction is not automatically zero knowledge]
+The prover's polynomials $g_i$ depend on $G$, even when the asserted sum $a$ is fixed. Lemma~\ref{lem:intro:leak} supplies an explicit pair of witnesses with the same public evaluation and distinct first-round polynomials. The soundness theorem alone makes no privacy claim.
+\end{remark}
