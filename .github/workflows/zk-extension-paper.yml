@@ -14,6 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Chapter 4 Rust kernel audit
+        run: |
+          cd paper/zk-extension
+          sh audit/RUN.sh
       - uses: xu-cheng/latex-action@v3
         with:
           root_file: main.tex
@@ -34,4 +38,6 @@ jobs:
             paper/zk-extension/README.md
             paper/zk-extension/THEOREM_LEDGER.md
             paper/zk-extension/CHAPTER_03_LEAN_MAP.md
+            paper/zk-extension/CHAPTER_04_LEAN_MAP.md
+            paper/zk-extension/audit/
           if-no-files-found: error
