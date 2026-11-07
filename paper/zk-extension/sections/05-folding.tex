@@ -1,0 +1,36 @@
+\section{Multilinearization, Kernel Folding, and Mask Propagation}\label{sec:kbfoldfold}
+
+This chapter develops the algebraic folding invariants needed for a zero-knowledge extension of KBFold. Its starting point is the Boolean-kernel encoding
+\[
+ U_f^{(m)}(X)=\sum_{b\in I_m} f(b)K_b^{(m)}(X)
+\]
+from Chapters~1 and~4, and the normalized odd-characteristic word fold in the original KBFold scheme~\cite{MkhidaKBFold2026}.
+We separate four different claims: that the coefficient table is restricted correctly; that polynomial and word folds commute; that an added high-degree mask propagates with a controlled degree budget; and that the \emph{joint} masked oracle answers satisfy a precise linear-algebraic hiding condition. None of these algebraic statements alone asserts a complete zero-knowledge simulator.
+
+\input{sections/05a-prefix-restriction}
+\input{sections/05b-polynomial-fold}
+\input{sections/05c-fold-dictionary}
+\input{sections/05d-masked-module}
+\input{sections/05e-codeword-fold}
+\input{sections/05f-local-verification}
+\input{sections/05g-joint-observations}
+
+\subsection{Main theorem chain and formal scope}\label{sec:kbfoldfold:conclusion}
+For $N=2^m$, $1\leq B\leq N$, and $R\in\F[X]_{<B}$, define the high-degree masked encoding
+$Q_0=U_f^{(m)}+X^NR$.
+The proven chain is
+\[
+ \boxed{
+ Q_j=U_{\mathsf{Res}^{[j]}_{r_{<j}}(f)}^{(m-j)}
+     +X^{N/2^j}\mathsf{PFold}^{[j]}_{r_{<j}}(R),}
+\]
+\[
+ \boxed{\deg Q_j<
+     \frac{N}{2^j}+\left\lceil\frac{B}{2^j}\right\rceil,}
+ \qquad
+ \boxed{Q_m(X)=\widetilde f(r)+\rho_r(R)X.}
+\]
+When $\F$ has odd characteristic and the code domain is a suitable power-of-two multiplicative group, the same polynomial identities propagate to the committed evaluation words and yield degree-correct local fold checks. For fixed challenge vectors and query schedules, the exact hiding condition is the coset-membership criterion of Theorem~\ref{thm:kbff:joint-mask}.
+
+\paragraph{Lean certification boundary.}
+Each result above has a self-contained algebraic proof, with all field and indexing hypotheses explicit. The proposed Lean targets are collected in \texttt{CHAPTER\_05\_LEAN\_MAP.md}. A proof that the full KBFold IOP is zero knowledge still requires a masked sumcheck, a simulator for adaptive authenticated openings, and soundness for malicious words in the enlarged Reed--Solomon code; these are not inferred from polynomial identities.
