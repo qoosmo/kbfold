@@ -357,3 +357,92 @@ fn chapter8_diamond_posen_tensor_ring(){
  ring_switch_tensor_case(GF{degree:4,irreducible:0x13},2,&mut seed);
  ring_switch_tensor_case(GF{degree:8,irreducible:0x11b},3,&mut seed);
 }
+
+
+// Chapter 9: exhaustive public-core simulation checks over GF(4).
+// 2^2 field elements; n=2 packed rows. All 4096 honest random-tape
+// combinations are enumerated for each witness and verifier strategy.
+fn zk_core_histogram(f:GF,s:&[u16],adaptive:bool)->Vec<u32>{
+ assert_eq!(f.degree,2);
+ let n=2usize;let q=f.q();let ell=1usize;
+ let (beta,coord,eta)=basis_and_coords(f,ell);
+ let mut hist=vec![0u32;q.pow(2*n as u32+2)];
+ for p0 in 0..q {
+  for p1 in 0..q {
+   let p=[p0 as u16,p1 as u16];
+   let cp=transposed(f,&beta,&coord,&p);
+   let m=[s[0]^p[0],s[1]^p[1]];
+   for pin in 0..q {
+    let yprime=pin as u16; // public y = 0 in the two witness cases
+    let theta=if adaptive {m[0]^m[1]^yprime} else {3u16};
+    let lambda=[f.lambda(0,&[theta]),f.lambda(1,&[theta])];
+    let dc=f.mul(lambda[0],cp[0])^f.mul(lambda[1],cp[1]);
+    let mut v=[0u16;2];
+    for k in 0..n {
+     v[k]=f.mul(eta[k],dc);
+     for row in 0..n {
+      let mut hh=0u16;
+      for u in 0..n {
+       let x=f.mul(beta[row],lambda[u]);
+       if (coord[x as usize]>>k)&1==1 {hh^=eta[u];}
+      }
+      v[k]^=f.mul(hh,p[row]);
+     }
+     assert_eq!(f.trace(v[k]),0,"consistent coefficient trace");
+    }
+    for t0 in 0..q {
+     for t1 in 0..q {
+      let t=[t0 as u16,t1 as u16];
+      let u=[v[0]^f.square(t[0])^t[0],v[1]^f.square(t[1])^t[1]];
+      assert_eq!(f.trace(u[0]),0);
+      assert_eq!(f.trace(u[1]),0);
+      let z=if adaptive {theta^u[0]^m[0]} else {2u16};
+      let w0=f.kernel(0,z,ell)^f.pow(z,n);
+      let w1=f.kernel(1,z,ell);
+      for rho in 0..q {
+       let a=rho as u16^f.mul(w0,t[0])^f.mul(w1,t[1]);
+       let fields=[m[0],m[1],yprime,u[0],u[1],a];
+       let mut place=0usize;let mut factor=1usize;
+       for value in fields {
+        place+=(value as usize)*factor;
+        factor*=q;
+       }
+       hist[place]+=1;
+      }
+     }
+    }
+   }
+  }
+ }
+ assert_eq!(hist.iter().map(|x|*x as usize).sum::<usize>(),q.pow(6));
+ // There are q^2 choices for m, q for y', 2^n valid U vectors,
+ // and q for A; each valid output has precisely 2^n hidden t choices.
+ for idx in 0..hist.len() {
+  let mut x=idx;let mut fields=[0usize;6];
+  for i in 0..6{fields[i]=x%q;x/=q;}
+  let valid=f.trace(fields[3] as u16)==0&&f.trace(fields[4] as u16)==0;
+  assert_eq!(hist[idx],if valid{4}else{0},
+   "public-core exact product law: index={idx}");
+ }
+ hist
+}
+#[test]
+fn chapter9_exhaustive_public_core_and_pad_reuse(){
+ let f=GF{degree:2,irreducible:0x7};
+ let s0=[0u16,0u16];let s1=[0u16,1u16];
+ for adaptive in [false,true]{
+  let h0=zk_core_histogram(f,&s0,adaptive);
+  let h1=zk_core_histogram(f,&s1,adaptive);
+  assert_eq!(h0,h1,"two equal-claim witnesses must have identical full public cores");
+ }
+ // Two high-axis evaluation openings with the same pad reveal the
+ // difference between the two underlying partial-evaluation vectors.
+ for p0 in 0..4u16 {for p1 in 0..4u16 {
+  let p=[p0,p1];
+  let zero_witness_diff=[p[0]^p[0],p[1]^p[1]];
+  let one_witness_diff=[(p[0]^s1[0])^p[0],(p[1]^s1[1])^p[1]];
+  assert_eq!(zero_witness_diff,[0,0]);
+  assert_eq!(one_witness_diff,[0,1]);
+ }}
+ println!("Chapter 9: GF(4) exhaustive joint public-core law, adaptive verifier, and two-opening leakage checked");
+}
