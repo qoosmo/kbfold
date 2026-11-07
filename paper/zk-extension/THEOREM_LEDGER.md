@@ -176,3 +176,24 @@ The chapter proves *an algebraic consistency checker*, **not** zero knowledge fo
 ### Reproducible audit
 
 Run `sh audit/RUN.sh` to execute the existing kernel tests plus the new deterministic GF(16) and GF(256) tests covering basis, trace duality, affine equations, honest checks and anchored root counts. These tests supplement the full mathematical proofs.
+
+
+## Chapter 7 — Binary-Field Packing and Transposition
+
+**Source:** `sections/07-packing.tex` with seven proof-oriented subsections.
+**Lean map:** [CHAPTER_07_LEAN_MAP.md](CHAPTER_07_LEAN_MAP.md).
+**Audit:** 71 labeled definitions/results: 22 definitions and **49 complete paper proofs**. None of these Chapter 7 declarations has yet been machine checked in Lean 4.
+
+### Established mathematical results
+
+- Lossless $\F_2$-basis packing, inverse extraction, bit-column identities, and original two-axis multilinear evaluation.
+- Exact coordinate-matrix transpose, involution $\mathcal T^2=\mathrm{id}$, proof of $\F_2$-linearity, and proof that it is not $L$-linear for $n>1$.
+- Packed transposition identity $\mathcal T(s^*)_u=\sum_jd_u(h_j)\widehat w_j$, random batching $B_{s^*}=\sum_j a_j\widehat w_j$, and a degree-$\ell$ discrepancy test.
+- Independent uniform pads $p,p_{\mathrm{in}}$, uniform public $(m,y')$, pad correction $C_p$, and complete IN/OUT/CLAIM affine equations.
+- Error decomposition $\mathsf{OUT\ residual}=B_{m+s^*+p}+D_{c+c^p}$, exact honest completeness and conditional algebraic soundness at most $(\ell+n)/2^n$ against false evaluation claims.
+- Trace-dual field-affine implementation interface and an explicit proof that exposing $(m,c^p)$ recovers $s^*$.
+- An ideal-to-implementation soundness union bound, conditional on independently proving external commitment/affine-proof failures.
+
+**Open:** External PCS soundness, binding to packed bits, authenticated openings, joint online simulator for $m,y',U,A$, and application to the odd-characteristic KBFold IOP.
+
+**Reproducibility:** Chapter 7 Rust tests exercise packed Ring Switching identities and masking over GF(16) and GF(256).
