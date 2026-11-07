@@ -81,3 +81,12 @@ For a high-degree mask in the original KBFold setting, the chapter proves
     pfold^j(X^N R) = X^(N/2^j) R_j,  N = 2^m,  0 <= j <= m.
 
 This exact identity is the starting point for analyzing the enlarged Reed--Solomon degree, masked final closure, and subsequent oracle simulation.
+
+
+### Chapter 2 audit additions
+
+| Result | Proof | Proposed Lean declaration |
+|---|---|---|
+| Univariate polynomial root-count lemma | full induction | polynomial_card_roots |
+| Multivariate Schwartz--Zippel | full induction on the number of variables | mvpoly_schwartz_zippel |
+| Trace-dual basis existence and uniqueness | full finite-dimensional linear-algebra proof | trace_dual_basis_exists_unique |
