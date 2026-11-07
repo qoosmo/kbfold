@@ -1,0 +1,15 @@
+\subsection{Formal research obligations}\label{sec:intro:goals}
+
+\begin{definition}[Target zero-knowledge evaluation statement]\label{def:intro:target}
+A full zero-knowledge KBFold extension must specify a public-parameter setup, a commitment and opening relation binding the table $f$, a distribution for masking randomness, an interactive prover and verifier, and a simulator for the entire verifier view. For each supported public instance $(\mathsf{cm},z,v)$ and witness/opening data tied to $f$, the intended statements are:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \emph{Completeness}: an honest opening for $v=\widetilde f(z)$ is accepted.
+\item \emph{Soundness}: every strategy proving a false evaluation for a committed witness has explicitly bounded acceptance probability.
+\item \emph{Zero knowledge}: for a specified verifier class, the real transcript distribution is indistinguishable, in a specified sense, from the simulator's output given only the allowed public instance and public auxiliary information.
+\end{enumerate}
+The complete probability spaces, quantifiers, and oracle-query bounds are deferred to Chapter~3, where the formal cryptographic interface is introduced.
+\end{definition}
+
+\paragraph{Logical dependency and status.} Lemmas~\ref{lem:intro:degree}--\ref{lem:intro:partition} and the kernel-folding dictionary are algebraic theorems proved in this chapter; the original KBFold paper contains corresponding kernel-basis and folding results~\cite{MkhidaKBFold2026}. Proposition~\ref{prop:intro:delta} identifies the characteristic-two ring-switching correction in the same language. It does not assert that the original KBFold protocol (over odd characteristic) has already acquired zero knowledge. Chapters~4--7 will develop and audit the binary-field masking protocol, while the later KBFold chapters will treat masked sumcheck polynomials, all folded oracles, the final table, and the enlarged-degree code constraints in the original field.
+
+\paragraph{Lean 4 decomposition.} The definitions in this chapter have intentionally small dependencies: bit indexing; polynomial kernel; even--odd split; basis; coefficient extraction; equality weights; restriction; normalized fold; iteration; field evaluation basis; binary-coordinate map; correction identity. The proof of each theorem uses only earlier definitions and statements, with the sole standard finite-field input in Proposition~\ref{prop:intro:delta} being existence of a trace-dual basis in a finite separable extension. The complete theorem/Lean dependency ledger is maintained alongside this manuscript.
