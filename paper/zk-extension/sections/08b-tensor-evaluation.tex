@@ -173,18 +173,20 @@ $\deg_{X_i}H\leq2$.
 \]
 \end{theorem}
 \begin{proof}
-For Boolean $j$, multilinear interpolation
-gives $\varphi_1(T')(j)=\varphi_1(\widehat w_j)$.
-Furthermore
-$\operatorname{eq}_h(\varphi_0(r_{\rm hi}),j)
-=\varphi_0(h_j)$ by the same
-homomorphism calculation as in
-Lemma~\ref{lem:dpr:eq-embedded}.
-Thus
-$\sum_jH(j)=\sum_j
-\varphi_1(\widehat w_j)\varphi_0(h_j)=S$,
-the latter equality being the expansion
-used in Theorem~\ref{thm:dpr:column-evaluation}.
+For Boolean $j$, multilinear interpolation and
+Lemma~\ref{lem:dpr:eq-embedded} give
+\[
+ \varphi_1(T')(j)=\varphi_1(\widehat w_j),
+ \qquad
+ \operatorname{eq}_h(\varphi_0(r_{\rm hi}),j)=\varphi_0(h_j).
+\]
+Consequently,
+\[
+ \sum_jH(j)
+ =\sum_j\varphi_1(\widehat w_j)\varphi_0(h_j)=S,
+\]
+where the last equality is the expansion in
+Theorem~\ref{thm:dpr:column-evaluation}.
 \end{proof}
 
 \begin{lemma}[Reduction to a large-field evaluation at a common challenge]\label{lem:dpr:terminal}
