@@ -1,0 +1,249 @@
+\subsection{An algebraic two-challenge consistency checker}\label{sec:binary:checker}
+We now combine the preceding lemmas into a small
+\emph{algebraic checking theorem}. This is the
+kernel-coordinate consistency component of the
+proposed binary-field construction. The theorem
+does not assert zero knowledge for the complete IOP
+or its commitment scheme.
+
+\begin{definition}[Affine consistency checks]\label{def:binary:checks}
+Let the secret values $p,c,t$, $r,s$ have types
+\[
+ p,c,t\in L^{I_\ell},\qquad r,s\in L.
+\]
+After a challenge $\theta\in L^\ell$,
+let $V_k=V_k(p,c,\theta)$ be as in
+Definition~\ref{def:binary:affine-H}, and let
+$U=(U_k)_k\in L^{I_\ell}$ be public.
+After a second challenge $z\in L$, a public scalar
+$A\in L$ is supplied. The \emph{algebraic
+consistency checker} accepts precisely if
+\begin{align}
+ \Tr(U_k)&=0\quad\text{for all }k\in I_\ell,
+ \label{eq:binary:check-traces}\\
+ A+r+\sum_kW_k(z)t_k&=0,
+ \label{eq:binary:check-first}\\
+ A^2+s+\sum_kW_k(z)^2(U_k+V_k+t_k)&=0.
+ \label{eq:binary:check-second}
+\end{align}
+The last two equations are affine in the
+committed secret variables $p,c,t,r,s$ once
+$\theta,z,U,A$ are fixed: $A^2$ and $W_k(z)^2$
+are public scalars.
+\end{definition}
+
+\begin{definition}[Scalar and vector checking residuals]\label{def:binary:check-residuals}
+Put
+\[
+ \delta:=s+r^2,\qquad
+ e_k:=U_k+V_k+t_k^2+t_k
+\]
+and form the anchored residual polynomial
+$F_{\delta,e}$ of Definition~\ref{def:binary:anchor-residual}.
+\end{definition}
+
+\begin{lemma}[First equation determines the public scalar]\label{lem:binary:first-determines}
+For fixed $r,t,z$, equation~\eqref{eq:binary:check-first}
+holds if and only if
+\[
+ A=r+\sum_kW_k(z)t_k.
+\]
+\end{lemma}
+\begin{proof}
+Move the other terms to the right side of
+equation~\eqref{eq:binary:check-first}.
+In characteristic two, additive inverses
+equal the original values, so subtraction and
+addition coincide. The resulting formula is
+both necessary and sufficient.
+\end{proof}
+
+\begin{lemma}[The two affine checks imply an anchored residual root]\label{lem:binary:check-implies-root}
+If equations~\eqref{eq:binary:check-first}
+and~\eqref{eq:binary:check-second} both hold, then
+\[
+ \boxed{\delta+\sum_ke_kW_k(z)^2=0.}
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:binary:first-determines},
+$A=r+\sum_kW_k(z)t_k$. Square this identity.
+Characteristic-two additivity of squares
+(Lemma~\ref{lem:binary:square}) gives
+\[
+ A^2=r^2+\sum_kW_k(z)^2t_k^2.
+\]
+Substitute it into equation~\eqref{eq:binary:check-second}:
+\[
+ 0=r^2+s+
+   \sum_kW_k(z)^2\bigl(t_k^2+U_k+V_k+t_k\bigr).
+\]
+The first two terms are $\delta=s+r^2$,
+and the parenthesis is exactly $e_k$ by
+Definition~\ref{def:binary:check-residuals}.
+This is the claimed identity.
+\end{proof}
+
+\begin{lemma}[Honest trace check]\label{lem:binary:honest-traces}
+Assume $c=c^p$ and choose
+$U_k:=V_k+\wp(t_k)$.
+Then the trace equations~\eqref{eq:binary:check-traces}
+hold for every $\theta$ and every $t$.
+\end{lemma}
+\begin{proof}
+By the definition of $c^p$ and
+Definition~\ref{def:binary:transpose},
+$D_c(\theta)=\Delta_p(\theta)$ for every $\theta$.
+Corollary~\ref{cor:binary:masked-traces-consistent}
+then yields $\Tr(U_k)=0$ for all $k$.
+\end{proof}
+
+\begin{lemma}[Honest affine checks]\label{lem:binary:honest-affine}
+Assume $c=c^p$, $s=r^2$, and
+$U_k=V_k+\wp(t_k)$ for every $k$.
+For every $\theta,z$, choose
+\[
+ A:=r+\sum_kW_k(z)t_k.
+\]
+Then the two affine equations
+\eqref{eq:binary:check-first} and
+\eqref{eq:binary:check-second} hold.
+\end{lemma}
+\begin{proof}
+The first equation holds by definition of $A$,
+since $A+A=0$ in characteristic two.
+The second equation follows from
+$U_k+V_k+t_k=t_k^2$:
+\[
+ A^2+s+\sum_kW_k(z)^2(U_k+V_k+t_k)
+ =A^2+r^2+\sum_kW_k(z)^2t_k^2.
+\]
+By the same squaring calculation used in
+Lemma~\ref{lem:binary:check-implies-root},
+$A^2=r^2+\sum_kW_k(z)^2t_k^2$.
+The displayed sum therefore consists of two
+identical copies of each term and equals zero.
+\end{proof}
+
+\begin{theorem}[Perfect algebraic completeness]\label{thm:binary:checker-complete}
+If $c=c^p$, $s=r^2$, $U_k=V_k+\wp(t_k)$, and
+$A=r+\sum_kW_k(z)t_k$, the checker accepts for
+every choice of the challenges $(\theta,z)$.
+\end{theorem}
+\begin{proof}
+Lemma~\ref{lem:binary:honest-traces} proves the
+trace tests, and Lemma~\ref{lem:binary:honest-affine}
+proves the two remaining affine equations.
+Thus all tests in Definition~\ref{def:binary:checks}
+hold.
+\end{proof}
+
+\begin{theorem}[Conditional anchored-check soundness]\label{thm:binary:checker-conditional}
+Fix $\theta,p,c,t,r,s,U$ before a uniform
+$z\overset{\$}{\leftarrow}L$ is sampled.
+Suppose the trace checks hold and
+$D_c(\theta)\neq\Delta_p(\theta)$.
+Then, even if $A$ is chosen after seeing $z$,
+the probability that both affine checks pass
+is at most $n/q$.
+\end{theorem}
+\begin{proof}
+Because the traces of all $U_k$ vanish while
+$D_c(\theta)\neq\Delta_p(\theta)$,
+Lemma~\ref{lem:binary:forced-residual}
+shows that some $e_k$ is nonzero.
+Thus $(\delta,e)\neq(0,0)$.
+The residual values depend only on
+$\theta,p,c,t,r,s,U$, which are fixed before $z$,
+so the hypotheses of Theorem~\ref{thm:binary:anchor-root}
+apply. If both affine checks pass,
+Lemma~\ref{lem:binary:check-implies-root}
+forces
+$\delta+\sum_ke_kW_k(z)^2=0$.
+The anchored-root bound gives probability
+at most $n/q$, independently of how $A$
+is selected after the challenge.
+\end{proof}
+
+\begin{theorem}[Two-challenge coefficient-consistency bound]\label{thm:binary:two-challenge}
+Fix $p,c\in L^{I_\ell}$ with $c\neq c^p$ before
+sampling uniform $\theta\in L^\ell$.
+After seeing $\theta$, an arbitrary strategy
+may select $t,r,s,U$ (and must satisfy all trace
+checks), but these values must be fixed
+\emph{before} an independent uniform
+$z\overset{\$}{\leftarrow}L$ is sampled.
+The strategy may choose $A$ after seeing $z$.
+Then the probability that all checks in
+Definition~\ref{def:binary:checks} accept is at most
+\[
+ \boxed{
+ \min\left\{1,\frac{\ell+n}{q}\right\},
+ \qquad q=2^n.
+ }
+\]
+\end{theorem}
+\begin{proof}
+Let $E$ be the event
+$D_c(\theta)=\Delta_p(\theta)$.
+Since $c\neq c^p$ was fixed before $\theta$,
+Corollary~\ref{cor:binary:mismatch-bound}
+gives $\Pr[E]\leq\ell/q$.
+On the complementary event $E^c$,
+condition on any particular $\theta$ and on
+the strategy's chosen values $t,r,s,U$
+(and its private random tape), provided
+the public trace checks pass.
+These values are fixed before the fresh
+challenge $z$, so
+Theorem~\ref{thm:binary:checker-conditional}
+bounds the conditional probability of
+passing both affine checks by $n/q$.
+If the trace checks fail, the acceptance
+probability is zero. Averaging over these
+conditional cases yields
+\[
+ \Pr[\text{accept}]
+ \leq\Pr[E]+\Pr[\text{accept}\cap E^c]
+ \leq\frac{\ell}{q}+\frac{n}{q}.
+\]
+Probabilities are also bounded by $1$.
+This proves the stated minimum.
+\end{proof}
+
+\begin{lemma}[No even-order multiplicative subgroup in a binary field]\label{lem:binary:no-even-subgroup}
+Every subgroup of $L^\times$ has odd order.
+In particular, the odd-characteristic
+pairing $x\leftrightarrow-x$ used in the
+original KBFold word fold has no distinct
+paired points in $L^\times$.
+\end{lemma}
+\begin{proof}
+The group $L^\times$ has order
+$|L|-1=2^n-1$, an odd integer.
+The order of any subgroup divides
+the order of the finite ambient group,
+so every subgroup has odd order.
+Furthermore $-x=x$ for every $x\in L$
+because the characteristic is two.
+Thus $x$ and $-x$ cannot form two distinct
+points.
+\end{proof}
+
+\begin{remark}[Precise boundary of the result]
+Theorems~\ref{thm:binary:checker-complete} and
+\ref{thm:binary:two-challenge} concern only
+the \emph{algebraic coefficient-consistency
+checker}. They assume the stated timing
+and do not incorporate a concrete
+commitment-binding error, the remaining
+ring-switching equations, the simulator
+for the joint public messages $(U,A)$,
+or any proof of security for the
+odd-characteristic KBFold IOP.
+The final lemma also proves that the
+binary checker cannot simply reuse the
+$\pm x$ multiplicative-domain fold.
+These issues will be addressed in the
+appropriate later chapters.
+\end{remark}
