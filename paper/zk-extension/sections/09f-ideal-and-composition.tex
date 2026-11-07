@@ -12,15 +12,26 @@ private registry, but its public transcript has only the following effects:
 \item On binding a hidden tuple, it emits a public registration token
 sampled from a specified distribution independent of the hidden tuple.
 The token is produced before the challenges that rely on its binding.
-\item Given a proposed public affine relation, it privately evaluates
-the relation against the registered hidden tuple and releases its
-accept/reject bit, with no other witness-dependent public data.
-\item It never provides the verifier a raw hidden field value, an
-unmasked codeword symbol, or an authenticated opening of a hidden value.
-\item On honest admissible executions it always outputs acceptance.
-For malicious executions it enforces the registered affine relations
-exactly. Its public token values may be adaptively queried or reused
-only to the extent explicitly supported by the ideal interface.
+\item At each scheduled protocol stage, it accepts \emph{only}
+the corresponding prescribed relation from
+Definition~\ref{def:zkrs:affine-checks},
+with coefficients determined by the public instance,
+messages, and chosen challenges.
+It privately tests this relation on the registered tuple
+and releases only its accept/reject bit.
+It is \emph{not} an oracle for arbitrary verifier-chosen
+affine predicates about the hidden tuple.
+\item A request to test any extraneous predicate, or to obtain
+a hidden field value, an unmasked codeword symbol, or an
+authenticated opening of a hidden value, is rejected with a
+fixed public error response independent of the hidden tuple.
+\item For honest admissible executions, every prescribed
+relation is valid for every chosen challenge, so all
+scheduled acceptance bits equal $1$.
+For malicious executions it enforces those prescribed
+relations exactly. Public registration tokens may be
+reused or queried only through explicitly allowed
+witness-independent interface operations.
 \end{enumerate}
 This is a \emph{mathematical ideal functionality}, not an assertion
 that a concrete ordinary binding commitment is perfectly opaque.
@@ -57,7 +68,11 @@ the public trace checks, the acceptance bits of all
 required affine relations, and all interaction with
 the opaque ideal interface.
 The verifier may choose its challenges adaptively
-after all messages visible at that stage.
+after all messages visible at that stage, but may not
+replace the prescribed affine verification equations with
+arbitrary secret-dependent predicates. Unsupported requests
+produce only the fixed error responses of
+Definition~\ref{def:zkrs:ideal-func}.
 \end{definition}
 
 \begin{theorem}[Perfect complete-view ZK in the opaque ideal model]\label{thm:zkrs:ideal-full-zk}
@@ -84,7 +99,7 @@ at every public-core round, including when
 the verifier chooses challenges from the
 earlier tokens and messages.
 The honest hidden state satisfies all
-ideal affine relations by
+\emph{prescribed} ideal affine relations by
 Lemmas~\ref{lem:zkrs:honest-checker} and
 \ref{lem:zkrs:honest-relations};
 hence their public accept/reject bits are
