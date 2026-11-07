@@ -5,9 +5,33 @@ The characteristic-two coordinate construction is related
 to binary-field ring switching~\cite{DiamondPosen2024}
 and to its masked versions~\cite{Kochergin2026,FrigoShelat2026}.
 
+\begin{lemma}[Existence of an element of full binary degree]\label{lem:binary:full-degree-element}
+There exists $\alpha\in L=\F_{2^n}$ such that
+$[\F_2(\alpha):\F_2]=n$.
+\end{lemma}
+\begin{proof}
+For any $a\in L$, the tower law applied to
+$\F_2\subseteq\F_2(a)\subseteq L$
+shows that $d:=[\F_2(a):\F_2]$ divides $n$.
+If every $a$ had $d<n$, then, because $n=2^\ell$,
+every such $d$ would divide $n/2$.
+The field $\F_2(a)$ has exactly $2^d$ elements.
+Repeating the product-permutation proof of
+Lemma~\ref{lem:binary:frob-period} in this
+finite field gives $a^{2^d}=a$.
+Iterating Frobenius then yields
+$a^{2^{n/2}}=a$ for every $a\in L$.
+This would make all $2^n$ elements of $L$ roots of
+$X^{2^{n/2}}+X$, a nonzero polynomial of degree
+$2^{n/2}<2^n$. It contradicts the root-count lemma,
+Lemma~\ref{lem:history:rootcount}.
+Therefore some $\alpha$ has degree $n$.
+\end{proof}
+
 \begin{definition}[Evaluation basis]\label{def:binary:eval-basis}
-Choose $\alpha\in L$ whose minimal polynomial over $\F_2$
-has degree $n$, and set
+Choose $\alpha\in L$ of degree $n$ over $\F_2$,
+whose existence is guaranteed by
+Lemma~\ref{lem:binary:full-degree-element}, and set
 \[
  \beta_u:=K_u(\alpha),\qquad u\in I_\ell.
 \]
