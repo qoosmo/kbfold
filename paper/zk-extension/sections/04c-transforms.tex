@@ -1,0 +1,109 @@
+\subsection{M\"obius inversion, constants, and fast transforms}\label{sec:kbalgebra:transforms}
+
+\begin{lemma}[Forward transform in subset form]\label{lem:kbalgebra:forward}
+Let $f:I_m\to\F$, set $P:=U_f^{(m)}$, and let $a_S:=[X^{e(S)}]P$ for $S\subseteq J_m$. Then
+\begin{equation}\label{eq:kbalgebra:forward}
+ \boxed{a_S=\sum_{\substack{b\in I_m\\Z(b)\subseteq S}}f(b).}
+\end{equation}
+\end{lemma}
+\begin{proof}
+By Definition~\ref{def:kbalgebra:kernel}, $P=\sum_bf(b)K_b^{(m)}$. Coefficient extraction is $\F$-linear. Thus
+\[
+ a_S=\sum_b f(b)[X^{e(S)}]K_b^{(m)}.
+\]
+Lemma~\ref{lem:kbalgebra:coefficient-rule} says the bracket is $1$ precisely when $Z(b)\subseteq S$ and $0$ otherwise. Removing the zero summands gives~\eqref{eq:kbalgebra:forward}.
+\end{proof}
+
+\begin{lemma}[Monomial expansion in the kernel basis]\label{lem:kbalgebra:monomial-inverse}
+For every $S\subseteq J_m$,
+\begin{equation}\label{eq:kbalgebra:monomial-inverse}
+ \boxed{X^{e(S)}=\sum_{\substack{b\in I_m\\S\subseteq Z(b)}}
+ (-1)^{|Z(b)\setminus S|}K_b^{(m)}(X).}
+\end{equation}
+\end{lemma}
+\begin{proof}
+For each $i\in S$ use $X^{2^i}=X^{2^i}+0$. For each $i\notin S$, use the identity
+\[
+ 1=(X^{2^i}+1)-(X^{2^i}+0).
+\]
+Multiplying these identities gives
+\[
+ X^{e(S)}=\prod_{i\in S}(X^{2^i}+0)
+ \prod_{i\notin S}\left[(X^{2^i}+1)-(X^{2^i}+0)\right].
+\]
+Expand the second product by distributivity. Each term is indexed by a Boolean vector $b$ with $b_i=0$ for all $i\in S$; equivalently $S\subseteq Z(b)$. Its factors, before their signs, multiply to $K_b^{(m)}$. A negative sign is incurred for every index $i\notin S$ where the term $-(X^{2^i}+0)$ was chosen, i.e. precisely for the indices in $Z(b)\setminus S$. Its coefficient is therefore $(-1)^{|Z(b)\setminus S|}$. Summing these terms proves the equality. This calculation works in every characteristic; in characteristic two all signs reduce to $+1$.
+\end{proof}
+
+\begin{proposition}[Inverse M\"obius formula]\label{prop:kbalgebra:inverse}
+Let $P(X)=\sum_{S\subseteq J_m}a_S X^{e(S)}$ be arbitrary of degree $<N$. Its unique kernel coordinates $f$ satisfy
+\begin{equation}\label{eq:kbalgebra:inverse}
+ \boxed{f(b)=\sum_{S\subseteq Z(b)}(-1)^{|Z(b)\setminus S|}a_S.}
+\end{equation}
+\end{proposition}
+\begin{proof}
+Substitute the monomial expansion~\eqref{eq:kbalgebra:monomial-inverse} into $P=\sum_Sa_SX^{e(S)}$ and interchange the two finite sums:
+\[
+ P=\sum_{b\in I_m}\left(\sum_{S\subseteq Z(b)}(-1)^{|Z(b)\setminus S|}a_S\right)K_b^{(m)}.
+\]
+By uniqueness of kernel coordinates (Corollary~\ref{cor:kbalgebra:unique-coordinates}), the coefficient in parentheses equals $f(b)$.
+\end{proof}
+
+\begin{lemma}[One-coordinate transform algorithms]\label{lem:kbalgebra:pair-algorithm}
+For a fixed coordinate $i$, apply to every pair of table entries with equal other bits the update
+\[
+ (x_0,x_1)\longmapsto(x_1,x_0+x_1).
+\]
+Composing these updates over all $i\in J_m$ sends a kernel-coordinate table $f$ to the monomial coefficient table $a$ of $U_f^{(m)}$. Reversing each update as
+\[
+ (y_0,y_1)\longmapsto(y_1-y_0,y_0)
+\]
+recovers $f$ from $a$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:kbalgebra:one-bit}, the forward pair update is multiplication by $C$ and the reverse is multiplication by $D=C^{-1}$. When performed on coordinate $i$ while fixing the other bits, the update is multiplication by the tensor matrix that has $C$ at coordinate $i$ and $I_2$ elsewhere. The mixed-product rule of Lemma~\ref{lem:kbalgebra:mixed-product} shows that multiplying these matrices once for each coordinate yields $C^{\otimes m}=\mathbf K_m$. The reverse operations similarly yield $D^{\otimes m}=\mathbf K_m^{-1}$, proving both claims.
+\end{proof}
+
+\begin{corollary}[Exact transform cost]\label{cor:kbalgebra:transform-cost}
+For $m\geq1$, either transform in Lemma~\ref{lem:kbalgebra:pair-algorithm} takes exactly $m2^{m-1}=mN/2$ additions or subtractions in $\F$ and no nontrivial field multiplications. For $m=0$, both transforms are the identity.
+\end{corollary}
+\begin{proof}
+For each coordinate $i$, there are exactly $2^{m-1}=N/2$ disjoint pairs, since the other $m-1$ bits can be chosen freely. Each forward pair operation copies one entry and computes one sum; each reverse pair copies one entry and computes one difference. Thus each coordinate costs $N/2$ additions or subtractions, and there are $m$ coordinates. Multiplication by $0$, $1$, or $-1$ is not counted as a nontrivial field multiplication. When $m=0$ there are no coordinate updates.
+\end{proof}
+
+\begin{corollary}[Highest and constant coefficients]\label{cor:kbalgebra:extreme-coeffs}
+For every table $f:I_m\to\F$,
+\[
+ [X^{N-1}]U_f^{(m)}=\sum_{b\in I_m}f(b),\qquad
+ [X^0]U_f^{(m)}=f(1,\ldots,1).
+\]
+\end{corollary}
+\begin{proof}
+In Lemma~\ref{lem:kbalgebra:forward}, take $S=J_m$; then every $Z(b)$ is a subset of $S$, so all $f(b)$ appear. For the constant term take $S=\varnothing$; the condition $Z(b)\subseteq\varnothing$ forces $Z(b)=\varnothing$, hence $b=(1,\ldots,1)$, leaving only this term.
+\end{proof}
+
+\begin{proposition}[Kernel coordinates of a constant]\label{prop:kbalgebra:constant}
+For every $c\in\F$,
+\begin{equation}\label{eq:kbalgebra:constant}
+ \boxed{c=\sum_{b\in I_m}c(-1)^{m-\operatorname{wt}(b)}K_b^{(m)}(X).}
+\end{equation}
+\end{proposition}
+\begin{proof}
+Apply Lemma~\ref{lem:kbalgebra:monomial-inverse} with $S=\varnothing$ to $X^{e(\varnothing)}=X^0=1$. Its sum runs over all $b$, and its sign is $(-1)^{|Z(b)|}=(-1)^{m-\operatorname{wt}(b)}$. Multiply the resulting polynomial identity by $c$.
+\end{proof}
+
+\begin{proposition}[Kernel partition product]\label{prop:kbalgebra:partition}
+For every $m\geq0$ and every field $\F$,
+\begin{equation}\label{eq:kbalgebra:partition}
+ \boxed{\sum_{b\in I_m}K_b^{(m)}(X)=\prod_{i=0}^{m-1}(2X^{2^i}+1).}
+\end{equation}
+If $\operatorname{char}\F=2$, the left side equals $1$; if $\operatorname{char}\F\neq2$ and $m\geq1$, the right side is a nonconstant polynomial of degree $N-1$.
+\end{proposition}
+\begin{proof}
+Since $b_i$ ranges independently over $0$ and $1$, repeated distributivity factors the sum as
+\[
+ \sum_{(b_i)_i}\prod_i(X^{2^i}+b_i)
+ =\prod_i\bigl((X^{2^i}+0)+(X^{2^i}+1)\bigr)
+ =\prod_i(2X^{2^i}+1).
+\]
+In characteristic two, every factor is $1$. Otherwise every factor has leading term $2X^{2^i}$ with nonzero coefficient, so their product has degree $\sum_i2^i=N-1>0$. For $m=0$ both sides are $1$.
+\end{proof}
