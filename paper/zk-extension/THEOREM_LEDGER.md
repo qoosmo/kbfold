@@ -1,25 +1,25 @@
 # Chapter 1 mathematical theorem ledger
 
-**Paper proof** means that the complete proof is in \`sections/01-introduction.tex\`. This does not assert that the new manuscript has yet been certified in Lean 4. Parent-KBFold already formalizes much of the pre-existing algebra in \`lean/KBFold/Kernel.lean\`.
+**Paper proof** means that the complete proof is in `sections/01-introduction.tex`. This does not assert that the new manuscript has yet been certified in Lean 4. Parent-KBFold already formalizes much of the pre-existing algebra in `lean/KBFold/Kernel.lean`.
 
 | Result | Paper proof | Dependencies | Proposed Lean target |
 |---|---|---|---|
-| Degree and monic kernel | included | Kernel definition | \`kernel_monic_degree\` |
-| Even/odd kernel recursion | included | Indexing | \`kernel_bit_recursion\` |
-| Unique even/odd decomposition | included | Polynomial coefficients | \`poly_even_odd_unique\` |
-| Kernel basis theorem | included | Recursion, decomposition, induction | \`kernel_basis\` |
-| Highest coefficient identity | included | Degree and monicity | \`kernel_top_coeff\` |
-| Boolean interpolation | included | Equality weights | \`eq_weight_bool\` |
-| Multilinear restriction | included | Equality weights | \`mle_restrict_first\` |
-| Fold dictionary | included | Recursion and decomposition | \`kernel_fold_dictionary\` |
-| Iterated folds | included | Restriction and fold dictionary | \`kernel_fold_iterate\` |
-| Unmasked sumcheck witness dependence | included | One-variable MLE | \`sumcheck_message_witness_dependent\` |
-| Kernel masking linearity | included | Fold dictionary | \`kernel_mask_linear\` |
-| Binary-field evaluation basis | included | Basis theorem, minimal polynomial | \`kernel_eval_basis_binary\` |
-| Masked transposition as kernel fold | included | Coordinate extraction | \`delta_eq_kernel_fold\` |
-| Characteristic-dependent partition | included | Distributivity | \`kernel_sum_product\` |
-| Binary multilinearization of kernel | included | Explicit monomial expansion | \`multilinearize_kernel\` |
-| Complete fold/multilinearization identity | included | Kernel expansion, linearity | \`kernel_fold_eq_multilinear_eval\` |
+| Degree and monic kernel | included | Kernel definition | `kernel_monic_degree` |
+| Even/odd kernel recursion | included | Indexing | `kernel_bit_recursion` |
+| Unique even/odd decomposition | included | Polynomial coefficients | `poly_even_odd_unique` |
+| Kernel basis theorem | included | Recursion, decomposition, induction | `kernel_basis` |
+| Highest coefficient identity | included | Degree and monicity | `kernel_top_coeff` |
+| Boolean interpolation | included | Equality weights | `eq_weight_bool` |
+| Multilinear restriction | included | Equality weights | `mle_restrict_first` |
+| Fold dictionary | included | Recursion and decomposition | `kernel_fold_dictionary` |
+| Iterated folds | included | Restriction and fold dictionary | `kernel_fold_iterate` |
+| Unmasked sumcheck witness dependence | included | One-variable MLE | `sumcheck_message_witness_dependent` |
+| Kernel masking linearity | included | Fold dictionary | `kernel_mask_linear` |
+| Binary-field evaluation basis | included | Basis theorem, minimal polynomial | `kernel_eval_basis_binary` |
+| Masked transposition as kernel fold | included | Coordinate extraction | `delta_eq_kernel_fold` |
+| Characteristic-dependent partition | included | Distributivity | `kernel_sum_product` |
+| Binary multilinearization of kernel | included | Explicit monomial expansion | `multilinearize_kernel` |
+| Complete fold/multilinearization identity | included | Kernel expansion, linearity | `kernel_fold_eq_multilinear_eval` |
 
 ## Separation of settings
 
@@ -90,3 +90,27 @@ This exact identity is the starting point for analyzing the enlarged Reed--Solom
 | Univariate polynomial root-count lemma | full induction | polynomial_card_roots |
 | Multivariate Schwartz--Zippel | full induction on the number of variables | mvpoly_schwartz_zippel |
 | Trace-dual basis existence and uniqueness | full finite-dimensional linear-algebra proof | trace_dual_basis_exists_unique |
+
+
+## Chapter 3: Formal Security Model
+
+**Complete source:** `sections/03-security.tex` (seven subsections).
+**Detailed map:** [CHAPTER_03_LEAN_MAP.md](CHAPTER_03_LEAN_MAP.md), which lists **62 individually labeled definitions/results**, including **32 complete paper proofs**.
+**Certification status:** LaTeX proof, not yet Lean-certified. Existing KBFold foundational results are linked but never counted as new Lean certification.
+
+### Principal proved results
+
+- Total variation triangle, event characterization, data processing, and a stepwise hybrid lemma.
+- Finite typed oracle transcript and adaptive decision-tree model.
+- Reed--Solomon distance \(M-N+1\), uniqueness for \(2\tau<M-N+1\).
+- Round-by-round soundness and knowledge-extraction implication.
+- Statistical simulator definition, its two-witness consequence, and the one-query leakage theorem for an unmasked KBFold oracle.
+- Exact linear-mask coset criterion, uniform conditional masks after adaptive reads, and interpolation for \(Q\) evaluation queries.
+- Online commitment-before-point simulation target and a counterexample showing \(U_f+X^N R\) cannot retain the original constant final closure check.
+
+### Not yet established
+
+- An explicit masking distribution for all **odd-characteristic** KBFold messages.
+- Online ZK simulator for all committed-fold word openings, round polynomials and final table.
+- Soundness of the enlarged-degree code under revised closure checks.
+- QROM/Fiat--Shamir zero-knowledge compilation.
