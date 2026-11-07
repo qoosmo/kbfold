@@ -1,0 +1,180 @@
+\subsection{Field-affine verification, timing, and residual checking}\label{sec:zkrs:affine}
+
+\begin{definition}[Complete ideal affine verification]\label{def:zkrs:affine-checks}
+For a fixed public instance and public core, the ideal checker
+receives hidden bound values
+$(\widehat w_j)_j,p,p_{\rm in},c,t,\rho,\sigma$
+with the following tests.
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \textbf{Claim:}
+$y'=y+p_{\rm in}$.
+\item \textbf{Incoming:}
+$\sum_vq_vm_v+y'=\sum_vq_vp_v+p_{\rm in}$.
+\item \textbf{Outgoing:}
+$\sum_ja_j(\theta)\widehat w_j
+=B_m(\theta)+D_c(\theta)$.
+\item \textbf{Trace:} $\Tr(U_k)=0$ for every $k$;
+these use only public values.
+\item \textbf{First anchored equation:}
+$A+\rho+\sum_kW_k(z)t_k=0$.
+\item \textbf{Second anchored equation:}
+\[
+ A^2+\sigma+\sum_kW_k(z)^2
+       (U_k+V_k(p,c,\theta)+t_k)=0.
+\]
+\end{enumerate}
+A separate underlying commitment relation must link the
+hidden packed columns to the fixed Boolean witness table.
+\end{definition}
+
+\begin{lemma}[The claimed-value and incoming tests are affine]\label{lem:zkrs:claim-in-affine}
+Once the public parameters and $(m,y')$ are fixed,
+the claim and incoming equations are affine over $L$
+in the committed secret variables
+$p,p_{\rm in}$.
+\end{lemma}
+\begin{proof}
+Rewrite the claim equation as
+$p_{\rm in}=y'+y$.
+Rewrite the incoming equation as
+$\sum_vq_vp_v+p_{\rm in}=\sum_vq_vm_v+y'$.
+In both expressions the coefficients and right sides
+are public, and each hidden element occurs with
+degree one, proving the assertion.
+\end{proof}
+
+\begin{lemma}[The outgoing test is affine]\label{lem:zkrs:out-affine}
+Once the public $(m,\theta)$ and the high-axis
+weights are fixed, the outgoing test is affine
+over $L$ in the committed packed columns
+$\widehat w$ and coefficients $c$.
+\end{lemma}
+\begin{proof}
+Expand $D_c(\theta)=\sum_u\lambda_u(\theta)c_u$.
+Then the outgoing relation reads
+\[
+ \sum_ja_j(\theta)\widehat w_j+
+ \sum_u\lambda_u(\theta)c_u=B_m(\theta).
+\]
+Every coefficient and the right side are publicly
+determined. The hidden values occur linearly.
+\end{proof}
+
+\begin{lemma}[Both anchored equations are affine in hidden variables]\label{lem:zkrs:anchor-affine}
+For fixed public $(m,y',\theta,U,z,A)$,
+the two anchored equations of
+Definition~\ref{def:zkrs:affine-checks}
+are affine over $L$ in $(p,c,t,\rho,\sigma)$.
+No product of two committed secret elements appears.
+\end{lemma}
+\begin{proof}
+The first anchored equation is
+$A+\rho+\sum_kW_k(z)t_k=0$:
+its coefficients $W_k(z)$ and $A$ are public.
+For the second, $A^2$ and every $W_k(z)^2$
+are public scalars. By
+Lemma~\ref{lem:pack:V-affine},
+$V_k(p,c,\theta)$ is $L$-linear in the
+secret pad and correction variables.
+Thus
+$A^2+\sigma+\sum_kW_k(z)^2(U_k+V_k+t_k)=0$
+is affine in $(p,c,t,\sigma)$.
+In particular $\sigma=\rho^2$
+does \emph{not} appear among the
+affine verifier equations.
+\end{proof}
+
+\begin{definition}[Algebraic residuals at the second challenge]\label{def:zkrs:errors}
+For arbitrary fixed hidden variables and public $(\theta,U)$,
+define
+\[
+ \delta:=\sigma+\rho^2,\qquad
+ e_k:=U_k+V_k(p,c,\theta)+t_k^2+t_k.
+\]
+These values are \emph{defined mathematically}
+for soundness analysis; the verifier need not
+compute them directly or ask for nonlinear proofs.
+\end{definition}
+
+\begin{lemma}[Accepted affine equations imply a residual root]\label{lem:zkrs:root-condition}
+If both anchored equations pass, then
+\[
+ \boxed{\delta+\sum_ke_kW_k(z)^2=0.}
+\]
+\end{lemma}
+\begin{proof}
+From the first equation,
+$A=\rho+\sum_kW_k(z)t_k$.
+Squaring in characteristic two gives
+$A^2=\rho^2+\sum_kW_k(z)^2t_k^2$.
+Substitute this into the second affine equation
+and collect the scalar term
+$\rho^2+\sigma=\delta$
+and the summands
+$U_k+V_k+t_k^2+t_k=e_k$.
+The remaining equality is the displayed equation.
+\end{proof}
+
+\begin{theorem}[Any nonzero residual is detected with probability at least $1-n/q$]\label{thm:zkrs:residual-detection}
+Fix $\theta,p,c,t,\rho,\sigma,U$ before
+an independent uniform second challenge $z\in L$.
+If $(\delta,e)\neq(0,0)$, then
+even for an arbitrary public $A$ chosen after seeing $z$,
+\[
+ \Pr_z[\text{both anchored affine equations pass}]
+ \leq\min\{1,n/q\}.
+\]
+\end{theorem}
+\begin{proof}
+The fixed-before-$z$ hypothesis makes
+$(\delta,e)$ independent of the challenge.
+By Lemma~\ref{lem:zkrs:root-condition},
+acceptance implies
+$\delta+\sum_ke_kW_k(z)^2=0$.
+The anchored residual root bound
+Theorem~\ref{thm:binary:anchor-root}
+bounds this event by $n/q$ for any
+nonzero residual tuple. The probability
+is also at most one.
+\end{proof}
+
+\begin{corollary}[No secret squaring check is needed for this algebraic soundness]\label{cor:zkrs:no-quadratic-secret-check}
+In the ideal algebraic setting, an adversarial choice
+$\sigma\ne\rho^2$ fixed before the second challenge
+is accepted by both anchored checks with probability
+at most $\min\{1,n/q\}$.
+\end{corollary}
+\begin{proof}
+The inequality $\sigma\ne\rho^2$
+is equivalent to $\delta\ne0$,
+so $(\delta,e)\ne(0,0)$ regardless
+of the vector $e$. Apply
+Theorem~\ref{thm:zkrs:residual-detection}.
+\end{proof}
+
+\begin{lemma}[Public trace checks impose no secret multiplication]\label{lem:zkrs:public-traces}
+The trace constraints $\Tr(U_k)=0$ can be
+checked from public field elements alone.
+\end{lemma}
+\begin{proof}
+Each $U_k$ is explicitly published.
+The trace is the finite field expression
+$\sum_{i=0}^{n-1}U_k^{2^i}$ by
+Definition~\ref{def:binary:trace}.
+Its computation accesses only the
+public value $U_k$ and public field arithmetic.
+\end{proof}
+
+\begin{remark}[What zero hidden-quadratic constraints means]
+Only the \emph{six displayed algebraic checks}
+above are affine in their hidden field values;
+the trace check is public and the second
+equation involves public $A^2$.
+The bit-packing/commitment binding,
+an implementation's internal arithmetic,
+and the ability to prove these affine
+relations in zero knowledge are separate
+assumptions. Consequently this statement
+is not a count of all gates or all transmitted
+field elements in a concrete end-to-end PCS.
+\end{remark}
