@@ -1,0 +1,121 @@
+\subsection{Online evaluation privacy and the exact KBFold proof obligations}\label{sec:security:online}
+
+\begin{definition}[Ideal evaluation functionality]\label{def:security:ideal-eval}
+For a fixed witness table $f:I_m\to\F$, define the deterministic ideal functionality
+\[
+  \mathcal F_{\rm eval}^f:\F^m\to\F,\qquad
+  \mathcal F_{\rm eval}^f(z):=\widetilde f(z).
+\]
+Each authorized request at a point $z$ returns exactly the public value $\widetilde f(z)$ and reveals no other information by definition. A multi-opening ideal functionality must also specify a maximum number of authorized requests: sufficiently many evaluations determine a multilinear polynomial.
+\end{definition}
+
+\begin{definition}[Online real evaluation game]\label{def:security:online-real}
+Fix a protocol with a preprocessing commitment phase and a subsequent evaluation-opening phase. In
+$\mathsf{OnlineReal}_{\Pi,V^*}(f)$:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item sample the honest prover's private preprocessing tape; on input $f$, form the real initial commitment and internal state;
+\item send the public commitment to $V^*$ \emph{before} the evaluation point is chosen;
+\item let $V^*$ choose an evaluation point $z$ as a function of its view so far;
+\item compute the authorized public value $v=\widetilde f(z)$ and run the honest evaluation-opening procedure;
+\item permit $V^*$ to make at most $Q$ adaptive authenticated oracle reads, in the order allowed by the protocol;
+\item output the full verifier view, including the root, $z$, $v$, explicit messages, query answers and authentication paths.
+\end{enumerate}
+The experiment may be iterated for multiple authorized openings if that extension is explicitly included in the parameters.
+\end{definition}
+
+\begin{definition}[Online ideal evaluation game]\label{def:security:online-ideal}
+In $\mathsf{OnlineIdeal}_{\mathsf{Sim},V^*}^{\mathcal F_{\rm eval}^f}$, the simulator $\mathsf{Sim}$ is not given $f$. It must first send a simulated public commitment before receiving $z$. After $V^*$ chooses $z$, the simulator may query $\mathcal F_{\rm eval}^f(z)$ for the authorized value $v$, and must then generate the remaining explicit messages and adaptive authenticated oracle replies. Its output is the full verifier view.
+\end{definition}
+
+\begin{definition}[Online zero knowledge]\label{def:security:online-zk}
+For $Q\geq0$ and $\varepsilon\geq0$, the protocol is \emph{$(Q,\varepsilon)$-online statistical zero knowledge} if for every $Q$-query-bounded adversarial verifier $V^*$ there is an \emph{online} simulator $\mathsf{Sim}_{V^*}$, independent of $f$, such that for every table $f$,
+\[
+ \Delta\left(
+  \mathsf{OnlineReal}_{\Pi,V^*}(f),
+  \mathsf{OnlineIdeal}_{\mathsf{Sim}_{V^*},V^*}^{\mathcal F_{\rm eval}^f}
+ \right)\leq\varepsilon.
+\]
+The computational variant replaces statistical distance with bounded distinguishing advantage, as in Definition~\ref{def:security:computational}.
+\end{definition}
+
+\begin{lemma}[Stepwise online simulation suffices]\label{lem:security:online-hybrid}
+Fix a verifier strategy $V^*$ and witness $f$. Suppose the real and simulated online processes can be represented by finite state spaces $A_0,\ldots,A_t$ (state includes all available query history) and Markov transition kernels $K_i,L_i$ satisfying the hypotheses of Lemma~\ref{lem:security:hybrid} with errors $\varepsilon_0,\ldots,\varepsilon_t$. Then the total variation distance of the two final verifier views is at most $\sum_{i=0}^t\varepsilon_i$.
+\end{lemma}
+\begin{proof}
+Apply Lemma~\ref{lem:security:hybrid} to the distributions on complete internal states after the last step. The verifier view is a deterministic projection of that internal state, so Corollary~\ref{cor:security:projection} shows that the distance between projected view distributions is no larger. This gives the stated bound.
+\end{proof}
+
+\begin{definition}[Unmasked KBFold transcript components]\label{def:security:kbfold-transcript}
+Specialize to an odd-characteristic KBFold domain. Let $0\leq s\leq m$ be the number of fold rounds, let $N_j:=N/2^j$ for $0\leq j\leq s$, and let $\mathcal D_j:=\{x^{2^j}:x\in\mathcal D\}$. Let $f_0=f$, $f_j=\Res_{r_{j-1}}(f_{j-1})$ for $1\leq j\leq s$, and let $\chi_0(b)=\operatorname{eq}_m(b,z)$ and $\chi_j=\Res_{r_{j-1}}(\chi_{j-1})$.
+For $1\leq j\leq s$, the honest round polynomial is
+\begin{equation}\label{eq:security:kbfold-round}
+ s_j(T):=\sum_{b\in I_{m-j}}
+ \left((1-T)f_{j-1}(0,b)+Tf_{j-1}(1,b)\right)
+ \left((1-T)\chi_{j-1}(0,b)+T\chi_{j-1}(1,b)\right).
+\end{equation}
+The honest word at fold level $j$ is
+\[
+ w_j:=\operatorname{ev}_{\mathcal D_j}(U_{f_j}^{(m-j)}),
+\]
+and the honest final table is $g:=f_s:I_{m-s}\to\F$. The actual view also contains the public commitment to $w_0$, committed roots for the selected subsequent words, the transmitted polynomials $s_j$, the final table $g$, and all authentication openings made in the proof query phase. Each element of this tuple must be included in a full ZK simulator.
+\end{definition}
+
+\begin{lemma}[KBFold round-sum equality]\label{lem:security:kbfold-roundsum}
+For every $1\leq j\leq s$, let $s_j(T)$ be as in~\eqref{eq:security:kbfold-round}. Then
+\[
+ s_j(0)+s_j(1)=
+ \sum_{a\in I_{m-j+1}} f_{j-1}(a)\chi_{j-1}(a).
+\]
+\end{lemma}
+\begin{proof}
+At $T=0$ each first factor in~\eqref{eq:security:kbfold-round} is $f_{j-1}(0,b)$ and each second factor is $\chi_{j-1}(0,b)$. At $T=1$ the corresponding factors are $f_{j-1}(1,b)$ and $\chi_{j-1}(1,b)$. Adding gives the sum over every pair $(0,b)$ and $(1,b)$, which enumerates $I_{m-j+1}$ exactly once.
+\end{proof}
+
+\begin{lemma}[KBFold round-polynomial degree]\label{lem:security:kbfold-rounddegree}
+For every $j$ and every fixed $f_{j-1},\chi_{j-1}$, the polynomial $s_j(T)$ in~\eqref{eq:security:kbfold-round} has degree at most $2$.
+\end{lemma}
+\begin{proof}
+Each displayed factor is affine in $T$ and therefore has degree at most $1$. Their product has degree at most $2$. Summing the finitely many products cannot increase the degree beyond $2$.
+\end{proof}
+
+\begin{theorem}[A naive high-degree mask does not preserve final closure]\label{thm:security:naive-closure}
+Assume $\operatorname{char}(\F)\neq2$ and $m\geq1$. Set $N=2^m$, let $f:I_m\to\F$ be arbitrary, and use the nonzero high-degree mask $R(X)=1$ in
+\[
+ Q_0(X):=U_f^{(m)}(X)+X^N.
+\]
+Choose every fold challenge to be $r_i=0$ for $0\leq i<m$, and define $Q_{i+1}:=\pfold_0(Q_i)$. Then
+\[
+ \boxed{Q_m(X)=\widetilde f(0,\ldots,0)+(-1)^m X.}
+\]
+In particular $Q_m$ is not a constant polynomial, whereas the original fully folded KBFold closure is constant. Thus the unmodified final closure equation cannot hold for this masking choice.
+\end{theorem}
+\begin{proof}
+By Corollary~\ref{cor:history:masked-kbfold}, after $m$ rounds
+\[
+ Q_m(X)=U_{f_m}^{(0)}(X)+X R_m(X),
+\]
+where $R_0=1$ and $R_{i+1}=\pfold_0(R_i)$. For every constant polynomial $c$, its even--odd decomposition is $E=c$ and $O=0$, so Definition~\ref{def:history:globalfold} gives
+$\pfold_0(c)=(2\cdot0-1)c+(1-0)0=-c$.
+Induction on $i$ yields $R_i=(-1)^i$, and in particular $R_m=(-1)^m$. Corollary~\ref{cor:intro:iterated} gives
+$U_{f_m}^{(0)}=\widetilde f(0,\ldots,0)$. Substitution proves the displayed formula. Since $(-1)^m$ is a nonzero unit in every field, the coefficient of $X$ is nonzero; hence $Q_m$ has degree $1$, not $0$.
+\end{proof}
+
+\begin{remark}[Meaning of the closure obstruction]
+Theorem~\ref{thm:security:naive-closure} does not rule out the high-degree masking proposal of the original KBFold paper. It proves that \emph{adding the mask while leaving the final consistency check unchanged} is not a correct protocol transformation. A completed construction must either unmask the residual term in a zero-knowledge manner or replace the final check by a degree-aware relation that includes the residual $R_s$.
+\end{remark}
+
+\begin{definition}[ZK-KBFold certification obligations]\label{def:security:obligation-ledger}
+For a claimed ZK extension of the actual KBFold protocol, the following statements will be proved as separate theorems rather than combined as an assumption:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \textbf{Fold invariant:} the masked word and polynomial folds agree over the enlarged degree space for every round.
+\item \textbf{Sumcheck invariant:} the masked round polynomials preserve the authorized evaluation claim and each verifier endpoint check.
+\item \textbf{Closure invariant:} the verifier's last-round test correctly handles the residual polynomial mask (Theorem~\ref{thm:security:naive-closure}).
+\item \textbf{Soundness:} the revised code rate and enlarged degree bound preserve an explicitly quantified evaluation/proximity soundness statement.
+\item \textbf{Adaptive view simulation:} the \emph{joint} root/round-polynomial/oracle-opening/final-table distribution is simulated with bounded query access, using conditional laws as in Lemma~\ref{lem:security:conditioned-mask}.
+\item \textbf{Compiler interface:} any proposed noninteractive or QROM variant has its own, separately stated simulator and proof of security; the original KBFold post-quantum soundness theorem is not a zero-knowledge theorem.
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[Formalization roadmap]
+Chapter~3 has defined the typed finite distributions, security games, and elementary oracle/masking lemmas. In Lean, these can be formalized using \texttt{Fintype}, \texttt{PMF} or \texttt{Measure} on finite types, \texttt{Polynomial}, \texttt{Submodule}, and finite linear maps. A complete computer-checked proof still requires the explicit implementation and semantics of the prover, verifier, simulator, and authenticated opening interface. No cryptographic zero-knowledge theorem for KBFold is asserted by the definitions of this chapter.
+\end{remark}
