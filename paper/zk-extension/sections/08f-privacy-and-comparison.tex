@@ -1,0 +1,213 @@
+\subsection{Information disclosure and its relationship to masked kernel coordinates}\label{sec:dpr:privacy}
+
+The tensor compiler above is \emph{not}
+zero knowledge. Its first prover
+message is the collection of all
+partial evaluations $s_v^*$,
+represented as an element of $A$.
+This is precisely the leakage
+surface addressed by later work
+\cite{Kochergin2026,FrigoShelat2026}.
+
+\begin{lemma}[The first message reveals every partial evaluation]\label{lem:dpr:leaks-partials}
+In an honest execution,
+the verifier can calculate
+\[
+ \boxed{s_v^*=\operatorname{Col}(S_0)_v}
+\]
+for every $v\in I_\ell$
+using only its first received
+ring-switching message.
+\end{lemma}
+\begin{proof}
+For an honest prover $S_0=S$.
+Theorem~\ref{thm:dpr:column-evaluation}
+identifies the $v$-th
+tensor column of $S$
+with the desired partial
+evaluation $s_v^*$.
+The column operation is
+explicitly available from
+the public tensor-field basis,
+so the verifier can evaluate it.
+\end{proof}
+
+\begin{theorem}[Perfect two-witness distinction from the first message]\label{thm:dpr:not-zk}
+For every $\ell\geq1$ and $h\geq1$,
+there exist two distinct Boolean
+witness tables $w^{(0)},w^{(1)}$
+and a public evaluation point
+$(r_{\rm lo},r_{\rm hi})$
+such that both tables have the same
+claimed evaluation $y_{\rm pub}=0$,
+but the distributions of the honest
+first tensor messages $S_0$
+have total variation distance $1$.
+Thus the unmasked tensor protocol
+does not satisfy statistical
+zero knowledge in the
+evaluation-only public-input game
+of Chapter~3.
+\end{theorem}
+\begin{proof}
+Choose $r_{\rm lo}=0_\ell$
+and $r_{\rm hi}=0_h$, both
+Boolean evaluation points.
+Let $w^{(0)}$ be identically zero.
+Choose a nonzero Boolean index
+$v_*\in I_\ell$ and let
+$w^{(1)}$ be zero everywhere
+except at $(v_*,0_h)$,
+where it equals $1$.
+At the Boolean point
+$(0_\ell,0_h)$,
+both multilinear extensions
+evaluate to the witness entry
+$w^{(i)}_{0_\ell,0_h}=0$,
+so both public claims agree.
+
+For $w^{(0)}$, every partial
+evaluation $s_v^*$ is zero.
+For $w^{(1)}$,
+the high-axis weights at
+$r_{\rm hi}=0_h$ equal
+$\operatorname{eq}_h(j,0_h)
+=\delta_{j,0_h}$.
+Therefore the partial vector
+has entry $s_{v_*}^*=1$
+and every other entry zero.
+By Theorem~\ref{thm:dpr:column-evaluation},
+the honest first messages have
+different $v_*$-th columns:
+$0$ and $1$, respectively.
+The deterministic test asking
+whether the $v_*$-th column
+equals zero outputs $1$
+with probability $1$ for the
+first witness and $0$ for
+the second.
+Lemma~\ref{lem:security:events}
+therefore makes their total
+variation distance equal to $1$.
+\end{proof}
+
+\begin{definition}[Masked field-column interface]\label{def:dpr:masked-column-interface}
+To avoid exposing $s_v^*$ directly,
+the field-affine interface of
+Chapter~7 uses the public vector
+\[
+ m_v:=s_v^*+p_v
+\]
+for hidden independent uniform
+pads $p_v\in L$. It also introduces
+the hidden transposed correction
+$c^p=\mathcal T(p)$
+and checks the contraction
+$D_c(\theta)=\Delta_p(\theta)$
+using the trace-coordinate
+checker of Chapter~6.
+\end{definition}
+
+\begin{lemma}[The basic masked column view does not distinguish]\label{lem:dpr:masked-column-uniform}
+For any two fixed Boolean witness
+tables, the distributions of their
+basic public masked vectors $m$
+from Definition~\ref{def:dpr:masked-column-interface}
+are identical and uniform on $L^I$.
+\end{lemma}
+\begin{proof}
+For either fixed witness,
+the partial vector $s^*$
+is fixed. Lemma~\ref{lem:pack:masked-uniform}
+proves that independent uniform
+$p\in L^I$ makes $s^*+p$
+uniform on $L^I$.
+This distribution is the same
+for both witnesses.
+\end{proof}
+
+\begin{lemma}[Revealing the full hidden correction reverses the mask]\label{lem:dpr:masked-correction-reveal}
+If the verifier obtains both
+$m=s^*+p$ and the full
+transposed pad vector
+$c^p=\mathcal T(p)$,
+then it can reconstruct
+all of $s^*$ exactly.
+\end{lemma}
+\begin{proof}
+Theorem~\ref{thm:pack:transpose-involutive}
+gives $p=\mathcal T(c^p)$.
+Consequently
+$s^*=m+p=m+\mathcal T(c^p)$,
+as already proved in
+Theorem~\ref{thm:pack:reveal-leak}.
+\end{proof}
+
+\begin{proposition}[The two protocol routes are distinct]\label{prop:dpr:routes-distinct}
+The original unmasked compiler of
+Definition~\ref{def:dpr:full-protocol}
+and the masked algebraic checker
+of Chapters~6--7 have different
+verifier interfaces:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item The former sends an
+$A$-valued partial evaluation
+$S_0$ and executes an
+$h$-round degree-two
+sumcheck over $A$ with
+challenges in $\varphi_1(L)$.
+\item The latter exposes
+uniform $m\in L^I$,
+keeps $p,c$ hidden,
+and uses a random kernel
+contraction and an anchored
+trace-zero consistency checker
+over $L$ with challenges
+$(\theta,z)$.
+\end{enumerate}
+Theorem~\ref{thm:dpr:compose-sound}
+does not automatically imply
+soundness of the latter;
+Theorem~\ref{thm:pack:algebraic-sound}
+does not automatically imply
+zero knowledge or proximity
+soundness of the former.
+\end{proposition}
+\begin{proof}
+The first distinction follows
+directly by comparing the
+typed messages and checks in
+Definitions~\ref{def:dpr:full-protocol}
+and~\ref{def:dpr:masked-column-interface}.
+The two soundness theorems
+quantify different acceptance
+events and impose different
+timing and underlying-oracle
+hypotheses. Neither theorem's
+hypotheses entail the other's,
+so no implication is asserted
+without a new reduction proof.
+\end{proof}
+
+\begin{remark}[Prior-work attribution]
+Diamond--Posen introduce the
+tensor-algebra ring-switching
+compiler~\cite{DiamondPosen2024}.
+Diamond's zero-knowledge
+large-field PCS note explicitly
+leaves ring-switching outside
+its scope~\cite{Diamond2025ZK}.
+Kochergin and Frigo--shelat
+subsequently give masking
+approaches for binary-field
+ring switching
+\cite{Kochergin2026,FrigoShelat2026}.
+Our use of the Boolean kernel
+basis as a representation of the
+correction has been established
+algebraically; a claim that the
+complete cryptographic construction
+is new or secure requires a
+separate comparison and a full
+zero-knowledge simulator.
+\end{remark}
