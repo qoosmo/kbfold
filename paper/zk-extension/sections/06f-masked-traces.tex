@@ -1,0 +1,119 @@
+\subsection{Public trace-zero messages and their algebraic residuals}\label{sec:binary:masked-traces}
+Fix $p,c,\theta$ as in Section~\ref{sec:binary:coordinates}.
+The trace-zero mask of Frigo--shelat~\cite{FrigoShelat2026}
+is a relevant prior algebraic mechanism; the following results
+make its conditional distributions explicit for our particular
+kernel-correction coefficients.
+
+\begin{definition}[Artin--Schreier-masked public values]\label{def:binary:masked-values}
+For a mask vector $t=(t_k)_{k\in I_\ell}\in L^{I_\ell}$
+define
+\[
+ U_k(p,c,\theta,t)
+   :=V_k(p,c,\theta)+t_k^2+t_k.
+\]
+When $t$ is random, its coordinates are sampled independently
+and uniformly from $L$ unless specified otherwise.
+\end{definition}
+
+\begin{lemma}[Masking preserves the trace of each residual]\label{lem:binary:mask-trace}
+For every $k\in I_\ell$,
+\[
+ \Tr(U_k)=\Tr(V_k)
+  =d_k(D_c(\theta)+\Delta_p(\theta)).
+\]
+\end{lemma}
+\begin{proof}
+By trace additivity and
+Lemma~\ref{lem:binary:as-trace},
+$\Tr(U_k)=\Tr(V_k)+\Tr(t_k^2+t_k)=\Tr(V_k)$.
+Apply Lemma~\ref{lem:binary:V-trace} to obtain the
+second equality.
+\end{proof}
+
+\begin{corollary}[Consistency iff all public traces vanish]\label{cor:binary:masked-traces-consistent}
+For fixed $p,c,\theta,t$,
+\[
+ D_c(\theta)=\Delta_p(\theta)
+ \quad\Longleftrightarrow\quad
+ \Tr(U_k)=0\quad\forall k\in I_\ell.
+\]
+\end{corollary}
+\begin{proof}
+Combine Lemma~\ref{lem:binary:mask-trace}
+with Theorem~\ref{thm:binary:affine-consistency}.
+\end{proof}
+
+\begin{theorem}[Joint uniformity of independently masked traces]\label{thm:binary:masked-vector-uniform}
+Suppose $D_c(\theta)=\Delta_p(\theta)$.
+If the coordinates $t_k$ are independent uniform samples in $L$,
+then the vector $(U_k)_{k\in I_\ell}$
+is uniform on $(\ker\Tr)^{I_\ell}$.
+Its distribution does not depend on the fixed values $p,c,\theta$
+once the consistency equality holds.
+\end{theorem}
+\begin{proof}
+By Theorem~\ref{thm:binary:affine-consistency},
+every $V_k$ has trace zero. The random variable
+$U_k=V_k+\wp(t_k)$ is therefore uniform on $\ker\Tr$
+by Theorem~\ref{thm:binary:single-mask}.
+The independent masks $t_k$ are transformed separately
+to produce each $U_k$; hence the $U_k$ are independent.
+Their joint law is the product of the uniform distributions,
+which is the uniform distribution on the Cartesian product
+$(\ker\Tr)^{I_\ell}$.
+This product law is independent of the fixed shifts $V_k$,
+and therefore of fixed $p,c,\theta$ satisfying consistency.
+\end{proof}
+
+\begin{definition}[Algebraic consistency residual]\label{def:binary:residual}
+For arbitrary public values $U=(U_k)_{k\in I_\ell}\in L^{I_\ell}$
+and an arbitrary mask vector $t$, set
+\[
+ e_k:=U_k+V_k(p,c,\theta)+t_k^2+t_k.
+\]
+Thus the honest masked value of Definition~\ref{def:binary:masked-values}
+satisfies $e_k=0$.
+\end{definition}
+
+\begin{lemma}[Trace of an algebraic residual]\label{lem:binary:residual-trace}
+For every $k$,
+\[
+ \Tr(e_k)=\Tr(U_k)+d_k(D_c(\theta)+\Delta_p(\theta)).
+\]
+\end{lemma}
+\begin{proof}
+By trace additivity,
+$\Tr(e_k)=\Tr(U_k)+\Tr(V_k)+\Tr(\wp(t_k))$.
+The last summand is zero by Lemma~\ref{lem:binary:as-trace}
+and the middle summand is
+$d_k(D_c+\Delta_p)$ by
+Lemma~\ref{lem:binary:V-trace}.
+\end{proof}
+
+\begin{lemma}[Trace checks force a nonzero residual under mismatch]\label{lem:binary:forced-residual}
+If $D_c(\theta)\neq\Delta_p(\theta)$ and
+$\Tr(U_k)=0$ for all $k$, then
+$e_k\neq0$ for at least one $k$.
+\end{lemma}
+\begin{proof}
+Since $D_c(\theta)+\Delta_p(\theta)\neq0$,
+at least one binary coordinate
+$d_k(D_c(\theta)+\Delta_p(\theta))$ equals $1$,
+by Definition~\ref{def:binary:coords}.
+Lemma~\ref{lem:binary:residual-trace} and the
+trace-zero assumptions give $\Tr(e_k)=1$ for
+this $k$. As $\Tr(0)=0$, necessarily $e_k\neq0$.
+\end{proof}
+
+\begin{remark}[Conditional, not full-transcript hiding]
+Theorem~\ref{thm:binary:masked-vector-uniform}
+asserts uniformity of the public vector $U$ for
+a \emph{fixed} consistent instance, assuming
+independent uniform masks. It does not prove
+that a later public linear combination of the
+same masks $t_k$, combined with $U$, remains
+witness-independent. Such correlations must
+be checked in the full protocol simulation game
+defined in Chapter~3.
+\end{remark}
