@@ -110,7 +110,7 @@ Let the witness $w$, public evaluation instance, and candidate partial evaluatio
 \end{theorem}
 \begin{proof}
 Because $\mathcal T$ is injective by Lemma~\ref{lem:history:involution}, $\mathcal T(s)-\mathcal T(s^*)$ is a nonzero vector $e$. By Lemma~\ref{lem:history:batch-correct}, the equation displayed in the theorem holds iff
-$E_e(\theta)=0$. By Lemma~\ref{lem:history:rowerror}, $E_e$ is nonzero of total degree at most $\ell$. The Schwartz--Zippel bound for uniform independent coordinates of $\theta$ gives probability at most $\ell/|L|$. The minimum with $1$ is automatic.
+$E_e(\theta)=0$. By Lemma~\ref{lem:history:rowerror}, $E_e$ is nonzero of total degree at most $\ell$. Lemma~\ref{lem:history:schwartz-zippel}, applied over $L$ to the independent uniform coordinates of $\theta$, gives probability at most $\ell/|L|$. The minimum with $1$ is automatic.
 \end{proof}
 
 \begin{remark}[Where commitment enters historically]
