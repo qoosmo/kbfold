@@ -1,6 +1,6 @@
 # Chapter 4 — Lean 4 theorem map
 
-**Statements:** 62 labeled definitions, lemmas, propositions, theorems and corollaries.
+**Statements:** 63 labeled definitions, lemmas, propositions, theorems and corollaries.
 
 **Status:** Complete paper proofs for all results; no claim of new Lean certification. The original KBFold Lean project already proves overlapping base-algebra results.
 
@@ -68,6 +68,8 @@
 | 04h-mask-query | lemma | Uniformity of the mask polynomial | `lem:kbalgebra:uniform-polynomial` | `KBFold.ZKKernel.uniform_polynomial` |
 | 04h-mask-query | lemma | Uniform answers at prescribed nonzero points | `lem:kbalgebra:uniform-queries` | `KBFold.ZKKernel.uniform_queries` |
 | 04h-mask-query | theorem | Adaptive bounded-query hiding for one masked polynomial | `thm:kbalgebra:adaptive-queries` | `KBFold.ZKKernel.adaptive_queries` |
+
+| 04h-mask-query | theorem | Mask-query and code-rate tradeoff | `thm:kbalgebra:mask-rate-tradeoff` | `KBFold.ZKKernel.mask_rate_tradeoff` |
 
 ## Required dependency order
 
