@@ -1,0 +1,173 @@
+\subsection{Correlated queries across folded oracles}\label{sec:kbfoldfold:joint}
+
+The polynomials $Q_0,\ldots,Q_m$ share the \emph{same} random mask $R$. Consequently their oracle responses are correlated. We now give the exact joint distribution for any fixed set of observations. This extends the single-oracle masking criterion of Chapter~4, but it is not yet an online simulation theorem for a malicious adaptive verifier.
+
+\begin{definition}[Fixed fold-query schedule]\label{def:kbff:schedule}
+Retain the fields and domains of Section~\ref{sec:kbfoldfold:codewords}.
+Fix a complete challenge vector $r\in\F^m$ and an integer $k\geq0$.
+A \emph{fixed query schedule} is a sequence
+\[
+ \Sigma=((j_1,\xi_1),\ldots,(j_k,\xi_k)),\qquad
+ 0\leq j_h\leq m,\quad \xi_h\in\Omega_{j_h}.
+\]
+The schedule is fixed independently of the mask $R$; it may depend on
+the already fixed challenge vector $r$.
+\end{definition}
+
+\begin{definition}[Witness and mask observation maps]\label{def:kbff:observation-maps}
+For such a fixed $r$ and $\Sigma$, define the maps
+\[
+ \mathcal S_{r,\Sigma}:\F^{I_m}\to\F^{k+1},
+ \qquad
+ \mathcal T_{r,\Sigma}:\F[X]_{<B}\to\F^{k+1}
+\]
+by
+\[
+ \mathcal S_{r,\Sigma}(f)
+ :=\left(U_{f_{j_h}}^{(m-j_h)}(\xi_h)\right)_{h=1}^k
+       \mathbin{\|}(0),
+\]
+\[
+ \mathcal T_{r,\Sigma}(R)
+ :=\left(\xi_h^{\,2^{m-j_h}}R_{j_h}(\xi_h)\right)_{h=1}^k
+       \mathbin{\|}(\rho_r(R)),
+\]
+where $\mathbin{\|}$ denotes concatenation with one final coordinate,
+$f_j$ and $R_j$ are as in Definition~\ref{def:kbff:masked-chain},
+and $\rho_r(R)$ is the scalar in Theorem~\ref{thm:kbff:linear-closure}.
+\end{definition}
+
+\begin{lemma}[Both observation maps are linear]\label{lem:kbff:observation-linear}
+The maps $\mathcal S_{r,\Sigma}$ and $\mathcal T_{r,\Sigma}$
+are $\F$-linear.
+\end{lemma}
+\begin{proof}
+The map $f\mapsto f_j$ is linear by Lemma~\ref{lem:kbff:prefix-linear};
+$f_j\mapsto U_{f_j}^{(m-j)}$ is linear by the finite-sum definition;
+evaluation at a fixed $\xi_h$ is linear. Thus each of the first
+$k$ coordinates of $\mathcal S_{r,\Sigma}$ is linear, and the final
+zero coordinate is linear.
+For $\mathcal T_{r,\Sigma}$, each fold map $\pfold_{r_i}$ is linear,
+so $R\mapsto R_{j_h}$ is linear. Evaluation at $\xi_h$ and
+multiplication by the fixed scalar
+$\xi_h^{2^{m-j_h}}$ are linear. Finally
+$R\mapsto\rho_r(R)=\mathsf{PFold}^{[m]}_r(R)$ is linear by the same
+fold-linearity argument. Hence all coordinates are linear.
+\end{proof}
+
+\begin{lemma}[Exact observation decomposition]\label{lem:kbff:observation-decompose}
+Let $Q_j$ be the masked fold polynomials. Define the observed vector
+\[
+ \mathcal O_{r,\Sigma}(f,R)
+ :=\left(Q_{j_h}(\xi_h)\right)_{h=1}^k
+     \mathbin{\|}\bigl(\rho_r(R)\bigr).
+\]
+Then
+\[
+ \boxed{
+ \mathcal O_{r,\Sigma}(f,R)
+  =\mathcal S_{r,\Sigma}(f)+\mathcal T_{r,\Sigma}(R).
+ }
+\]
+\end{lemma}
+\begin{proof}
+For each query $(j_h,\xi_h)$, Theorem~\ref{thm:kbff:masked-invariant}
+gives
+\[
+ Q_{j_h}(\xi_h)
+ =U_{f_{j_h}}^{(m-j_h)}(\xi_h)
+   +\xi_h^{2^{m-j_h}}R_{j_h}(\xi_h).
+\]
+These are exactly the $h$-th coordinates of
+$\mathcal S_{r,\Sigma}(f)$ and $\mathcal T_{r,\Sigma}(R)$.
+The last coordinate of the first vector is $0$, and the last
+coordinate of the second is $\rho_r(R)$, which also equals the
+last coordinate of $\mathcal O_{r,\Sigma}(f,R)$.
+Thus all $k+1$ coordinates agree.
+\end{proof}
+
+\begin{theorem}[Exact joint fixed-schedule masking criterion]\label{thm:kbff:joint-mask}
+Assume $\F$ is finite and $R$ is uniform on the vector space
+$\F[X]_{<B}$. For fixed $r$ and $\Sigma$, the vector
+$\mathcal O_{r,\Sigma}(f,R)$ is uniform on the affine coset
+\[
+ \mathcal S_{r,\Sigma}(f)
+   +\operatorname{im}\mathcal T_{r,\Sigma}
+ \subseteq\F^{k+1}.
+\]
+For any two tables $f,g:I_m\to\F$,
+\[
+ \boxed{
+ \Delta\left(
+ \mathcal O_{r,\Sigma}(f,R),\mathcal O_{r,\Sigma}(g,R)
+ \right)
+ =
+ \begin{cases}
+ 0,&\mathcal S_{r,\Sigma}(f-g)
+        \in\operatorname{im}\mathcal T_{r,\Sigma},\\
+ 1,&\text{otherwise}.
+ \end{cases}}
+\]
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:kbff:observation-linear},
+$\mathcal T_{r,\Sigma}$ is linear. Lemma~\ref{lem:kbff:observation-decompose}
+expresses the random vector as the sum of a fixed vector
+$\mathcal S_{r,\Sigma}(f)$ and the image of a uniform random
+element of the mask space. Lemma~\ref{lem:security:affine-uniform}
+therefore gives the uniform coset distribution.
+Apply Lemma~\ref{lem:security:coset-criterion} with
+$V=\F^{k+1}$, $H=\operatorname{im}\mathcal T_{r,\Sigma}$,
+and secret vectors $\mathcal S_{r,\Sigma}(f)$ and
+$\mathcal S_{r,\Sigma}(g)$. Their difference equals
+$\mathcal S_{r,\Sigma}(f-g)$ by linearity, proving both cases.
+\end{proof}
+
+\begin{corollary}[Sufficient condition for witness-independent fixed-schedule answers]\label{cor:kbff:joint-surjective}
+If $\mathcal T_{r,\Sigma}$ is surjective onto $\F^{k+1}$,
+the joint observed vector is uniform on $\F^{k+1}$ for every
+witness $f$, hence independent of $f$.
+\end{corollary}
+\begin{proof}
+Surjectivity gives $\operatorname{im}\mathcal T_{r,\Sigma}
+=\F^{k+1}$. Its unique affine coset is the whole target space.
+Apply the uniform-coset conclusion of Theorem~\ref{thm:kbff:joint-mask}.
+\end{proof}
+
+\begin{lemma}[Dimension obstruction to surjectivity]\label{lem:kbff:rank-obstruction}
+If $\mathcal T_{r,\Sigma}$ is surjective, then
+\[
+ k+1\leq B.
+\]
+\end{lemma}
+\begin{proof}
+The source $\F[X]_{<B}$ has dimension $B$ over $\F$.
+The target $\F^{k+1}$ has dimension $k+1$.
+The image of a linear map has dimension at most that of its source.
+Surjectivity would give
+$k+1=\dim\operatorname{im}\mathcal T_{r,\Sigma}\leq B$.
+\end{proof}
+
+\begin{remark}[Final line coefficients are correlated with earlier openings]
+The last observation $\rho_r(R)$ is a linear functional of the
+\emph{same} mask that randomizes the earlier oracle values.
+Even if each marginal query is uniform, the joint distribution
+may distinguish two witnesses unless
+$\mathcal S_{r,\Sigma}(f-g)$ lies in the mask image.
+Theorem~\ref{thm:kbff:joint-mask} is therefore the exact
+fixed-schedule proof obligation for a candidate simulator.
+When a verifier chooses later queries after seeing earlier
+answers, the schedule is no longer fixed; one must use the
+conditional-coset description in
+Lemma~\ref{lem:security:conditioned-mask} for every adaptive history.
+\end{remark}
+
+\begin{remark}[Not a complete zero-knowledge theorem]
+The observations here do not include commitment roots, Merkle
+authentication paths, the sumcheck round-polynomial messages, or
+adaptively selected challenge/query schedules. No claim that
+$\mathcal T_{r,\Sigma}$ is always surjective is made.
+Consequently the chapter supplies a necessary-and-sufficient
+linear-algebraic test for a \emph{specified} fixed schedule,
+not zero knowledge for the complete KBFold protocol.
+\end{remark}
