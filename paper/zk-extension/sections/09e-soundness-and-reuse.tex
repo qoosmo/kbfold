@@ -1,0 +1,224 @@
+\subsection{False-claim soundness and repeated-opening failures}\label{sec:zkrs:soundness}
+
+\begin{lemma}[False claim forces a partial-evaluation discrepancy]\label{lem:zkrs:false-error}
+Fix a Boolean table $w$, packed columns $\widehat w$,
+and evaluation points $(r_{\rm lo},r_{\rm hi})$.
+Suppose the public $y\neq y_w$.
+If the claim and incoming affine equations pass,
+then
+\[
+ e:=m+s^*+p\in L^I
+\]
+is nonzero.
+\end{lemma}
+\begin{proof}
+If $e=0$ then $m=s^*+p$.
+The claim and incoming equations imply
+$y=\sum_vq_v(m_v+p_v)$ by
+Lemma~\ref{lem:pack:incoming-eliminate}.
+Hence $y=\sum_vq_vs_v^*=y_w$ by
+Lemma~\ref{lem:pack:partial-eval},
+contradicting the false claim.
+\end{proof}
+
+\begin{lemma}[Correct hidden transposition gives a nonzero outgoing polynomial]\label{lem:zkrs:correct-c}
+Under Lemma~\ref{lem:zkrs:false-error},
+if $c=c^p$, then passing the outgoing
+equation is equivalent to $B_e(\theta)=0$,
+where $e$ is fixed and nonzero.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:pack:out-error},
+the outgoing discrepancy is
+$B_e(\theta)+D_{c+c^p}(\theta)$.
+The assumed equality $c=c^p$
+makes the second term zero.
+By Lemma~\ref{lem:zkrs:false-error},
+$e\neq0$, and the outgoing
+equation holds precisely when
+the first term vanishes.
+\end{proof}
+
+\begin{lemma}[Incorrect hidden transposition gives a degree-$\ell$ mismatch]\label{lem:zkrs:incorrect-c}
+If $c\neq c^p$ is fixed before a uniform
+$\theta\in L^\ell$, the probability that
+$D_c(\theta)=\Delta_p(\theta)$ is at most
+$\min\{1,\ell/q\}$.
+\end{lemma}
+\begin{proof}
+Apply
+Corollary~\ref{cor:binary:mismatch-bound}.
+Its hypotheses are exactly the stated
+coefficient mismatch and independence
+from the challenge.
+\end{proof}
+
+\begin{theorem}[Ideal masked ring-switching false-claim soundness]\label{thm:zkrs:false-sound}
+Fix a Boolean witness, its exact packed
+columns, public $(r_{\rm lo},r_{\rm hi},y)$,
+and the public $m,y'$ and hidden
+$p,p_{\rm in},c$ before the independent
+uniform first challenge $\theta$.
+After $\theta$, a malicious prover may
+choose the checker values $(t,\rho,\sigma,U)$
+adaptively, but must bind them before the
+independent uniform second challenge $z$.
+It may choose $A$ after receiving $z$.
+Assume all ideal field-affine checks and
+public trace checks of
+Definition~\ref{def:zkrs:affine-checks}
+are enforced exactly.
+If $y\ne y_w$, then
+\[
+ \boxed{
+ \Pr[\mathrm{accept}]
+ \leq\min\left\{1,\frac{\ell+n}{q}\right\}.
+ }
+\]
+\end{theorem}
+\begin{proof}
+Distinguish two mutually exclusive cases,
+which are already fixed before $\theta$.
+
+If $c=c^p$, whenever the claim and
+incoming equations pass the vector
+$e=m+s^*+p$ is nonzero by
+Lemma~\ref{lem:zkrs:false-error}.
+By Lemma~\ref{lem:zkrs:correct-c},
+outgoing acceptance requires
+$B_e(\theta)=0$. The discrepancy
+polynomial has degree at most $\ell$
+and is nonzero; Theorem~\ref{thm:pack:batch-sound}
+bounds this event by $\ell/q$.
+Further checker constraints can only
+reduce acceptance.
+
+If $c\ne c^p$, let $E$ denote the
+exceptional first-challenge event
+$D_c(\theta)=\Delta_p(\theta)$.
+Lemma~\ref{lem:zkrs:incorrect-c}
+gives $\Pr[E]\leq\ell/q$.
+On its complement, if the public
+trace checks pass then
+Lemma~\ref{lem:binary:forced-residual}
+guarantees a nonzero vector
+$e_k=U_k+V_k+t_k^2+t_k$
+for at least one coordinate.
+The auxiliary values are fixed
+before the fresh $z$, so the residual
+detection theorem
+(Theorem~\ref{thm:zkrs:residual-detection})
+bounds passage of the two anchored
+equations by $n/q$.
+Conditioning on the malicious prover's
+chosen state and private random tape
+and then averaging gives
+$\Pr[\mathrm{accept}]\leq(\ell+n)/q$
+in this case.
+Taking the maximum of the two bounds,
+and capping by one, proves the theorem.
+\end{proof}
+
+\begin{definition}[Two-opening pad-reuse experiment]\label{def:zkrs:reuse-game}
+Let a single witness $w$ be evaluated
+at two distinct high-axis points
+$r_{\rm hi}^{(1)},r_{\rm hi}^{(2)}$
+with the same low-axis point.
+Let $s^{*(i)}$ be the associated
+partial-evaluation vectors.
+A \emph{reused-pad} implementation
+chooses one uniform $p\in L^I$
+and publishes
+$m^{(1)}=s^{*(1)}+p$ and
+$m^{(2)}=s^{*(2)}+p$.
+\end{definition}
+
+\begin{lemma}[Reusing a pad reveals the difference of partial evaluations]\label{lem:zkrs:reuse-difference}
+In the two-opening pad-reuse experiment,
+\[
+ \boxed{m^{(1)}+m^{(2)}
+        =s^{*(1)}+s^{*(2)}}
+\]
+for every outcome of the pad.
+\end{lemma}
+\begin{proof}
+Add the two definitions:
+$m^{(1)}+m^{(2)}
+=s^{*(1)}+p+s^{*(2)}+p$.
+Because $p+p=0$ in characteristic
+two, the pad cancels.
+\end{proof}
+
+\begin{theorem}[Perfect two-opening leakage under pad reuse]\label{thm:zkrs:reuse-attack}
+For any $\ell\geq1$ and $h\geq1$,
+there are two Boolean witnesses having the
+same authorized evaluation values at two
+public points, but whose reused-pad
+public pairs $(m^{(1)},m^{(2)})$
+have statistical distance $1$.
+\end{theorem}
+\begin{proof}
+Take $r_{\rm lo}=0_\ell$ and
+$r_{\rm hi}^{(1)}=0_h$,
+$r_{\rm hi}^{(2)}=(1,0,\ldots,0)$.
+Let $w^{(0)}$ be identically zero.
+Choose $v_*\neq0_\ell$ and define
+$w^{(1)}$ with exactly one nonzero
+entry at $(v_*,0_h)$.
+Both public evaluations, at both
+chosen points, are zero for both
+witnesses: the low-axis equality
+weights select only the row
+$v=0_\ell$, which is zero.
+
+For $w^{(0)}$, both partial vectors
+vanish, so Lemma~\ref{lem:zkrs:reuse-difference}
+gives $m^{(1)}+m^{(2)}=0$ always.
+For $w^{(1)}$, the first high-axis
+point selects the Boolean column
+$j=0_h$, producing a partial vector
+with a single $1$ in row $v_*$.
+The second high-axis point selects
+the column $(1,0,\ldots,0)$, where
+the witness is zero, and hence
+$s^{*(2)}=0$.
+Thus $m^{(1)}+m^{(2)}$ has a nonzero
+entry at $v_*$ with probability one.
+The deterministic event
+$m^{(1)}+m^{(2)}=0$ distinguishes the
+two distributions with probabilities
+$1$ and $0$.
+Lemma~\ref{lem:security:events}
+makes the statistical distance $1$.
+\end{proof}
+
+\begin{corollary}[Fresh partial-evaluation pads are necessary for this implementation]\label{cor:zkrs:fresh-pads}
+Any multi-opening version that
+publishes raw masked partial
+vectors in the form $m=s^*+p$
+must not reuse the same pad
+across arbitrary evaluation points
+if it is to satisfy witness privacy
+for the authorized evaluation values.
+\end{corollary}
+\begin{proof}
+The reuse construction of
+Definition~\ref{def:zkrs:reuse-game}
+violates the two-witness closeness
+required by statistical zero
+knowledge, as shown in
+Theorem~\ref{thm:zkrs:reuse-attack}.
+Thus that reuse rule is not
+compatible with the stated
+privacy goal.
+\end{proof}
+
+\begin{remark}[No universal lower bound]
+Corollary~\ref{cor:zkrs:fresh-pads}
+rules out this exact pad-reuse pattern;
+it does not prove an information-theoretic
+lower bound for all possible multi-opening
+ZK schemes. Correlated masks with
+additional zero-knowledge machinery
+would require their own proof.
+\end{remark}
