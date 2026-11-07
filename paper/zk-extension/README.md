@@ -32,7 +32,7 @@ Existing KBFold algebraic results are reproved here where required for self-cont
 1. Introduction and exact mathematical problem (complete)
 2. Historical background and related work (complete)
 3. Formal security model, online zero knowledge, and adaptive masking (complete)
-4. Full Boolean-kernel algebra
+4. Complete Boolean-kernel algebra (written, fully proved)
 5. Multilinearization and fold identities
 6. Characteristic-two specializations
 7. Binary-field packing, trace, dual basis
@@ -73,3 +73,7 @@ Original reference: https://github.com/qoosmo/kbfold
 See `CHAPTER_03_LEAN_MAP.md` for all 62 individually labeled definitions/results and their proposed Lean declarations.
 
 **Scope:** Chapter 3 defines and proves the foundational security statements. It does not claim that the full zero-knowledge KBFold protocol has already been constructed or certified.
+
+## Chapter 4 result
+
+This chapter develops the original kernel basis over arbitrary fields, including the Kronecker transform, Möbius inverse, low-degree criterion, the exact evaluation curve, and the full tensor-functional formula for normalized folds. It separates odd characteristic from characteristic two. For a finite field, it proves that a uniformly chosen low-degree kernel mask gives secret-independent answers to at most `2^t` adaptive distinct nonzero queries to a **single** oracle of the form `P+X^N R`; the proof does not claim full ZK-KBFold. See `CHAPTER_04_LEAN_MAP.md`.
