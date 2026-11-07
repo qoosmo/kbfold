@@ -33,4 +33,5 @@ jobs:
             paper/zk-extension/sections/
             paper/zk-extension/README.md
             paper/zk-extension/THEOREM_LEDGER.md
+            paper/zk-extension/CHAPTER_03_LEAN_MAP.md
           if-no-files-found: error
