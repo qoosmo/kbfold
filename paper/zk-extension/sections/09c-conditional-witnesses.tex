@@ -1,0 +1,158 @@
+\subsection{Conditional witness distributions and the limits of public simulation}\label{sec:zkrs:conditional}
+
+\begin{lemma}[Two solutions of a trace-zero equation]\label{lem:zkrs:AS-fiber}
+For every $a\in H=\ker\Tr$ and every solution
+$t_0\in L$ of $t_0^2+t_0=a$, the complete
+solution set is $\{t_0,t_0+1\}$.
+The two values are distinct.
+\end{lemma}
+\begin{proof}
+Theorem~\ref{thm:binary:as-image}
+guarantees at least one solution $t_0$.
+If $t$ is another, add the two equations:
+$(t+t_0)^2+(t+t_0)=0$ by
+Lemma~\ref{lem:binary:as-linear}.
+Lemma~\ref{lem:binary:as-kernel}
+implies $t+t_0\in\{0,1\}$,
+so $t=t_0$ or $t=t_0+1$.
+Conversely both values satisfy the equation
+because $1^2+1=0$.
+The values differ since $1\ne0$.
+\end{proof}
+
+\begin{lemma}[Uniform conditional mask preimages]\label{lem:zkrs:AS-condition}
+Fix $V\in H$ and sample $t$ uniformly from $L$.
+For any $u\in H$, conditioned on
+$u=V+t^2+t$, the variable $t$ is uniform
+on the two-element set of roots of
+$t^2+t=u+V$.
+\end{lemma}
+\begin{proof}
+The event is equivalent to
+$t^2+t=u+V\in H$.
+By Lemma~\ref{lem:zkrs:AS-fiber}, it contains
+exactly two equally likely values of the original
+uniform sample $t$. Conditioning on this
+nonempty event gives probability $1/2$ to each.
+\end{proof}
+
+\begin{lemma}[Conditioned vector mask is a product of two-point fibers]\label{lem:zkrs:vector-fiber}
+Fix an admissible witness, a public prefix $(m,y',\theta)$,
+and a realized trace-zero vector $U$.
+Under the honest execution, conditional on that data,
+the vector $t$ is uniform on the Cartesian product
+\[
+ \prod_{k\in I}\{t_{0,k},t_{0,k}+1\},
+ \qquad
+ t_{0,k}^2+t_{0,k}=U_k+V_k(p,c,\theta),
+\]
+and each of its $2^n$ points is equally likely.
+\end{lemma}
+\begin{proof}
+Given the fixed witness and $m$, the pad
+$p=m+s^*$ and the correction $c=\mathcal T(p)$
+are determined, and hence so is each $V_k$.
+The original coordinates $t_k$ are independent
+uniform variables and each equation
+$U_k=V_k+t_k^2+t_k$ restricts only $t_k$.
+Lemma~\ref{lem:zkrs:AS-condition} gives a
+uniform two-point conditional law per coordinate.
+Because the conditioning event factors over
+the coordinates, these conditional laws remain
+independent, giving the stated product distribution.
+There are $|I|=n$ binary choices, hence $2^n$ vectors.
+\end{proof}
+
+\begin{lemma}[Conditional reconstruction of the last scalar mask]\label{lem:zkrs:rho-reconstruct}
+For fixed $(t,z,A)$ in an honest execution, the value
+of $\rho$ is uniquely determined:
+\[
+ \boxed{\rho=A+\sum_kW_k(z)t_k,\qquad \sigma=\rho^2.}
+\]
+\end{lemma}
+\begin{proof}
+The honest last message satisfies
+$A=\rho+\sum_kW_k(z)t_k$.
+Adding the field sum to both sides,
+and using characteristic two, gives
+the displayed expression. The
+definition of the honest $\sigma$
+then gives $\sigma=\rho^2$.
+Uniqueness follows because these are
+deterministic field operations.
+\end{proof}
+
+\begin{proposition}[Algebraic completion for a fixed witness and a public core]\label{prop:zkrs:completion}
+Fix an admissible private witness and any
+public core $(m,y',\theta,U,z,A)$ satisfying
+$\Tr(U_k)=0$ for all $k$.
+There exist hidden values
+$(p,p_{\rm in},c,t,\rho,\sigma)$ satisfying
+all honest algebraic relations in
+Definitions~\ref{def:zkrs:prestate} and
+\ref{def:zkrs:poststate}.
+Exactly $2^n$ choices of the vector $t$
+are possible; for each, all other hidden
+variables are uniquely determined.
+\end{proposition}
+\begin{proof}
+The equations for the pre-challenge data
+force
+$p=m+s^*$ and $p_{\rm in}=y'+y$,
+and then $c=\mathcal T(p)$.
+The trace consistency lemma
+(Lemma~\ref{lem:zkrs:honest-correction})
+gives $\Tr(V_k)=0$ for this $p,c,\theta$.
+Hence each $U_k+V_k$ has trace zero and
+Lemma~\ref{lem:zkrs:AS-fiber} gives exactly
+two solutions of
+$t_k^2+t_k=U_k+V_k$.
+Independent selection across $n$ coordinates
+gives $2^n$ distinct choices of $t$.
+For each choice, Lemma~\ref{lem:zkrs:rho-reconstruct}
+determines $\rho$ and $\sigma$ uniquely,
+and all defining equations then hold.
+Conversely every valid completion must obey
+the same forced equations, so the count is exact.
+\end{proof}
+
+\begin{remark}[The crucial witness-dependence]
+The existence and count in
+Proposition~\ref{prop:zkrs:completion}
+do \emph{not} yield a witness-free
+simulator for the hidden values.
+The forced pad $p=m+s^*$ depends on
+the private partial vector $s^*$.
+A simulator receiving only the public
+evaluation claim does not know that vector.
+A hiding commitment and a zero-knowledge
+proof of the affine relations must therefore
+permit transcript simulation without
+extracting or revealing these hidden
+values. Ordinary binding or marginal
+hiding, by themselves, are insufficient.
+\end{remark}
+
+\begin{lemma}[Revealing the hidden pad breaks the single-opening privacy]\label{lem:zkrs:pad-disclosure}
+If a verifier receives $m$ and $p$
+in the clear, it can recover the
+unmasked partial vector $s^*$ by
+$s^*=m+p$.
+\end{lemma}
+\begin{proof}
+By definition $m=s^*+p$.
+Adding $p$ to both sides gives
+$m+p=s^*+p+p=s^*$ because $2p=0$.
+\end{proof}
+
+\begin{corollary}[Revealing the transposed pad has the same effect]\label{cor:zkrs:c-disclosure}
+If a verifier receives $(m,c)$ in the clear
+with $c=\mathcal T(p)$, it can recover
+$s^*=m+\mathcal T(c)$.
+\end{corollary}
+\begin{proof}
+The transpose is an involution by
+Theorem~\ref{thm:pack:transpose-involutive},
+so $\mathcal T(c)=p$.
+Apply Lemma~\ref{lem:zkrs:pad-disclosure}.
+\end{proof}
