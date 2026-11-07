@@ -148,3 +148,31 @@ Main proved algebraic statements:
 - Explicit one-query attack showing that disclosure of the final mask slope can cancel a degree-zero mask from an earlier oracle opening, even when both messages are individually uniform.
 
 **Security boundary:** The chapter does not prove that a malicious oracle lies near the enlarged RS code, nor the joint authenticated online ZK simulator. Those are new protocol theorems, not consequences of the algebraic identities.
+
+
+## Chapter 6 — Characteristic-Two Specializations
+
+**Source:** `sections/06-binary.tex` and eight proof-oriented subsections.
+**Lean map:** [CHAPTER_06_LEAN_MAP.md](CHAPTER_06_LEAN_MAP.md).
+**Audit:** 85 separately labeled statements, including **67 full paper proofs** and 18 typed definitions. The new Chapter 6 results are **not yet Lean-certified**.
+
+### Proven algebraic results
+
+- Characteristic-two Frobenius on scalars and polynomial coefficients, including field and kernel covariance.
+- The partition identity `sum_b K_b(X)=1`, and complete/partial multilinearization by explicit monomial expansion.
+- Absolute trace and Artin--Schreier: `im(t²+t)=ker(Tr)`, uniform trace-zero masking.
+- Existence of a full-degree field element, a kernel evaluation basis and its trace-dual coordinate basis.
+- Exact affine kernel-correction identity `Tr(V_k)=coord_k(D_c+Delta_p)`.
+- Uniformity of independently masked public trace-zero messages for a fixed consistent instance.
+- Unanchored residual collision and construction of the minimal-degree anchored family `{1,W_b}`.
+- Root bound `n/2^n` for a fixed nonzero anchored residual.
+- Perfect algebraic completeness and two-challenge **coefficient-consistency** bound `(ell+n)/2^n` for fixed `p,c` before `theta`, with all residuals fixed before `z`.
+- Proof that a binary field has no even-order multiplicative subgroup, so KBFold's original odd-characteristic `±x` word fold does not directly carry over.
+
+### Security boundary
+
+The chapter proves *an algebraic consistency checker*, **not** zero knowledge for the entire Ring Switching protocol or the odd-characteristic KBFold PCS. In particular it does not establish the joint distribution of the public vector `U` together with the later scalar `A`, a hiding authenticated commitment, or a full online simulator.
+
+### Reproducible audit
+
+Run `sh audit/RUN.sh` to execute the existing kernel tests plus the new deterministic GF(16) and GF(256) tests covering basis, trace duality, affine equations, honest checks and anchored root counts. These tests supplement the full mathematical proofs.
