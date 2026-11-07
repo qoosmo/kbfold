@@ -1,0 +1,179 @@
+\subsection{The tensor algebra and its two scalar embeddings}\label{sec:dpr:tensor}
+The original Diamond--Posen ring-switching compiler
+is formulated over $A=L\otimes_KL$, not merely
+over a matrix transpose. We reconstruct the
+specialization $K=\F_2$ of Construction~4.1
+in~\cite{DiamondPosen2024}. Write
+$n=2^\ell$, $L=\F_{2^n}$, and use the
+binary basis $(\beta_v)_{v\in I_\ell}$ from Chapter~6.
+
+\begin{definition}[Two embeddings]\label{def:dpr:embeddings}
+Let $A:=L\otimes_{\F_2}L$ be the tensor product
+with multiplication
+$(a\otimes b)(c\otimes d)=ac\otimes bd$
+and identity $1\otimes1$. Define
+\[
+ \varphi_0(a):=a\otimes1,\qquad
+ \varphi_1(a):=1\otimes a.
+\]
+For $x=\sum_{i}a_i\otimes b_i$ define
+the multiplication map
+$\mu(x):=\sum_i a_ib_i\in L$.
+\end{definition}
+
+\begin{lemma}[The multiplication map is well defined]\label{lem:dpr:mu-defined}
+The map $\mu:A\to L$ is an $\F_2$-linear map,
+and $\mu(\varphi_0(a))=\mu(\varphi_1(a))=a$.
+\end{lemma}
+\begin{proof}
+The map $(a,b)\mapsto ab$ is additive
+in each argument and balanced over $\F_2$.
+By the universal property of the tensor
+product it induces a unique $\F_2$-linear
+map $\mu$ with $\mu(a\otimes b)=ab$.
+Evaluating at $a\otimes1$ and $1\otimes a$
+gives the two identities.
+\end{proof}
+
+\begin{lemma}[Two commuting field embeddings]\label{lem:dpr:phi-embed}
+Both $\varphi_0,\varphi_1:L\to A$
+are injective unital ring homomorphisms,
+and $\varphi_0(a)\varphi_1(b)=a\otimes b$.
+\end{lemma}
+\begin{proof}
+Additivity, multiplicativity and preservation
+of the unit follow from the defining tensor
+relations and multiplication rule.
+The formula for the product is
+$(a\otimes1)(1\otimes b)=a\otimes b$.
+If $\varphi_i(a)=0$, Lemma~\ref{lem:dpr:mu-defined}
+implies $a=\mu(\varphi_i(a))=0$,
+so both maps are injective.
+The two images commute because $A$
+is a commutative algebra.
+\end{proof}
+
+\begin{definition}[Column coordinates in the tensor algebra]\label{def:dpr:column}
+For $x\in A$ define $\operatorname{Col}(x)_v\in L$
+as the unique coefficients satisfying
+\[
+ \boxed{x=\sum_{v\in I_\ell}
+   \varphi_0(\operatorname{Col}(x)_v)
+   \varphi_1(\beta_v).}
+\]
+\end{definition}
+
+\begin{lemma}[Existence and uniqueness of tensor columns]\label{lem:dpr:column-basis}
+The family $(\varphi_1(\beta_v))_v$
+is an $L$-basis of $A$ with scalar action
+through $\varphi_0$, so
+Definition~\ref{def:dpr:column} is well defined.
+\end{lemma}
+\begin{proof}
+Every $b\in L$ has a unique expansion
+$b=\sum_vd_v(b)\beta_v$ with
+$d_v(b)\in\F_2$. For a pure tensor,
+\[
+ a\otimes b
+ =\sum_vd_v(b)\,(a\otimes\beta_v)
+ =\sum_v\varphi_0(ad_v(b))\varphi_1(\beta_v).
+\]
+Every tensor is a finite sum of pure tensors,
+so the proposed family spans $A$ over the
+left $L$-action.
+For independence, let
+$\sum_va_v\otimes\beta_v=0$.
+For each $u$, apply the well-defined
+linear map $\mathrm{id}_L\otimes d_u:A\to
+L\otimes_{\F_2}\F_2\simeq L$;
+the result is
+$\sum_va_vd_u(\beta_v)=a_u=0$.
+All coefficients vanish.
+\end{proof}
+
+\begin{lemma}[Columns of the two embeddings]\label{lem:dpr:embedding-columns}
+For all $a,b\in L$,
+\[
+ \operatorname{Col}(\varphi_0(a))_v=a\,d_v(1),
+ \qquad
+ \operatorname{Col}(\varphi_1(b))_v=d_v(b).
+\]
+In particular
+$\operatorname{Col}(\varphi_1(b))$
+has entries in $\F_2$.
+\end{lemma}
+\begin{proof}
+Use the basis expansions
+$1=\sum_vd_v(1)\beta_v$ and
+$b=\sum_vd_v(b)\beta_v$
+in the second tensor factor,
+then compare the unique
+left-$L$ coefficients from
+Lemma~\ref{lem:dpr:column-basis}.
+\end{proof}
+
+\begin{lemma}[Left scalar multiplication acts columnwise]\label{lem:dpr:column-scaling}
+For all $a\in L$ and $x\in A$,
+\[
+ \operatorname{Col}(\varphi_0(a)x)_v
+  =a\,\operatorname{Col}(x)_v.
+\]
+\end{lemma}
+\begin{proof}
+Insert the unique column expansion of
+$x$, multiply each term by
+$\varphi_0(a)$, use multiplicativity
+of $\varphi_0$, and compare coefficients
+in the left-$L$ basis.
+\end{proof}
+
+\begin{definition}[Weighted column contraction]\label{def:dpr:contraction}
+For $q=(q_v)_v\in L^{I_\ell}$ define
+\[
+ C_q:A\to L,\qquad
+ C_q(x):=\sum_vq_v\operatorname{Col}(x)_v.
+\]
+\end{definition}
+
+\begin{lemma}[Contraction is linear in the left scalar action]\label{lem:dpr:contraction-linear}
+For $a\in L$ and $x,y\in A$,
+$C_q(\varphi_0(a)x+y)=aC_q(x)+C_q(y)$.
+\end{lemma}
+\begin{proof}
+Every coordinate map $\operatorname{Col}$
+is additive, and
+Lemma~\ref{lem:dpr:column-scaling}
+shows compatibility with the left
+scalar action. Multiply by $q_v$
+and sum over $v$.
+\end{proof}
+
+\begin{lemma}[Ordinary multiplication loses tensor information]\label{lem:dpr:multiplication-loss}
+The map $\mu:A\to L$ is not injective
+when $n>1$. More precisely, for any
+$a\in L\setminus\F_2$ the tensor
+$\varphi_0(a)+\varphi_1(a)$ is nonzero
+but has image zero under $\mu$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:dpr:mu-defined},
+$\mu(\varphi_0(a)+\varphi_1(a))=a+a=0$.
+Suppose the tensor were zero.
+Its $v$-th column would satisfy
+$a\,d_v(1)+d_v(a)=0$ for every $v$,
+by Lemma~\ref{lem:dpr:embedding-columns}.
+As $1\ne0$, some coordinate $d_v(1)=1$.
+For that $v$ the equality gives
+$a=d_v(a)\in\F_2$, a contradiction.
+\end{proof}
+
+\begin{remark}[Provenance and scope]
+The two embeddings and the distinction
+between columns and the multiplication map
+are essential to Diamond--Posen's actual
+ring-switching Construction~4.1.
+The binary transposition map $\mathcal T$
+of Chapter~7 is a related coordinate
+operation, but it is not a substitute for
+the entire tensor-algebra sumcheck.
+\end{remark}
