@@ -1,0 +1,110 @@
+\subsection{Classical FRI, field extension, and degree-aware masking}\label{sec:kbalgebra:fri}
+
+\begin{definition}[Classical even--odd FRI fold]\label{def:kbalgebra:classical}
+For $P\in\F[X]$ and $\theta\in\F$, put
+\[
+ \mathsf{cfold}_\theta(P):=E(P)+\theta O(P),
+\]
+where $E$ and $O$ are the operators of Definition~\ref{def:kbalgebra:evenodd}.
+\end{definition}
+
+\begin{lemma}[Classical fold of the kernel coordinate pair]\label{lem:kbalgebra:classical-coordinates}
+Let $m\geq1$ and write a table $f:I_m\to\F$ as $f_0(b'):=f(0,b')$ and $f_1(b'):=f(1,b')$. Then
+\[
+ \mathsf{cfold}_\theta(U_f^{(m)})
+ =U_{\theta f_0+(1+\theta)f_1}^{(m-1)}.
+\]
+\end{lemma}
+\begin{proof}
+By Corollary~\ref{cor:kbalgebra:recursion},
+\[
+ U_f^{(m)}(X)=XU_{f_0}^{(m-1)}(X^2)+(X+1)U_{f_1}^{(m-1)}(X^2).
+\]
+Collecting the even and odd terms gives $E(U_f)=U_{f_1}^{(m-1)}$ and $O(U_f)=U_{f_0}^{(m-1)}+U_{f_1}^{(m-1)}$. Thus
+\[
+ \mathsf{cfold}_\theta(U_f)=U_{f_1}+\theta(U_{f_0}+U_{f_1})
+ =U_{\theta f_0+(1+\theta)f_1}
+\]
+by linearity of $f\mapsto U_f$.
+\end{proof}
+
+\begin{lemma}[Classical versus normalized fold]\label{lem:kbalgebra:fold-reparam}
+Let $\theta\in\F$ satisfy $1+2\theta\neq0$, and set
+\[
+ r:=\frac{1+\theta}{1+2\theta}.
+\]
+Then for every polynomial $P\in\F[X]$,
+\begin{equation}\label{eq:kbalgebra:fold-reparam}
+ \boxed{\mathsf{cfold}_\theta(P)=(1+2\theta)\pfold_r(P).}
+\end{equation}
+Conversely, for $r\in\F$ with $2r-1\neq0$, setting $\theta:=(1-r)/(2r-1)$ gives
+\[
+ \pfold_r(P)=(2r-1)\mathsf{cfold}_\theta(P).
+\]
+\end{lemma}
+\begin{proof}
+For the first identity,
+\[
+ 2r-1=\frac{2+2\theta-(1+2\theta)}{1+2\theta}
+ =\frac1{1+2\theta},
+ \qquad 1-r=\frac{\theta}{1+2\theta}.
+\]
+Therefore $(1+2\theta)((2r-1)E(P)+(1-r)O(P))=E(P)+\theta O(P)=\mathsf{cfold}_\theta(P)$. For the converse, substituting $\theta=(1-r)/(2r-1)$ into $(2r-1)(E+\theta O)$ gives $(2r-1)E+(1-r)O=\pfold_r(P)$. Every division is legal by the explicitly stated nonvanishing hypotheses.
+\end{proof}
+
+\begin{lemma}[One classical fold preserves evaluation on a square]\label{lem:kbalgebra:classical-eval}
+For every $P\in\F[X]$, every $\zeta\in\F$, and $\theta=\zeta$,
+\[
+ P(\zeta)=\mathsf{cfold}_{\zeta}(P)(\zeta^2).
+\]
+\end{lemma}
+\begin{proof}
+By Definition~\ref{def:kbalgebra:evenodd}, $P(\zeta)=E(P)(\zeta^2)+\zeta O(P)(\zeta^2)$. The right side is exactly $\mathsf{cfold}_\zeta(P)(\zeta^2)$ by Definition~\ref{def:kbalgebra:classical}.
+\end{proof}
+
+\begin{theorem}[Classical folding computes univariate evaluation]\label{thm:kbalgebra:classical-evaluation}
+Fix $\zeta\in\F$ and $P\in\F[X]_{<N}$. Define $P_0=P$ and $P_{i+1}:=\mathsf{cfold}_{\zeta^{2^i}}(P_i)$ for $0\leq i<m$. Then $P_m$ is constant and
+\[
+ \boxed{P_m=P(\zeta).}
+\]
+\end{theorem}
+\begin{proof}
+The classical fold maps polynomials of degree less than $2d$ to polynomials of degree less than $d$, because $E$ and $O$ have that degree bound by Definition~\ref{def:kbalgebra:evenodd}. Therefore $P_m$ is constant. Applying Lemma~\ref{lem:kbalgebra:classical-eval} with $P_i$ and evaluation point $\zeta^{2^i}$ shows
+\[
+ P_i(\zeta^{2^i})=P_{i+1}(\zeta^{2^{i+1}})
+\]
+for every $0\leq i<m$. Chaining these $m$ equalities yields $P(\zeta)=P_m(\zeta^{2^m})=P_m$, since $P_m$ is constant.
+\end{proof}
+
+\begin{lemma}[Naturality under field extensions]\label{lem:kbalgebra:naturality}
+Let $\iota:\F\hookrightarrow\mathbb K$ be an injective field homomorphism. Extend it coefficientwise to polynomials and pointwise to tables. Then
+\[
+ \iota(K_b^{(m)})=K_b^{(m)},\qquad
+ \iota(U_f^{(m)})=U_{\iota\circ f}^{(m)},
+\]
+and for every $P\in\F[X]$ and $r\in\F$,
+\[
+ \iota(\pfold_r(P))=\pfold_{\iota(r)}(\iota(P)).
+\]
+Consequently the kernel-coordinate transforms and complete normalized folds commute with $\iota$.
+\end{lemma}
+\begin{proof}
+Every coefficient of $K_b^{(m)}$ is an integer expression in $0$ and $1$, fixed by the homomorphism $\iota$, proving the first equality. Apply $\iota$ to the finite sum defining $U_f$ and use preservation of addition and multiplication to obtain the second. Even--odd coefficient extraction commutes with $\iota$ because $\iota$ acts coefficientwise: $E(\iota(P))=\iota(E(P))$ and $O(\iota(P))=\iota(O(P))$. Applying $\iota$ to $(2r-1)E(P)+(1-r)O(P)$ therefore gives the third equality. Repeating it round by round proves the corresponding complete fold identity. Uniqueness of kernel coordinates from Theorem~\ref{thm:kbalgebra:basis} gives the transform compatibility.
+\end{proof}
+
+\begin{lemma}[Degree of a high-degree masked kernel polynomial]\label{lem:kbalgebra:mask-degree}
+Let $m\geq1$, $N=2^m$, $f:I_m\to\F$, and $R\in\F[X]$ be nonzero of degree $d\geq0$. Then
+\begin{equation}\label{eq:kbalgebra:mask-degree}
+ \boxed{\deg(U_f^{(m)}+X^N R)=N+d.}
+\end{equation}
+\end{lemma}
+\begin{proof}
+Corollary~\ref{cor:kbalgebra:monic} gives $\deg U_f^{(m)}\leq N-1$, unless the polynomial vanishes. Because $R$ is nonzero of degree $d$, the polynomial $X^NR$ has degree exactly $N+d$ with the same nonzero leading coefficient as $R$. There is no term of degree $N+d$ in $U_f$, so the top coefficient of $X^NR$ cannot cancel in the sum. The sum has degree $N+d$.
+\end{proof}
+
+\begin{corollary}[The code dimension must change]\label{cor:kbalgebra:mask-rate}
+Suppose $\mathcal D\subseteq\F$ has $M$ distinct elements and $M\geq N+d+1$, with $R\neq0$ of degree $d$. Then the evaluation word of $U_f+X^NR$ does not lie in $\operatorname{RS}_{\F}(\mathcal D,N)$. It belongs to $\operatorname{RS}_{\F}(\mathcal D,N+d+1)$.
+\end{corollary}
+\begin{proof}
+The second claim follows from Lemma~\ref{lem:kbalgebra:mask-degree}: the polynomial has degree $N+d<N+d+1$. Suppose its evaluation word also lay in $\operatorname{RS}_{\F}(\mathcal D,N)$. Then some polynomial $T$ of degree less than $N$ would agree with $U_f+X^NR$ at every point of $\mathcal D$. Their difference is nonzero of degree $N+d$, because the leading term of $X^NR$ cannot cancel with terms of degree less than $N$. This difference has at least $M\geq N+d+1$ distinct roots, contradicting Lemma~\ref{lem:history:rootcount}. Hence the word is outside the original degree-$N$ code.
+\end{proof}
