@@ -40,6 +40,22 @@ Condition first on a fixed random tape of the verifier, so the query strategy is
 for each $a\in\F$, independently of $P$. On a repeated query the answer is deterministically the previously observed value, again independent of $P$ conditional on the history. By induction on query steps, the distributions of the entire records coincide for all choices of $P$. Finally average over the verifier's independent random tape; the mixture is the same for every $P$.
 \end{proof}
 
+\begin{theorem}[Mask-query and code-rate tradeoff]\label{thm:kbalgebra:mask-rate-tradeoff}
+Let $\F$ be a finite field, let $m\geq1$, let $N=2^m$, and let $0\leq t\leq m$ with $B=2^t$. Let $\mathcal D\subseteq\F^\times$ have $M\geq N+B$ pairwise distinct elements. For a fixed secret table $f:I_m\to\F$, sample $R$ uniformly from $\F[X]_{<B}$ and set
+\[
+ Q(X):=U_f^{(m)}(X)+X^N R(X).
+\]
+Then the following three statements hold:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item $\operatorname{ev}_{\mathcal D}(Q)\in\operatorname{RS}_{\F}(\mathcal D,N+B)$ for every $R$.
+\item A verifier making at most $B$ adaptive distinct queries to this one oracle, at nonzero domain points and without receiving other witness-dependent messages, obtains a query-and-answer distribution independent of $f$.
+\item The code $\operatorname{RS}_{\F}(\mathcal D,N+B)$ has minimum distance at least $M-(N+B)+1$, and a received word can be within Hamming distance $\tau$ of at most one codeword whenever $2\tau<M-(N+B)+1$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+For (i), $\deg U_f^{(m)}\leq N-1$ and $\deg R<B$. Therefore $\deg(X^N R)<N+B$, with the zero polynomial also allowed. The same degree bound holds for their sum $Q$, which by definition belongs to the evaluation code of dimension bound $N+B$. For (ii), Lemma~\ref{lem:kbalgebra:uniform-polynomial} shows that uniform kernel masks from $\mathcal H_t$ are equivalent to uniform polynomials of degree $<B$, so Theorem~\ref{thm:kbalgebra:adaptive-queries} applies verbatim to the oracle $Q$ on the nonzero domain $\mathcal D$. For (iii), two distinct polynomials of degree $<N+B$ differ by a nonzero polynomial of degree at most $N+B-1$. The root-count lemma (Lemma~\ref{lem:history:rootcount}) shows that their evaluation words agree in at most $N+B-1$ of the $M$ positions. Thus their Hamming distance is at least $M-(N+B)+1$. If two codewords both had distance at most $\tau$ from one received word, the Hamming triangle inequality (Lemma~\ref{lem:security:hamming-triangle}) would bound their mutual distance by $2\tau$, contrary to the strict hypothesis.
+\end{proof}
+
 \begin{remark}[Exact scope of the bounded-query theorem]\label{rem:kbalgebra:mask-scope}
 Theorem~\ref{thm:kbalgebra:adaptive-queries} concerns \emph{only} direct oracle evaluations of a single high-degree masked polynomial at nonzero points. It does not prove zero knowledge of KBFold: the original protocol reveals additional sumcheck round polynomials, correlated folded words, a last-round table, and authenticated commitment openings. Those additional messages can invalidate the theorem's hypotheses. Moreover, to use the masked word in a proximity protocol the Reed--Solomon degree and final closure must be modified as proved in Corollary~\ref{cor:kbalgebra:mask-rate} and Theorem~\ref{thm:security:naive-closure}.
 \end{remark}
