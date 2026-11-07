@@ -55,6 +55,26 @@ In characteristic two, $\wp(t+s)=\wp(t)+\wp(s)$, so $\wp$ is $\F_2$-linear. By L
 $\Tr(\wp(t))=\Tr(t^2)+\Tr(t)=0$, proving inclusion of the image in the trace kernel. The polynomial $t^2+t=t(t+1)$ vanishes precisely at $t\in\{0,1\}$, so $\ker\wp$ has two elements. Consequently $\operatorname{im}\wp$ has $|L|/2$ elements. By surjectivity of $\Tr$ in Lemma~\ref{lem:history:trace}, $\ker\Tr$ also has $|L|/2$ elements. The inclusion is thus an equality. Every value in the image has exactly two preimages, and a uniform $t$ therefore induces the uniform distribution on $\ker\Tr$.
 \end{proof}
 
+\begin{lemma}[Existence and uniqueness of the trace-dual basis]\label{lem:history:dualbasis}
+Let $(\beta_u)_{u\in I}$ be any $\F_2$-basis of $L=\F_{2^n}$, indexed by a set $I$ of cardinality $n$. There is a unique family $(\eta_u)_{u\in I}\subseteq L$ such that
+\[
+ \Tr(\eta_u\beta_v)=\delta_{uv}
+ \qquad\text{for all }u,v\in I.
+\]
+This family is an $\F_2$-basis of $L$, and for every $x=\sum_v d_v(x)\beta_v$,
+$d_u(x)=\Tr(\eta_ux)$.
+\end{lemma}
+\begin{proof}
+Consider the $\F_2$-linear map
+\[
+ \Phi:L\longrightarrow\operatorname{Hom}_{\F_2}(L,\F_2),\qquad
+ \Phi(a)(x):=\Tr(ax).
+\]
+To prove injectivity, let $a\neq0$. By surjectivity of $\Tr$ in Lemma~\ref{lem:history:trace}, choose $y\in L$ with $\Tr(y)=1$. Since $a$ is invertible, setting $x=a^{-1}y$ gives $\Phi(a)(x)=\Tr(y)=1$, so $\Phi(a)\neq0$. Thus $\ker\Phi=\{0\}$. Both the domain and codomain have dimension $n$ over $\F_2$: the codomain has dimension $n$ because an $\F_2$-linear functional is uniquely determined by its $n$ values on a basis. Hence $\Phi$ is bijective.
+
+For each $u\in I$, define the coordinate functional $d_u:L\to\F_2$ by $d_u(\sum_vc_v\beta_v)=c_u$. The bijection $\Phi$ provides a unique $\eta_u$ with $\Phi(\eta_u)=d_u$. Evaluating at $\beta_v$ yields the desired trace pairing. If $\sum_uc_u\eta_u=0$ with $c_u\in\F_2$, multiply by $\beta_v$ and apply trace to obtain $c_v=0$ for all $v$. Thus $(\eta_u)$ is linearly independent and hence a basis. Finally $d_u(x)=\Phi(\eta_u)(x)=\Tr(\eta_ux)$ by its definition.
+\end{proof}
+
 \begin{lemma}[Frobenius-linear decomposition of the correction]\label{lem:history:frobdecomp}
 Choose the trace-dual field basis $(\eta_u)_{u\in I}$ satisfying
 $d_u(x)=\Tr(\eta_ux)$. For $0\leq j<n$ define
