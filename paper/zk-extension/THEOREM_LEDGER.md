@@ -219,3 +219,25 @@ Run `sh audit/RUN.sh` to execute the existing kernel tests plus the new determin
 **Important attribution:** Diamond and Posen (ePrint 2024/504, §4) introduced this original tensor-algebra compiler; its reconstruction is not claimed as our novel result. The later mask techniques of Kochergin and Frigo--shelat are cited independently.
 
 **Rust audit:** GF(16)/GF(256) tests for tensor multiplication, embeddings, exact columns, original evaluation, terminal factor and the embedded-field polynomial root bound.
+
+
+## Chapter 9 — Zero-Knowledge Ring Switching
+
+**Source:** `sections/09-zk-ring-switching.tex`, seven subsections.
+**Lean map:** [CHAPTER_09_LEAN_MAP.md](CHAPTER_09_LEAN_MAP.md).
+**Proof audit:** 51 labeled definitions/results and **37 complete mathematical proofs**. The newly proposed Lean 4 declarations have not been certified.
+
+### Proved facts
+
+- Exact causal one-opening public-core simulation: the joint view `(m,y',theta,U,z,A)` is independent of an admissible witness, even under adaptively chosen verifier challenges, provided fresh independent field masks are used.
+- Uniform input pair `(m,y')`, uniform conditional trace-zero vector `U`, and uniform conditional final field scalar `A`.
+- Exact conditional Artin--Schreier mask fibers (two preimages per coordinate), and existence/count of hidden witness completions.
+- Every enforced hidden-field consistency relation is affine after public challenges; the public check uses `Tr(U_k)=0`. Hidden quadratic `sigma=rho²` is tested probabilistically through anchored residuals rather than directly proved.
+- Nonzero residual root error at most `n/|L|`; ideal false-claim soundness at most `(ell+n)/|L|` with all commitment/challenge timing explicit.
+- A two-opening pad-reuse attack distinguishing equal-authorized-evaluation witnesses with statistical distance one.
+- Perfect complete-view privacy in a deliberately **opaque ideal proof functionality**, plus a conditional real-world ZK composition theorem assuming a separate full commitment/proof/authenticated-opening simulator.
+- Exact single-opening message and auxiliary-state counts and the characteristic-two versus existing odd-characteristic KBFold obstacle.
+
+**Security boundary:** Chapter 9 does **not** establish unconditional real-world zero knowledge for the complete KBFold PCS. Concrete binding, hiding, online simulation of all commitment roots/proofs/openings, and the original KBFold degree/proximity arguments remain to be proved.
+
+**Reproducible tests:** Chapter 9 has deterministic finite-field regression tests of public message distributions and conditional mask laws over GF(4) and GF(16).
