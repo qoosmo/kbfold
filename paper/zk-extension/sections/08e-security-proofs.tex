@@ -1,0 +1,283 @@
+\subsection{Completeness and composition soundness of the compiler}\label{sec:dpr:security}
+
+\begin{lemma}[Honest initial contraction]\label{lem:dpr:init-honest}
+If the public claim is true,
+$y_{\rm pub}=y_w$, and the prover
+sends the correct tensor message
+$S_0=S$, the initial contraction
+check passes.
+\end{lemma}
+\begin{proof}
+By Theorem~\ref{thm:dpr:claim-contraction},
+$C_q(S)=y_w$. Substitute
+$S_0=S$ and
+$y_{\rm pub}=y_w$.
+\end{proof}
+
+\begin{lemma}[Honest sumcheck telescoping]\label{lem:dpr:telescoping}
+If $S_0=S=\sum_{b\in I_h}H(b)$
+and the prover sends the true
+partial-sum polynomial $g_i=G_i$
+at every round, then all endpoint
+checks pass and
+\[
+ s_h=H(\varphi_1(z)).
+\]
+\end{lemma}
+\begin{proof}
+Induct on the number $i$ of
+completed rounds. Initially
+$s_0=S$ equals the full Boolean
+sum by Theorem~\ref{thm:dpr:boolean-sum}.
+Suppose $s_i$ equals the true
+Boolean sum over the remaining
+variables at challenge prefix
+$z_{<i}$. The endpoint identity
+of Lemma~\ref{lem:dpr:true-partial}
+gives
+$s_i=G_i(0)+G_i(1)=g_i(0)+g_i(1)$,
+so the verifier's check passes.
+It then sets
+$s_{i+1}=G_i(\varphi_1(z_i))$,
+which by the definition of $G_i$
+is exactly the sum over the
+remaining $h-i-1$ Boolean variables.
+This proves the induction invariant.
+At $i=h$, no variables remain,
+and the sole term is
+$H(\varphi_1(z_0),\ldots,
+\varphi_1(z_{h-1}))$.
+\end{proof}
+
+\begin{lemma}[Honest terminal check]\label{lem:dpr:terminal-honest}
+If the sumcheck is honest and
+the prover sends $u=T'(z)$,
+the terminal tensor equality
+in Definition~\ref{def:dpr:full-protocol}
+passes.
+\end{lemma}
+\begin{proof}
+Lemma~\ref{lem:dpr:telescoping}
+gives $s_h=H(\varphi_1(z))$.
+Lemma~\ref{lem:dpr:terminal}
+identifies this element with
+$\varphi_1(T'(z))$
+times the public equality factor.
+Replacing $T'(z)$ by $u$
+proves the terminal check.
+\end{proof}
+
+\begin{theorem}[Perfect completeness of the unmasked compiler]\label{thm:dpr:complete}
+Assume the underlying large-field
+evaluation protocol has perfect
+completeness in the sense of
+Definition~\ref{def:dpr:large-pcs}.
+For an honest Boolean witness $w$
+and true public evaluation claim
+$y_{\rm pub}=y_w$, an honest
+execution of
+Definition~\ref{def:dpr:full-protocol}
+is accepted with probability $1$.
+\end{theorem}
+\begin{proof}
+The prover constructs the packed
+polynomial and commits to it.
+The initial contraction passes by
+Lemma~\ref{lem:dpr:init-honest}.
+Every sumcheck round passes by
+Lemma~\ref{lem:dpr:telescoping}.
+The terminal equality passes by
+Lemma~\ref{lem:dpr:terminal-honest}.
+The final large-field claim
+$u=T'(z)$ is true, so the
+delegated evaluation proof passes
+by its assumed perfect
+completeness. All checks pass
+for every choice of verifier
+challenges.
+\end{proof}
+
+\begin{definition}[Unpacking an arbitrary committed polynomial]\label{def:dpr:extract}
+For any multilinear
+$T'\in L[X_0,\ldots,X_{h-1}]_{\rm mult}$,
+define its underlying Boolean table
+\[
+ \operatorname{Dec}(T')(v,j):=
+ d_v(T'(j))\in\F_2.
+\]
+Let $w^{T'}$ denote this table.
+\end{definition}
+
+\begin{lemma}[Packing after extraction gives the original packed polynomial]\label{lem:dpr:extract-pack}
+For each $j\in I_h$,
+\[
+ \sum_v\beta_vw^{T'}_{v,j}=T'(j).
+\]
+Therefore the packed multilinear
+extension of $w^{T'}$ is exactly
+$T'$.
+\end{lemma}
+\begin{proof}
+The first equality is the
+unique binary basis expansion
+$T'(j)=\sum_v\beta_vd_v(T'(j))$.
+Both $T'$ and the packed multilinear
+extension of $w^{T'}$ are
+multilinear polynomials over $L$
+with identical values at all
+Boolean vertices $j\in I_h$.
+The uniqueness of multilinear
+interpolation (from Chapter~1)
+therefore makes them identical.
+\end{proof}
+
+\begin{lemma}[False original claim implies false tensor initial sum]\label{lem:dpr:false-initial}
+Fix a multilinear packed polynomial
+$T'$ and its extracted Boolean
+table $w^{T'}$.
+If
+$y_{\rm pub}\neq
+\widetilde{w^{T'}}(r_{\rm lo},r_{\rm hi})$
+and the initial contraction check
+$y_{\rm pub}=C_q(S_0)$ passes,
+then
+\[
+ S_0\neq\sum_{j\in I_h}H(j).
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:dpr:extract-pack},
+$T'$ is the exact packing of
+$w^{T'}$.
+Theorem~\ref{thm:dpr:boolean-sum}
+identifies the true tensor sum
+with $S$. Theorems
+\ref{thm:dpr:column-evaluation}
+and~\ref{thm:dpr:claim-contraction},
+applied to the extracted table,
+give
+$C_q(\sum_jH(j))
+=\widetilde{w^{T'}}(r_{\rm lo},r_{\rm hi})$.
+If $S_0$ were that true sum,
+the passing initial contraction
+would force $y_{\rm pub}$
+to equal the extracted evaluation,
+contrary to hypothesis.
+\end{proof}
+
+\begin{lemma}[A correct delegated opening implies the true terminal tensor value]\label{lem:dpr:correct-open}
+Suppose the delegated claimed
+value satisfies $u=T'(z)$.
+If the terminal equality
+\[
+ s_h=\varphi_1(u)
+ \operatorname{eq}_h(\varphi_0(r_{\rm hi}),\varphi_1(z))
+\]
+passes, then
+$s_h=H(\varphi_1(z))$.
+\end{lemma}
+\begin{proof}
+Substitute $u=T'(z)$ into
+the terminal equality and apply
+Lemma~\ref{lem:dpr:terminal},
+which identifies the product
+with $H(\varphi_1(z))$.
+\end{proof}
+
+\begin{theorem}[False-claim soundness with a bound underlying large-field oracle]\label{thm:dpr:compose-sound}
+Fix a committed multilinear
+$T'$ and its extracted Boolean
+table $w^{T'}$ before any
+interactive challenges.
+Assume the underlying
+evaluation protocol satisfies
+Definition~\ref{def:dpr:large-pcs}
+with error
+$\varepsilon_{\rm eval}$.
+If
+$y_{\rm pub}\neq
+\widetilde{w^{T'}}(r_{\rm lo},r_{\rm hi})$,
+then for every randomized causal
+prover
+\[
+ \boxed{
+ \Pr[\mathrm{ring\ switch\ verifier\ accepts}]
+ \leq\min\left\{1,\frac{2h}{q}
+               +\varepsilon_{\rm eval}\right\}.}
+\]
+\end{theorem}
+\begin{proof}
+Let $E$ denote the event that
+the verifier accepts its
+delegated large-field evaluation
+proof even though $u\neq T'(z)$.
+The underlying soundness
+assumption gives
+$\Pr[E]\leq\varepsilon_{\rm eval}$.
+We now condition on the
+complement of $E$ and analyze
+the ring-switching checks.
+
+If the initial contraction
+fails, the verifier rejects.
+Otherwise Lemma~\ref{lem:dpr:false-initial}
+proves that the initial
+ring-sumcheck claim is false.
+On a run in $E^c$ where the
+underlying verification accepts,
+the final claimed opening
+satisfies $u=T'(z)$.
+If the terminal tensor equality
+passes, Lemma~\ref{lem:dpr:correct-open}
+then forces the final sumcheck
+claim to be the \emph{true}
+value $H(\varphi_1(z))$.
+Theorem~\ref{thm:dpr:sumcheck-sound}
+bounds the probability of
+that event, together with all
+sumcheck checks passing, by
+$2h/q$.
+Thus acceptance is contained
+in the union of $E$ and
+the false-to-true sumcheck event.
+The union bound gives
+$\Pr[\mathrm{accept}]
+\leq\varepsilon_{\rm eval}+2h/q$.
+Cap by $1$ to finish.
+\end{proof}
+
+\begin{corollary}[Ideal large-field oracle error]\label{cor:dpr:ideal-sound}
+If the delegated evaluation
+is perfectly sound
+($\varepsilon_{\rm eval}=0$),
+then a false original evaluation
+claim survives the tensor
+ring-switching reduction
+with probability at most
+$\min\{1,2h/q\}$.
+\end{corollary}
+\begin{proof}
+Set $\varepsilon_{\rm eval}=0$
+in Theorem~\ref{thm:dpr:compose-sound}.
+\end{proof}
+
+\begin{remark}[Difference from a full IOP knowledge theorem]
+Theorem~\ref{thm:dpr:compose-sound}
+assumes that the committed
+polynomial $T'$ has already been
+bound. It does not reprove the
+emulator/extractor theorem
+for the actual vector-oracle
+model of Diamond--Posen,
+nor does it account for
+all implementation-level
+binding and query errors.
+The original authors give
+their own compiler security
+argument in Theorem~4.4
+of~\cite{DiamondPosen2024}.
+This chapter isolates
+a quantitative algebraic
+soundness interface for
+later formalization.
+\end{remark}
