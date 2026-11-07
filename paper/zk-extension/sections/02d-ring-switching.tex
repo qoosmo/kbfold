@@ -1,0 +1,118 @@
+\subsection{Diamond--Posen ring switching as an exact transposition}\label{sec:history:ring}
+
+Diamond and Posen~\cite{DiamondPosen2024} address commitment and evaluation of Boolean-valued multilinear polynomials using a system that opens packed elements over a large binary extension field. We derive the ring-switching identity at the algebraic level. No hidden correction or masking is used in this subsection.
+
+\begin{definition}[Packing parameters]\label{def:history:packing}
+Let $\ell\geq1$, let $n=2^\ell$, let $L=\F_{2^n}$, and put $I=I_\ell$. Fix any ordered $\F_2$-basis $(\beta_v)_{v\in I}$ of $L$. For $x\in L$ let $d_u(x)\in\F_2$ be the unique coordinates with $x=\sum_{u\in I}\beta_u d_u(x)$. Let $d\geq0$, put $J=\{0,1\}^d$, and let $w=(w_{v,j})_{(v,j)\in I\times J}$ be a Boolean witness table, $w_{v,j}\in\F_2$.
+\end{definition}
+
+\begin{definition}[Packed witness and evaluation instance]\label{def:history:packedclaim}
+For $j\in J$ let
+\[
+ \widehat w_j:=\sum_{v\in I}\beta_v w_{v,j}\in L.
+\]
+Fix $r_{\rm lo}\in L^\ell$ and $r_{\rm hi}\in L^d$, and define the public equality weights
+\[
+ q_v:=\operatorname{eq}_\ell(v,r_{\rm lo}),\qquad
+ h_j:=\operatorname{eq}_d(j,r_{\rm hi}).
+\]
+When $d=0$, $J$ consists of the empty tuple and the empty-product weight is $1$.
+The claimed evaluation is
+\[
+ y=\sum_{v\in I}\sum_{j\in J}q_vh_jw_{v,j}.
+\]
+\end{definition}
+
+\begin{definition}[Partial evaluations and binary transposition]\label{def:history:transpose}
+Define the honest partial evaluations $s_v^{*}:=\sum_{j\in J}h_jw_{v,j}\in L$. For an arbitrary vector $s=(s_v)_{v\in I}\in L^I$ define its transpose under the chosen binary basis by
+\begin{equation}\label{eq:history:transposition}
+ \mathcal T(s)_u:=\sum_{v\in I}\beta_v d_u(s_v),\qquad u\in I.
+\end{equation}
+\end{definition}
+
+\begin{lemma}[Transposition is an involution]\label{lem:history:involution}
+The map $\mathcal T:L^I\to L^I$ is $\F_2$-linear and satisfies $\mathcal T^2=\operatorname{id}_{L^I}$.
+\end{lemma}
+\begin{proof}
+Each coordinate map $d_u$ is $\F_2$-linear, so $\mathcal T$ is $\F_2$-linear. Fix an arbitrary vector $s$. From the definition of coordinates and their uniqueness,
+\[
+ d_v(\mathcal T(s)_u)
+ =d_v\left(\sum_{a\in I}\beta_a d_u(s_a)\right)=d_u(s_v).
+\]
+It follows that
+\[
+ \mathcal T(\mathcal T(s))_v
+ =\sum_{u\in I}\beta_u d_v(\mathcal T(s)_u)
+ =\sum_{u\in I}\beta_u d_u(s_v)=s_v.
+\]
+Thus $\mathcal T^2=\operatorname{id}$, and in particular $\mathcal T$ is bijective.
+\end{proof}
+
+\begin{lemma}[Packed transposition identity]\label{lem:history:packedtranspose}
+For every $u\in I$,
+\begin{equation}\label{eq:history:packedtranspose}
+ \mathcal T(s^*)_u=\sum_{j\in J}d_u(h_j)\widehat w_j.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Use Definition~\ref{def:history:transpose} and expand:
+\[
+ \mathcal T(s^*)_u
+  =\sum_v\beta_v d_u\left(\sum_jh_jw_{v,j}\right).
+\]
+Because each $w_{v,j}\in\F_2$ and $d_u$ is $\F_2$-linear,
+$d_u(\sum_jh_jw_{v,j})=\sum_jd_u(h_j)w_{v,j}$.
+Interchanging the two finite sums yields
+\[
+ \sum_jd_u(h_j)\left(\sum_v\beta_vw_{v,j}\right)
+ =\sum_jd_u(h_j)\widehat w_j,
+\]
+which is the assertion.
+\end{proof}
+
+\begin{definition}[Random multilinear batching]\label{def:history:batch}
+For $\theta\in L^\ell$ and $u\in I$, put $\lambda_u(\theta):=\operatorname{eq}_\ell(u,\theta)$. For a candidate vector $s\in L^I$ define
+\[
+ B_s(\theta):=\sum_{u\in I}\lambda_u(\theta)\mathcal T(s)_u,\qquad
+ a_j(\theta):=\sum_{u\in I}\lambda_u(\theta)d_u(h_j).
+\]
+The batched transposition equation is
+\begin{equation}\label{eq:history:batch}
+ B_s(\theta)=\sum_{j\in J}a_j(\theta)\widehat w_j.
+\end{equation}
+\end{definition}
+
+\begin{lemma}[Batch correctness]\label{lem:history:batch-correct}
+Equation~\eqref{eq:history:batch} holds for every $\theta\in L^\ell$ when $s=s^*$.
+\end{lemma}
+\begin{proof}
+Multiply the identity~\eqref{eq:history:packedtranspose} by $\lambda_u(\theta)$ and sum over $u$. Interchange the finite sums and use the definition of $a_j(\theta)$.
+\end{proof}
+
+\begin{lemma}[Nonzero row error yields a nonzero polynomial]\label{lem:history:rowerror}
+Fix $e=(e_u)_{u\in I}\in L^I$ and define
+\[
+ E_e(\Theta):=\sum_{u\in I}e_u\operatorname{eq}_\ell(u,\Theta)\in L[\Theta_0,\ldots,\Theta_{\ell-1}].
+\]
+If $e\ne0$, then $E_e$ is nonzero and has total degree at most $\ell$.
+\end{lemma}
+\begin{proof}
+Each equality polynomial is a product of $\ell$ affine factors, so the total degree bound holds. Choose $u_0$ for which $e_{u_0}\ne0$. At the Boolean point $\Theta=u_0$, Lemma~\ref{lem:intro:interpolation} gives
+$E_e(u_0)=e_{u_0}\ne0$. Hence $E_e$ is not the zero polynomial.
+\end{proof}
+
+\begin{theorem}[Ring-switching batching error]\label{thm:history:ring-sound}
+Let the witness $w$, public evaluation instance, and candidate partial evaluations $s$ be fixed before a uniform challenge $\theta\overset{\$}{\leftarrow}L^\ell$. If $s\ne s^*$, then
+\[
+ \Pr_\theta\left[B_s(\theta)=\sum_ja_j(\theta)\widehat w_j\right]
+ \leq\min\{1,\ell/|L|\}.
+\]
+\end{theorem}
+\begin{proof}
+Because $\mathcal T$ is injective by Lemma~\ref{lem:history:involution}, $\mathcal T(s)-\mathcal T(s^*)$ is a nonzero vector $e$. By Lemma~\ref{lem:history:batch-correct}, the equation displayed in the theorem holds iff
+$E_e(\theta)=0$. By Lemma~\ref{lem:history:rowerror}, $E_e$ is nonzero of total degree at most $\ell$. The Schwartz--Zippel bound for uniform independent coordinates of $\theta$ gives probability at most $\ell/|L|$. The minimum with $1$ is automatic.
+\end{proof}
+
+\begin{remark}[Where commitment enters historically]
+Ring switching reduces a bit-level multilinear claim to linear relations on packed field elements. Diamond and Posen use a suitable underlying large-field proof system to establish those relations. The algebraic identity and batching theorem above do not prescribe which commitment system implements the final verification.
+\end{remark}
