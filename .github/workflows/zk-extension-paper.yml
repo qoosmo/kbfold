@@ -1,0 +1,25 @@
+name: Zero-Knowledge KBFold Manuscript
+on:
+  push:
+    branches: [main]
+    paths:
+      - "paper/zk-extension/**"
+      - ".github/workflows/zk-extension-paper.yml"
+  pull_request:
+    paths:
+      - "paper/zk-extension/**"
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          working_directory: paper/zk-extension
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kbfold-zk-manuscript
+          path: paper/zk-extension/main.pdf
+          if-no-files-found: error
