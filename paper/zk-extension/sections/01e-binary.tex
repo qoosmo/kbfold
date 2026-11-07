@@ -1,0 +1,113 @@
+\subsection{A second setting: binary-field ring switching}\label{sec:intro:binary}
+
+\begin{definition}[Binary extension setting]\label{def:intro:binary}
+Let $\ell\geq1$, put $n:=2^\ell$, and now let $L:=\F_{2^n}$. Choose $\alpha\in L$ such that $[\F_2(\alpha):\F_2]=n$. For $b\in I_\ell$ set $\beta_b:=K_b^{(\ell)}(\alpha)$.
+\end{definition}
+
+\begin{lemma}[Kernel field basis]\label{lem:intro:fieldbasis}
+The family $(\beta_b)_{b\in I_\ell}$ is an $\F_2$-basis of $L$.
+\end{lemma}
+\begin{proof}
+Proposition~\ref{prop:intro:basis}, applied with $\F=\F_2$ and $m=\ell$, says that $(K_b^{(\ell)})_b$ is an $\F_2$-basis of $\F_2[X]_{<n}$. Evaluation at $\alpha$ is $\F_2$-linear. It is injective: a nonzero polynomial of degree $<n$ cannot vanish at $\alpha$ because the minimal polynomial of $\alpha$ has degree $n$. Its domain and codomain are both $n$-dimensional over $\F_2$, hence the evaluation map is bijective. The images of the stated basis under this bijection form an $\F_2$-basis of $L$.
+\end{proof}
+
+\begin{definition}[Coordinates and transposed mask]\label{def:intro:correction}
+For $x\in L$ and $u\in I_\ell$ let $d_u(x)\in\F_2$ be the unique coordinate satisfying $x=\sum_u d_u(x)\beta_u$. Let $p=(p_v)_{v\in I_\ell}\in L^{I_\ell}$ be a pad vector, and define
+\begin{align}
+ c^p_u&:=\sum_{v\in I_\ell}\beta_v d_u(p_v),\label{eq:intro:cp}\\
+ C_p(X)&:=\sum_{u\in I_\ell}c^p_u K_u^{(\ell)}(X).\label{eq:intro:cp-poly}
+\end{align}
+For a challenge $\theta\in L^\ell$ define
+\begin{equation}\label{eq:intro:delta}
+ \Delta_p(\theta):=\sum_{u\in I_\ell}\operatorname{eq}_\ell(u,\theta)c^p_u.
+\end{equation}
+Finally define the \emph{scalar kernel-fold evaluation} for any $c\in L^{I_\ell}$ by
+\[
+ \KFold_\theta\bigl(U_c^{(\ell)}\bigr):=\sum_{u\in I_\ell}\operatorname{eq}_\ell(u,\theta)c_u.
+\]
+This is well defined by Proposition~\ref{prop:intro:basis}.
+\end{definition}
+
+\begin{proposition}[Kernel representation of masked transposition]\label{prop:intro:delta}
+With the preceding definitions, for every $p\in L^{I_\ell}$ and $\theta\in L^\ell$,
+\begin{equation}\label{eq:intro:delta-kernel}
+ \Delta_p(\theta)=\KFold_\theta(C_p).
+\end{equation}
+Moreover, if $\eta_u\in L$ denotes the trace-dual basis to $\beta_u$, then
+\begin{equation}\label{eq:intro:delta-trace}
+ \Delta_p(\theta)=\sum_{u,v\in I_\ell}\operatorname{eq}_\ell(u,\theta)\beta_v\Tr_{L/\F_2}(\eta_u p_v).
+\end{equation}
+\end{proposition}
+\begin{proof}
+By the definition of $C_p$ and the scalar kernel-fold evaluation,
+\[
+ \KFold_\theta(C_p)=\sum_u\operatorname{eq}_\ell(u,\theta)c^p_u=\Delta_p(\theta),
+\]
+proving~\eqref{eq:intro:delta-kernel}. For the second identity, the trace-dual property implies $d_u(x)=\Tr_{L/\F_2}(\eta_u x)$: expand $x=\sum_vd_v(x)\beta_v$, multiply by $\eta_u$, apply trace, and use $\Tr(\eta_u\beta_v)=1$ for $u=v$ and $0$ otherwise. Substitute this coordinate identity in~\eqref{eq:intro:cp} and then in~\eqref{eq:intro:delta} to obtain~\eqref{eq:intro:delta-trace}.
+\end{proof}
+
+\begin{lemma}[Characteristic-dependent partition identity]\label{lem:intro:partition}
+For every field $\F$ and every $m\geq1$,
+\begin{equation}\label{eq:intro:partition}
+ \sum_{b\in I_m}K_b^{(m)}(X)=\prod_{i=0}^{m-1}(2X^{2^i}+1).
+\end{equation}
+In particular, if $\operatorname{char}(\F)=2$, the sum equals $1$.
+\end{lemma}
+\begin{proof}
+Expand the sum over bit tuples as a product of sums, one for each index $i$:
+\[
+ \sum_{b\in I_m}\prod_i(X^{2^i}+b_i)
+  =\prod_i\bigl((X^{2^i}+0)+(X^{2^i}+1)\bigr)
+  =\prod_i(2X^{2^i}+1).
+\]
+When $\operatorname{char}(\F)=2$, each factor on the right is $1$.
+\end{proof}
+
+\begin{definition}[Binary multilinearization]\label{def:intro:mlization}
+Let $\operatorname{char}(\F)=2$, let $m\geq1$ and $N=2^m$. For $0\leq e<N$ write its unique binary expansion $e=\sum_{i=0}^{m-1}e_i2^i$. Let $\F[Z_0,\ldots,Z_{m-1}]_{\mathrm{ml}}$ be the $\F$-vector space spanned by the squarefree monomials $\prod_i Z_i^{e_i}$. Define the unique $\F$-linear map $\mathscr M_m:\F[X]_{<N}\to\F[Z_0,\ldots,Z_{m-1}]_{\mathrm{ml}}$ by
+\[
+ \mathscr M_m(X^e):=\prod_{i=0}^{m-1}Z_i^{e_i}.
+\]
+We do not assume that $\mathscr M_m$ preserves polynomial multiplication.
+\end{definition}
+
+\begin{lemma}[Multilinearization of a kernel polynomial]\label{lem:intro:mlizekernel}
+Under the hypotheses of Definition~\ref{def:intro:mlization}, for every $b\in I_m$,
+\[
+ \mathscr M_m(K_b^{(m)})(Z)=\prod_{i=0}^{m-1}(Z_i+b_i).
+\]
+\end{lemma}
+\begin{proof}
+Fix $b$ and write $J=\{0,\ldots,m-1\}$. Applying distributivity to the product defining $K_b^{(m)}$ yields the exact finite expansion
+\[
+ K_b^{(m)}(X)=\sum_{S\subseteq J}\left(\prod_{i\notin S}b_i\right)X^{\sum_{i\in S}2^i}.
+\]
+For each subset $S$, the integer $\sum_{i\in S}2^i$ is strictly less than $N$ and has binary digit $1$ precisely at the positions in $S$. By the definition of $\mathscr M_m$,
+\[
+ \mathscr M_m\left(X^{\sum_{i\in S}2^i}\right)=\prod_{i\in S}Z_i.
+\]
+Applying $\F$-linearity to the preceding finite expansion gives
+\[
+ \mathscr M_m(K_b^{(m)})(Z)=\sum_{S\subseteq J}\left(\prod_{i\notin S}b_i\right)\left(\prod_{i\in S}Z_i\right).
+\]
+Finally, distributivity of $\prod_{i\in J}(Z_i+b_i)$ gives exactly the same sum over $S$. Thus the two polynomials agree. No multiplicativity property of $\mathscr M_m$ was used.
+\end{proof}
+
+\begin{proposition}[Multilinearization of the complete kernel fold]\label{prop:intro:mlizefold}
+Suppose $\operatorname{char}(\F)=2$. For every $P\in\F[X]_{<N}$ and $\theta\in\F^m$,
+\begin{equation}\label{eq:intro:mlizefold}
+ \KFold_\theta(P)=\mathscr M_m(P)(1+\theta_0,\ldots,1+\theta_{m-1}),
+\end{equation}
+where $\KFold_\theta(P)$ denotes the iterated normalized fold in Corollary~\ref{cor:intro:iterated}, applied to the unique kernel coefficient table of $P$.
+\end{proposition}
+\begin{proof}
+By Proposition~\ref{prop:intro:basis}, write uniquely $P=\sum_{b\in I_m}c_bK_b^{(m)}$. Corollary~\ref{cor:intro:iterated} gives
+\[
+ \KFold_\theta(P)=\sum_b c_b\operatorname{eq}_m(b,\theta).
+\]
+By $\F$-linearity of $\mathscr M_m$ and of evaluation at $1+\theta$,
+\[
+ \mathscr M_m(P)(1+\theta)=\sum_b c_b\mathscr M_m(K_b^{(m)})(1+\theta).
+\]
+Lemma~\ref{lem:intro:mlizekernel} identifies each summand as $\prod_i(1+\theta_i+b_i)$. If $b_i=0$, this factor is $1+\theta_i=1-\theta_i$, because the characteristic is two. If $b_i=1$, the factor is $2+\theta_i=\theta_i$. In both cases this equals $(1-b_i)(1-\theta_i)+b_i\theta_i$. Taking the product over $i$ shows $\mathscr M_m(K_b^{(m)})(1+\theta)=\operatorname{eq}_m(b,\theta)$. Substitution in the displayed sum proves~\eqref{eq:intro:mlizefold}.
+\end{proof}
