@@ -1,0 +1,157 @@
+\subsection{The original ring-switching evaluation reduction}\label{sec:dpr:protocol}
+
+We state an algebraically explicit specialization of
+Diamond--Posen's Construction~4.1
+\cite{DiamondPosen2024}. Its large-field
+evaluation protocol is represented by a black-box
+committed-oracle interface, not silently replaced
+by our Chapter~6 trace checker.
+
+\begin{definition}[Underlying large-field evaluation interface]\label{def:dpr:large-pcs}
+An \emph{underlying large-field evaluation protocol}
+consists of algorithms
+\[
+ \mathsf{Commit}'(T'),\quad
+ \mathsf{Prove}'(C',z,u;T'),\quad
+ \mathsf{Verify}'(C',z,u,\pi').
+\]
+Here $T'$ is a multilinear polynomial over $L$,
+$C'$ is the commitment to its Boolean coefficient
+table, $z\in L^h$, and $u\in L$.
+Perfect correctness means every honest opening
+for $u=T'(z)$ is accepted. For a \emph{fixed,
+bound} $T'$ we assume the following
+evaluation soundness property: for any causal
+adversary and any choice of the claimed
+$(z,u)$ arising from the higher-level protocol,
+\[
+ \Pr[\mathsf{Verify}'\text{ accepts}\ \land\
+ u\neq T'(z)]\leq\varepsilon_{\mathrm{eval}}.
+\]
+This is an assumption on the external protocol,
+not a theorem of the tensor algebra.
+\end{definition}
+
+\begin{definition}[Ring-switching prover and verifier]\label{def:dpr:full-protocol}
+The public instance is
+$(C',r_{\rm lo},r_{\rm hi},y_{\rm pub})$;
+the prover holds the Boolean table $w$
+that packs into the committed $T'$.
+The ring-switching reduction runs as follows.
+\begin{enumerate}[label=\textup{(\roman*)}]
+ \item \textbf{Commit:} The prover packs
+ $w$ into the table of $T'$ and
+ invokes $\mathsf{Commit}'(T')$ to obtain $C'$.
+ The commitment and its bound table are fixed
+ before the interactive evaluation.
+ \item \textbf{Tensor partial message:}
+ The prover forms
+ $S=\varphi_1(T')(\varphi_0(r_{\rm hi}))$
+ and sends an alleged value $S_0\in A$.
+ \item \textbf{Original-claim check:}
+ The verifier requires
+ \[
+ \boxed{y_{\rm pub}=C_q(S_0).}
+ \]
+ This step reads every tensor column
+ but does not reveal the packed polynomial.
+ \item \textbf{Ring sumcheck:}
+ Run Definition~\ref{def:dpr:sumcheck}
+ starting with $s_0=S_0$
+ for the degree-two polynomial
+ $H(X)=\varphi_1(T')(X)
+       \operatorname{eq}_h(\varphi_0(r_{\rm hi}),X)$.
+ For every $i<h$, the prover sends $g_i\in A[X]$
+ of degree at most $2$; the verifier
+ checks $s_i=g_i(0)+g_i(1)$, then samples
+ $z_i\leftarrow L$ and puts
+ $s_{i+1}=g_i(\varphi_1(z_i))$.
+ \item \textbf{Reduction to the large field:}
+ The prover sends an alleged
+ $u\in L$ for $T'(z)$, where
+ $z=(z_0,\ldots,z_{h-1})$,
+ and the verifier requires
+ \[
+ \boxed{s_h=\varphi_1(u)\,
+ \operatorname{eq}_h(\varphi_0(r_{\rm hi}),\varphi_1(z)).}
+ \]
+ \item \textbf{Delegated evaluation:}
+ The parties execute the large-field
+ evaluation protocol and accept only if
+ $\mathsf{Verify}'(C',z,u,\pi')=1$.
+\end{enumerate}
+The verifier accepts precisely when
+all the displayed checks and the
+external proof pass.
+\end{definition}
+
+\begin{lemma}[All verifier quantities are typed]\label{lem:dpr:welltyped}
+Every equality checked in
+Definition~\ref{def:dpr:full-protocol}
+is between elements of the same
+ring or field, and the final
+evaluation request to the black box
+is over $L$, not over the tensor
+algebra $A$.
+\end{lemma}
+\begin{proof}
+The element $S_0$ and each
+$s_i,g_i(0),g_i(1),
+g_i(\varphi_1(z_i))$ belong to $A$.
+The contraction $C_q(S_0)$ is in $L$,
+matching $y_{\rm pub}\in L$.
+The terminal expression is a
+product of two elements of $A$,
+matching $s_h\in A$.
+Finally $u$ and $T'(z)$ belong to
+$L$, and $C'$ is a commitment
+to an $L$-coefficient table.
+\end{proof}
+
+\begin{lemma}[The public terminal equality factor is computable]\label{lem:dpr:terminal-public}
+The element
+$\operatorname{eq}_h(\varphi_0(r_{\rm hi}),\varphi_1(z))$
+is computable by the verifier
+from public values without
+accessing the witness table.
+\end{lemma}
+\begin{proof}
+All coordinates of $r_{\rm hi}$
+and the freshly sampled $z$
+are public at the final step.
+Both embeddings $\varphi_0,\varphi_1$
+and the equality polynomial are
+specified by the public field
+representation. Evaluating their
+finite product requires no private
+coefficient of $T'$.
+\end{proof}
+
+\begin{definition}[Committed-word timing invariant]\label{def:dpr:timing}
+A run is \emph{causal and bound} if:
+$T'$ is fixed by its commitment before
+the evaluation interaction;
+$S_0$ is sent before the sumcheck
+challenges; each $g_i$ is fixed
+before $z_i$; the final $u$ may
+depend on the sampled $z$ but
+must be verified against the
+already bound $T'$; and the
+external evaluation protocol satisfies
+the assumed error bound of
+Definition~\ref{def:dpr:large-pcs}.
+\end{definition}
+
+\begin{remark}[Protocol name and attribution]
+This is the \emph{unmasked} reduction
+of Diamond--Posen, specialized to
+$K=\F_2$, extension $L/K$ of degree
+$n=2^\ell$, and $h$ remaining variables.
+It is distinct from the \emph{masked}
+field-affine variant developed in
+Chapter~7. In particular, the
+original prover sends $S_0$
+in the clear, whereas the masking
+program aims to prevent disclosure
+of its witness-dependent columns.
+\end{remark}
