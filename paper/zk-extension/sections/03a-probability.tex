@@ -1,0 +1,142 @@
+\subsection{Finite probability spaces and statistical distance}\label{sec:security:probability}
+
+Every probability calculation in the algebraic IOP model below takes place on a finite sample space. Cryptographic security parameter families will be introduced separately. This separation allows the foundational results to be formalized in Lean~4 without first implementing a computational adversary model.
+
+\begin{definition}[Finite probability distribution]\label{def:security:distribution}
+For a nonempty finite set $A$, a \emph{probability distribution} on $A$ is a function $\mu:A\to\mathbb R_{\geq0}$ such that
+\[
+ \sum_{a\in A}\mu(a)=1.
+\]
+We write $\mathsf{Dist}(A)$ for this set. For $E\subseteq A$, put $\Pr_\mu[E]:=\sum_{a\in E}\mu(a)$. The uniform distribution is $\mathsf{Unif}_A(a):=1/|A|$. For independent $X\sim\mu$ and $Y\sim\nu$, the joint distribution satisfies $\Pr[X=a,Y=b]=\mu(a)\nu(b)$.
+\end{definition}
+
+\begin{definition}[Total variation distance]\label{def:security:tv}
+For $\mu,\nu\in\mathsf{Dist}(A)$ define
+\begin{equation}\label{eq:security:tv}
+  \Delta_A(\mu,\nu):=\frac12\sum_{a\in A}|\mu(a)-\nu(a)|.
+\end{equation}
+For random variables with distributions $\mu$ and $\nu$, we also write $\Delta(X,Y)$.
+\end{definition}
+
+\begin{lemma}[Range and symmetry]\label{lem:security:tv-range}
+For $\mu,\nu\in\mathsf{Dist}(A)$,
+\[
+ 0\leq\Delta_A(\mu,\nu)\leq1,\qquad
+ \Delta_A(\mu,\nu)=\Delta_A(\nu,\mu),
+\]
+and $\Delta_A(\mu,\nu)=0$ if and only if $\mu=\nu$.
+\end{lemma}
+\begin{proof}
+Each summand in~\eqref{eq:security:tv} is nonnegative, proving the lower bound. The inequality $|\mu(a)-\nu(a)|\leq\mu(a)+\nu(a)$ follows because both terms are nonnegative; summing gives $\Delta_A\leq(1+1)/2=1$. Symmetry follows from $|x-y|=|y-x|$. If the total variation is zero, each nonnegative summand must vanish, so $\mu(a)=\nu(a)$ for all $a$; the converse is immediate.
+\end{proof}
+
+\begin{lemma}[Triangle inequality]\label{lem:security:tv-triangle}
+For $\mu,\nu,\xi\in\mathsf{Dist}(A)$,
+\[
+ \Delta_A(\mu,\xi)\leq\Delta_A(\mu,\nu)+\Delta_A(\nu,\xi).
+\]
+\end{lemma}
+\begin{proof}
+For every $a$, use the real triangle inequality
+$|\mu(a)-\xi(a)|\leq|\mu(a)-\nu(a)|+|\nu(a)-\xi(a)|$. Sum over $A$ and divide by $2$.
+\end{proof}
+
+\begin{lemma}[Event characterization and separating events]\label{lem:security:events}
+For any $\mu,\nu\in\mathsf{Dist}(A)$ and any $E\subseteq A$,
+\[
+ |\Pr_\mu[E]-\Pr_\nu[E]|\leq\Delta_A(\mu,\nu).
+\]
+There exists an $E\subseteq A$ for which equality holds, so
+\[
+ \Delta_A(\mu,\nu)=\max_{E\subseteq A}|\Pr_\mu[E]-\Pr_\nu[E]|.
+\]
+\end{lemma}
+\begin{proof}
+Put $\delta(a):=\mu(a)-\nu(a)$. Since both distributions have mass $1$, $\sum_a\delta(a)=0$. Let $E_+:=\{a:\delta(a)\geq0\}$ and $E_-:=A\setminus E_+$. Then
+\[
+ \sum_{a\in E_+}\delta(a)=-\sum_{a\in E_-}\delta(a)
+   =\frac12\sum_{a\in A}|\delta(a)|=\Delta_A(\mu,\nu).
+\]
+For any $E$, the sum $\sum_{a\in E}\delta(a)$ is at most the sum over all nonnegative terms, which is $\Delta_A$, and at least the sum over all negative terms, which is $-\Delta_A$. This proves the inequality. Taking $E=E_+$ gives equality.
+\end{proof}
+
+\begin{definition}[Markov kernel and pushforward]\label{def:security:kernel}
+For nonempty finite sets $A,B$, a \emph{Markov kernel} $K:A\to\mathsf{Dist}(B)$ assigns a distribution $K(a)$ to each $a\in A$. Its action on $\mu\in\mathsf{Dist}(A)$ is
+\[
+ (K_*\mu)(b):=\sum_{a\in A}\mu(a)K(a)(b).
+\]
+This is a probability distribution on $B$.
+\end{definition}
+
+\begin{lemma}[Data processing]\label{lem:security:data-processing}
+For every Markov kernel $K:A\to\mathsf{Dist}(B)$ and $\mu,\nu\in\mathsf{Dist}(A)$,
+\[
+ \Delta_B(K_*\mu,K_*\nu)\leq\Delta_A(\mu,\nu).
+\]
+\end{lemma}
+\begin{proof}
+Expanding the definition and applying the real triangle inequality,
+\begin{align*}
+2\Delta_B(K_*\mu,K_*\nu)
+ &=\sum_{b\in B}\left|\sum_{a\in A}(\mu(a)-\nu(a))K(a)(b)\right|\\
+ &\leq\sum_{b\in B}\sum_{a\in A}|\mu(a)-\nu(a)|K(a)(b)\\
+ &=\sum_{a\in A}|\mu(a)-\nu(a)|\sum_{b\in B}K(a)(b)\\
+ &=2\Delta_A(\mu,\nu).
+\end{align*}
+The third equality interchanges finite sums, and the fourth uses the normalization of $K(a)$.
+\end{proof}
+
+\begin{corollary}[Projection does not improve distinguishing]\label{cor:security:projection}
+For a function $\pi:A\to B$, let $\pi_*\mu$ denote the distribution of $\pi(X)$ for $X\sim\mu$. Then
+\[
+ \Delta_B(\pi_*\mu,\pi_*\nu)\leq\Delta_A(\mu,\nu).
+\]
+\end{corollary}
+\begin{proof}
+Apply Lemma~\ref{lem:security:data-processing} to the deterministic Markov kernel $K(a)$ concentrated at $\pi(a)$.
+\end{proof}
+
+\begin{lemma}[Convexity under a shared mixing distribution]\label{lem:security:mixture}
+Let $p\in\mathsf{Dist}(A)$, and for each $a\in A$ let $\mu_a,\nu_a\in\mathsf{Dist}(B)$. Then
+\[
+ \Delta_B\left(\sum_a p(a)\mu_a,\sum_a p(a)\nu_a\right)
+ \leq\sum_a p(a)\Delta_B(\mu_a,\nu_a).
+\]
+\end{lemma}
+\begin{proof}
+For each $b$, the absolute difference of the two mixture masses is
+$\left|\sum_ap(a)(\mu_a(b)-\nu_a(b))\right|$, bounded by
+$\sum_ap(a)|\mu_a(b)-\nu_a(b)|$. Sum over $b$, interchange the two finite sums, and divide by $2$.
+\end{proof}
+
+\begin{lemma}[Stepwise hybrid bound]\label{lem:security:hybrid}
+Let $A_0,\ldots,A_t$ be finite nonempty sets. Let
+$\mu_0,\nu_0\in\mathsf{Dist}(A_0)$, and for $1\leq i\leq t$
+let $K_i,L_i:A_{i-1}\to\mathsf{Dist}(A_i)$ be Markov kernels.
+Put $\mu_i=(K_i)_*\mu_{i-1}$ and $\nu_i=(L_i)_*\nu_{i-1}$.
+Suppose that
+\[
+ \Delta_{A_0}(\mu_0,\nu_0)\leq\varepsilon_0,\qquad
+ \Delta_{A_i}(K_i(a),L_i(a))\leq\varepsilon_i
+ \ \ \forall\,a\in A_{i-1}.
+\]
+Then for $0\leq j\leq t$,
+\[
+ \Delta_{A_j}(\mu_j,\nu_j)\leq\sum_{i=0}^j\varepsilon_i.
+\]
+\end{lemma}
+\begin{proof}
+Induct on $j$. The base case is the first hypothesis. For the inductive step, insert the intermediate distribution $(K_j)_*\nu_{j-1}$ and use Lemma~\ref{lem:security:tv-triangle}:
+\begin{align*}
+ \Delta(\mu_j,\nu_j)
+ &\leq\Delta((K_j)_*\mu_{j-1},(K_j)_*\nu_{j-1})
+ +\Delta((K_j)_*\nu_{j-1},(L_j)_*\nu_{j-1})\\
+ &\leq\Delta(\mu_{j-1},\nu_{j-1})
+ +\sum_{a\in A_{j-1}}\nu_{j-1}(a)\Delta(K_j(a),L_j(a)).
+\end{align*}
+The second line is Lemma~\ref{lem:security:data-processing} followed by Lemma~\ref{lem:security:mixture}. The last sum is at most $\varepsilon_j$. Apply the induction hypothesis.
+\end{proof}
+
+\begin{remark}[Cryptographic meaning]
+Lemma~\ref{lem:security:hybrid} is an algebraic tool for constructing a simulator round by round. Its hypotheses require a uniform bound for \emph{every history}, not only for the average transcript of an honest verifier. This difference will matter for adaptive oracle queries.
+\end{remark}
