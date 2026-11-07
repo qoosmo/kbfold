@@ -1,0 +1,185 @@
+\subsection{Finite binary extensions, trace, and Artin--Schreier masks}\label{sec:binary:trace}
+
+For the rest of the chapter, specialize to
+$L=\F_{2^n}$ with $n=2^\ell$ and $\ell\geq1$.
+The statements that mention uniformity use the finite uniform
+distribution from Definition~\ref{def:security:distribution}.
+We write $q:=|L|=2^n$.
+
+\begin{lemma}[Frobenius has period $n$]\label{lem:binary:frob-period}
+For every $a\in L$, $a^{2^n}=a$.
+\end{lemma}
+\begin{proof}
+If $a=0$, the identity is immediate. Suppose $a\neq0$.
+Multiplication by $a$ is a bijection of $L^\times$,
+whose cardinality is $q-1$. Define
+$P:=\prod_{x\in L^\times}x$, a nonzero element of $L$.
+Reindexing the product under the bijection $x\mapsto ax$ gives
+\[
+ P=\prod_{x\in L^\times}(ax)
+  =a^{q-1}\prod_{x\in L^\times}x=a^{q-1}P.
+\]
+Cancel the nonzero element $P$, obtaining $a^{q-1}=1$.
+Multiplying by $a$ yields $a^q=a$, with $q=2^n$.
+\end{proof}
+
+\begin{definition}[Absolute trace]\label{def:binary:trace}
+For $x\in L$ define
+\[
+ \Tr(x):=\sum_{j=0}^{n-1}x^{2^j}.
+\]
+Initially the sum is taken in $L$; the next lemma proves its
+value lies in the prime subfield $\F_2$.
+\end{definition}
+
+\begin{lemma}[Trace is additive and Frobenius-invariant]\label{lem:binary:trace-add}
+For every $x,y\in L$,
+\[
+ \Tr(x+y)=\Tr(x)+\Tr(y),\qquad
+ \Tr(x^2)=\Tr(x).
+\]
+In particular, $\Tr$ is $\F_2$-linear.
+\end{lemma}
+\begin{proof}
+The first equality follows by applying
+Lemma~\ref{lem:binary:frob-add} to each term of the finite sum.
+For the second, write
+\[
+ \Tr(x^2)=x^2+x^{2^2}+\cdots+x^{2^n}.
+\]
+By Lemma~\ref{lem:binary:frob-period}, the last term is $x$.
+Thus the sum is a cyclic permutation of the terms in $\Tr(x)$.
+Linearity for the scalar $0$ is immediate, and for scalar $1$
+it is the identity $\Tr(1x)=\Tr(x)$.
+\end{proof}
+
+\begin{lemma}[Trace takes binary values]\label{lem:binary:trace-binary}
+For every $x\in L$, $\Tr(x)\in\F_2=\{0,1\}$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:binary:trace-add},
+$\Tr(x)^2=\Tr(x^2)=\Tr(x)$.
+Hence $\Tr(x)$ is a root of $T^2+T=T(T+1)$.
+A field has no zero divisors, so the only possibilities are
+$T=0$ and $T=1$, both in $\F_2$.
+\end{proof}
+
+\begin{lemma}[Trace is surjective]\label{lem:binary:trace-surj}
+The linear map $\Tr:L\to\F_2$ is nonzero and therefore surjective.
+\end{lemma}
+\begin{proof}
+Consider the polynomial
+$H(X)=X+X^2+\cdots+X^{2^{n-1}}\in L[X]$.
+It is nonzero: its coefficient of $X$ is $1$, and all higher
+exponents are distinct. Its degree $2^{n-1}$ is strictly less than
+$q=2^n$. If $H(x)=0$ for all $x\in L$, this nonzero polynomial
+would have $q$ distinct roots, contradicting
+Lemma~\ref{lem:history:rootcount}. Thus some $x$ satisfies
+$\Tr(x)=H(x)\neq0$. By Lemma~\ref{lem:binary:trace-binary},
+that value equals $1$. Therefore the image of $\Tr$ contains
+both $0$ and $1$.
+\end{proof}
+
+\begin{corollary}[Sizes of the two trace fibers]\label{cor:binary:trace-fibers}
+The sets $\ker\Tr$ and $\{x\in L:\Tr(x)=1\}$ each have
+$q/2$ elements.
+\end{corollary}
+\begin{proof}
+Choose $a\in L$ with $\Tr(a)=1$ by
+Lemma~\ref{lem:binary:trace-surj}. Translation $x\mapsto x+a$
+is a bijection and, by trace additivity, sends elements of trace
+zero exactly to elements of trace one and vice versa.
+The two fibers partition $L$, and hence have equal cardinality
+$q/2$.
+\end{proof}
+
+\begin{definition}[Artin--Schreier operator]\label{def:binary:artin-schreier}
+Define $\wp:L\to L$ by
+\[
+ \wp(t):=t^2+t.
+\]
+\end{definition}
+
+\begin{lemma}[Artin--Schreier is binary-linear]\label{lem:binary:as-linear}
+For all $s,t\in L$, $\wp(s+t)=\wp(s)+\wp(t)$.
+\end{lemma}
+\begin{proof}
+Expand $(s+t)^2+s+t$ and apply
+Lemma~\ref{lem:binary:square}. The result is
+$(s^2+s)+(t^2+t)$.
+\end{proof}
+
+\begin{lemma}[Artin--Schreier kernel]\label{lem:binary:as-kernel}
+$\ker\wp=\{0,1\}$.
+\end{lemma}
+\begin{proof}
+$\wp(t)=t^2+t=t(t+1)$. This product is zero exactly when
+$t=0$ or $t+1=0$, the latter being $t=1$ in characteristic two.
+Both values satisfy the equation.
+\end{proof}
+
+\begin{lemma}[Every Artin--Schreier value has trace zero]\label{lem:binary:as-trace}
+For every $t\in L$, $\Tr(\wp(t))=0$.
+\end{lemma}
+\begin{proof}
+By trace additivity and Frobenius invariance,
+$\Tr(t^2+t)=\Tr(t^2)+\Tr(t)=\Tr(t)+\Tr(t)=0$.
+\end{proof}
+
+\begin{theorem}[Artin--Schreier characterizes trace zero]\label{thm:binary:as-image}
+\[
+ \boxed{\operatorname{im}\wp=\ker\Tr.}
+\]
+Every element of $\ker\Tr$ has exactly two preimages under $\wp$.
+\end{theorem}
+\begin{proof}
+Lemma~\ref{lem:binary:as-trace} gives
+$\operatorname{im}\wp\subseteq\ker\Tr$.
+By Lemma~\ref{lem:binary:as-linear},
+the nonempty fiber above any $y=\wp(t)$ is the coset
+$t+\ker\wp$: indeed $\wp(s)=\wp(t)$ is equivalent to
+$\wp(s+t)=0$ and hence $s+t\in\ker\wp$.
+By Lemma~\ref{lem:binary:as-kernel}, every nonempty fiber
+contains exactly two elements. Thus
+$|\operatorname{im}\wp|=q/2$.
+Corollary~\ref{cor:binary:trace-fibers} shows
+$|\ker\Tr|=q/2$. The inclusion between equal-sized finite
+sets is an equality.
+\end{proof}
+
+\begin{corollary}[Uniform trace-zero masking]\label{cor:binary:as-uniform}
+If $T$ is uniform on $L$, then $\wp(T)$ is uniform on
+$\ker\Tr$.
+\end{corollary}
+\begin{proof}
+By Theorem~\ref{thm:binary:as-image}, every trace-zero
+element has exactly two preimages. Therefore its probability
+as the output $\wp(T)$ is $2/q=1/(q/2)$, independent of
+the chosen trace-zero element.
+\end{proof}
+
+\begin{theorem}[Perfect hiding of an individual trace-zero shift]\label{thm:binary:single-mask}
+Fix $v\in\ker\Tr$ and let $T$ be uniform on $L$.
+Then
+\[
+ U:=v+\wp(T)
+\]
+is uniform on $\ker\Tr$, independently of $v$.
+\end{theorem}
+\begin{proof}
+Corollary~\ref{cor:binary:as-uniform} makes
+$\wp(T)$ uniform on the additive subgroup $\ker\Tr$.
+Since $v$ lies in that subgroup, translation
+$y\mapsto v+y$ is a bijection of $\ker\Tr$,
+so $U$ is uniform there. Its distribution is therefore
+independent of the fixed value $v$.
+\end{proof}
+
+\begin{remark}[No joint-ZK conclusion]
+Theorem~\ref{thm:binary:single-mask} concerns one public
+field element. If the same $T$ is subsequently used in
+another published equation, the joint transcript can have
+correlations. The complete verification protocol must
+analyze those correlations, as illustrated by the
+reused-mask attack of Theorem~\ref{thm:kbff:one-query-attack}.
+\end{remark}
