@@ -118,8 +118,10 @@ This exact identity is the starting point for analyzing the enlarged Reed--Solom
 
 ## Chapter 4 — Boolean-Kernel Basis: Complete Algebraic Theory
 
-- 62 formally numbered definitions/results; independent small proofs throughout.
+- 63 formally numbered definitions/results; independent small proofs throughout.
 - Complete map: [CHAPTER_04_LEAN_MAP.md](CHAPTER_04_LEAN_MAP.md).
 - Proven algebraic content: coefficient expansion; tensor basis; inverse Möbius transform; low-degree characterization; evaluation curve; weighted complete fold; characteristic-two specialization; fold reparametrization; high-degree mask degree; bounded-query mask hiding for a single oracle.
 - No new Lean proof has been checked in this chapter.
 - Original KBFold kernel algebra was previously proved; this manuscript rederives it self-containedly before the new masking-specific consequences.
+
+- Chapter 4 tradeoff theorem: a uniform degree-<2^t mask hides up to 2^t adaptive queries to one nonzero-point oracle, while increasing the Reed--Solomon degree limit from N to N+2^t; exact distance and unique-radius bounds follow.
