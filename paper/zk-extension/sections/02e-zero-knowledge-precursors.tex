@@ -1,0 +1,130 @@
+\subsection{Zero-knowledge ring switching and trace-zero bit packing}\label{sec:history:zkbit}
+
+Kochergin~\cite{Kochergin2026} revisits the ring-switching protocol with a zero-knowledge requirement: the field-valued partial evaluations $s_v$ from Section~\ref{sec:history:ring} must not be sent in the clear. Frigo and shelat~\cite{FrigoShelat2026} give a subsequent general bit-packing approach whose advertised reduction uses only linear constraints and applies to arbitrary bit-linear claims. The results below are small field-algebra statements used to explain these constructions; complete protocol security analyses remain the task of the later chapters.
+
+\begin{definition}[Uniform pads and masked transposition]\label{def:history:ringmask}
+Retain the binary extension $L=\F_{2^n}$ and the notation of Section~\ref{sec:history:ring}. Let $p=(p_v)_{v\in I}\in L^I$ be independent uniform pads, chosen before the batching challenge, and let
+\[
+ m_v:=s_v+p_v,\qquad
+ \Delta_p(\theta):=\sum_{u,v\in I}\lambda_u(\theta)\beta_vd_u(p_v).
+\]
+\end{definition}
+
+\begin{lemma}[Additivity of masked transposition]\label{lem:history:maskadditivity}
+For every $s,p\in L^I$ and $\theta\in L^\ell$,
+\[
+ B_{s+p}(\theta)=B_s(\theta)+\Delta_p(\theta).
+\]
+\end{lemma}
+\begin{proof}
+The coordinate functions $d_u$ are $\F_2$-linear. Therefore
+\[
+ \mathcal T(s+p)_u
+ =\sum_v\beta_vd_u(s_v+p_v)
+ =\sum_v\beta_v(d_u(s_v)+d_u(p_v))
+ =\mathcal T(s)_u+\mathcal T(p)_u.
+\]
+Multiply by $\lambda_u(\theta)$ and sum over $u$. The second sum is $\Delta_p(\theta)$ by definition.
+\end{proof}
+
+\begin{lemma}[Absolute trace properties]\label{lem:history:trace}
+Let $L=\F_{2^n}$. Define $\Tr:L\to\F_2$ by
+\[
+ \Tr(x):=\sum_{j=0}^{n-1}x^{2^j}.
+\]
+Then $\Tr$ is $\F_2$-linear, $\Tr(x^2)=\Tr(x)$, and its image is $\F_2$.
+\end{lemma}
+\begin{proof}
+In characteristic two, $(x+y)^{2^j}=x^{2^j}+y^{2^j}$ for all $j$, proving additivity; scalar linearity over $\F_2$ is immediate. Since every $x\in L$ satisfies $x^{2^n}=x$,
+\[
+ \Tr(x^2)=x^2+x^{2^2}+\cdots+x^{2^n}
+ =x^2+\cdots+x^{2^{n-1}}+x=\Tr(x).
+\]
+Also $\Tr(x)^2=\Tr(x^2)=\Tr(x)$, so $\Tr(x)$ is a root of $T^2-T=T(T-1)$ and hence belongs to $\F_2$. Finally, the polynomial $X+X^2+\cdots+X^{2^{n-1}}$ is nonzero and has degree $2^{n-1}<2^n=|L|$. It cannot vanish at every element of $L$. Therefore $\Tr$ is not the zero map; its image is a nonzero $\F_2$-subspace of $\F_2$, hence equals $\F_2$.
+\end{proof}
+
+\begin{lemma}[Trace-zero characterization]\label{lem:history:artinschreier}
+For the map $\wp:L\to L$ defined by $\wp(t)=t^2+t$,
+\[
+ \operatorname{im}\wp=\ker\Tr.
+\]
+If $t$ is uniform on $L$, then $\wp(t)$ is uniform on $\ker\Tr$.
+\end{lemma}
+\begin{proof}
+In characteristic two, $\wp(t+s)=\wp(t)+\wp(s)$, so $\wp$ is $\F_2$-linear. By Lemma~\ref{lem:history:trace},
+$\Tr(\wp(t))=\Tr(t^2)+\Tr(t)=0$, proving inclusion of the image in the trace kernel. The polynomial $t^2+t=t(t+1)$ vanishes precisely at $t\in\{0,1\}$, so $\ker\wp$ has two elements. Consequently $\operatorname{im}\wp$ has $|L|/2$ elements. By surjectivity of $\Tr$ in Lemma~\ref{lem:history:trace}, $\ker\Tr$ also has $|L|/2$ elements. The inclusion is thus an equality. Every value in the image has exactly two preimages, and a uniform $t$ therefore induces the uniform distribution on $\ker\Tr$.
+\end{proof}
+
+\begin{lemma}[Frobenius-linear decomposition of the correction]\label{lem:history:frobdecomp}
+Choose the trace-dual field basis $(\eta_u)_{u\in I}$ satisfying
+$d_u(x)=\Tr(\eta_ux)$. For $0\leq j<n$ define
+\[
+ \mu_j(\theta):=\sum_{u\in I}\lambda_u(\theta)\eta_u^{2^j},
+ \qquad
+ T_j(\theta,p):=
+ \sum_{v\in I}(\mu_j(\theta)\beta_v)^{2^{n-j}}p_v.
+\]
+Then
+\[
+ \Delta_p(\theta)=\sum_{j=0}^{n-1}T_j(\theta,p)^{2^j}.
+\]
+\end{lemma}
+\begin{proof}
+Expand the trace in Definition~\ref{def:history:ringmask}:
+\begin{align*}
+ \Delta_p(\theta)
+ &=\sum_{u,v}\lambda_u(\theta)\beta_v
+           \sum_{j=0}^{n-1}(\eta_up_v)^{2^j}\\
+ &=\sum_{j=0}^{n-1}\sum_v\beta_v p_v^{2^j}
+           \left(\sum_u\lambda_u(\theta)\eta_u^{2^j}\right)\\
+ &=\sum_{j=0}^{n-1}\sum_v\mu_j(\theta)\beta_vp_v^{2^j}.
+\end{align*}
+For each $j$, Frobenius additivity and $x^{2^n}=x$ imply
+\[
+ T_j(\theta,p)^{2^j}
+ =\sum_v(\mu_j(\theta)\beta_v)^{2^n}p_v^{2^j}
+ =\sum_v\mu_j(\theta)\beta_vp_v^{2^j}.
+\]
+Substitution yields the identity.
+\end{proof}
+
+\begin{lemma}[Backward Frobenius recurrence]\label{lem:history:backward}
+Let $T_0,\ldots,T_{n-1}\in L$ be arbitrary. Set $X_n=0$ and recursively
+\[
+ X_j:=T_j+X_{j+1}^2,\qquad j=n-1,\ldots,1.
+\]
+Then
+\[
+ \sum_{j=0}^{n-1}T_j^{2^j}=T_0+X_1^2.
+\]
+\end{lemma}
+\begin{proof}
+From the recurrence, $T_j=X_j+X_{j+1}^2$ for $1\leq j<n$. Raising this identity to $2^j$ and summing gives
+\[
+ \sum_{j=1}^{n-1}T_j^{2^j}
+ =\sum_{j=1}^{n-1}X_j^{2^j}
+  +\sum_{j=1}^{n-1}X_{j+1}^{2^{j+1}}.
+\]
+Terms indexed by $2\leq j\leq n-1$ occur twice and cancel in characteristic two. The remaining terms are $X_1^2+X_n^{2^n}=X_1^2$. Add $T_0$.
+\end{proof}
+
+\begin{lemma}[Affine verification of a masked recurrence]\label{lem:history:affine}
+Fix $T_j$ and $X_j$ as in Lemma~\ref{lem:history:backward}. Let $\rho_j\in L$ be masks for $1\leq j<n$ and put $Q_j:=\rho_j^2$ and $Z_j:=X_j+\rho_j$; set $Z_n=Q_n=0$. Then
+\begin{align*}
+ Q_j&=\rho_j^2,\\
+ T_j&=Z_j+\rho_j+Z_{j+1}^2+Q_{j+1}\quad(1\leq j<n),\\
+ \sum_{j=0}^{n-1}T_j^{2^j}&=T_0+Z_1^2+Q_1.
+\end{align*}
+\end{lemma}
+\begin{proof}
+The first relation is the definition of $Q_j$. Since $X_j=Z_j+\rho_j$,
+\[
+ X_{j+1}^2=(Z_{j+1}+\rho_{j+1})^2
+  =Z_{j+1}^2+Q_{j+1}.
+\]
+Substitute both expressions into $T_j=X_j+X_{j+1}^2$ to obtain the second equation. Apply Lemma~\ref{lem:history:backward} and use $X_1^2=Z_1^2+Q_1$ for the third. All the displayed recurrence equations are affine in the hidden committed values once $Z_j$ are public; only the separate square relations $Q_j=\rho_j^2$ are quadratic in hidden values.
+\end{proof}
+
+\begin{remark}[Comparison of the two 2026 constructions]
+Kochergin~\cite{Kochergin2026} uses the preceding Frobenius recurrence to certify the masked transposition with $n-1$ auxiliary squaring constraints. Frigo and shelat~\cite{FrigoShelat2026} instead emphasize the $\F_2$-linearity of trace and the trace-zero characterization, and report a reduction for arbitrary bit-linear claims requiring only linear constraints over a suitable hiding linear commitment. In particular, the trace-zero lemma above is \emph{not} a new invention of the present manuscript.
+\end{remark}
