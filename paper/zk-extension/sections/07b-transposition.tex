@@ -1,0 +1,191 @@
+\subsection{Matrix transposition over the binary prime field}\label{sec:packing:transpose}
+
+The transpose below is an $\F_2$-linear operation on
+a vector of $n$ elements of $L$.
+It is generally \emph{not} an $L$-linear transformation;
+this is the source of the nontrivial ring-switching
+correction in the subsequent sections.
+
+\begin{definition}[Binary coordinate matrix]\label{def:pack:matrix}
+For $s=(s_v)_{v\in I}\in L^I$ define its
+binary coordinate matrix
+\[
+ M(s)=(M_{u,v}(s))_{u,v\in I},\qquad
+ M_{u,v}(s):=d_u(s_v)\in\F_2.
+\]
+The first index labels a binary basis coordinate;
+the second labels an entry of the original field vector.
+\end{definition}
+
+\begin{lemma}[Recovering a field vector from its matrix]\label{lem:pack:matrix-reconstruct}
+For every $s\in L^I$ and every $v\in I$,
+\[
+ s_v=\sum_{u\in I}\beta_uM_{u,v}(s).
+\]
+\end{lemma}
+\begin{proof}
+By Definition~\ref{def:pack:matrix},
+$M_{u,v}(s)=d_u(s_v)$.
+The displayed sum is therefore the unique
+basis expansion of $s_v$, namely
+$\sum_u\beta_ud_u(s_v)=s_v$.
+\end{proof}
+
+\begin{definition}[Binary coordinate transpose]\label{def:pack:transpose}
+For $s\in L^I$ define $\mathcal T(s)\in L^I$ by
+\[
+ \boxed{\mathcal T(s)_u
+      :=\sum_{v\in I}\beta_vd_u(s_v)
+      =\sum_v\beta_vM_{u,v}(s).}
+\]
+\end{definition}
+
+\begin{lemma}[Transpose is binary-linear]\label{lem:pack:transpose-linear}
+For every $s,t\in L^I$ and
+$e\in\F_2$,
+\[
+ \mathcal T(s+et)=\mathcal T(s)+e\mathcal T(t).
+\]
+\end{lemma}
+\begin{proof}
+For each $u$, expand
+$\mathcal T(s+et)_u=
+\sum_v\beta_vd_u(s_v+et_v)$.
+Linearity of $d_u$ over $\F_2$ gives
+$d_u(s_v)+ed_u(t_v)$.
+Distribute the sum and factor out the scalar $e$.
+The resulting coordinates equal those of
+$\mathcal T(s)+e\mathcal T(t)$.
+\end{proof}
+
+\begin{lemma}[Coordinates of a transposed vector]\label{lem:pack:transpose-coords}
+For all $u,v\in I$ and $s\in L^I$,
+\[
+ \boxed{d_v(\mathcal T(s)_u)=d_u(s_v).}
+\]
+\end{lemma}
+\begin{proof}
+Use Definition~\ref{def:pack:transpose}
+and the coordinate property
+$d_v(\beta_a)=\delta_{va}$
+(Lemma~\ref{lem:binary:extract}):
+\[
+ d_v(\mathcal T(s)_u)
+ =\sum_{a\in I}d_u(s_a)d_v(\beta_a)
+ =d_u(s_v).
+\]
+The first equality uses $\F_2$-linearity
+of $d_v$ and that $d_u(s_a)\in\F_2$.
+\end{proof}
+
+\begin{theorem}[Transposition is an involution]\label{thm:pack:transpose-involutive}
+For every $s\in L^I$,
+\[
+ \boxed{\mathcal T(\mathcal T(s))=s.}
+\]
+\end{theorem}
+\begin{proof}
+For each $v\in I$, expand the second transpose:
+\[
+ \mathcal T(\mathcal T(s))_v
+ =\sum_{u\in I}\beta_u
+   d_v(\mathcal T(s)_u).
+\]
+Lemma~\ref{lem:pack:transpose-coords}
+replaces the last coordinate with $d_u(s_v)$.
+The sum becomes $\sum_u\beta_ud_u(s_v)$,
+which equals $s_v$ by
+Lemma~\ref{lem:pack:matrix-reconstruct}.
+This holds for all $v$.
+\end{proof}
+
+\begin{corollary}[Transpose is a bijective binary-linear map]\label{cor:pack:transpose-iso}
+$\mathcal T:L^I\to L^I$ is an $\F_2$-linear
+isomorphism with inverse $\mathcal T$.
+\end{corollary}
+\begin{proof}
+Lemma~\ref{lem:pack:transpose-linear}
+gives linearity; Theorem~\ref{thm:pack:transpose-involutive}
+makes the map its own two-sided inverse.
+\end{proof}
+
+\begin{lemma}[The coordinate matrices are transposes]\label{lem:pack:matrix-transpose}
+For every $s\in L^I$ and all $u,v\in I$,
+\[
+ \boxed{M_{u,v}(\mathcal T(s))=M_{v,u}(s).}
+\]
+\end{lemma}
+\begin{proof}
+The left side is $d_u(\mathcal T(s)_v)$
+by Definition~\ref{def:pack:matrix}.
+Lemma~\ref{lem:pack:transpose-coords}
+turns it into $d_v(s_u)$,
+which is the right side.
+\end{proof}
+
+\begin{lemma}[Nonzero field elements have some nonzero coordinate]\label{lem:pack:coordinate-separates}
+For every $x\in L$,
+\[
+ x\neq0\quad\Longleftrightarrow\quad
+ \exists u\in I,\ d_u(x)=1.
+\]
+\end{lemma}
+\begin{proof}
+If every coordinate vanishes, the expansion
+$x=\sum_u\beta_ud_u(x)$ is zero.
+Contrapositively, $x\neq0$ implies
+some coordinate is nonzero, and an element
+of $\F_2$ is nonzero exactly when it is $1$.
+Conversely the zero element has all coordinates
+zero by $\F_2$-linearity of the maps $d_u$.
+\end{proof}
+
+\begin{proposition}[Transposition is not extension-field-linear]\label{prop:pack:not-L-linear}
+Because $n=2^\ell\geq2$,
+the operation $\mathcal T:L^I\to L^I$
+is not $L$-linear.
+\end{proposition}
+\begin{proof}
+Suppose toward a contradiction that $\mathcal T$
+is $L$-linear.
+Choose $v\in I$, and let $e_v\in L^I$
+be the vector equal to $1$ at $v$ and
+$0$ elsewhere. Since $1\neq0$, the preceding
+lemma gives an index $u$ with $d_u(1)=1$.
+For any $a\in L$, the definition of
+$\mathcal T$ gives
+$\mathcal T(ae_v)_u=\beta_vd_u(a)$
+and $\mathcal T(e_v)_u=\beta_vd_u(1)=\beta_v$.
+The assumed $L$-linearity would imply
+$\beta_vd_u(a)=a\beta_v$.
+Because $\beta_v\neq0$, division gives
+$d_u(a)=a$ for every $a\in L$.
+But $d_u(a)\in\F_2$ and $|L|=2^n>2$,
+so choosing $a\in L\setminus\F_2$
+is a contradiction.
+\end{proof}
+
+\begin{lemma}[Uniformity under binary transposition]\label{lem:pack:transpose-uniform}
+If $S$ is uniform on $L^I$, then
+$\mathcal T(S)$ is uniform on $L^I$.
+\end{lemma}
+\begin{proof}
+By Corollary~\ref{cor:pack:transpose-iso},
+$\mathcal T$ is a bijection of the finite
+set $L^I$. Each output has exactly one
+preimage, hence the uniform input law
+is mapped to the uniform output law.
+\end{proof}
+
+\begin{remark}[Connection with field-linear proof systems]
+A proof system verifying only affine equations
+over $L$ cannot directly replace
+$\mathcal T(m)$ by a linear combination
+of hidden field entries $m_v$:
+the coefficient extraction $d_u$ is only
+$\F_2$-linear. Our protocol therefore
+reveals masked field entries $m_v$ and
+enforces the hidden correction using
+affine trace coordinates, rather than
+pretending that $\mathcal T$ is $L$-linear.
+\end{remark}
