@@ -1,0 +1,126 @@
+\subsection{Local fold checks and a revised final closure}\label{sec:kbfoldfold:verification}
+
+We now give exact local algebraic verification statements for the enlarged-degree codes of Section~\ref{sec:kbfoldfold:codewords}. They assume that the queried words \emph{are evaluations of degree-bounded polynomials}; proving this property for maliciously committed words requires the separate proximity analysis of KBFold~\cite{MkhidaKBFold2026}.
+
+\begin{definition}[Fold-consistency residual]\label{def:kbff:fold-residual}
+Fix $0\leq j<m$, a challenge $r\in\F$, and two polynomials
+$P\in\F[X]_{<D_j}$ and $Q\in\F[X]_{<D_{j+1}}$. Define
+\[
+ E_{P,Q,r}(Y):=Q(Y)-\pfold_r(P)(Y).
+\]
+For $y=x^2\in\Omega_{j+1}$, the \emph{local fold test} is the equation
+\[
+ Q(y)=
+ (2r-1)\frac{P(x)+P(-x)}2
+ +(1-r)\frac{P(x)-P(-x)}{2x}.
+\]
+\end{definition}
+
+\begin{lemma}[Local test equals a residual root]\label{lem:kbff:local-residual}
+With the notation above, the local test at $y$ passes if and only if
+$E_{P,Q,r}(y)=0$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:kbff:eval-evenodd}, the even and odd expressions on the right side of the local test evaluate the even and odd parts of $P$ at $y$. Their normalized combination equals $\pfold_r(P)(y)$ by Definition~\ref{def:history:globalfold}. Thus the local test is $Q(y)=\pfold_r(P)(y)$, equivalent to $E_{P,Q,r}(y)=0$.
+\end{proof}
+
+\begin{lemma}[Residual degree]\label{lem:kbff:residual-bound}
+The polynomial $E_{P,Q,r}$ has degree less than $D_{j+1}$ or is zero.
+\end{lemma}
+\begin{proof}
+By assumption $\deg Q<D_{j+1}$. By Corollary~\ref{cor:kbff:fold-degree} and Lemma~\ref{lem:kbff:budget-recurrence},
+$\deg\pfold_r(P)<\lceil D_j/2\rceil=D_{j+1}$.
+A difference of two polynomials of degree less than $D_{j+1}$
+has degree less than $D_{j+1}$ unless it vanishes.
+\end{proof}
+
+\begin{theorem}[Single-query local fold detection]\label{thm:kbff:local-detection}
+Under $D_{j+1}\leq M_{j+1}$, if
+$Q\neq\pfold_r(P)$ and $y$ is uniform on $\Omega_{j+1}$, then
+\[
+ \Pr_y[\text{local fold test passes}]
+ \leq \frac{D_{j+1}-1}{M_{j+1}}.
+\]
+For $k\geq1$ independent uniform $y_1,\ldots,y_k\in\Omega_{j+1}$,
+the probability that all $k$ tests pass is at most
+\[
+ \left(\frac{D_{j+1}-1}{M_{j+1}}\right)^k.
+\]
+\end{theorem}
+\begin{proof}
+Since $Q\neq\pfold_r(P)$, the residual polynomial
+$E_{P,Q,r}$ is nonzero. By Lemma~\ref{lem:kbff:residual-bound},
+its degree is at most $D_{j+1}-1$. The univariate root-count lemma,
+Lemma~\ref{lem:history:rootcount}, gives at most $D_{j+1}-1$
+roots in the entire field, hence at most that many in $\Omega_{j+1}$.
+By Lemma~\ref{lem:kbff:local-residual}, acceptance at uniform $y$
+occurs on exactly those roots, proving the first bound.
+Conditional on the fixed polynomials, the $k$ query points are
+independent and their acceptance events depend only on the
+individual query values; therefore the probability that all pass is
+the product of the individual probabilities. Apply the first bound
+to every factor.
+\end{proof}
+
+\begin{definition}[Linear final closure predicate]\label{def:kbff:linear-predicate}
+Let $v\in\F$ be the claimed \emph{folded} scalar at a fixed challenge vector
+$r\in\F^m$. For a final polynomial $Q\in\F[X]_{<2}$, define
+\[
+ \mathsf{Close}_{v}(Q)\quad\Longleftrightarrow\quad [X^0]Q=v.
+\]
+The original KBFold constant-closure predicate is the stronger
+condition $Q=v$ as a constant polynomial. These are different
+predicates for a nonzero linear coefficient.
+\end{definition}
+
+\begin{lemma}[Honest masked closure]\label{lem:kbff:honest-closure}
+For every table $f:I_m\to\F$ and mask $R$ of degree $<B\leq N$,
+the final polynomial $Q_m$ satisfies
+$\mathsf{Close}_{\widetilde f(r)}(Q_m)$ for every $r\in\F^m$.
+\end{lemma}
+\begin{proof}
+By Theorem~\ref{thm:kbff:linear-closure},
+$Q_m=\widetilde f(r)+\rho_r(R)X$. Its coefficient of $X^0$ is
+$\widetilde f(r)$, proving the predicate.
+\end{proof}
+
+\begin{lemma}[Two evaluations determine the constant of a line]\label{lem:kbff:two-point-line}
+Let $Q(X)=a+bX\in\F[X]_{<2}$ and let $x,y\in\F$ be distinct.
+Then
+\[
+ a=\frac{yQ(x)-xQ(y)}{y-x},
+ \qquad
+ b=\frac{Q(y)-Q(x)}{y-x}.
+\]
+\end{lemma}
+\begin{proof}
+Expanding $yQ(x)-xQ(y)$ gives
+$y(a+bx)-x(a+by)=(y-x)a+(yx-xy)b=(y-x)a$.
+Because $x\neq y$, the scalar $y-x$ is nonzero and invertible,
+so division yields the formula for $a$.
+Likewise $Q(y)-Q(x)=b(y-x)$, yielding the formula for $b$.
+\end{proof}
+
+\begin{corollary}[Two-point linear closure check]\label{cor:kbff:two-point-close}
+Assume $Q\in\F[X]_{<2}$ and choose distinct $x,y\in\Omega_m$.
+Then $\mathsf{Close}_{v}(Q)$ holds exactly when
+\[
+ yQ(x)-xQ(y)=v(y-x).
+\]
+\end{corollary}
+\begin{proof}
+By Lemma~\ref{lem:kbff:two-point-line}, the left side equals
+$(y-x)[X^0]Q$. Since $y-x\neq0$, its equality with $v(y-x)$ is
+equivalent to $[X^0]Q=v$.
+\end{proof}
+
+\begin{remark}[Protocol-level scope]
+The test of Corollary~\ref{cor:kbff:two-point-close} is algebraically
+correct only once the final word is known to be an evaluation of a
+degree-$<2$ polynomial. Two unauthenticated values of an arbitrary word
+do not certify its degree. A full ZK-KBFold protocol must enforce
+the degree bound and folding consistency, and then hide or correctly
+simulate all requested Merkle openings. The final folded scalar
+$\widetilde f(r)$ is generally \emph{not} the initially claimed
+$\widetilde f(z)$; the original sumcheck links these values.
+\end{remark}
