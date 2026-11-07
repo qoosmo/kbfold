@@ -115,3 +115,28 @@ fn folded_word_and_two_point_closure(){
  }
  println!("Chapter 5: 4800 local word fold cases and 400 two-point closure checks");
 }
+
+#[test]
+fn exact_degree_zero_mask_joint_leakage() {
+ // Theorem 5.7: each marginal is uniform but (opening, slope) distinguishes.
+ let mut first_opening=[0usize; MOD as usize];
+ let mut first_slope=[0usize; MOD as usize];
+ let mut second_opening=[0usize; MOD as usize];
+ let mut second_slope=[0usize; MOD as usize];
+ for c in 0..MOD {
+  let slope=m(-c);
+  let f0_open=c;
+  let f1_open=add(2,c);
+  first_opening[f0_open as usize]+=1;
+  second_opening[f1_open as usize]+=1;
+  first_slope[slope as usize]+=1;
+  second_slope[slope as usize]+=1;
+  assert_eq!(add(f0_open,slope),0);
+  assert_eq!(add(f1_open,slope),2);
+ }
+ assert!(first_opening.iter().all(|n|*n==1));
+ assert!(second_opening.iter().all(|n|*n==1));
+ assert!(first_slope.iter().all(|n|*n==1));
+ assert!(second_slope.iter().all(|n|*n==1));
+ println!("Chapter 5: exact uniform-marginal/perfect-joint-leakage attack verified");
+}
