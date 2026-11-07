@@ -1,0 +1,105 @@
+\subsection{Degree constraints in kernel coordinates}\label{sec:kbalgebra:lowdeg}
+
+\begin{definition}[Coefficient blocks]\label{def:kbalgebra:blocks}
+Fix integers $0\leq t\leq m$ and set $B:=2^t$, $H:=2^{m-t}$, so $N=BH$. For any $P\in\F[X]_{<N}$, its $B$-coefficient blocks are the polynomials $P_j\in\F[X]_{<B}$, $0\leq j<H$, uniquely determined by
+\[
+ P(X)=\sum_{j=0}^{H-1}X^{Bj}P_j(X).
+\]
+\end{definition}
+
+\begin{lemma}[Existence and uniqueness of coefficient blocks]\label{lem:kbalgebra:block-unique}
+The decomposition in Definition~\ref{def:kbalgebra:blocks} exists and is unique for every $P\in\F[X]_{<N}$.
+\end{lemma}
+\begin{proof}
+Write $P(X)=\sum_{a=0}^{N-1}p_aX^a$. Every $a$ has a unique quotient--remainder decomposition $a=Bj+i$ with $0\leq i<B$ and $0\leq j<H$. Define $P_j(X):=\sum_{i=0}^{B-1}p_{Bj+i}X^i$. Then
+$\sum_jX^{Bj}P_j(X)=\sum_{j,i}p_{Bj+i}X^{Bj+i}=P(X)$. Conversely, comparing coefficients of the pairwise distinct powers $X^{Bj+i}$ determines all coefficients of every $P_j$, proving uniqueness.
+\end{proof}
+
+\begin{lemma}[Block degree criterion]\label{lem:kbalgebra:degree-blocks}
+With the preceding notation, $\deg P<B$ (including $P=0$) if and only if $P_j=0$ for all $1\leq j<H$.
+\end{lemma}
+\begin{proof}
+The terms of $X^{Bj}P_j$ have degrees in the interval $[Bj,B(j+1)-1]$. These intervals are pairwise disjoint. If $P_j\neq0$ for some $j\geq1$, the polynomial $P$ has a nonzero coefficient of degree at least $B$, so $\deg P\not<B$. Conversely, if all blocks with $j\geq1$ vanish, then $P=P_0$ with $\deg P_0<B$ by definition.
+\end{proof}
+
+\begin{definition}[High-bit kernel polynomials]\label{def:kbalgebra:high-block}
+For a table $f:I_m\to\F$ and each $c\in I_t$, define
+\[
+ Y_c(Z):=\sum_{h\in I_{m-t}} f(c,h)K_h^{(m-t)}(Z)\in\F[Z]_{<H}.
+\]
+If $Y_c(Z)=\sum_{j=0}^{H-1}y_{c,j}Z^j$, define
+\[
+ A_j(X):=\sum_{c\in I_t}y_{c,j}K_c^{(t)}(X)\in\F[X]_{<B}.
+\]
+\end{definition}
+
+\begin{lemma}[Kernel blocks equal monomial blocks]\label{lem:kbalgebra:kernel-block-decomposition}
+For the polynomials of Definition~\ref{def:kbalgebra:high-block},
+\[
+ U_f^{(m)}(X)=\sum_{c\in I_t}K_c^{(t)}(X)Y_c(X^{B})
+ =\sum_{j=0}^{H-1}X^{Bj}A_j(X).
+\]
+\end{lemma}
+\begin{proof}
+Split the finite sum defining $U_f$ according to the unique low/high decomposition $b=(c,h)$. Lemma~\ref{lem:kbalgebra:block} gives
+\[
+ U_f=\sum_c\sum_hf(c,h)K_c^{(t)}(X)K_h^{(m-t)}(X^B)
+ =\sum_cK_c^{(t)}(X)Y_c(X^B).
+\]
+Substitute $Y_c(X^B)=\sum_jy_{c,j}X^{Bj}$, interchange the two finite sums, and use the definition of $A_j$. By Corollary~\ref{cor:kbalgebra:monic}, each $K_c^{(t)}$ has degree $B-1$, so $A_j\in\F[X]_{<B}$ and the displayed sum is precisely the unique block decomposition.
+\end{proof}
+
+\begin{lemma}[Low degree iff each high kernel polynomial is constant]\label{lem:kbalgebra:high-constant}
+With the preceding notation,
+\[
+ \deg U_f^{(m)}<B
+ \quad\Longleftrightarrow\quad
+ \text{every }Y_c(Z)\text{ is constant.}
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:kbalgebra:degree-blocks} and Lemma~\ref{lem:kbalgebra:kernel-block-decomposition}, $\deg U_f<B$ is equivalent to $A_j=0$ for every $j\geq1$. By the basis theorem (Theorem~\ref{thm:kbalgebra:basis}) with $t$ variables, each $A_j=\sum_cy_{c,j}K_c^{(t)}$ vanishes iff every $y_{c,j}=0$. Thus all $A_j$ with $j\geq1$ vanish iff all coefficients of all $Y_c$ of positive degree vanish, exactly when every $Y_c$ is constant.
+\end{proof}
+
+\begin{theorem}[Complete low-degree characterization]\label{thm:kbalgebra:low-degree}
+Let $0\leq t\leq m$ and let $f:I_m\to\F$. Put\par\noindent\[U_f^{(m)}=\sum_{b\in I_m}f(b)K_b^{(m)}.\] Then
+\begin{equation}\label{eq:kbalgebra:lowdeg}
+ \boxed{\deg U_f^{(m)}<2^t}
+\end{equation}
+if and only if there exists a unique table $\varphi:I_t\to\F$ satisfying
+\begin{equation}\label{eq:kbalgebra:lowdeg-pattern}
+ \boxed{f(c,h)=(-1)^{(m-t)-\operatorname{wt}(h)}\varphi(c)
+ \qquad(c\in I_t,\ h\in I_{m-t}).}
+\end{equation}
+In this case,
+\[
+ U_f^{(m)}=U_\varphi^{(t)},
+ \qquad \varphi(c)=f(c,1,\ldots,1).
+\]
+\end{theorem}
+\begin{proof}
+Put $B=2^t$, $H=2^{m-t}$ and use Definition~\ref{def:kbalgebra:high-block}. By Lemma~\ref{lem:kbalgebra:high-constant}, $\deg U_f<B$ holds if and only if for every $c$, $Y_c(Z)=\varphi(c)$ for some scalar $\varphi(c)$. Proposition~\ref{prop:kbalgebra:constant}, applied with $m-t$ variables, gives the kernel expansion
+\[
+ \varphi(c)=\sum_{h\in I_{m-t}}
+ (-1)^{(m-t)-\operatorname{wt}(h)}\varphi(c)K_h^{(m-t)}(Z).
+\]
+The definition $Y_c=\sum_hf(c,h)K_h^{(m-t)}$ and uniqueness of kernel coordinates (Corollary~\ref{cor:kbalgebra:unique-coordinates}) imply that $Y_c=\varphi(c)$ iff the coefficients satisfy~\eqref{eq:kbalgebra:lowdeg-pattern} for every $h$. This proves the equivalence. The bit vector $h=(1,\ldots,1)$ has weight $m-t$, so its sign in~\eqref{eq:kbalgebra:lowdeg-pattern} is $+1$. Hence $\varphi(c)=f(c,1,\ldots,1)$ is forced and unique. Finally, substituting $Y_c=\varphi(c)$ into Lemma~\ref{lem:kbalgebra:kernel-block-decomposition} gives
+$U_f^{(m)}=\sum_cK_c^{(t)}\varphi(c)=U_\varphi^{(t)}$.
+\end{proof}
+
+\begin{corollary}[Dimension of a kernel low-degree subspace]\label{cor:kbalgebra:dimension}
+The set of coefficient tables
+\[
+ \mathcal H_t:=\{f\in\F^{I_m}:\deg U_f^{(m)}<2^t\}
+\]
+is an $\F$-linear subspace of dimension $2^t$.
+\end{corollary}
+\begin{proof}
+By Theorem~\ref{thm:kbalgebra:low-degree}, $\mathcal H_t$ consists exactly of the tables obtained by applying the linear map
+$\varphi\mapsto((c,h)\mapsto(-1)^{m-t-\operatorname{wt}(h)}\varphi(c))$
+to $\F^{I_t}$. This map is injective because $\varphi(c)$ is recovered from $f(c,1,\ldots,1)$. Its image is $\mathcal H_t$. Since $\F^{I_t}$ has dimension $|I_t|=2^t$, the same holds for $\mathcal H_t$.
+\end{proof}
+
+\begin{remark}[Characteristic-two simplification]\label{rem:kbalgebra:lowdeg-char2}
+When $\operatorname{char}\F=2$, every sign in~\eqref{eq:kbalgebra:lowdeg-pattern} equals $+1$, so low-degree kernel tables are constant along each high-bit fiber: $f(c,h)=\varphi(c)$. This simplification fails in general over the odd-characteristic fields used by the original KBFold protocol.
+\end{remark}
