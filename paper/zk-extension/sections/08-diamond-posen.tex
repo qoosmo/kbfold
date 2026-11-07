@@ -1,0 +1,89 @@
+\section{The Diamond--Posen Ring-Switching Compiler}\label{sec:dpr}
+
+We now reconstruct the \emph{original} Diamond--Posen
+ring-switching reduction from a small-field
+multilinear evaluation to a committed
+large-field multilinear evaluation
+\cite[Section~4]{DiamondPosen2024}.
+Its defining intermediate object is a
+tensor algebra $A=L\otimes_K L$
+with two distinct field embeddings.
+This is not equivalent to treating
+binary coordinate transposition as an
+extension-field-linear map.
+We specialize to $K=\F_2$ and
+$[L:K]=2^\ell$ to connect the
+construction with Chapters~6--7;
+the original compiler applies to
+more general finite extensions of
+power-of-two degree.
+
+We first prove the ring and column
+identities, then the tensor
+sumcheck reduction and its
+degree-two root lemma, and finally
+a conditional composition theorem
+and a precise disclosure theorem.
+The manuscript distinguishes every
+algebraic proof from claims requiring
+an authenticated commitment,
+a proximity theorem, or
+a full zero-knowledge simulator.
+
+\input{sections/08a-tensor-algebra}
+\input{sections/08b-tensor-evaluation}
+\input{sections/08c-sumcheck-over-tensor}
+\input{sections/08d-protocol}
+\input{sections/08e-security-proofs}
+\input{sections/08f-privacy-and-comparison}
+\input{sections/08g-interfaces}
+
+\subsection{The theorem chain and its exact scope}\label{sec:dpr:conclusion}
+Put $T'(j)=\sum_v\beta_vw_{v,j}$ and
+\[
+ S=\varphi_1(T')(\varphi_0(r_{\rm hi})),
+ \qquad
+ H(X)=\varphi_1(T')(X)
+      \operatorname{eq}_h(\varphi_0(r_{\rm hi}),X).
+\]
+The original Boolean evaluation and
+tensor sumcheck identities are
+\[
+ \boxed{
+ y_w=C_q(S),\qquad
+ \sum_{j\in I_h}H(j)=S,\qquad
+ \deg_{X_i}H\leq2.}
+\]
+A nonzero degree-$d$ polynomial
+in $A[X]$ has at most $d$
+zeros in the embedded subfield
+$\varphi_1(L)$, since distinct
+embedded field values differ
+by units in $A$.
+Consequently, under a fixed
+committed packed polynomial and
+causal prover timing,
+\[
+ \boxed{
+ \Pr[\text{false original claim accepted}]
+ \leq
+ \min\{1,2h/q+\varepsilon_{\rm eval}\}.}
+\]
+This is a conditional algebraic
+statement depending on the
+soundness of the delegated
+large-field evaluation protocol.
+The first unmasked tensor message
+reveals every $s_v^*$ and is
+perfectly distinguishable for
+some equal-evaluation witnesses.
+Thus the unmasked protocol
+does not establish zero knowledge.
+
+Chapter~7's hidden-pad correction
+is a \emph{different} verification
+interface. It must independently
+satisfy soundness, commitment
+binding and full adaptive-view
+simulation before being claimed
+as a zero-knowledge implementation.
