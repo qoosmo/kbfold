@@ -33,7 +33,7 @@ Existing KBFold algebraic results are reproved here where required for self-cont
 2. Historical background and related work (complete)
 3. Formal security model, online zero knowledge, and adaptive masking (complete)
 4. Complete Boolean-kernel algebra (written, fully proved)
-5. Multilinearization and fold identities
+5. Multilinearization, normalized folding, linear masked closure, and joint query criteria (complete)
 6. Characteristic-two specializations
 7. Binary-field packing, trace, dual basis
 8. Diamond--Posen ring switching
@@ -83,3 +83,22 @@ This chapter develops the original kernel basis over arbitrary fields, including
 From `paper/zk-extension`, run `sh audit/RUN.sh`. This compiles a self-contained Rust test harness that checks kernel coordinate inversions, normalized fold identities, low-degree patterns, scaled evaluation curves, and an exhaustive two-query masking distribution. The CI workflow runs the Rust harness independently from the LaTeX build. These tests supplement but do not replace proofs.
 
 The chapter also establishes an exact mask-budget versus code-rate tradeoff: for B=2^t, a degree-<B mask yields bounded-query hiding for B distinct nonzero oracle queries, while the Reed--Solomon degree bound becomes N+B.
+
+
+## Chapter 5 results
+
+The chapter contains **62 labeled definitions/results and 49 complete paper proofs** in seven subsections.
+
+- All-prefix restrictions and multilinear evaluations.
+- An explicit monomial/tensor functional for normalized folding over arbitrary fields, plus the characteristic-two specialization.
+- Complete kernel-fold dictionary, including iterated/prefix composition.
+- An injective and surjective masked encoding `(f,R) ↦ U_f+X^N R` for mask degree `< B ≤ N`.
+- A precise level-wise mask propagation invariant `Q_j=U_(Res^j f)+X^(N/2^j)R_j`.
+- **Revised linear final closure:** `Q_m(X)=MLE(f)(r)+rho_r(R)X` and `coeff_0(Q_m)=MLE(f)(r)`.
+- Enlarged degree budgets `D_j=N/2^j+ceil(B/2^j)` and honest RS codeword-fold correctness.
+- Local fold-check detection bounds, under explicit low-degree code membership.
+- A necessary-and-sufficient image/coset criterion for jointly hiding fixed-schedule queries across folded oracles.
+
+**Security status:** All above are algebraic results. They do not prove the full ZK-KBFold protocol against malicious, adaptively querying verifiers. The masked sumcheck, authenticated online simulator, and adversarial proximity proof remain open.
+
+See `CHAPTER_05_LEAN_MAP.md`. Run `sh audit/RUN.sh` for the original Chapter 4 and the new Chapter 5 Rust regression tests.
