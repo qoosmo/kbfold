@@ -1,0 +1,213 @@
+\subsection{Multilinearization and the exact kernel-fold functional}\label{sec:binary:multilinearization}
+We retain $\ell\geq1$, $n=2^\ell$, and a characteristic-two field $\F$.
+For $0\leq e<n$ write its unique binary expansion as
+$e=\sum_{i=0}^{\ell-1}e_i2^i$ with $e_i\in\{0,1\}$.
+
+\begin{definition}[Binary-exponent multilinearization]\label{def:binary:ml}
+Let $\mathscr{ML}_\ell$ be the $\F$-vector space of
+polynomials multilinear in $Z_0,\ldots,Z_{\ell-1}$.
+Define the $\F$-linear map
+\[
+ \mathscr M_\ell:\F[X]_{<n}\longrightarrow\mathscr{ML}_\ell,
+ \qquad
+ \mathscr M_\ell\Bigl(\sum_{e=0}^{n-1}a_eX^e\Bigr)
+ :=\sum_{e=0}^{n-1}a_e\prod_{i=0}^{\ell-1}Z_i^{e_i}.
+\]
+\end{definition}
+
+\begin{lemma}[Multilinearization is a vector-space isomorphism]\label{lem:binary:ml-iso}
+The map $\mathscr M_\ell$ is an $\F$-linear bijection.
+\end{lemma}
+\begin{proof}
+Linearity is part of its definition. The monomials
+$X^e$, $0\leq e<n$, form a basis of $\F[X]_{<n}$.
+The monomials $\prod_iZ_i^{e_i}$ indexed by the binary digits of
+$0\leq e<n$ form a basis of $\mathscr{ML}_\ell$.
+The binary expansion gives a bijection between these two bases.
+The map sends each element of the first basis to the corresponding
+element of the second, hence is an isomorphism.
+\end{proof}
+
+\begin{lemma}[Explicit subset expansion of a kernel]\label{lem:binary:kernel-expansion}
+For $b\in I_\ell$,
+\[
+ K_b(X)=\sum_{S\subseteq\{0,\ldots,\ell-1\}}
+   \left(\prod_{i\notin S}b_i\right)
+   X^{\sum_{i\in S}2^i}.
+\]
+\end{lemma}
+\begin{proof}
+In the product $K_b=\prod_i(X^{2^i}+b_i)$,
+a term is obtained by selecting $X^{2^i}$ from a subset $S$
+of factors and $b_i$ from the complementary factors.
+The resulting term has scalar coefficient $\prod_{i\notin S}b_i$
+and monomial factor $X^{\sum_{i\in S}2^i}$.
+Every subset occurs exactly once in the full distributive
+expansion, establishing the equality.
+\end{proof}
+
+\begin{lemma}[Multilinearization of every kernel basis element]\label{lem:binary:ml-kernel}
+For every $b\in I_\ell$,
+\[
+ \boxed{\mathscr M_\ell(K_b)(Z)=\prod_{i=0}^{\ell-1}(Z_i+b_i).}
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:binary:kernel-expansion} and linearity,
+\[
+ \mathscr M_\ell(K_b)=\sum_{S}
+   \left(\prod_{i\notin S}b_i\right)
+   \mathscr M_\ell\left(X^{\sum_{i\in S}2^i}\right).
+\]
+The binary digits of $\sum_{i\in S}2^i$ equal $1$ precisely for
+$i\in S$, so the last factor is $\prod_{i\in S}Z_i$.
+Therefore the sum equals
+$\sum_S(\prod_{i\notin S}b_i)(\prod_{i\in S}Z_i)$.
+The distributive expansion of $\prod_i(Z_i+b_i)$ is the same sum.
+This argument uses only linearity of $\mathscr M_\ell$,
+not multiplicativity.
+\end{proof}
+
+\begin{definition}[Characteristic-two equality weights]\label{def:binary:lambda}
+For $b\in I_\ell$ and $\theta=(\theta_0,\ldots,\theta_{\ell-1})\in\F^\ell$,
+define
+\[
+ \lambda_b(\theta):=\prod_{i=0}^{\ell-1}(1+\theta_i+b_i).
+\]
+For $P=\sum_bc_bK_b$ with its unique kernel coefficient table,
+define
+\[
+ D_P(\theta):=\sum_bc_b\lambda_b(\theta).
+\]
+\end{definition}
+
+\begin{lemma}[Equality weights agree]\label{lem:binary:eq-weights}
+For all $b\in I_\ell$ and $\theta\in\F^\ell$,
+$\lambda_b(\theta)=\operatorname{eq}_\ell(b,\theta)$.
+\end{lemma}
+\begin{proof}
+For each coordinate $i$, if $b_i=0$ then
+$1+\theta_i+b_i=1+\theta_i=1-\theta_i$.
+If $b_i=1$ then $1+\theta_i+b_i=\theta_i$,
+because $1+1=0$. These are precisely the two cases of
+$(1-b_i)(1-\theta_i)+b_i\theta_i$.
+Multiply the coordinatewise identities.
+\end{proof}
+
+\begin{lemma}[Boolean weights partition unity]\label{lem:binary:lambda-partition}
+For every $\theta\in\F^\ell$,
+$\sum_{b\in I_\ell}\lambda_b(\theta)=1$.
+\end{lemma}
+\begin{proof}
+Factor the sum over bit strings into a product of two-term sums:
+\[
+ \sum_b\lambda_b(\theta)
+ =\prod_{i=0}^{\ell-1}
+  \bigl((1+\theta_i+0)+(1+\theta_i+1)\bigr)
+ =\prod_i\bigl((1+\theta_i)+\theta_i\bigr)=1.
+\]
+\end{proof}
+
+\begin{theorem}[Complete kernel fold equals multilinearized evaluation]\label{thm:binary:fold-ml}
+For every $P\in\F[X]_{<n}$ and $\theta\in\F^\ell$,
+\[
+ \boxed{
+ \mathsf{PFold}^{[\ell]}_\theta(P)
+  =D_P(\theta)
+  =\mathscr M_\ell(P)(1+\theta_0,\ldots,1+\theta_{\ell-1}).
+ }
+\]
+\end{theorem}
+\begin{proof}
+By Proposition~\ref{prop:intro:basis}, uniquely write
+$P=\sum_bc_bK_b$. The fold dictionary,
+Corollary~\ref{cor:kbff:full-evaluation},
+identifies its complete fold with
+$\sum_bc_b\operatorname{eq}_\ell(b,\theta)$,
+which equals $D_P(\theta)$ by Lemma~\ref{lem:binary:eq-weights}.
+For the second equality, apply the linear map $\mathscr M_\ell$
+to the kernel expansion of $P$ and evaluate:
+\[
+ \mathscr M_\ell(P)(1+\theta)
+ =\sum_bc_b\,\mathscr M_\ell(K_b)(1+\theta).
+\]
+Lemma~\ref{lem:binary:ml-kernel} evaluates each summand as
+$\prod_i(1+\theta_i+b_i)=\lambda_b(\theta)$.
+Thus the sum is precisely $D_P(\theta)$.
+\end{proof}
+
+\begin{definition}[Partial multilinearization]\label{def:binary:partial-ml}
+For $0\leq j\leq\ell$, define
+\[
+ \mathscr M_{\ell,j}(P)(Z_0,\ldots,Z_{j-1},Y)
+ :=\sum_{e=0}^{n-1}a_e
+   \left(\prod_{i=0}^{j-1}Z_i^{e_i}\right)
+   Y^{\lfloor e/2^j\rfloor}
+\]
+for $P(X)=\sum_{e=0}^{n-1}a_eX^e$.
+\end{definition}
+
+\begin{lemma}[Partial folding formula]\label{lem:binary:partial-fold}
+For $0\leq j\leq\ell$ and $r\in\F^j$,
+\[
+ \boxed{
+ \mathsf{PFold}^{[j]}_r(P)(Y)
+ =\mathscr M_{\ell,j}(P)(1+r_0,\ldots,1+r_{j-1},Y).
+ }
+\]
+\end{lemma}
+\begin{proof}
+The explicit fold formula of
+Theorem~\ref{thm:kbff:fold-coefficients}
+gives a summand
+$a_e\bigl(\prod_{i<j}A_{e_i}(r_i)\bigr)Y^{\lfloor e/2^j\rfloor}$.
+In characteristic two, $A_0(r_i)=2r_i-1=1$ and
+$A_1(r_i)=1-r_i=1+r_i$.
+Thus $\prod_{i<j}A_{e_i}(r_i)=\prod_{i<j}(1+r_i)^{e_i}$.
+Substitution produces exactly the evaluation of
+Definition~\ref{def:binary:partial-ml}.
+\end{proof}
+
+\begin{lemma}[Frobenius covariance of equality weights]\label{lem:binary:lambda-frob}
+For $b\in I_\ell$, $\theta\in\F^\ell$, and $j\geq0$,
+\[
+ \lambda_b(\theta)^{2^j}
+ =\lambda_b(\theta_0^{2^j},\ldots,\theta_{\ell-1}^{2^j}).
+\]
+\end{lemma}
+\begin{proof}
+Apply $\sigma_j$ to the product
+$\prod_i(1+\theta_i+b_i)$, using the ring-homomorphism
+property of Lemma~\ref{lem:binary:frob-ring}.
+Since $1$ and $b_i\in\F_2$ are fixed by $\sigma_j$,
+each factor becomes $1+\theta_i^{2^j}+b_i$.
+Their product is the equality weight on the right.
+\end{proof}
+
+\begin{corollary}[Frobenius covariance of kernel-fold values]\label{cor:binary:fold-frob}
+For $c:I_\ell\to\F$, $\theta\in\F^\ell$, and $j\geq0$,
+\[
+ \boxed{D_{U_c}(\theta)^{2^j}
+ =D_{U_{c^{\sigma_j}}}(\theta^{\sigma_j}).}
+\]
+\end{corollary}
+\begin{proof}
+Raise the finite sum
+$D_{U_c}(\theta)=\sum_bc(b)\lambda_b(\theta)$
+to its $2^j$-th power.
+By Lemma~\ref{lem:binary:frob-add} and multiplicativity,
+it becomes $\sum_bc(b)^{2^j}\lambda_b(\theta)^{2^j}$.
+Apply Lemma~\ref{lem:binary:lambda-frob}
+and Definition~\ref{def:binary:table-frob}.
+\end{proof}
+
+\begin{remark}[Nonmultiplicativity warning]
+The multilinearization map is \emph{not} a ring homomorphism,
+even where both sides happen to be defined.
+For $\ell\geq2$,
+$\mathscr M_\ell(X^2)=Z_1$ while
+$\mathscr M_\ell(X)\mathscr M_\ell(X)=Z_0^2$.
+The polynomials $Z_1$ and $Z_0^2$ are distinct.
+All foregoing kernel identities were proved from expansions
+and the linearity of $\mathscr M_\ell$.
+\end{remark}
