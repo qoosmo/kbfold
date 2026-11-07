@@ -1,0 +1,103 @@
+\subsection{Adaptive linear masking and conditional oracle answers}\label{sec:security:linear-masks}
+
+The next lemmas give a criterion for whether a random linear mask actually hides the values seen by an adaptive oracle verifier. Unlike an assertion that one masked element is uniform, these statements describe the joint and conditional distributions of arbitrarily many linear observations.
+
+\begin{definition}[Linear masking experiment]\label{def:security:linear-mask}
+Let $\F$ be a finite field, let $V$ be a finite-dimensional $\F$-vector space, and let $H\leq V$ be an $\F$-linear subspace. Fix a secret vector $s\in V$. Sample $R$ uniformly from $H$ and publish or expose the \emph{masked vector}
+\[
+ Y_s:=s+R.
+\]
+For a fixed $\F$-linear map $L:V\to W$ into another finite-dimensional vector space $W$, the \emph{linear observation} is $L(Y_s)$.
+\end{definition}
+
+\begin{lemma}[Uniformity on an affine coset]\label{lem:security:affine-uniform}
+The random variable $Y_s$ is uniform on the affine coset $s+H$. For every linear $L:V\to W$, its observation $L(Y_s)$ is uniform on
+\[
+ L(s)+L(H)\subseteq W.
+\]
+\end{lemma}
+\begin{proof}
+Translation $R\mapsto s+R$ is a bijection $H\to s+H$, so it preserves uniformity. The restriction $L|_H:H\to L(H)$ is a surjective linear map. For any $a\in L(H)$ and any chosen preimage $h_a\in H$, its full fiber is $h_a+\ker(L|_H)$, which has size $|\ker(L|_H)|$ independent of $a$. Thus $L(R)$ is uniform on $L(H)$, and translation by $L(s)$ proves the second assertion.
+\end{proof}
+
+\begin{lemma}[Exact distinguishing criterion for linear observations]\label{lem:security:coset-criterion}
+For fixed linear $L:V\to W$ and two secret vectors $s_0,s_1\in V$, the distributions $L(Y_{s_0})$ and $L(Y_{s_1})$ satisfy
+\[
+ \Delta(L(Y_{s_0}),L(Y_{s_1}))
+ =
+ \begin{cases}
+ 0,&L(s_0-s_1)\in L(H),\\
+ 1,&L(s_0-s_1)\notin L(H).
+ \end{cases}
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:security:affine-uniform}, the two variables are uniform respectively on $A_0=L(s_0)+L(H)$ and $A_1=L(s_1)+L(H)$. Two cosets of the same additive subgroup are either equal or disjoint. They are equal if and only if
+$L(s_0)-L(s_1)=L(s_0-s_1)$ belongs to $L(H)$.
+In that case the distributions agree, so the distance is zero by Lemma~\ref{lem:security:tv-range}. Otherwise their supports are disjoint. Taking the event $A_0$ in Lemma~\ref{lem:security:events} shows that their total variation distance is at least $1$, and Lemma~\ref{lem:security:tv-range} gives the reverse bound.
+\end{proof}
+
+\begin{lemma}[Conditional uniformity after linear queries]\label{lem:security:conditioned-mask}
+Let $L:V\to W$ be linear, and let $y\in W$ be such that
+$\Pr[L(Y_s)=y]>0$. Fix any $r_0\in H$ satisfying
+$L(r_0)=y-L(s)$. Then, conditioned on $L(Y_s)=y$, the mask $R$ is uniform on
+\[
+ r_0+(H\cap\ker L),
+\]
+and the exposed vector $Y_s$ is uniform on
+\[
+ s+r_0+(H\cap\ker L).
+\]
+\end{lemma}
+\begin{proof}
+The event $L(Y_s)=y$ is equivalent to $R\in H$ and
+$L(R)=y-L(s)$. By the assumption of positive probability, this fiber is nonempty; choose $r_0$ in it. For any $r\in H$,
+$L(r)=L(r_0)$ holds exactly when $r-r_0\in H\cap\ker L$. Thus the fiber equals $r_0+(H\cap\ker L)$. The original distribution of $R$ assigns the same probability $1/|H|$ to every member of $H$, so conditioning on this nonempty fiber assigns equal probability to all its members. Translating by $s$ yields the final statement.
+\end{proof}
+
+\begin{corollary}[One more adaptive linear oracle query]\label{cor:security:adaptive-next}
+Retain Lemma~\ref{lem:security:conditioned-mask}, and let $\varphi:V\to\F$ be another $\F$-linear functional chosen as a function of the observed answer $y$. Conditional on $L(Y_s)=y$, the next answer $\varphi(Y_s)$ is uniform on
+\[
+ \varphi(s+r_0)+\varphi(H\cap\ker L)\subseteq\F.
+\]
+In particular, its conditional distribution is either a point mass or the uniform distribution on $\F$.
+\end{corollary}
+\begin{proof}
+Apply Lemma~\ref{lem:security:affine-uniform} to the conditional affine mask space in Lemma~\ref{lem:security:conditioned-mask}, using the linear map $\varphi$ restricted to $H\cap\ker L$. Its image is an $\F$-linear subspace of the one-dimensional $\F$-vector space $\F$; such a subspace is either $\{0\}$ or all of $\F$. In the former case the translated distribution is a point mass, and in the latter it is uniform on $\F$.
+\end{proof}
+
+\begin{remark}[What must be proved for an adaptive simulator]
+Corollary~\ref{cor:security:adaptive-next} gives an exact next-answer law \emph{conditional on every realized query history}. It does not by itself give a witness-independent simulator: if the next answer is deterministic, its value could still depend on $s$. An online simulator must prove that each such deterministic value is determined by the authorized public information, and that each remaining randomized answer is sampled consistently with the earlier answers. The uniform-in-history hypothesis of Lemma~\ref{lem:security:hybrid} is the corresponding simulation invariant.
+\end{remark}
+
+\begin{lemma}[Evaluation masks at arbitrary distinct points]\label{lem:security:lagrange}
+Let $\xi_1,\ldots,\xi_Q\in\F$ be pairwise distinct, with $Q\geq1$. The evaluation map
+\[
+ \operatorname{Ev}_Q:\F[X]_{<Q}\to\F^Q,\qquad
+ R\mapsto (R(\xi_1),\ldots,R(\xi_Q))
+\]
+is an $\F$-linear bijection.
+\end{lemma}
+\begin{proof}
+Linearity is immediate from polynomial evaluation. For each $i$ put
+\[
+ L_i(X):=\prod_{\substack{1\leq j\leq Q\\j\ne i}}
+     \frac{X-\xi_j}{\xi_i-\xi_j}.
+\]
+Every denominator is nonzero by pairwise distinctness, and $\deg L_i\leq Q-1$. Direct substitution gives $L_i(\xi_i)=1$ and $L_i(\xi_j)=0$ for $j\ne i$. For any target vector $(y_1,\ldots,y_Q)$, the polynomial $R(X)=\sum_{i=1}^Qy_iL_i(X)$ has degree less than $Q$ and satisfies $R(\xi_j)=y_j$ for every $j$, establishing surjectivity. If $R$ maps to zero, it has the $Q$ distinct roots $\xi_1,\ldots,\xi_Q$, while its degree is at most $Q-1$. Lemma~\ref{lem:history:rootcount} forces $R=0$, giving injectivity.
+\end{proof}
+
+\begin{corollary}[Uniform masking of a bounded set of evaluation queries]\label{cor:security:q-query-uniform}
+Let $R$ be uniform on $\F[X]_{<Q}$ and let $P\in\F[X]$ be fixed. For any fixed $Q$ distinct points $\xi_1,\ldots,\xi_Q$, the random vector
+\[
+ (P(\xi_1)+R(\xi_1),\ldots,P(\xi_Q)+R(\xi_Q))
+\]
+is uniform on $\F^Q$ and its distribution is independent of $P$.
+\end{corollary}
+\begin{proof}
+By Lemma~\ref{lem:security:lagrange}, $\operatorname{Ev}_Q$ is a bijection; hence the evaluations of the uniform random polynomial $R$ form a uniform vector in $\F^Q$. Translation by the fixed vector of $P$ evaluations preserves the uniform distribution (Lemma~\ref{lem:history:otp}).
+\end{proof}
+
+\begin{remark}[Why the preceding corollary is only a local hiding claim]
+For fewer than $Q$ distinct queries, the same conclusion follows by restriction of the uniform $Q$-vector to the requested coordinates. For \emph{more} than $Q$ queries the image of $\operatorname{Ev}$ is a proper linear subspace of $\F^k$ because $\F[X]_{<Q}$ has dimension $Q$. Lemma~\ref{lem:security:coset-criterion} then identifies which differences of two secrets are visible. This is a dimension condition on a particular linear masking family, not a universal lower bound for every ZK proof system.
+\end{remark}
