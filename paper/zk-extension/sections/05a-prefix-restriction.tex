@@ -1,0 +1,117 @@
+\subsection{Prefix restrictions and multilinear evaluation}\label{sec:kbfoldfold:prefix}
+
+Throughout this chapter, $\F$ is a field, $m\geq1$ is an integer, $N=2^m$, and $I_k=\{0,1\}^k$ for every $0\leq k\leq m$. The first bit is the lowest-index bit, as in Definition~\ref{def:intro:indices}. The variables of a table are ordered, and no permutation of their indices is implicit.
+
+\begin{definition}[Prefix equality weight]\label{def:kbff:prefix-weight}
+For $0\leq j\leq m$, $a\in I_j$ and $r=(r_0,\ldots,r_{j-1})\in\F^j$, define
+\[
+ \lambda^{(j)}_a(r)
+ :=\prod_{i=0}^{j-1}\bigl((1-a_i)(1-r_i)+a_ir_i\bigr)\in\F.
+\]
+For $j=0$, the unique weight is the empty product $1$.
+\end{definition}
+
+\begin{lemma}[First-bit factorization]\label{lem:kbff:weight-factor}
+For $j<m$, any $a=(a_0,\ldots,a_{j-1})\in I_j$, $e\in\{0,1\}$ and $r'=(r_0,\ldots,r_{j-1})\in\F^j$,
+\[
+ \lambda^{(j+1)}_{(a,e)}(r',t)=
+ \lambda^{(j)}_a(r')\bigl((1-e)(1-t)+et\bigr).
+\]
+\end{lemma}
+\begin{proof}
+By Definition~\ref{def:kbff:prefix-weight}, the left side is a product indexed by $i=0,\ldots,j$. Separate the factor with $i=j$ from the product with $i<j$. The latter is $\lambda^{(j)}_a(r')$ and the former is the displayed affine factor.
+\end{proof}
+
+\begin{definition}[Simultaneous prefix restriction]\label{def:kbff:prefix-restriction}
+For $0\leq j\leq m$, $r\in\F^j$, and $f:I_m\to\F$, define
+\[
+ \mathsf{Res}^{[j]}_r(f):I_{m-j}\to\F,\qquad
+ \mathsf{Res}^{[j]}_r(f)(b)
+   :=\sum_{a\in I_j}\lambda^{(j)}_a(r)\,f(a,b).
+\]
+Here $(a,b)\in I_m$ denotes concatenation in the original bit order.
+\end{definition}
+
+\begin{lemma}[Zero-prefix identity]\label{lem:kbff:prefix-zero}
+For every table $f:I_m\to\F$,
+\[
+ \mathsf{Res}^{[0]}_{()}(f)=f.
+\]
+\end{lemma}
+\begin{proof}
+The set $I_0$ contains only the empty tuple $()$, whose equality weight equals $1$. In the defining sum, $((),b)=b$. Thus $\mathsf{Res}^{[0]}_{()}(f)(b)=f(b)$ for every $b$.
+\end{proof}
+
+\begin{lemma}[Prefix extension by one restriction]\label{lem:kbff:prefix-step}
+For $0\leq j<m$, $r\in\F^j$, and $t\in\F$,
+\[
+ \mathsf{Res}^{[j+1]}_{(r,t)}(f)
+ =\Res_t\bigl(\mathsf{Res}^{[j]}_r(f)\bigr).
+\]
+\end{lemma}
+\begin{proof}
+Fix $b\in I_{m-j-1}$ and expand the left side:
+\[
+ \mathsf{Res}^{[j+1]}_{(r,t)}(f)(b)
+ =\sum_{a\in I_j}\sum_{e\in\{0,1\}}
+   \lambda^{(j+1)}_{(a,e)}(r,t) f(a,e,b).
+\]
+By Lemma~\ref{lem:kbff:weight-factor}, the summand equals
+$\lambda^{(j)}_a(r)((1-e)(1-t)+et)f(a,e,b)$.
+Separate the two values of $e$:
+\[
+ (1-t)\sum_{a\in I_j}\lambda^{(j)}_a(r)f(a,0,b)
+ +t\sum_{a\in I_j}\lambda^{(j)}_a(r)f(a,1,b).
+\]
+The two sums are $\mathsf{Res}^{[j]}_r(f)(0,b)$ and
+$\mathsf{Res}^{[j]}_r(f)(1,b)$, respectively. Their affine combination is
+$\Res_t(\mathsf{Res}^{[j]}_r(f))(b)$ by Definition~\ref{def:intro:restriction}.
+Since $b$ was arbitrary, the table identity follows.
+\end{proof}
+
+\begin{lemma}[Linearity of prefix restriction]\label{lem:kbff:prefix-linear}
+For any $f,g:I_m\to\F$, $c\in\F$, and every prefix $r\in\F^j$,
+\[
+ \mathsf{Res}^{[j]}_r(f+cg)=
+ \mathsf{Res}^{[j]}_r(f)+c\,\mathsf{Res}^{[j]}_r(g).
+\]
+\end{lemma}
+\begin{proof}
+At each remaining bit tuple $b$, distribute the sum
+$\sum_a\lambda^{(j)}_a(r)(f(a,b)+cg(a,b))$, and take the scalar $c$ outside the finite sum.
+\end{proof}
+
+\begin{lemma}[Partial multilinear-evaluation identity]\label{lem:kbff:prefix-mle}
+For every $0\leq j\leq m$, $r\in\F^j$, and $y\in\F^{m-j}$,
+\[
+ \widetilde{\mathsf{Res}^{[j]}_r(f)}(y)=\widetilde f(r,y).
+\]
+\end{lemma}
+\begin{proof}
+By the definition of multilinear extension, the left side is
+\[
+ \sum_{b\in I_{m-j}}
+     \mathsf{Res}^{[j]}_r(f)(b)\lambda^{(m-j)}_b(y).
+\]
+Substitute Definition~\ref{def:kbff:prefix-restriction} and interchange the two finite sums:
+\[
+ \sum_{a\in I_j}\sum_{b\in I_{m-j}}
+ f(a,b)\lambda^{(j)}_a(r)\lambda^{(m-j)}_b(y).
+\]
+By splitting the product in Definition~\ref{def:intro:mle},
+$\lambda^{(m)}_{(a,b)}(r,y)=
+\lambda^{(j)}_a(r)\lambda^{(m-j)}_b(y)$.
+The map $(a,b)\mapsto(a,b)$ is a bijection
+$I_j\times I_{m-j}\to I_m$; thus the displayed expression equals
+$\sum_{c\in I_m}f(c)\lambda^{(m)}_c(r,y)=\widetilde f(r,y)$.
+\end{proof}
+
+\begin{corollary}[Complete prefix restriction]\label{cor:kbff:full-prefix}
+For $r\in\F^m$ the table $\mathsf{Res}^{[m]}_r(f)$ has one entry and
+\[
+ \mathsf{Res}^{[m]}_r(f)(())=\widetilde f(r).
+\]
+\end{corollary}
+\begin{proof}
+Apply Lemma~\ref{lem:kbff:prefix-mle} with $j=m$ and the unique empty tuple of $\F^0$; the multilinear extension of a one-entry table is its only entry.
+\end{proof}
