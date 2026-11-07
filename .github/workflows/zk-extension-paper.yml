@@ -23,3 +23,14 @@ jobs:
           name: kbfold-zk-manuscript
           path: paper/zk-extension/main.pdf
           if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kbfold-zk-source
+          path: |
+            paper/zk-extension/main.tex
+            paper/zk-extension/references.bib
+            paper/zk-extension/sections/
+            paper/zk-extension/README.md
+            paper/zk-extension/THEOREM_LEDGER.md
+          if-no-files-found: error
