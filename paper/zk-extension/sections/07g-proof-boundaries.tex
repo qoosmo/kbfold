@@ -1,0 +1,118 @@
+\subsection{Exact composition boundary and implementation obligations}\label{sec:packing:boundary}
+
+\begin{definition}[Ideal versus implemented acceptance]\label{def:pack:implementation}
+Let $\mathcal A_{\mathrm{ideal}}$ be the algebraic
+acceptance event of Definition~\ref{def:pack:combined}
+for fixed committed values. Let
+$\mathcal A_{\mathrm{impl}}$ denote acceptance by
+a proposed implemented PCS/IOP using an
+auxiliary commitment and affine-proof system.
+Call $\mathcal B$ the event that the implementation
+accepts even though some supposedly enforced
+commitment equality, claimed bit packing, or
+field-affine relation is invalid on the
+fixed underlying witness.
+Assume the implementation has the
+\emph{faithful acceptance} property
+\[
+ \mathcal A_{\mathrm{impl}}\cap\mathcal B^c
+       \subseteq\mathcal A_{\mathrm{ideal}}.
+\]
+\end{definition}
+
+\begin{lemma}[Bad-execution decomposition]\label{lem:pack:bad-decomposition}
+Under Definition~\ref{def:pack:implementation},
+\[
+ \mathcal A_{\mathrm{impl}}
+ \subseteq \mathcal A_{\mathrm{ideal}}\cup\mathcal B.
+\]
+\end{lemma}
+\begin{proof}
+Every execution either belongs to $\mathcal B$
+or to its complement. In the first case
+it belongs to the union on the right.
+In the second case, faithful acceptance
+places it in $\mathcal A_{\mathrm{ideal}}$.
+This exhausts all executions.
+\end{proof}
+
+\begin{proposition}[Conditional soundness under an external failure bound]\label{prop:pack:external-composition}
+Consider a false evaluation claim under the
+pre-challenge binding and strategy-timing
+hypotheses of
+Theorem~\ref{thm:pack:algebraic-sound}.
+If an implementation admits an ideal
+coupling as in Definition~\ref{def:pack:implementation}
+and the probability of the bad event is
+at most $\varepsilon_{\mathrm{ext}}$, then
+\[
+ \boxed{
+ \Pr[\mathcal A_{\mathrm{impl}}]
+ \leq
+ \min\left\{1,\frac{\ell+n}{q}
+                    +\varepsilon_{\mathrm{ext}}\right\}.
+ }
+\]
+\end{proposition}
+\begin{proof}
+By Lemma~\ref{lem:pack:bad-decomposition}
+and the probability union bound,
+\[
+ \Pr[\mathcal A_{\mathrm{impl}}]
+ \leq\Pr[\mathcal A_{\mathrm{ideal}}]
+           +\Pr[\mathcal B].
+\]
+Theorem~\ref{thm:pack:algebraic-sound}
+bounds the first term by $(\ell+n)/q$.
+The external coupling assumption bounds
+the second by $\varepsilon_{\mathrm{ext}}$.
+Cap the sum by the universal upper
+bound $1$ for a probability.
+\end{proof}
+
+\begin{definition}[Formal verification obligations]\label{def:pack:obligations}
+To turn the preceding identities into a
+complete zero-knowledge Ring Switching IOP
+and then reuse them safely as a component
+of another proof system, one needs separate
+formal statements that establish:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item the exact binding relation between
+the independently committed Boolean
+witness and packed elements $\widehat w_j$;
+\item the commitment-before-$\theta$ timing
+for $w,m,p,c,y',p_{\mathrm{in}}$ and the
+pre-$z$ timing for the checker residuals;
+\item exact or knowledge-sound
+implementation of the three affine
+interfaces and the Chapter~6 checker;
+\item the joint zero-knowledge simulation
+of $m,y',U,A$ together with
+commitments and authenticated openings;
+\item a separate analysis for any
+multiple-opening and Fiat--Shamir/QROM
+compilation; and
+\item if combined with the original KBFold
+PCS, the odd-characteristic folding,
+degree and proximity arguments of
+Chapters~3--5 rather than an
+unjustified characteristic-two
+substitution.
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[Where Chapter 7 ends]
+We have proved lossless packing,
+the exact involutive transpose,
+the outgoing packed-evaluation identity,
+incoming/outgoing masked equations,
+algebraic completeness and a quantified
+false-claim bound in an idealized affine
+interface. We have \emph{not} proved
+cryptographic zero knowledge or a
+new PCS theorem. A future simulator
+must cover the full conditional
+distribution of every committed and
+published message, not just the
+uniform marginals of $m$ and $y'$.
+\end{remark}
