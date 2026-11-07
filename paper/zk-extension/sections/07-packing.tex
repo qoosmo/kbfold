@@ -1,0 +1,75 @@
+\section{Binary-Field Packing and Transposition}\label{sec:packing}
+
+This chapter constructs the exact algebraic interface
+between a Boolean witness table, its binary field-packed
+columns, and a collection of extension-field affine
+relations. It builds on the characteristic-two kernel,
+trace-dual basis, and anchored consistency checker of
+Chapter~6; it rederives the transposition equations of
+Diamond--Posen~\cite{DiamondPosen2024} in the chosen
+Boolean-kernel coordinates and distinguishes them from
+the separate trace-zero masking mechanisms of
+Kochergin~\cite{Kochergin2026} and
+Frigo--shelat~\cite{FrigoShelat2026}.
+Every claim has a declared field and challenge order,
+and all algebraic statements are proved in small steps
+suitable for later Lean~4 formalization.
+
+\input{sections/07a-packing}
+\input{sections/07b-transposition}
+\input{sections/07c-packed-evaluation}
+\input{sections/07d-masked-equations}
+\input{sections/07e-composition-soundness}
+\input{sections/07f-affine-and-privacy}
+\input{sections/07g-proof-boundaries}
+
+\subsection{Main theorem chain}\label{sec:packing:conclusion}
+
+Fix $n=2^\ell$, $L=\F_{2^n}$, and a Boolean
+witness $w:I_\ell\times I_h\to\F_2$.
+The exact identities established above are
+\[
+ \boxed{
+ \operatorname{Unpack}\circ\operatorname{Pack}
+        =\operatorname{id},\qquad
+ \mathcal T^2=\operatorname{id},}
+\]
+\[
+ \boxed{
+ \mathcal T(s^*)_u
+ =\sum_{j\in J}d_u(h_j)\widehat w_j,\qquad
+ B_{s^*}(\theta)=\sum_ja_j(\theta)\widehat w_j,}
+\]
+and, for $m=s^*+p$ with $c=c^p=\mathcal T(p)$,
+\[
+ \boxed{
+ y_{\mathrm{pub}}=\sum_vq_v(m_v+p_v),\qquad
+ \sum_ja_j(\theta)\widehat w_j
+       =B_m(\theta)+D_c(\theta).}
+\]
+The first incoming equation is equivalent to
+the two concrete affine equations
+$\mathsf{CLAIM}$ and $\mathsf{IN}$.
+The second is the outgoing affine equation
+$\mathsf{OUT}$, and the non-affine identity
+$c=\mathcal T(p)$ is checked by the
+anchored trace-coordinate checker of Chapter~6.
+
+When a false evaluation $y_{\mathrm{pub}}\neq y_w$
+is bound before the independent challenges,
+the combined \emph{ideal algebraic} checks obey
+\[
+ \boxed{
+ \Pr[\mathsf{Accept}_7]\leq
+ \min\{1,(\ell+n)/2^n\}.}
+\]
+This is a conditional algebraic result, not a
+complete cryptographic theorem.
+The chapter also proves that publishing
+$(m,c^p)$ reveals $s^*$ exactly, even though
+the marginal distribution of $m$ is uniform.
+The remaining obligations are external
+commitment binding, authenticated affine
+proofs, an online joint-view simulator, and
+composition with the original odd-characteristic
+KBFold PCS.
