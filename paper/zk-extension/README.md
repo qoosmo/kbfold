@@ -77,3 +77,7 @@ See `CHAPTER_03_LEAN_MAP.md` for all 62 individually labeled definitions/results
 ## Chapter 4 result
 
 This chapter develops the original kernel basis over arbitrary fields, including the Kronecker transform, Möbius inverse, low-degree criterion, the exact evaluation curve, and the full tensor-functional formula for normalized folds. It separates odd characteristic from characteristic two. For a finite field, it proves that a uniformly chosen low-degree kernel mask gives secret-independent answers to at most `2^t` adaptive distinct nonzero queries to a **single** oracle of the form `P+X^N R`; the proof does not claim full ZK-KBFold. See `CHAPTER_04_LEAN_MAP.md`.
+
+## Chapter 4 Rust regression tests
+
+From `paper/zk-extension`, run `sh audit/RUN.sh`. This compiles a self-contained Rust test harness that checks kernel coordinate inversions, normalized fold identities, low-degree patterns, scaled evaluation curves, and an exhaustive two-query masking distribution. The CI workflow runs the Rust harness independently from the LaTeX build. These tests supplement but do not replace proofs.
