@@ -1,0 +1,222 @@
+\subsection{Packed polynomial and the tensor-valued evaluation}\label{sec:dpr:eval}
+Fix a Boolean witness $w:I_\ell\times I_h\to\F_2$,
+with $h\geq1$, and the evaluation points
+$r_{\rm lo}\in L^\ell$, $r_{\rm hi}\in L^h$
+from Chapter~7. Write $q_v=\operatorname{eq}_\ell
+(v,r_{\rm lo})$, $h_j=\operatorname{eq}_h(j,r_{\rm hi})$.
+
+\begin{definition}[Packed multilinear polynomial]\label{def:dpr:packed-poly}
+The packed table is
+$t'(j):=\sum_v\beta_vw_{v,j}=\widehat w_j$,
+$j\in I_h$. Its multilinear extension
+is
+\[
+ T'(X)=\sum_{j\in I_h}\widehat w_j
+ \operatorname{eq}_h(j,X)\in
+ L[X_0,\ldots,X_{h-1}]_{\mathrm{mult}}.
+\]
+Let $\varphi_1(T')$ denote the polynomial
+obtained by applying $\varphi_1$ to each
+coefficient of $T'$.
+\end{definition}
+
+\begin{lemma}[Tensor expansion on Boolean columns]\label{lem:dpr:tensor-column}
+For every $j\in I_h$,
+\[
+ \varphi_1(\widehat w_j)
+ =\sum_v\varphi_0(w_{v,j})\varphi_1(\beta_v).
+\]
+\end{lemma}
+\begin{proof}
+By definition
+$\widehat w_j=\sum_v\beta_vw_{v,j}$.
+Apply the additive ring homomorphism
+$\varphi_1$.
+Because $w_{v,j}\in\F_2$, the scalar
+embeddings agree:
+$\varphi_1(w_{v,j})=\varphi_0(w_{v,j})$.
+Rearranging the commutative products
+gives the displayed expansion.
+\end{proof}
+
+\begin{definition}[Tensor partial evaluation]\label{def:dpr:tensor-S}
+Put
+\[
+ S:=\varphi_1(T')(
+ \varphi_0(r_{{\rm hi},0}),\ldots,
+ \varphi_0(r_{{\rm hi},h-1}))\in A.
+\]
+\end{definition}
+
+\begin{lemma}[Evaluation of equality weights through the left embedding]\label{lem:dpr:eq-embedded}
+For each $j\in I_h$,
+\[
+ \operatorname{eq}_h(j,\varphi_0(r_{\rm hi}))
+ =\varphi_0(h_j).
+\]
+\end{lemma}
+\begin{proof}
+Each equality weight is a product of
+factors of the form $(1-r_i)$ or $r_i$,
+selected by the Boolean index $j_i$.
+A unital ring homomorphism preserves
+addition, products, and the elements
+$0,1$. Applying $\varphi_0$
+coordinatewise to the defining product
+thus gives the same result as evaluating
+at the embedded point.
+\end{proof}
+
+\begin{theorem}[Columns of the tensor evaluation]\label{thm:dpr:column-evaluation}
+For every $v\in I_\ell$,
+\[
+ \boxed{
+ \operatorname{Col}(S)_v
+  =\sum_{j\in I_h}h_jw_{v,j}
+  =s_v^*.}
+\]
+\end{theorem}
+\begin{proof}
+Multilinear interpolation and
+Lemma~\ref{lem:dpr:eq-embedded} give
+\[
+ S=\sum_j\varphi_1(\widehat w_j)
+                 \varphi_0(h_j).
+\]
+Insert Lemma~\ref{lem:dpr:tensor-column}:
+\[
+ S=\sum_{j,v}\varphi_0(w_{v,j}h_j)
+                       \varphi_1(\beta_v).
+\]
+Interchange the finite sums, use
+additivity of $\varphi_0$, and obtain
+\[
+ S=\sum_v
+     \varphi_0\left(\sum_jh_jw_{v,j}\right)
+     \varphi_1(\beta_v).
+\]
+Uniqueness of column coefficients in
+Lemma~\ref{lem:dpr:column-basis}
+shows that the $v$-th coefficient
+is $\sum_jh_jw_{v,j}$, precisely the
+partial evaluation $s_v^*$ defined
+in Chapter~7.
+\end{proof}
+
+\begin{theorem}[Original evaluation is a column contraction]\label{thm:dpr:claim-contraction}
+The true evaluation of the original
+Boolean multilinear table is
+\[
+ \boxed{y_w=C_q(S).}
+\]
+\end{theorem}
+\begin{proof}
+By Theorem~\ref{thm:dpr:column-evaluation},
+$C_q(S)=\sum_vq_vs_v^*$.
+Lemma~\ref{lem:pack:partial-eval}
+identifies this finite sum with $y_w$.
+\end{proof}
+
+\begin{lemma}[Multiplication recovers only the packed high-axis evaluation]\label{lem:dpr:mu-evaluation}
+\[
+ \mu(S)=T'(r_{\rm hi})
+       =\sum_v\beta_vs_v^*.
+\]
+\end{lemma}
+\begin{proof}
+Apply the multiplication map $\mu$
+to the displayed expansion of $S$
+in the proof of
+Theorem~\ref{thm:dpr:column-evaluation}.
+As $\mu(\varphi_0(a)\varphi_1(b))=ab$,
+the image is $\sum_v\beta_vs_v^*$.
+On the other hand multilinear
+interpolation gives
+$T'(r_{\rm hi})=\sum_jh_j\widehat w_j
+=\sum_{j,v}h_j\beta_vw_{v,j}
+=\sum_v\beta_vs_v^*$.
+\end{proof}
+
+\begin{definition}[Sumcheck summand over $A$]\label{def:dpr:H}
+Define the $A$-coefficient polynomial
+\[
+ H(X):=\varphi_1(T')(X)\,
+   \operatorname{eq}_h(\varphi_0(r_{\rm hi}),X)
+ \in A[X_0,\ldots,X_{h-1}],
+\]
+where the multivariate equality polynomial
+uses the usual affine factors in each variable.
+\end{definition}
+
+\begin{lemma}[Individual variable degree of the sumcheck summand]\label{lem:dpr:H-degree}
+The degree of $H$ in each variable $X_i$
+is at most $2$.
+\end{lemma}
+\begin{proof}
+The polynomial $T'$ is multilinear,
+so its coefficientwise image under
+$\varphi_1$ has degree at most $1$
+in each variable. The equality
+polynomial is also multilinear, hence
+has individual variable degree at most
+$1$. In a commutative polynomial ring,
+degrees of products in any fixed variable
+are bounded above by the sum of the
+degrees of the factors. Therefore
+$\deg_{X_i}H\leq2$.
+\end{proof}
+
+\begin{theorem}[Tensor Boolean sum equals its partial evaluation]\label{thm:dpr:boolean-sum}
+\[
+ \boxed{
+ \sum_{j\in I_h}H(j)=S.}
+\]
+\end{theorem}
+\begin{proof}
+For Boolean $j$, multilinear interpolation
+gives $\varphi_1(T')(j)=\varphi_1(\widehat w_j)$.
+Furthermore
+$\operatorname{eq}_h(\varphi_0(r_{\rm hi}),j)
+=\varphi_0(h_j)$ by the same
+homomorphism calculation as in
+Lemma~\ref{lem:dpr:eq-embedded}.
+Thus
+$\sum_jH(j)=\sum_j
+\varphi_1(\widehat w_j)\varphi_0(h_j)=S$,
+the latter equality being the expansion
+used in Theorem~\ref{thm:dpr:column-evaluation}.
+\end{proof}
+
+\begin{lemma}[Reduction to a large-field evaluation at a common challenge]\label{lem:dpr:terminal}
+For $z\in L^h$,
+\[
+ \boxed{
+ H(\varphi_1(z))
+ =\varphi_1(T'(z))\,
+ \operatorname{eq}_h(\varphi_0(r_{\rm hi}),\varphi_1(z)).
+ }
+\]
+\end{lemma}
+\begin{proof}
+Evaluate Definition~\ref{def:dpr:H}
+at the tuple of elements $\varphi_1(z_i)$.
+Because $\varphi_1$ is a ring homomorphism,
+substituting $\varphi_1(z_i)$ into the
+coefficientwise image $\varphi_1(T')$
+equals $\varphi_1(T'(z))$. The second
+factor is already the displayed public
+equality polynomial at that tuple.
+\end{proof}
+
+\begin{remark}[Why the tensor is essential]
+The ordinary packed value $T'(r_{\rm hi})$
+equals $\mu(S)$; it does not preserve
+the independent columns of $S$.
+The verifier needs these columns to
+apply its arbitrary low-axis weights $q$.
+The noninjectivity of $\mu$ from
+Lemma~\ref{lem:dpr:multiplication-loss}
+explains why evaluating only $T'$ at
+$r_{\rm hi}$ cannot replace the tensor
+phase of the original compiler.
+\end{remark}
