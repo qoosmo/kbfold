@@ -1,0 +1,203 @@
+\subsection{Masking partial evaluations and both affine interfaces}\label{sec:packing:masked}
+The raw partial evaluations $s_v^*$ can depend on the witness.
+The protocol instead exposes $m_v=s_v^*+p_v$ and checks
+the correction through hidden kernel coordinates.
+The following identities are algebraic, not yet a complete
+zero-knowledge simulation result.
+
+\begin{definition}[Field pads and masked partial evaluations]\label{def:pack:pads}
+Let $p=(p_v)_{v\in I}\in L^I$ be a pad vector and define
+\[
+ \boxed{m_v:=s_v^*+p_v,\qquad v\in I.}
+\]
+In distributional statements the coordinates of $p$
+are independent uniform elements of $L$.
+\end{definition}
+
+\begin{lemma}[Uniform masked partial evaluations]\label{lem:pack:masked-uniform}
+For every fixed witness and high-axis evaluation point,
+if $p$ is uniform on $L^I$ then $m=s^*+p$ is uniform
+on $L^I$, independently of the witness.
+\end{lemma}
+\begin{proof}
+For each $a\in L^I$, the event $m=a$ holds precisely when
+$p=a+s^*$, since subtraction equals addition in
+characteristic two. Translation by $s^*$ is a bijection
+of $L^I$, so $\Pr[m=a]=q^{-n}$, independently of $s^*$.
+\end{proof}
+
+\begin{definition}[Transposed pad coefficients]\label{def:pack:pad-coeff}
+Set
+\[
+ c^p_u:=\mathcal T(p)_u=\sum_{v\in I}\beta_vd_u(p_v),
+ \qquad
+ C_p(X):=\sum_{u\in I}c^p_uK_u^{(\ell)}(X).
+\]
+For $\theta\in L^\ell$ define
+\[
+ \Delta_p(\theta):=B_p(\theta)
+ =\sum_{u\in I}\operatorname{eq}_\ell(u,\theta)c^p_u.
+\]
+\end{definition}
+
+\begin{lemma}[Pad correction equals its complete kernel fold]\label{lem:pack:pad-kernel}
+For every $p,\theta$,
+\[
+ \boxed{\Delta_p(\theta)
+ =\mathsf{PFold}^{[\ell]}_\theta(C_p)
+ =\mathscr M_\ell(C_p)(1+\theta).}
+\]
+\end{lemma}
+\begin{proof}
+The kernel coefficients of $C_p$ are $c^p$.
+Corollary~\ref{cor:kbff:full-evaluation} therefore gives
+the first equality by the definition of $\Delta_p$.
+The second equality is the characteristic-two identity
+of Theorem~\ref{thm:binary:fold-ml}.
+\end{proof}
+
+\begin{lemma}[Transpose of a masked vector]\label{lem:pack:masked-transpose}
+If $m=s^*+p$, then
+\[
+ \boxed{\mathcal T(m)=\mathcal T(s^*)+c^p.}
+\]
+\end{lemma}
+\begin{proof}
+By $\F_2$-linearity of $\mathcal T$,
+$\mathcal T(s^*+p)=\mathcal T(s^*)+\mathcal T(p)$.
+The last term equals $c^p$ by definition.
+\end{proof}
+
+\begin{corollary}[Masked batching with the true correction]\label{cor:pack:masked-batch}
+For all $\theta$,
+\[
+ \boxed{B_m(\theta)+\Delta_p(\theta)
+       =\sum_{j\in J}a_j(\theta)\widehat w_j.}
+\]
+\end{corollary}
+\begin{proof}
+The preceding lemma implies
+$B_m=B_{s^*}+B_p$ by distributivity of the
+finite sum defining $B$. Adding
+$\Delta_p=B_p$ cancels two copies of $B_p$
+in characteristic two. Theorem~\ref{thm:pack:batch-correct}
+then identifies the result with the right side.
+\end{proof}
+
+\begin{definition}[Candidate correction and outgoing interface]\label{def:pack:candidate-c}
+A committed candidate $c=(c_u)_{u\in I}\in L^I$
+is fixed before the batching challenge. Define
+\[
+ D_c(\theta):=\sum_{u\in I}
+       \operatorname{eq}_\ell(u,\theta)c_u.
+\]
+The intended consistency condition is $c=c^p$.
+The \emph{outgoing affine equation} is
+\[
+ \boxed{
+ \sum_{j\in J}a_j(\theta)\widehat w_j
+       =B_m(\theta)+D_c(\theta).
+ }\tag{$\mathsf{OUT}$}\label{eq:pack:outgoing}
+\]
+After the public $m$ and challenge $\theta$ are fixed,
+$B_m$ is publicly computable and the equation is
+affine in hidden field values $(\widehat w_j,c_u)$.
+\end{definition}
+
+\begin{lemma}[Outgoing equation with consistent correction]\label{lem:pack:outgoing-honest}
+If $c=c^p$, equation~\eqref{eq:pack:outgoing}
+holds for every $\theta$.
+\end{lemma}
+\begin{proof}
+The consistency condition gives $D_c=\Delta_p$.
+Substitute in Corollary~\ref{cor:pack:masked-batch}.
+\end{proof}
+
+\begin{definition}[Incoming masked scalar]\label{def:pack:incoming}
+Let $y_{\mathrm{pub}}\in L$ be a public evaluation
+claim and let $p_{\mathrm{in}}\in L$ be an independent
+hidden pad. Define
+\[
+ y':=y_{\mathrm{pub}}+p_{\mathrm{in}}.
+\]
+\end{definition}
+
+\begin{lemma}[Incoming masked scalar is uniform]\label{lem:pack:incoming-uniform}
+For fixed $y_{\mathrm{pub}}$, a uniform
+$p_{\mathrm{in}}$ makes $y'$ uniform on $L$.
+\end{lemma}
+\begin{proof}
+For every $a\in L$, the equation $y'=a$
+has exactly one pad solution
+$p_{\mathrm{in}}=a+y_{\mathrm{pub}}$.
+The uniform distribution assigns it probability $1/q$.
+\end{proof}
+
+\begin{lemma}[Joint uniformity of basic public masks]\label{lem:pack:joint-uniform}
+For fixed $w,y_{\mathrm{pub}},r_{\mathrm{hi}}$,
+if $p$ and $p_{\mathrm{in}}$ are independent uniform
+samples, then $(m,y')$ is uniform on $L^I\times L$.
+\end{lemma}
+\begin{proof}
+For a target pair $(a,b)$, the equations
+$(m,y')=(a,b)$ uniquely determine
+$p=a+s^*$ and
+$p_{\mathrm{in}}=b+y_{\mathrm{pub}}$.
+The independent uniform masks give probability
+$q^{-n}q^{-1}=q^{-(n+1)}$ for each target pair.
+\end{proof}
+
+\begin{definition}[Incoming affine relation]\label{def:pack:incoming-check}
+The incoming equation is
+\[
+ \boxed{\sum_{v\in I}q_vm_v+y'
+  =\sum_{v\in I}q_vp_v+p_{\mathrm{in}}.}
+ \tag{$\mathsf{IN}$}\label{eq:pack:incoming}
+\]
+It is affine in the hidden field values $p_v,p_{\mathrm{in}}$
+once public messages and evaluation weights are fixed.
+\end{definition}
+
+\begin{lemma}[Incoming elimination of both masks]\label{lem:pack:incoming-eliminate}
+Under $y'=y_{\mathrm{pub}}+p_{\mathrm{in}}$,
+equation~\eqref{eq:pack:incoming} is equivalent to
+\[
+ \boxed{y_{\mathrm{pub}}=\sum_{v\in I}q_v(m_v+p_v).}
+\]
+\end{lemma}
+\begin{proof}
+Substitute $y_{\mathrm{pub}}+p_{\mathrm{in}}$
+for $y'$ in the incoming equation.
+Add $p_{\mathrm{in}}$ to both sides to cancel it,
+then add $\sum_vq_vm_v$ to both sides.
+Distributivity yields the displayed equality.
+Every operation is reversible in the additive group
+of $L$, establishing equivalence.
+\end{proof}
+
+\begin{theorem}[Perfect correctness of both masked interfaces]\label{thm:pack:honest-interfaces}
+Assume $y_{\mathrm{pub}}=y_w$,
+$m=s^*+p$, $c=c^p$, and
+$y'=y_{\mathrm{pub}}+p_{\mathrm{in}}$.
+Then both~\eqref{eq:pack:incoming} and
+\eqref{eq:pack:outgoing} hold for every $\theta$.
+\end{theorem}
+\begin{proof}
+Since $m+p=s^*$,
+Lemma~\ref{lem:pack:partial-eval} gives
+$\sum_vq_v(m_v+p_v)=
+\sum_vq_vs_v^*=y_w=y_{\mathrm{pub}}$.
+Lemma~\ref{lem:pack:incoming-eliminate} proves
+the incoming equation.
+Lemma~\ref{lem:pack:outgoing-honest} proves
+the outgoing equation.
+\end{proof}
+
+\begin{remark}[Privacy boundary]
+The pair $(m,y')$ is individually and jointly
+uniform in the stated setting, but the complete
+protocol view also includes commitments, outgoing
+constraints, trace-zero messages and later affine
+checks. Their joint distribution requires an
+independent zero-knowledge proof.
+\end{remark}
