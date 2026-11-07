@@ -1,0 +1,181 @@
+\subsection{Binary witness tables and lossless field packing}\label{sec:packing:tables}
+Fix integers $\ell\geq1$ and $h\geq0$, and put
+\[
+ n:=2^\ell,\qquad L:=\F_{2^n},\qquad q:=|L|=2^n,\qquad
+ I:=I_\ell=\{0,1\}^\ell,\qquad J:=I_h=\{0,1\}^h.
+\]
+Choose $\alpha\in L$ of degree $n$ over $\F_2$ and use the
+kernel evaluation basis $\beta_v=K_v^{(\ell)}(\alpha)$,
+$v\in I$, and trace-dual basis $\eta_v$ from
+Section~\ref{sec:binary:coordinates}.
+The equality weights are the polynomials
+$\operatorname{eq}_d$ from Chapter~1, interpreted as
+the constant $1$ when $d=0$.
+The packed-ring-switching construction and its history
+are described in~\cite{DiamondPosen2024}.
+We derive each required identity rather than importing
+a protocol-level correctness statement.
+
+\begin{definition}[Boolean witness and its field embedding]\label{def:pack:witness}
+A \emph{Boolean witness} is a function
+$w:I\times J\to\F_2$. We identify the prime subfield
+$\F_2\subseteq L$ with $\{0,1\}\subseteq L$
+when forming products or sums in $L$.
+For $v\in I$ and $j\in J$ write $w_{v,j}:=w(v,j)$.
+\end{definition}
+
+\begin{definition}[Packing a Boolean column]\label{def:pack:pack}
+For $a=(a_v)_{v\in I}\in\F_2^I$ define
+\[
+ \operatorname{Pack}(a):=\sum_{v\in I}\beta_v a_v\in L.
+\]
+For $x\in L$ define
+$\operatorname{Unpack}(x):=(d_v(x))_{v\in I}\in\F_2^I$,
+where $d_v$ are the unique coordinates in the basis
+$(\beta_v)$.
+\end{definition}
+
+\begin{lemma}[Unpack after Pack]\label{lem:pack:unpack-pack}
+For every $a\in\F_2^I$,
+$\operatorname{Unpack}(\operatorname{Pack}(a))=a$.
+\end{lemma}
+\begin{proof}
+The element $\operatorname{Pack}(a)$ is by definition
+$\sum_v\beta_va_v$. By uniqueness of coordinates
+in the basis $(\beta_v)$,
+$d_u(\operatorname{Pack}(a))=a_u$ for every $u\in I$.
+These equalities are the equality of the two vectors.
+\end{proof}
+
+\begin{lemma}[Pack after Unpack]\label{lem:pack:pack-unpack}
+For every $x\in L$,
+$\operatorname{Pack}(\operatorname{Unpack}(x))=x$.
+\end{lemma}
+\begin{proof}
+The defining coordinate expansion is
+$x=\sum_v\beta_vd_v(x)$. Its right side is
+$\operatorname{Pack}(\operatorname{Unpack}(x))$.
+\end{proof}
+
+\begin{lemma}[Packing is binary-linear]\label{lem:pack:linear}
+For $a,b\in\F_2^I$ and $e\in\F_2$,
+$\operatorname{Pack}(a+eb)=
+\operatorname{Pack}(a)+e\operatorname{Pack}(b)$.
+The map $\operatorname{Unpack}$ is also $\F_2$-linear.
+\end{lemma}
+\begin{proof}
+Distribute the finite sum
+$\sum_v\beta_v(a_v+eb_v)$, using
+$e\in\F_2$. Each coordinate map $d_v$ is
+$\F_2$-linear by Lemma~\ref{lem:binary:extract},
+so the coordinatewise map $\operatorname{Unpack}$ is.
+\end{proof}
+
+\begin{theorem}[Lossless Boolean packing]\label{thm:pack:bijection}
+$\operatorname{Pack}:\F_2^I\to L$ and
+$\operatorname{Unpack}:L\to\F_2^I$ are mutually inverse
+$\F_2$-linear isomorphisms.
+\end{theorem}
+\begin{proof}
+Lemmas~\ref{lem:pack:unpack-pack} and
+\ref{lem:pack:pack-unpack} show that the maps are
+mutually inverse. Lemma~\ref{lem:pack:linear}
+proves their $\F_2$-linearity.
+\end{proof}
+
+\begin{definition}[Packed witness and its column coordinates]\label{def:pack:columns}
+For each $j\in J$ define the packed field element
+\[
+ \widehat w_j:=\operatorname{Pack}
+                    \bigl((w_{v,j})_{v\in I}\bigr)
+             =\sum_{v\in I}\beta_vw_{v,j}.
+\]
+\end{definition}
+
+\begin{corollary}[Recovering every Boolean witness bit]\label{cor:pack:column-bits}
+For all $v\in I$ and $j\in J$,
+\[
+ \boxed{d_v(\widehat w_j)=w_{v,j}.}
+\]
+\end{corollary}
+\begin{proof}
+Apply Lemma~\ref{lem:pack:unpack-pack} to the
+column vector $(w_{v,j})_{v\in I}$ and compare
+its $v$-th coordinate.
+\end{proof}
+
+\begin{remark}[What packing does not prove]
+Every field element $x\in L$ has a unique vector of
+\emph{binary} coordinates in this fixed basis. Thus
+the equality $x=\operatorname{Pack}(\operatorname{Unpack}(x))$
+does not require a separate Booleanity constraint.
+However it does not bind an independently committed
+array of bits to $x$: if both representations are
+provided independently, their equality is an
+additional relation that must be checked.
+\end{remark}
+
+\begin{definition}[Multilinear evaluation weights]\label{def:pack:weights}
+Choose two public evaluation points
+$r_{\mathrm{lo}}\in L^\ell$ and
+$r_{\mathrm{hi}}\in L^h$, and define
+\[
+ q_v:=\operatorname{eq}_\ell(v,r_{\mathrm{lo}}),
+ \qquad
+ h_j:=\operatorname{eq}_h(j,r_{\mathrm{hi}}).
+\]
+For $h=0$ the unique weight is $h_{()}=1$.
+Define the true evaluation of a Boolean table by
+\[
+ y_w:=\sum_{v\in I}\sum_{j\in J}
+             q_vh_jw_{v,j}\in L.
+\]
+\end{definition}
+
+\begin{lemma}[Two-axis equality-weight factorization]\label{lem:pack:weight-factor}
+For all $(v,j)\in I\times J$,
+\[
+ \operatorname{eq}_{\ell+h}
+ ((v,j),(r_{\mathrm{lo}},r_{\mathrm{hi}}))
+ =q_vh_j.
+\]
+\end{lemma}
+\begin{proof}
+The equality polynomial is the product of one
+affine factor per coordinate. Its first $\ell$
+factors involve only $(v,r_{\mathrm{lo}})$ and
+multiply to $q_v$; its final $h$ factors involve
+only $(j,r_{\mathrm{hi}})$ and multiply to $h_j$.
+Splitting the finite product gives the identity.
+\end{proof}
+
+\begin{corollary}[Packed witness is the original Boolean multilinear table]\label{cor:pack:original-evaluation}
+Let $\widetilde w:L^{\ell+h}\to L$ be the
+multilinear extension of the field-embedded
+Boolean table $w$. Then
+\[
+ \boxed{\widetilde w(r_{\mathrm{lo}},r_{\mathrm{hi}})
+ =y_w.}
+\]
+\end{corollary}
+\begin{proof}
+Expand the multilinear extension as
+$\sum_{(v,j)\in I\times J}
+  w_{v,j}\operatorname{eq}_{\ell+h}
+      ((v,j),(r_{\mathrm{lo}},r_{\mathrm{hi}}))$.
+Substitute the factorization of
+Lemma~\ref{lem:pack:weight-factor}.
+The resulting sum is the definition of $y_w$.
+\end{proof}
+
+\begin{lemma}[Partition of evaluation weights]\label{lem:pack:weight-sum}
+$\sum_{v\in I}q_v=1$ and $\sum_{j\in J}h_j=1$.
+\end{lemma}
+\begin{proof}
+For each coordinate, the equality weights
+for Boolean values $0$ and $1$ sum to
+$(1-t)+t=1$. Distributing the finite sum
+over all bit strings as a product of these
+two-term sums gives $1$ for each axis.
+When $h=0$, the second sum has one term $1$.
+\end{proof}
