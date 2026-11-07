@@ -76,6 +76,37 @@ If $A,B\in\F[T]$ are distinct and each has degree at most $d$, then for uniform 
 The polynomial $A-B$ is nonzero, has degree at most $d$, and therefore has at most $d$ distinct roots in the field $\F$. Divide the root count by $q$.
 \end{proof}
 
+\begin{lemma}[Univariate root-count lemma]\label{lem:history:rootcount}
+Let $\F$ be a field and let $P\in\F[T]$ be nonzero of degree $d\geq0$. Then $P$ has at most $d$ distinct roots in $\F$.
+\end{lemma}
+\begin{proof}
+Induct on $d$. If $d=0$ then $P$ is a nonzero constant and has no roots. Suppose $d\geq1$. If $P$ has no roots, the claim is immediate. Otherwise choose one root $a\in\F$. Polynomial division by the monic linear polynomial $T-a$ gives $P(T)=(T-a)Q(T)$ with $\deg Q=d-1$, since the remainder is the constant $P(a)=0$. Every root $b\neq a$ of $P$ satisfies $0=(b-a)Q(b)$, hence $Q(b)=0$ because $\F$ is a field and $b-a\neq0$. By induction $Q$ has at most $d-1$ distinct roots. Thus $P$ has at most $1+(d-1)=d$ distinct roots.
+\end{proof}
+
+\begin{lemma}[Multivariate Schwartz--Zippel bound]\label{lem:history:schwartz-zippel}
+Let $s\geq1$ and let $P\in\F[X_0,\ldots,X_{s-1}]$ be nonzero of total degree at most $D$. For independent uniform $r_i\overset{\$}{\leftarrow}\F$,
+\[
+ \Pr[P(r_0,\ldots,r_{s-1})=0]\leq\min\{1,D/|\F|\}.
+\]
+\end{lemma}
+\begin{proof}
+We prove the bound $D/|\F|$ by induction on $s$. The case $s=1$ is Lemma~\ref{lem:history:rootcount} divided by $|\F|$. Assume $s>1$ and expand $P$ in its final variable:
+\[
+ P(X_0,\ldots,X_{s-1})
+  =\sum_{j=0}^{e}A_j(X_0,\ldots,X_{s-2})X_{s-1}^j,
+ \qquad A_e\neq0.
+\]
+Every monomial in $A_e$ has degree at most $D-e$, so $\deg A_e\leq D-e$. For a uniform random prefix $r'=(r_0,\ldots,r_{s-2})$, the induction hypothesis gives
+\[
+ \Pr[A_e(r')=0]\leq(D-e)/|\F|.
+\]
+Condition on the event $A_e(r')\neq0$. Then the specialized univariate polynomial $P(r',T)$ is nonzero and has degree exactly $e$. By Lemma~\ref{lem:history:rootcount}, the independent final challenge $r_{s-1}$ is a root with conditional probability at most $e/|\F|$. Split the event $P(r',r_{s-1})=0$ according to whether $A_e(r')=0$. The union/conditional-probability bound yields
+\[
+ \Pr[P(r',r_{s-1})=0]\leq\frac{D-e}{|\F|}+\frac{e}{|\F|}=\frac D{|\F|}.
+\]
+Taking the minimum with $1$ finishes the proof.
+\end{proof}
+
 \begin{theorem}[Sumcheck soundness]\label{thm:history:sumcheck-sound}
 If $a\neq S_G$, the acceptance probability of any prover obeying the timing and degree rules in Definition~\ref{def:history:verifier} is at most
 \[
