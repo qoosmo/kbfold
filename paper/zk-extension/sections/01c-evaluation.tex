@@ -1,0 +1,83 @@
+\subsection{The exact evaluation problem}\label{sec:intro:evaluation}
+
+\begin{definition}[Equality weights and multilinear extension]\label{def:intro:mle}
+For $z=(z_0,\ldots,z_{m-1})\in\F^m$ and $x=(x_0,\ldots,x_{m-1})\in\F^m$ put
+\begin{equation}\label{eq:intro:eq}
+ \operatorname{eq}_m(x,z):=\prod_{i=0}^{m-1}\big((1-x_i)(1-z_i)+x_i z_i\big)\in\F.
+\end{equation}
+For $f:I_m\to\F$ define
+\begin{equation}\label{eq:intro:mle}
+ \widetilde f(z):=\sum_{b\in I_m}f(b)\operatorname{eq}_m(b,z).
+\end{equation}
+\end{definition}
+
+\begin{lemma}[Boolean interpolation]\label{lem:intro:interpolation}
+For $b,c\in I_m$, $\operatorname{eq}_m(b,c)=1$ if $b=c$, and $0$ otherwise. Consequently $\widetilde f(c)=f(c)$ for every $c\in I_m$.
+\end{lemma}
+\begin{proof}
+If $b_i=c_i=0$, the $i$-th factor of~\eqref{eq:intro:eq} equals $(1-0)(1-0)+0=1$. If $b_i=c_i=1$, the factor equals $0+1=1$. If $b_i\ne c_i$, direct substitution gives $0$. Thus the full product is $1$ exactly when all coordinates agree. Substituting into~\eqref{eq:intro:mle} leaves only the term indexed by $b=c$.
+\end{proof}
+
+\begin{definition}[Evaluation relation]\label{def:intro:relation}
+Define the algebraic relation
+\[
+ \mathcal R_{m,\F}:=\left\{(z,v;f)\in\F^m\times\F\times\F^{I_m} : v=\widetilde f(z)\right\}.
+\]
+The public assertion is $(z,v)$; the table $f$ is a witness. In the KBFold opening problem the prover additionally binds an encoding of $f$ to a public commitment or codeword oracle. The exact binding and oracle interfaces will be defined in Chapter~3.
+\end{definition}
+
+\begin{definition}[Table restriction]\label{def:intro:restriction}
+For $r\in\F$ and $f:I_m\to\F$ define $\Res_r(f):I_{m-1}\to\F$ by
+\begin{equation}\label{eq:intro:restriction}
+ \Res_r(f)(b')=(1-r)f(0,b')+rf(1,b').
+\end{equation}
+\end{definition}
+
+\begin{lemma}[Multilinear restriction]\label{lem:intro:restriction}
+For every $r\in\F$ and $y\in\F^{m-1}$,
+\begin{equation}\label{eq:intro:mle-rest}
+ \widetilde{\Res_r(f)}(y)=\widetilde f(r,y).
+\end{equation}
+\end{lemma}
+\begin{proof}
+Using the product definition of equality weights, $\operatorname{eq}_m((0,b'),(r,y))=(1-r)\operatorname{eq}_{m-1}(b',y)$ and $\operatorname{eq}_m((1,b'),(r,y))=r\operatorname{eq}_{m-1}(b',y)$. Split the defining sum for $\widetilde f(r,y)$ according to the first bit, factor out $\operatorname{eq}_{m-1}(b',y)$, and substitute~\eqref{eq:intro:restriction}. The result is exactly the defining sum for $\widetilde{\Res_r(f)}(y)$.
+\end{proof}
+
+\begin{definition}[Normalized polynomial kernel fold]\label{def:intro:pfold}
+Let $P\in\F[X]_{<2d}$ and let $P(X)=E(X^2)+XO(X^2)$ be its unique even--odd decomposition. For $r\in\F$ define
+\begin{equation}\label{eq:intro:pfold}
+ \pfold_r(P)(Y):=(2r-1)E(Y)+(1-r)O(Y).
+\end{equation}
+The coefficients are defined over an arbitrary field, including characteristic two; no division is used in this polynomial definition.
+\end{definition}
+
+\begin{theorem}[Fold dictionary]\label{thm:intro:dictionary}
+For every $m\geq1$, table $f:I_m\to\F$, and $r\in\F$,
+\begin{equation}\label{eq:intro:dictionary}
+ \pfold_r(U_f^{(m)})=U_{\Res_r(f)}^{(m-1)}.
+\end{equation}
+\end{theorem}
+\begin{proof}
+Write $f_0(b')=f(0,b')$ and $f_1(b')=f(1,b')$, and set $A=U_{f_0}^{(m-1)}$, $B=U_{f_1}^{(m-1)}$. By Lemma~\ref{lem:intro:recursion} and the definition of $U_f$,
+\[
+ U_f^{(m)}(X)=XA(X^2)+(X+1)B(X^2)=B(X^2)+X(A+B)(X^2).
+\]
+By Lemma~\ref{lem:intro:split}, its even and odd components are $E=B$ and $O=A+B$, respectively. Definition~\ref{def:intro:pfold} therefore gives
+\begin{align*}
+ \pfold_r(U_f^{(m)})
+  &=(2r-1)B+(1-r)(A+B)\\
+  &=(1-r)A+\big((2r-1)+(1-r)\big)B\\
+  &=(1-r)A+rB.
+\end{align*}
+By the linear definition~\eqref{eq:intro:encoding}, this last polynomial equals $U_{(1-r)f_0+rf_1}^{(m-1)}$, and the coefficient table is $\Res_r(f)$ by~\eqref{eq:intro:restriction}.
+\end{proof}
+
+\begin{corollary}[Iterated folds compute the claimed value]\label{cor:intro:iterated}
+Let $z=(z_0,\ldots,z_{m-1})\in\F^m$. Set $P_0=U_f^{(m)}$ and define $P_{i+1}=\pfold_{z_i}(P_i)$ for $0\leq i<m$. Then $P_m$ is a constant polynomial and
+\begin{equation}\label{eq:intro:finalfold}
+ P_m=\widetilde f(z).
+\end{equation}
+\end{corollary}
+\begin{proof}
+For $0\leq i\leq m$, define the table $f_i$ on $I_{m-i}$ by $f_0=f$ and $f_{i+1}=\Res_{z_i}(f_i)$. Induction using Theorem~\ref{thm:intro:dictionary} proves $P_i=U_{f_i}^{(m-i)}$. A second induction using Lemma~\ref{lem:intro:restriction} proves that $\widetilde{f_i}(y)=\widetilde f(z_0,\ldots,z_{i-1},y)$ for every remaining point $y$. For $i=m$, $I_0$ has one entry and $U_{f_m}^{(0)}=f_m(())$ is constant. The second identity at $i=m$ gives $f_m(())=\widetilde f(z)$, which is~\eqref{eq:intro:finalfold}.
+\end{proof}
