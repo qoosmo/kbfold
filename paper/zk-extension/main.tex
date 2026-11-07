@@ -1,0 +1,43 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{mathrsfs}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage[backend=biber,style=alphabetic,sorting=nyt]{biblatex}
+\addbibresource{references.bib}
+\geometry{margin=1in}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\numberwithin{equation}{section}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\B}{\{0,1\}}
+\newcommand{\KFold}{\mathsf{KFold}}
+\newcommand{\pfold}{\mathsf{pfold}}
+\newcommand{\Res}{\mathsf{Res}}
+\newcommand{\MLE}{\widetilde{}}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\Enc}{\operatorname{Enc}}
+\title{Kernel-Based Masking and Zero-Knowledge Folding\\\large A Self-Contained Mathematical Development}
+\author{Abdelali Mkhida\\Algorizk Labs}
+\date{Working manuscript --- 7 November 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+We investigate zero-knowledge extensions of KBFold and the representation of masked binary-field ring switching in Boolean-kernel coordinates. The starting point is a precise mathematical evaluation problem, not a new security theorem. This manuscript develops small, fully quantified statements with explicit proofs and dependencies suitable for subsequent Lean~4 certification. Chapter~1 establishes the kernel encoding and its normalized folding dictionary, exhibits witness leakage in an unmasked sumcheck message, and formulates the two field-dependent research tasks.
+\end{abstract}
+\tableofcontents
+\input{sections/01-introduction}
+\printbibliography
+\end{document}
