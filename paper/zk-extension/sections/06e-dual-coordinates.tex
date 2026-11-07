@@ -1,0 +1,258 @@
+\subsection{Trace-dual coordinates and affine verification of kernel corrections}\label{sec:binary:coordinates}
+All vector indices in this subsection belong to $I_\ell$ and all
+field elements belong to $L=\F_{2^n}$, $n=2^\ell$.
+The characteristic-two coordinate construction is related
+to binary-field ring switching~\cite{DiamondPosen2024}
+and to its masked versions~\cite{Kochergin2026,FrigoShelat2026}.
+
+\begin{definition}[Evaluation basis]\label{def:binary:eval-basis}
+Choose $\alpha\in L$ whose minimal polynomial over $\F_2$
+has degree $n$, and set
+\[
+ \beta_u:=K_u(\alpha),\qquad u\in I_\ell.
+\]
+\end{definition}
+
+\begin{lemma}[Kernel values form a binary field basis]\label{lem:binary:eval-basis}
+The family $(\beta_u)_{u\in I_\ell}$ is an $\F_2$-basis of $L$.
+\end{lemma}
+\begin{proof}
+The polynomials $(K_u)_u$ form an $\F_2$-basis of
+$\F_2[X]_{<n}$ by Proposition~\ref{prop:intro:basis}.
+The evaluation map $P\mapsto P(\alpha)$ is injective on
+that space: if a nonzero polynomial of degree $<n$
+vanished at $\alpha$, it would contradict the minimality
+of the degree-$n$ minimal polynomial.
+Both domain and codomain have dimension $n$ over $\F_2$.
+Thus the map is an isomorphism, and the images of the
+kernel basis form a basis of $L$.
+\end{proof}
+
+\begin{definition}[Binary coordinate maps]\label{def:binary:coords}
+For each $u\in I_\ell$, define the unique
+$\F_2$-linear coordinate map $d_u:L\to\F_2$ by
+\[
+ x=\sum_{u\in I_\ell}\beta_u d_u(x)
+ \quad\text{for every }x\in L.
+\]
+\end{definition}
+
+\begin{lemma}[Coordinate extraction]\label{lem:binary:extract}
+For $u,v\in I_\ell$, $d_u(\beta_v)=1$ if $u=v$ and $0$
+otherwise; each $d_u$ is additive.
+\end{lemma}
+\begin{proof}
+The kernel-basis expansion of $\beta_v$ has coefficient $1$
+at index $v$ and $0$ elsewhere; uniqueness of coordinates
+gives the first assertion. If $x=\sum_v\beta_v a_v$ and
+$y=\sum_v\beta_v b_v$, with $a_v,b_v\in\F_2$, then
+$x+y=\sum_v\beta_v(a_v+b_v)$. Uniqueness gives
+$d_u(x+y)=a_u+b_u=d_u(x)+d_u(y)$.
+\end{proof}
+
+\begin{lemma}[Trace pairing is nondegenerate]\label{lem:binary:trace-pairing}
+For every nonzero $a\in L$ there exists $x\in L$ with
+$\Tr(ax)=1$.
+\end{lemma}
+\begin{proof}
+Choose $y\in L$ with $\Tr(y)=1$, using
+Lemma~\ref{lem:binary:trace-surj}. As $a\neq0$,
+$a^{-1}$ exists. Put $x=a^{-1}y$; then
+$\Tr(ax)=\Tr(y)=1$.
+\end{proof}
+
+\begin{theorem}[Existence and uniqueness of trace-dual coordinates]\label{thm:binary:dual-basis}
+There is a unique family $(\eta_u)_{u\in I_\ell}$ in $L$ such that
+\[
+ \boxed{\Tr(\eta_u\beta_v)=\delta_{uv}.}
+\]
+For every $x\in L$,
+\[
+ \boxed{d_u(x)=\Tr(\eta_u x).}
+\]
+\end{theorem}
+\begin{proof}
+Define the $\F_2$-linear map
+$\Phi:L\to\operatorname{Hom}_{\F_2}(L,\F_2)$ by
+$\Phi(a)(x)=\Tr(ax)$. Linearity follows from
+Lemma~\ref{lem:binary:trace-add}.
+Lemma~\ref{lem:binary:trace-pairing} proves that $\Phi$
+is injective. Its domain has dimension $n$ over $\F_2$;
+its codomain also has dimension $n$, since a linear functional
+is uniquely determined by its values on the $n$ basis elements
+$\beta_v$. Hence $\Phi$ is bijective.
+For each coordinate functional $d_u$, choose the unique
+$\eta_u=\Phi^{-1}(d_u)$. Then
+$\Tr(\eta_u\beta_v)=d_u(\beta_v)=\delta_{uv}$
+by Lemma~\ref{lem:binary:extract}, and
+$\Tr(\eta_u x)=d_u(x)$ for all $x$ by construction.
+Uniqueness of each $\eta_u$ follows from injectivity
+of $\Phi$.
+\end{proof}
+
+\begin{definition}[Binary transpose and kernel correction]\label{def:binary:transpose}
+For $p=(p_v)_{v\in I_\ell}\in L^{I_\ell}$ define
+\[
+ c^p_u:=\sum_{v\in I_\ell}\beta_vd_u(p_v),\qquad
+ C_p(X):=\sum_{u\in I_\ell}c^p_uK_u(X).
+\]
+For $\theta\in L^\ell$ define
+\[
+ \Delta_p(\theta):=\sum_{u\in I_\ell}
+       \lambda_u(\theta)c^p_u
+       =D_{C_p}(\theta).
+\]
+\end{definition}
+
+\begin{lemma}[Trace expression for the correction]\label{lem:binary:delta-trace}
+For every $p\in L^{I_\ell}$ and $\theta\in L^\ell$,
+\[
+ \boxed{\Delta_p(\theta)=
+  \sum_{u,v\in I_\ell}
+   \lambda_u(\theta)\beta_v\Tr(\eta_u p_v).}
+\]
+\end{lemma}
+\begin{proof}
+Expand $\Delta_p(\theta)$ using
+Definition~\ref{def:binary:transpose}:
+\[
+ \Delta_p(\theta)=
+ \sum_u\lambda_u(\theta)\sum_v\beta_vd_u(p_v).
+\]
+Interchange the two finite sums and replace
+$d_u(p_v)$ by $\Tr(\eta_up_v)$ using
+Theorem~\ref{thm:binary:dual-basis}.
+\end{proof}
+
+\begin{definition}[Public affine coefficients]\label{def:binary:affine-H}
+For $\theta\in L^\ell$ and $u,v,k\in I_\ell$ put
+\[
+ H_{v,k}(\theta):=\sum_{u\in I_\ell}
+       d_k\bigl(\beta_v\lambda_u(\theta)\bigr)\eta_u.
+\]
+For a candidate coefficient table $c:I_\ell\to L$ define
+\[
+ D_c(\theta):=\sum_u\lambda_u(\theta)c_u
+\]
+and
+\[
+ V_k(p,c,\theta):=\eta_kD_c(\theta)
+      +\sum_{v\in I_\ell}H_{v,k}(\theta)p_v.
+\]
+The coefficients $H_{v,k}(\theta)$ depend only on public
+parameters and $\theta$, not on the hidden pads $p_v$.
+\end{definition}
+
+\begin{lemma}[Affine transpose trace identity]\label{lem:binary:affine-trace}
+For every $p,\theta,k$,
+\[
+ \Tr\left(\sum_v H_{v,k}(\theta)p_v\right)
+   =d_k\bigl(\Delta_p(\theta)\bigr).
+\]
+\end{lemma}
+\begin{proof}
+Expand the definition of $H$ and use
+$\F_2$-linearity of trace:
+\[
+ \Tr\left(\sum_vH_{v,k}p_v\right)
+ =\sum_{u,v}
+    d_k(\beta_v\lambda_u(\theta))\,\Tr(\eta_up_v).
+\]
+Each factor $\Tr(\eta_up_v)$ lies in $\F_2$.
+Using additivity and $\F_2$-linearity of $d_k$,
+the last sum equals
+\[
+ d_k\left(\sum_{u,v}
+   \beta_v\lambda_u(\theta)\Tr(\eta_up_v)\right).
+\]
+The field element inside $d_k$ equals
+$\Delta_p(\theta)$ by Lemma~\ref{lem:binary:delta-trace}.
+\end{proof}
+
+\begin{lemma}[Trace coordinates of affine residuals]\label{lem:binary:V-trace}
+For all $p,c,\theta$ and $k$,
+\[
+ \boxed{\Tr(V_k(p,c,\theta))
+      =d_k\bigl(D_c(\theta)+\Delta_p(\theta)\bigr).}
+\]
+\end{lemma}
+\begin{proof}
+By the definition of $V_k$ and trace additivity,
+\[
+ \Tr(V_k)=\Tr(\eta_k D_c(\theta))
+  +\Tr\left(\sum_vH_{v,k}p_v\right).
+\]
+The first term equals $d_k(D_c(\theta))$ by
+Theorem~\ref{thm:binary:dual-basis}; the second equals
+$d_k(\Delta_p(\theta))$ by
+Lemma~\ref{lem:binary:affine-trace}.
+Additivity of $d_k$ combines them into the claimed formula.
+\end{proof}
+
+\begin{theorem}[Exact affine trace consistency]\label{thm:binary:affine-consistency}
+For fixed $p,c,\theta$,
+\[
+ \boxed{
+ D_c(\theta)=\Delta_p(\theta)
+ \ \Longleftrightarrow\
+ \Tr(V_k(p,c,\theta))=0\quad\forall k\in I_\ell.
+ }
+\]
+\end{theorem}
+\begin{proof}
+In characteristic two the equality
+$D_c(\theta)=\Delta_p(\theta)$ is equivalent to
+$D_c(\theta)+\Delta_p(\theta)=0$.
+Lemma~\ref{lem:binary:V-trace} identifies
+$\Tr(V_k)$ with the coordinate
+$d_k(D_c+\Delta_p)$. A field element is zero exactly
+when every coordinate in the basis $(\beta_k)$ is zero,
+by Definition~\ref{def:binary:coords}. This proves both directions.
+\end{proof}
+
+\begin{lemma}[Mismatch gives a nonzero multilinear polynomial]\label{lem:binary:nonzero-mismatch}
+If $c\neq c^p$ as tables, then
+\[
+ E_{c,p}(\Theta):=D_c(\Theta)+\Delta_p(\Theta)
+   =\sum_{u\in I_\ell}(c_u+c^p_u)\lambda_u(\Theta)
+\]
+is a nonzero polynomial in $L[\Theta_0,\ldots,\Theta_{\ell-1}]$
+of total degree at most $\ell$.
+\end{lemma}
+\begin{proof}
+Each $\lambda_u$ is a product of $\ell$ affine factors,
+giving the degree bound. Choose $u_0$ with
+$c_{u_0}\neq c^p_{u_0}$.
+Evaluate at the Boolean point $\Theta=u_0$. By
+Lemma~\ref{lem:intro:interpolation} and
+Lemma~\ref{lem:binary:eq-weights},
+$E_{c,p}(u_0)=c_{u_0}+c^p_{u_0}\neq0$.
+Hence the polynomial is nonzero.
+\end{proof}
+
+\begin{corollary}[Random-challenge detection of a coefficient mismatch]\label{cor:binary:mismatch-bound}
+If $c\neq c^p$ is fixed before uniform
+$\theta\in L^\ell$ is sampled, then
+\[
+ \Pr_\theta[D_c(\theta)=\Delta_p(\theta)]
+ \leq \min\{1,\ell/q\},\qquad q=2^n.
+\]
+\end{corollary}
+\begin{proof}
+By Lemma~\ref{lem:binary:nonzero-mismatch},
+$E_{c,p}$ is nonzero of total degree at most $\ell$.
+The event on the left is $E_{c,p}(\theta)=0$.
+Apply the multivariate Schwartz--Zippel bound proved in
+Lemma~\ref{lem:history:schwartz-zippel}.
+The fixed-before-challenge hypothesis ensures the
+polynomial is independent of the uniform $\theta$.
+\end{proof}
+
+\begin{remark}[Meaning of this part of the construction]
+The coefficients $H_{v,k}(\theta)$ turn the
+$\F_2$-linear coordinate relation into \emph{affine equations
+over the extension field}. This is an algebraic ingredient
+of our proposed kernel-coordinate checker; it does not
+by itself establish hiding of a committed witness or
+the soundness of the complete ring-switching protocol.
+\end{remark}
