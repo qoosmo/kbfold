@@ -140,3 +140,108 @@ fn characteristic_two_kernel_gf16_gf256(){
     run_binary_case(GF{degree:4,irreducible:0x13},2,&mut seed);
     run_binary_case(GF{degree:8,irreducible:0x11b},3,&mut seed);
 }
+
+
+// Chapter 7: exact packed Ring Switching regressions over GF(16)/GF(256).
+fn transposed(f:GF,beta:&[u16],coord:&[usize],x:&[u16])->Vec<u16>{
+ let n=f.degree;
+ assert_eq!(x.len(),n);
+ let mut out=vec![0u16;n];
+ for u in 0..n {
+  for v in 0..n {
+   if (coord[x[v] as usize]>>u)&1 == 1 {out[u]^=beta[v];}
+  }
+ }
+ out
+}
+fn ring_switch_case(f:GF,ell:usize,seed:&mut u64){
+ let n=f.degree;let q=f.q();
+ let (beta,coord,_eta)=basis_and_coords(f,ell);
+ let high=2usize;let cols=1usize<<high;
+ for _trial in 0..130 {
+  let mut w=vec![vec![0u16;cols];n];
+  for v in 0..n {for j in 0..cols {
+   w[v][j]=next(seed,q)&1;
+  }}
+  let mut packed=vec![0u16;cols];
+  for j in 0..cols {
+   for v in 0..n {if w[v][j]==1 {packed[j]^=beta[v];}}
+   for v in 0..n {
+    assert_eq!(((coord[packed[j] as usize]>>v)&1) as u16,w[v][j]);
+   }
+  }
+  let r_hi:Vec<u16>=(0..high).map(|_|next(seed,q)).collect();
+  let r_lo:Vec<u16>=(0..ell).map(|_|next(seed,q)).collect();
+  let theta:Vec<u16>=(0..ell).map(|_|next(seed,q)).collect();
+  let hh:Vec<u16>=(0..cols).map(|j|f.lambda(j,&r_hi)).collect();
+  let qq:Vec<u16>=(0..n).map(|v|f.lambda(v,&r_lo)).collect();
+  let ll:Vec<u16>=(0..n).map(|u|f.lambda(u,&theta)).collect();
+  let mut partial=vec![0u16;n];
+  for v in 0..n {for j in 0..cols {
+   if w[v][j]==1{partial[v]^=hh[j];}
+  }}
+  let ts=transposed(f,&beta,&coord,&partial);
+  let again=transposed(f,&beta,&coord,&ts);
+  assert_eq!(again,partial,"transpose involution");
+  for u in 0..n {
+   for v in 0..n {
+    assert_eq!((coord[ts[u] as usize]>>v)&1,
+               (coord[partial[v] as usize]>>u)&1);
+   }
+  }
+  for u in 0..n {
+   let mut expected=0u16;
+   for j in 0..cols {
+    if ((coord[hh[j] as usize]>>u)&1)==1 {expected^=packed[j];}
+   }
+   assert_eq!(ts[u],expected,"packed transpose identity");
+  }
+  let mut aa=vec![0u16;cols];
+  for j in 0..cols {
+   for u in 0..n {
+    if ((coord[hh[j] as usize]>>u)&1)==1 {aa[j]^=ll[u];}
+   }
+  }
+  let mut rhs=0u16;
+  for j in 0..cols {rhs^=f.mul(aa[j],packed[j]);}
+  let mut bs=0u16;
+  for u in 0..n {bs^=f.mul(ll[u],ts[u]);}
+  assert_eq!(bs,rhs,"correct unmasked batched relation");
+  let mut y=0u16;
+  for v in 0..n {y^=f.mul(qq[v],partial[v]);}
+  let mut y_direct=0u16;
+  for v in 0..n {for j in 0..cols {
+   if w[v][j]==1{y_direct^=f.mul(qq[v],hh[j]);}
+  }}
+  assert_eq!(y,y_direct,"two-axis multilinear evaluation");
+  let p:Vec<u16>=(0..n).map(|_|next(seed,q)).collect();
+  let m:Vec<u16>=(0..n).map(|v|partial[v]^p[v]).collect();
+  let cp=transposed(f,&beta,&coord,&p);
+  assert_eq!(transposed(f,&beta,&coord,&cp),p,"pad transpose inverse");
+  let tm=transposed(f,&beta,&coord,&m);
+  let mut bm=0u16;let mut dc=0u16;
+  for u in 0..n {
+   bm^=f.mul(ll[u],tm[u]);
+   dc^=f.mul(ll[u],cp[u]);
+  }
+  assert_eq!(bm^dc,rhs,"masked outgoing equation");
+  let pin=next(seed,q);let yprime=y^pin;
+  let mut incoming_lhs=yprime;let mut incoming_rhs=pin;
+  for v in 0..n {
+   incoming_lhs^=f.mul(qq[v],m[v]);
+   incoming_rhs^=f.mul(qq[v],p[v]);
+  }
+  assert_eq!(incoming_lhs,incoming_rhs,"incoming affine equation");
+  let mut c_bad=cp.clone();c_bad[0]^=1;
+  let mut dc_bad=0u16;
+  for u in 0..n {dc_bad^=f.mul(ll[u],c_bad[u]);}
+  assert_eq!(bm^dc_bad^rhs,ll[0],"outgoing residual split");
+ }
+ println!("GF(2^{n}): 130 packed witness, transposition and mask cases passed");
+}
+#[test]
+fn chapter7_packed_ring_switching(){
+ let mut seed=0xC7A7_2026_ABC1_DE55u64;
+ ring_switch_case(GF{degree:4,irreducible:0x13},2,&mut seed);
+ ring_switch_case(GF{degree:8,irreducible:0x11b},3,&mut seed);
+}
