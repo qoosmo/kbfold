@@ -31,7 +31,7 @@ Existing KBFold algebraic results are reproved here where required for self-cont
 
 1. Introduction and exact mathematical problem (complete)
 2. Historical background and related work (complete)
-3. Security model and preliminaries
+3. Formal security model, online zero knowledge, and adaptive masking (complete)
 4. Full Boolean-kernel algebra
 5. Multilinearization and fold identities
 6. Characteristic-two specializations
@@ -57,3 +57,19 @@ Original reference: https://github.com/qoosmo/kbfold
 - Binary packing transposition and soundness of random multilinear batching.
 - Trace/Frobenius correction, backward recurrence, and trace-zero characterization.
 - A formal provenance and dependency ledger.
+
+
+## Chapter 3 results
+
+- Typed finite probability spaces, total variation, data processing, Markov hybrids.
+- IOP oracle and adaptive verifier model; commitment correctness, binding, hiding definitions.
+- Exact KBFold evaluation and proximity relations; Reed--Solomon distance and unique decoding.
+- Round-by-round soundness and knowledge extraction.
+- Statistical and online zero-knowledge games, including timing of commitment versus evaluation point.
+- One-query leakage theorem for an unmasked codeword oracle.
+- Adaptive linear-mask simulation via affine cosets and conditional distributions.
+- Explicit counterexample proving that the high-degree polynomial mask requires a revised final-round closure.
+
+See `CHAPTER_03_LEAN_MAP.md` for all 62 individually labeled definitions/results and their proposed Lean declarations.
+
+**Scope:** Chapter 3 defines and proves the foundational security statements. It does not claim that the full zero-knowledge KBFold protocol has already been constructed or certified.
