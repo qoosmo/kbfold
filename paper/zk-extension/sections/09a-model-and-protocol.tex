@@ -1,0 +1,122 @@
+\subsection{Security target, message schedule, and witness types}\label{sec:zkrs:model}
+We retain $L=\F_{2^n}$, $n=2^\ell$, $q=2^n$, $I=I_\ell$, and the notation of Chapters~6--7.
+The binary witness $w:I\times I_h\to\F_2$ has packed columns
+$\widehat w_j=\sum_v\beta_vw_{v,j}$ and true claimed evaluation
+$y_w=\sum_{v,j}q_vh_jw_{v,j}$.
+We do not identify the masked ring-switching extension with the original
+unmasked tensor-sumcheck of Diamond--Posen~\cite{DiamondPosen2024}.
+Our public-message protocol is a kernel-coordinate realization
+of a candidate masked affine interface; trace-zero masking also appears in
+Frigo--shelat~\cite{FrigoShelat2026} and the earlier ring-switching
+discussion of Kochergin~\cite{Kochergin2026}.
+
+\begin{definition}[Admissible single-opening instance]\label{def:zkrs:instance}
+An admissible instance consists of public $(r_{\rm lo},r_{\rm hi},y)$,
+a private Boolean table $w$, and exact packed columns $\widehat w$,
+with $y=\widetilde w(r_{\rm lo},r_{\rm hi})$.
+The evaluation points are fixed for the duration of this one-opening
+experiment. The public value $y$ is \emph{authorized} information.
+\end{definition}
+
+\begin{definition}[Pre-challenge hidden state]\label{def:zkrs:prestate}
+For one honest opening, sample independently
+\[
+ p\overset{\$}{\leftarrow}L^I,\qquad
+ p_{\rm in}\overset{\$}{\leftarrow}L,
+\]
+and form
+\[
+ s_v^*=\sum_jh_jw_{v,j},\quad
+ m=s^*+p,\quad y'=y+p_{\rm in},\quad c=c^p=\mathcal T(p).
+\]
+The mask vector $p$ and correction $c$ must be bound before the
+first consistency challenge $\theta$.
+The public pre-challenge messages are $(m,y')$.
+\end{definition}
+
+\begin{definition}[Post-challenge hidden state]\label{def:zkrs:poststate}
+After $\theta\in L^\ell$ has been received, sample independently
+\[
+ t=(t_k)_{k\in I}\overset{\$}{\leftarrow}L^I,\qquad
+ \rho\overset{\$}{\leftarrow}L,
+ \qquad \sigma:=\rho^2.
+\]
+Write
+\[
+ V_k=V_k(p,c,\theta),\qquad
+ U_k:=V_k+t_k^2+t_k.
+\]
+Publish $U=(U_k)_k$ and bind $(t,\rho,\sigma)$ before the second
+challenge $z$. After receiving $z\in L$, publish
+\[
+ A:=\rho+\sum_kW_k(z)t_k.
+\]
+The scalar $\rho$ in this chapter is the auxiliary mask denoted $r$
+in Chapter~6; the distinct notation avoids confusion with the
+public evaluation point $(r_{\rm lo},r_{\rm hi})$.
+\end{definition}
+
+\begin{definition}[Public-message schedule]\label{def:zkrs:public-core}
+The \emph{public core} is the ordered transcript
+\[
+ \mathsf{Core}:=(m,y';\,\theta;\,U;\,z;\,A).
+\]
+A causal verifier may select $\theta$ after seeing $(m,y')$
+and $z$ after seeing $(m,y',\theta,U)$, using its private randomness.
+The underlying commitments, their roots and authenticated openings,
+and the auxiliary proofs are \emph{not} part of $\mathsf{Core}$;
+they belong to the complete transcript defined later.
+\end{definition}
+
+\begin{lemma}[Perfect consistency of an honest correction]\label{lem:zkrs:honest-correction}
+Under Definition~\ref{def:zkrs:prestate},
+$D_c(\theta)=\Delta_p(\theta)$ for every $\theta\in L^\ell$,
+and therefore every $V_k$ has trace zero.
+\end{lemma}
+\begin{proof}
+The equality $c=c^p$ is part of the honest definition.
+By Definition~\ref{def:binary:transpose}, the two kernel
+evaluations $D_c$ and $\Delta_p=D_{c^p}$ coincide identically.
+Theorem~\ref{thm:binary:affine-consistency} implies
+$\Tr(V_k)=0$ for every coordinate $k$, independently of $\theta$.
+\end{proof}
+
+\begin{lemma}[All three checker equations hold for honest values]\label{lem:zkrs:honest-checker}
+For every $\theta,z$, the honest values of
+Definitions~\ref{def:zkrs:prestate} and
+\ref{def:zkrs:poststate} pass all tests in
+Definition~\ref{def:binary:checks}, with
+$(r,s)$ there interpreted as $(\rho,\sigma)$ here.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:zkrs:honest-correction},
+$D_c(\theta)=\Delta_p(\theta)$.
+The honest values also satisfy $\sigma=\rho^2$,
+$U_k=V_k+t_k^2+t_k$ and
+$A=\rho+\sum_kW_k(z)t_k$ by construction.
+These are exactly the hypotheses of
+Theorem~\ref{thm:binary:checker-complete},
+which proves every checker equation.
+\end{proof}
+
+\begin{lemma}[Complete algebraic correctness of the masked interfaces]\label{lem:zkrs:honest-relations}
+For every admissible instance and honest state as above,
+$\mathsf{CLAIM}$, $\mathsf{IN}$ and $\mathsf{OUT}$ from
+Chapter~7 hold for all $\theta$.
+\end{lemma}
+\begin{proof}
+The admissible-instance condition gives $y=y_w$.
+By definition $m=s^*+p$, $c=c^p$ and $y'=y+p_{\rm in}$.
+These are the hypotheses of
+Theorem~\ref{thm:pack:honest-interfaces},
+which proves all three relations.
+\end{proof}
+
+\begin{remark}[Challenge order and single-opening scope]
+A malicious verifier's choices need not be uniform for the
+privacy theorems of this chapter. Uniform independent challenges
+are, however, required for the quantitative soundness estimates
+of Chapters~6--7. The present distributional analysis uses
+fresh $(p,p_{\rm in},t,\rho)$ for a \emph{single} opening;
+it must not be silently extended to pad reuse across openings.
+\end{remark}
