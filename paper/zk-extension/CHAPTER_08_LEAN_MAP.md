@@ -77,7 +77,7 @@
 ## Source provenance and known discrepancies
 
 - **Primary reference:** Diamond and Posen, *Polylogarithmic Proofs for Multilinears over Binary Towers*, ePrint 2024/504, §4, Construction 4.1; Theorems 4.2 and 4.4; Lemma 4.5.
-- Chapter 8 reconstructs the **original unmasked** tensor-algebra compiler specialized to ground field $ℝ_2$. The preceding Chapter 7 constructs a **distinct masked affine/traces verification interface**; the two soundness statements are not interchangeable.
+- Chapter 8 reconstructs the **original unmasked** tensor-algebra compiler specialized to ground field $F₂$. The preceding Chapter 7 constructs a **distinct masked affine/traces verification interface**; the two soundness statements are not interchangeable.
 - Earlier Diamond 2025/1015 treats large-field PCS zero knowledge but explicitly not ring switching; Kochergin 2026/2754 and Frigo–shelat 2026/2770 discuss subsequent binary-field masking methods.
 - The soundness theorem in this chapter assumes a fixed committed packed polynomial $T'$ and an external large-field evaluation error $\epsilon_{eval}$; it does not reproduce the original IOP emulator/extractor or a composed ZK simulator.
 - The unmasked tensor message leaks every partial evaluation; an explicit two-witness test has statistical distance one.
