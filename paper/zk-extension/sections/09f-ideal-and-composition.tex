@@ -1,0 +1,218 @@
+\subsection{Ideal complete-view privacy and modular cryptographic composition}\label{sec:zkrs:composition}
+The public core is not the complete verifier view.
+A real implementation includes commitments to packed witness elements,
+hidden pads, correction coefficients and auxiliary masks, plus the
+affine-proof transcripts and any authenticated oracle queries.
+We now state exactly what an external proof system must supply.
+
+\begin{definition}[Opaque commitment-and-affine ideal functionality]\label{def:zkrs:ideal-func}
+An \emph{opaque ideal proof interface} stores hidden witness data in a
+private registry, but its public transcript has only the following effects:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item On binding a hidden tuple, it emits a public registration token
+sampled from a specified distribution independent of the hidden tuple.
+The token is produced before the challenges that rely on its binding.
+\item Given a proposed public affine relation, it privately evaluates
+the relation against the registered hidden tuple and releases its
+accept/reject bit, with no other witness-dependent public data.
+\item It never provides the verifier a raw hidden field value, an
+unmasked codeword symbol, or an authenticated opening of a hidden value.
+\item On honest admissible executions it always outputs acceptance.
+For malicious executions it enforces the registered affine relations
+exactly. Its public token values may be adaptively queried or reused
+only to the extent explicitly supported by the ideal interface.
+\end{enumerate}
+This is a \emph{mathematical ideal functionality}, not an assertion
+that a concrete ordinary binding commitment is perfectly opaque.
+\end{definition}
+
+\begin{lemma}[Opaque tokens do not perturb the public-core law]\label{lem:zkrs:opaque-kernels}
+Assume all opaque interface tokens and outputs for an
+honest execution are independent of the private witness and
+of the random masks used in the public core, except that the
+acceptance bits are the constant $1$.
+Then, conditioned on any allowed visible history of tokens,
+the honest public-core transitions have the same uniform
+conditional laws as Lemmas~\ref{lem:zkrs:input-uniform},
+\ref{lem:zkrs:U-conditional}, and~\ref{lem:zkrs:A-conditional}.
+\end{lemma}
+\begin{proof}
+Independence implies that conditioning on the tokens
+does not change the joint law of the private masks
+and the verifier's previous public-core messages.
+Constant acceptance bits reveal no new information.
+The input-pair translation argument, trace-zero
+pushforward argument, and final uniform-$\rho$
+translation argument therefore hold under the
+additional conditioning without change.
+These are exactly the three cited lemmas.
+\end{proof}
+
+\begin{definition}[Complete ideal verifier view]\label{def:zkrs:ideal-view}
+For a single admissible opening, the \emph{complete ideal view}
+consists of the public commitment tokens, the verifier's own
+random tape, $(m,y')$, its challenges $(\theta,z)$,
+the public vector $U$, the final scalar $A$,
+the public trace checks, the acceptance bits of all
+required affine relations, and all interaction with
+the opaque ideal interface.
+The verifier may choose its challenges adaptively
+after all messages visible at that stage.
+\end{definition}
+
+\begin{theorem}[Perfect complete-view ZK in the opaque ideal model]\label{thm:zkrs:ideal-full-zk}
+For any causal verifier and any two admissible witnesses
+for the same fixed public evaluation instance, the complete
+ideal verifier views of Definition~\ref{def:zkrs:ideal-view}
+are identically distributed. A simulator without the witness
+generates the opaque registration tokens from their specified
+distributions, uses Definition~\ref{def:zkrs:core-sim}
+for the public core, and returns the constant honest
+acceptance bits from the ideal checks.
+\end{theorem}
+\begin{proof}
+The simulator samples each token from the
+witness-independent distribution prescribed by
+Definition~\ref{def:zkrs:ideal-func}, and couples
+the verifier's random tape with the real experiment.
+By Lemma~\ref{lem:zkrs:opaque-kernels},
+conditioning on these tokens preserves the
+uniform laws of all public core messages.
+Theorem~\ref{thm:zkrs:perfect-core}
+then gives identical conditional distributions
+at every public-core round, including when
+the verifier chooses challenges from the
+earlier tokens and messages.
+The honest hidden state satisfies all
+ideal affine relations by
+Lemmas~\ref{lem:zkrs:honest-checker} and
+\ref{lem:zkrs:honest-relations};
+hence their public accept/reject bits are
+the constant $1$ in both experiments.
+All outputs are either the same coupled
+verifier actions, identically distributed
+tokens, identically distributed core messages,
+or these deterministic accept bits.
+Thus the complete finite joint view laws
+coincide.
+\end{proof}
+
+\begin{definition}[Sequential external-interface simulation contract]\label{def:zkrs:realization}
+Fix an interactive implementation, a causal verifier $V^*$,
+and a number of externally generated transcript stages $N_{\rm ext}$.
+A \emph{sequential ideal-interface realization with errors}
+$(\varepsilon_0,\ldots,\varepsilon_{N_{\rm ext}-1})$
+is a family of witness-independent simulators for
+the commitment/proof/opening stages, with the following property:
+in an ordered sequence of hybrids replacing external stages
+one at a time by their simulators, each adjacent pair of
+complete verifier-view distributions has statistical distance
+at most $\varepsilon_i$, uniformly over every admissible witness
+and every allowed adaptive verifier strategy.
+The final hybrid must be the opaque ideal interaction of
+Definition~\ref{def:zkrs:ideal-view}, with the same public-core
+message schedule and authorized public instance.
+The contract includes correlations with the public-core
+messages and any authenticated queries; it cannot be
+replaced by marginal commitment hiding.
+\end{definition}
+
+\begin{theorem}[Conditional real-world statistical ZK composition]\label{thm:zkrs:conditional-zk}
+Suppose a concrete single-opening implementation satisfies
+the sequential external-interface simulation contract
+of Definition~\ref{def:zkrs:realization} for a given query
+bound and verifier class. Then for every admissible witness,
+the implemented complete view has a witness-independent
+simulator with statistical distance at most
+\[
+ \boxed{
+ \varepsilon_{\rm ZK}\leq
+ \min\left\{1,\sum_{i=0}^{N_{\rm ext}-1}\varepsilon_i\right\}.
+ }
+\]
+If all external interfaces are perfectly simulatable,
+the complete protocol is perfect zero knowledge for
+that single-opening game.
+\end{theorem}
+\begin{proof}
+Use the simulator of
+Theorem~\ref{thm:zkrs:ideal-full-zk}
+for the final opaque ideal hybrid,
+and use the stage simulators from
+Definition~\ref{def:zkrs:realization}
+for the intervening external stages.
+The statistical distance between the
+real complete view and the ideal
+complete view is at most the sum
+of the adjacent-hybrid distances
+by repeated application of
+Lemma~\ref{lem:security:tv-triangle}.
+By definition of the realization
+contract, each adjacent distance is
+at most $\varepsilon_i$.
+The final ideal simulator is witness
+independent by
+Theorem~\ref{thm:zkrs:ideal-full-zk}.
+Cap the resulting bound by $1$.
+\end{proof}
+
+\begin{definition}[External algebraic-soundness failure]\label{def:zkrs:sound-failure}
+Let $\mathcal B$ be the event that an
+implemented verifier accepts despite
+some underlying commitment-binding,
+packed-witness consistency, or advertised
+field-affine constraint failing to hold
+for the fixed hidden tuple.
+Assume a separately established
+implementation-specific error bound
+$\Pr[\mathcal B]\leq\varepsilon_{\rm ext,snd}$.
+\end{definition}
+
+\begin{theorem}[Conditional full implementation soundness]\label{thm:zkrs:conditional-sound}
+Under the causal and fixed-before-challenge hypotheses
+of Theorem~\ref{thm:zkrs:false-sound},
+and assuming implementation acceptance
+outside $\mathcal B$ implies acceptance of all ideal
+algebraic checks on the same fixed hidden values, a false
+evaluation claim is accepted with probability at most
+\[
+ \boxed{
+ \varepsilon_{\rm snd}\leq
+ \min\left\{1,\frac{\ell+n}{q}
+             +\varepsilon_{\rm ext,snd}\right\}.
+ }
+\]
+\end{theorem}
+\begin{proof}
+Outside $\mathcal B$, implementation
+acceptance entails acceptance of the
+ideal algebraic checker.
+Thus the implementation-accept event
+is contained in the union of the
+ideal-accept event and $\mathcal B$.
+Theorem~\ref{thm:zkrs:false-sound}
+bounds the first event by
+$(\ell+n)/q$, and
+Definition~\ref{def:zkrs:sound-failure}
+bounds the second by
+$\varepsilon_{\rm ext,snd}$.
+Apply the probability union bound
+and cap the result by one.
+\end{proof}
+
+\begin{remark}[No unconditional real-world ZK claim]
+Theorem~\ref{thm:zkrs:conditional-zk}
+is deliberately conditional:
+the implementation must actually
+satisfy a simulation contract for
+its \emph{full} commitment and proof
+transcripts. Neither ordinary
+computational hiding of one commitment
+nor a proof that $(m,y',U,A)$ has
+uniform marginals establishes that
+contract. A real online commitment
+chosen before the evaluation point
+also requires a simulator capable of
+maintaining consistency with later
+chosen evaluations.
+\end{remark}
