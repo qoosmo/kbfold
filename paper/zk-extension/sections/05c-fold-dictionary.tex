@@ -12,11 +12,14 @@ $f_1(b):=f(1,b)$ for $b\in I_{m-1}$. Then
 \]
 \end{lemma}
 \begin{proof}
-Split the defining finite sum for $U_f^{(m)}$ into terms indexed by $(0,b)$ and $(1,b)$. Lemma~\ref{lem:intro:recursion} gives
-$K_{(0,b)}^{(m)}(X)=XK_b^{(m-1)}(X^2)$ and
-$K_{(1,b)}^{(m)}(X)=(X+1)K_b^{(m-1)}(X^2)$.
-Substitution gives
-$XU_{f_0}^{(m-1)}(X^2)+(X+1)U_{f_1}^{(m-1)}(X^2)$.
+Split the defining finite sum for $U_f^{(m)}$ into terms
+indexed by $(0,b)$ and $(1,b)$. Lemma~\ref{lem:intro:recursion}
+identifies the two kernel terms. Substituting those identities
+and collecting the terms gives
+\[
+ U_f^{(m)}(X)
+ =XU_{f_0}^{(m-1)}(X^2)+(X+1)U_{f_1}^{(m-1)}(X^2).
+\]
 Distribute the second term and collect the constant and $X$ parts to obtain the stated formula.
 \end{proof}
 
