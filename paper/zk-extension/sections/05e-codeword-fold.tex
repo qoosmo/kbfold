@@ -1,0 +1,191 @@
+\subsection{Reed--Solomon words, local folds, and degree budgets}\label{sec:kbfoldfold:codewords}
+
+For this subsection assume $\F$ has odd characteristic and
+$\Omega_0\leq\F^\times$ is a multiplicative subgroup of order $M=2^{m+s}$,
+with $s\geq1$. Define $\Omega_j:=\{x^{2^j}:x\in\Omega_0\}$ for
+$0\leq j\leq m$.
+
+\begin{lemma}[Domain sizes]\label{lem:kbff:domain-sizes}
+For every $0\leq j\leq m$,
+\[
+ |\Omega_j|=M_j:=\frac{M}{2^j},\qquad
+ \Omega_{j+1}=\Omega_j^2\quad(j<m).
+\]
+Each $\Omega_j$ has even order.
+\end{lemma}
+\begin{proof}
+A finite multiplicative subgroup of a field is cyclic. In a cyclic
+group of order $M=2^{m+s}$, the homomorphism $x\mapsto x^{2^j}$ has
+kernel of order $\gcd(M,2^j)=2^j$ for $j\leq m$; hence its image has order
+$M/2^j$. Taking the image again under squaring gives
+$\Omega_{j+1}=\Omega_j^2$. Because $s\geq1$ and $j\leq m$, we have
+$M_j\geq2^s\geq2$, so each order is even.
+\end{proof}
+
+\begin{definition}[Word fold on a smooth domain]\label{def:kbff:wordfold}
+Let $w:\Omega_j\to\F$ with $j<m$. For $y=x^2\in\Omega_{j+1}$ set
+\[
+ w_{\rm e}(y)=\frac{w(x)+w(-x)}2,\qquad
+ w_{\rm o}(y)=\frac{w(x)-w(-x)}{2x},
+\]
+and
+\[
+ \mathsf{WFold}_{r,j}(w)(y)
+   =(2r-1)w_{\rm e}(y)+(1-r)w_{\rm o}(y).
+\]
+\end{definition}
+
+\begin{lemma}[Word fold is well defined]\label{lem:kbff:wordfold-well-defined}
+The values in Definition~\ref{def:kbff:wordfold} are independent of the choice
+of $x\in\Omega_j$ with $x^2=y$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:kbff:domain-sizes}, the domain $\Omega_j$ has even
+order, hence $-1\in\Omega_j$. Since the field has odd characteristic,
+$x\neq-x$ and both square to $y$.
+Conversely $u^2=x^2$ implies $(u-x)(u+x)=0$, so $u=\pm x$.
+Replacing $x$ with $-x$ fixes the numerator of $w_{\rm e}$.
+It changes the signs of both the numerator and denominator of
+$w_{\rm o}$, leaving that quotient unchanged. Thus both components and
+their linear combination are well defined.
+\end{proof}
+
+\begin{lemma}[Evaluations split into even and odd parts]\label{lem:kbff:eval-evenodd}
+Let $P(X)=E(X^2)+XO(X^2)$ and let $w(x)=P(x)$ on $\Omega_j$.
+Then for every $y\in\Omega_{j+1}$,
+\[
+ w_{\rm e}(y)=E(y),\qquad w_{\rm o}(y)=O(y).
+\]
+\end{lemma}
+\begin{proof}
+Choose $x\in\Omega_j$ with $x^2=y$. Then
+$P(x)=E(y)+xO(y)$ and $P(-x)=E(y)-xO(y)$.
+Their sum is $2E(y)$ and their difference is $2xO(y)$.
+Both $2$ and $x$ are invertible in the field, giving the two equalities.
+\end{proof}
+
+\begin{theorem}[Word/polynomial fold commutation]\label{thm:kbff:wordfold}
+For every $P\in\F[X]$, $r\in\F$, and $0\leq j<m$,
+\[
+ \boxed{
+ \mathsf{WFold}_{r,j}\bigl(\operatorname{ev}_{\Omega_j}(P)\bigr)
+ =\operatorname{ev}_{\Omega_{j+1}}\bigl(\pfold_r(P)\bigr).
+ }
+\]
+\end{theorem}
+\begin{proof}
+Let $P=E(X^2)+XO(X^2)$. By Lemma~\ref{lem:kbff:eval-evenodd},
+the two components of the evaluation word at $y\in\Omega_{j+1}$
+equal $E(y)$ and $O(y)$. Their normalized linear combination is
+$(2r-1)E(y)+(1-r)O(y)=\pfold_r(P)(y)$.
+This holds at every coordinate $y$, proving equality of words.
+\end{proof}
+
+\begin{corollary}[Masked oracle fold chain]\label{cor:kbff:wordchain}
+Let $Q_j$ be the polynomials in Definition~\ref{def:kbff:masked-chain},
+and define $w_j:=\operatorname{ev}_{\Omega_j}(Q_j)$. Then
+\[
+ w_{j+1}=\mathsf{WFold}_{r_j,j}(w_j)\qquad(0\leq j<m).
+\]
+\end{corollary}
+\begin{proof}
+The definition of iterated polynomial folds gives
+$Q_{j+1}=\pfold_{r_j}(Q_j)$. Apply Theorem~\ref{thm:kbff:wordfold}
+with $P=Q_j$.
+\end{proof}
+
+\begin{definition}[Enlarged degree budgets]\label{def:kbff:degree-budgets}
+For $0\leq j\leq m$ put
+\[
+ N_j:=2^{m-j},\qquad B_j:=\left\lceil B/2^j\right\rceil,
+ \qquad D_j:=N_j+B_j,
+ \qquad M_j:=M/2^j.
+\]
+The corresponding degree-bounded evaluation code is
+$\operatorname{RS}_{\F}(\Omega_j,D_j)$.
+\end{definition}
+
+\begin{lemma}[Budget recurrence]\label{lem:kbff:budget-recurrence}
+For $0\leq j<m$,
+\[
+ \left\lceil\frac{D_j}{2}\right\rceil=D_{j+1}.
+\]
+\end{lemma}
+\begin{proof}
+Since $N_j=2N_{j+1}$,
+\[
+ \left\lceil\frac{D_j}{2}\right\rceil
+ =N_{j+1}+\left\lceil\frac{B_j}{2}\right\rceil.
+\]
+For every positive integer $B$ and every $j\geq0$,
+$\lceil\lceil B/2^j\rceil/2\rceil=\lceil B/2^{j+1}\rceil$,
+as follows directly by writing $B=2^{j+1}q+t$ with
+$0\leq t<2^{j+1}$ and checking the cases $t=0$ and $t>0$.
+The second summand is therefore $B_{j+1}$, which proves the formula.
+\end{proof}
+
+\begin{theorem}[Degree-correct masked RS chain]\label{thm:kbff:code-rate}
+Assume $1\leq B\leq N$ and $N+B\leq M$.
+For every masked encoding $Q_0=U_f^{(m)}+X^NR$ and every challenge
+sequence $r\in\F^m$,
+\[
+ w_j\in\operatorname{RS}_{\F}(\Omega_j,D_j),\qquad
+ D_j\leq M_j,
+\]
+and
+\[
+ \mathsf{WFold}_{r_j,j}:
+   \operatorname{RS}_{\F}(\Omega_j,D_j)
+   \longrightarrow\operatorname{RS}_{\F}(\Omega_{j+1},D_{j+1})
+\]
+for $j<m$.
+\end{theorem}
+\begin{proof}
+Corollary~\ref{cor:kbff:masked-degree} gives $\deg Q_j<D_j$,
+so $w_j$ belongs to the stated code. Since $N+B\leq M$,
+we have
+\[
+ D_j=N/2^j+\lceil B/2^j\rceil
+ =\left\lceil\frac{N+B}{2^j}\right\rceil
+ \leq M/2^j=M_j,
+\]
+where divisibility of $N$ and $M$ by $2^j$ is used.
+For any polynomial $P$ of degree $<D_j$,
+Corollary~\ref{cor:kbff:fold-degree} gives
+$\deg\pfold_{r_j}(P)<\lceil D_j/2\rceil=D_{j+1}$.
+Theorem~\ref{thm:kbff:wordfold} identifies the word fold of its
+evaluation with the evaluation of that polynomial, which belongs
+to the next RS code.
+\end{proof}
+
+\begin{corollary}[Exact rate transition for a power-of-two mask budget]\label{cor:kbff:rate-transition}
+Let $B=2^t$ with $0\leq t\leq m$, and put $\rho=N/M$.
+Then the relative degree budget $D_j/M_j$ equals
+\[
+ \frac{D_j}{M_j}=
+ \begin{cases}
+ \displaystyle\frac{N+B}{M},&0\leq j\leq t,\\[3pt]
+ \displaystyle\frac{N+2^j}{M},&t<j\leq m.
+ \end{cases}
+\]
+In particular $D_m=2$ and $D_m/M_m=2\rho$.
+\end{corollary}
+\begin{proof}
+For $j\leq t$, $B_j=\lceil2^t/2^j\rceil=2^{t-j}$,
+so $D_j=(N+B)/2^j$ and division by $M/2^j$ gives
+$(N+B)/M$.
+For $j>t$, $0<2^t/2^j<1$, hence $B_j=1$, so
+$D_j=N/2^j+1$, and division gives $(N+2^j)/M$.
+At $j=m$, $N_m=1$ and $B_m=1$, so $D_m=2$; since $M_m=M/N$,
+its rate is $2N/M=2\rho$.
+\end{proof}
+
+\begin{remark}[Quantified effect on proximity analysis]
+The original KBFold proof uses constant-rate RS chains of degree
+$N_j$. A high-degree mask replaces them by $D_j=N_j+B_j$.
+Theorem~\ref{thm:kbff:code-rate} proves code membership and
+correctness of the folds, but does not prove a proximity soundness
+theorem against adversarial \emph{non-codewords}. Every argument
+using code distance or correlated agreement must use the actual
+$D_j/M_j$ at the corresponding level.
+\end{remark}
