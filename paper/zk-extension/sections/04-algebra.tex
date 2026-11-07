@@ -1,0 +1,15 @@
+\section{The Boolean-Kernel Basis: Complete Algebraic Theory}\label{sec:kbalgebra}
+
+We develop the Boolean-kernel representation with all indices, maps, fields, and degree conventions explicit. Each result is split into elementary steps suitable for future Lean~4 certification. The original KBFold paper proves the kernel basis, Kronecker transform, low-degree criterion, and fold dictionary~\cite{MkhidaKBFold2026}; we reconstruct those results with complete proofs, then derive algebraic consequences directly relevant to degree-aware masking and bounded-query simulation. Throughout this chapter, $\F$ is an arbitrary field unless a lemma explicitly assumes a finite field or specifies the characteristic.
+
+\input{sections/04a-indexing-coefficients}
+\input{sections/04b-kronecker}
+\input{sections/04c-transforms}
+\input{sections/04d-low-degree}
+\input{sections/04e-evaluation}
+\input{sections/04f-fold-monomials}
+\input{sections/04g-fri-masking}
+\input{sections/04h-mask-query}
+
+\subsection{Formal status and next algebraic dependencies}\label{sec:kbalgebra:status}
+The foundations above depend only on field arithmetic, polynomial coefficients, finite sums, and finite-dimensional linear algebra, except for the explicitly finite-field masking statements in Section~\ref{sec:kbalgebra:maskquery}. The tensor fold in Theorem~\ref{thm:kbalgebra:tensor-fold} is valid in every characteristic; the ordinary evaluation formula of Corollary~\ref{cor:kbalgebra:char2-multilinear} is the characteristic-two specialization. These are not interchangeable in the odd-characteristic KBFold protocol. In the next chapter, the typed mathematical statements on multilinearization, folding, and masks can be imported as standalone lemmas rather than re-proved inside a cryptographic security argument. The dedicated theorem ledger accompanying the source provides a proposed Lean name for each declaration. No new Lean machine-checked proof is asserted here.
