@@ -1,0 +1,205 @@
+\subsection{Affine-proof interfaces, trace coordinates, and privacy limits}\label{sec:packing:affine}
+
+\begin{definition}[Available affine constraints]\label{def:pack:affine-API}
+An \emph{extension-field affine proof interface}
+for $L$ allows a verifier to specify public
+coefficients $(a_i)_i\in L^t$ and a public
+right-hand side $b\in L$, and to require
+committed hidden values $(x_i)_i$ to satisfy
+\[
+ \sum_i a_ix_i=b
+\]
+without exposing those values.
+The algebraic interface does not itself
+assert binding, knowledge soundness, or
+zero knowledge for the implementation.
+\end{definition}
+
+\begin{lemma}[Incoming constraints are extension-field affine]\label{lem:pack:IN-affine}
+For public $m,y',q_v,y_{\mathrm{pub}}$
+the relations $\mathsf{CLAIM}$
+and $\mathsf{IN}$ are extension-field
+affine equations in hidden
+$(p_v)_v,p_{\mathrm{in}}$.
+\end{lemma}
+\begin{proof}
+The claim relation is
+$p_{\mathrm{in}}=y'+y_{\mathrm{pub}}$
+in characteristic two, so it is affine.
+The incoming relation is
+$\sum_vq_vp_v+p_{\mathrm{in}}
+ =\sum_vq_vm_v+y'$,
+with public right side and public
+coefficients $q_v$. Both have exactly
+the form in Definition~\ref{def:pack:affine-API}.
+\end{proof}
+
+\begin{lemma}[Outgoing constraints are extension-field affine]\label{lem:pack:OUT-affine}
+For public $\theta,m$ and weights
+$h_j$, the outgoing equation is
+extension-field affine in hidden
+$(\widehat w_j)_j$ and $c=(c_u)_u$.
+\end{lemma}
+\begin{proof}
+Rewrite~\eqref{eq:pack:out-new} as
+$\sum_ja_j(\theta)\widehat w_j+
+  \sum_u\operatorname{eq}_\ell(u,\theta)c_u
+  =B_m(\theta)$.
+Every coefficient is publicly
+computable from $\theta,h_j$,
+and the public right side
+$B_m(\theta)$ is computed by
+transposing the public vector $m$.
+No coordinate extraction of
+a hidden field element occurs
+in this equation, proving affinity.
+\end{proof}
+
+\begin{definition}[Affine correction coefficients]\label{def:pack:affine-H}
+Use the trace-dual basis $\eta_u$ and
+the public coefficients from Chapter~6:
+\[
+ H_{v,k}(\theta)
+ =\sum_{u\in I}
+    d_k\bigl(\beta_v\operatorname{eq}_\ell(u,\theta)\bigr)
+    \eta_u.
+\]
+Define
+\[
+ V_k(p,c,\theta)
+ =\eta_kD_c(\theta)+
+       \sum_{v\in I}H_{v,k}(\theta)p_v.
+\]
+\end{definition}
+
+\begin{lemma}[Every correction expression is extension-field affine]\label{lem:pack:V-affine}
+For fixed public $\theta$,
+the expression $V_k(p,c,\theta)$
+is $L$-linear in the hidden values
+$(p_v)_v$ and $(c_u)_u$.
+\end{lemma}
+\begin{proof}
+Substitute
+$D_c(\theta)=\sum_u\lambda_u(\theta)c_u$.
+Then
+\[
+ V_k=\sum_u\eta_k\lambda_u(\theta)c_u
+       +\sum_vH_{v,k}(\theta)p_v.
+\]
+All coefficients multiplying hidden
+variables depend only on public
+parameters and $\theta$.
+There is no constant term, so the
+expression is in fact homogeneous
+$L$-linear.
+\end{proof}
+
+\begin{theorem}[Trace-coordinate interface for candidate correction]\label{thm:pack:trace-correct}
+For every $p,c,\theta$,
+\[
+ \boxed{
+ D_c(\theta)=\Delta_p(\theta)
+ \quad\Longleftrightarrow\quad
+ \Tr(V_k(p,c,\theta))=0\quad\forall k\in I.}
+\]
+\end{theorem}
+\begin{proof}
+By Theorem~\ref{thm:binary:dual-basis},
+$d_k(x)=\Tr(\eta_kx)$.
+Lemma~\ref{lem:binary:affine-trace}
+shows
+$\Tr(\sum_vH_{v,k}p_v)
+ =d_k(\Delta_p)$.
+Therefore
+$\Tr(V_k)=d_k(D_c+\Delta_p)$,
+which is Lemma~\ref{lem:binary:V-trace}.
+Every coordinate vanishes if and only
+if the field element vanishes,
+by the basis expansion.
+In characteristic two
+$D_c+\Delta_p=0$ is equivalent to
+$D_c=\Delta_p$.
+\end{proof}
+
+\begin{lemma}[A revealed transposed pad reveals the original pad]\label{lem:pack:reveal-pad}
+If the entire field vector $c^p=\mathcal T(p)$
+is revealed, then the pad vector $p$
+is uniquely recovered by
+\[
+ \boxed{p=\mathcal T(c^p).}
+\]
+\end{lemma}
+\begin{proof}
+Apply $\mathcal T$ to the identity
+$c^p=\mathcal T(p)$, then use
+Theorem~\ref{thm:pack:transpose-involutive}.
+\end{proof}
+
+\begin{theorem}[Revealing the correction destroys masking]\label{thm:pack:reveal-leak}
+Suppose both $m=s^*+p$ and
+$c^p=\mathcal T(p)$ are sent in the clear.
+Then every unmasked partial evaluation
+$s_v^*$ is deterministically recoverable:
+\[
+ \boxed{s^*=m+\mathcal T(c^p).}
+\]
+\end{theorem}
+\begin{proof}
+Lemma~\ref{lem:pack:reveal-pad}
+recovers $p=\mathcal T(c^p)$.
+As $m=s^*+p$, adding $p$ to
+both sides yields
+$s^*=m+p=m+\mathcal T(c^p)$.
+Thus the unmasked vector can be
+computed from the two exposed vectors.
+\end{proof}
+
+\begin{corollary}[Masked-value uniformity alone does not imply privacy]\label{cor:pack:uniform-not-ZK}
+The marginal uniformity result
+for $m$ in Lemma~\ref{lem:pack:masked-uniform}
+does not imply witness privacy for the
+joint message pair $(m,c^p)$.
+\end{corollary}
+\begin{proof}
+For any fixed $s^*$, the joint pair
+$(m,c^p)$ deterministically reveals
+$s^*$ by Theorem~\ref{thm:pack:reveal-leak}.
+Choose two distinct possible
+partial-evaluation vectors $s_0^*,s_1^*$.
+The events that the reconstruction
+equals $s_0^*$ distinguish their joint
+message distributions with probabilities
+$1$ and $0$, respectively.
+Thus the pair need not be
+witness independent, despite each
+$m$ being uniform.
+\end{proof}
+
+\begin{remark}[Public parameters and hidden values]
+All $H_{v,k}(\theta)$ and $a_j(\theta)$
+may be computed by the verifier from
+public inputs; the vectors $p,c$
+must remain hidden behind a commitment
+or an appropriate zero-knowledge
+affine proof. Whether such a proof can
+simulate its commitments, openings and
+messages is a separate cryptographic
+statement. The current chapter proves
+only the algebraic affine interface.
+\end{remark}
+
+\begin{remark}[Independent paper contributions]
+The matrix transposition and packed
+bit-linear reduction originate in the
+Ring Switching line of work
+\cite{DiamondPosen2024}.
+The trace/Frobenius approach to hiding
+has prior treatments
+\cite{Kochergin2026,FrigoShelat2026}.
+Our kernel-coordinate identities use
+the basis from KBFold
+\cite{MkhidaKBFold2026}.
+No novelty claim about the
+underlying trace-zero principle is
+made here.
+\end{remark}
