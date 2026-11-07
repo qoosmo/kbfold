@@ -1,0 +1,183 @@
+\subsection{The unanchored dependence and the anchored kernel family}\label{sec:binary:anchors}
+
+The identity $\sum_bK_b=1$ creates an exact linear
+dependence between the constant polynomial and the
+kernel basis. This makes a naive residual polynomial
+identity test unsound unless the additional scalar
+residual is distinguished algebraically.
+We derive the minimal-degree anchoring mechanism;
+a full protocol using it will appear later.
+
+\begin{lemma}[Unanchored residual dependence]\label{lem:binary:unanchored}
+Let $\delta\in L$ be nonzero and set $e_b:=\delta$ for
+every $b\in I_\ell$. Then
+\[
+ \delta+\sum_{b\in I_\ell}e_bK_b(X)=0
+\]
+as a polynomial, even though $(\delta,e)\neq0$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:binary:partition},
+$\sum_bK_b=1$. Therefore the left side is
+$\delta+\delta\sum_bK_b=\delta+\delta=0$
+in characteristic two. The first residual component
+$\delta$ is nonzero by assumption.
+\end{proof}
+
+\begin{definition}[Anchored Boolean kernels]\label{def:binary:anchored}
+Let $0_\ell=(0,\ldots,0)\in I_\ell$. For $b\in I_\ell$ define
+\[
+ W_b(X):=
+ \begin{cases}
+ K_{0_\ell}(X)+X^n,&b=0_\ell,\\
+ K_b(X),&b\neq0_\ell.
+ \end{cases}
+\]
+Every $W_b$ is a polynomial with coefficients in $\F_2$.
+\end{definition}
+
+\begin{lemma}[Anchored family degree]\label{lem:binary:anchor-degree}
+$\deg W_{0_\ell}=n$, while
+$\deg W_b=n-1$ for every $b\neq0_\ell$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:intro:degree}, each kernel has degree
+$n-1$. Therefore the added monomial $X^n$ is the
+unique degree-$n$ contribution to $W_{0_\ell}$,
+with nonzero coefficient $1$, so its degree is $n$.
+For $b\neq0_\ell$, $W_b=K_b$, which has degree $n-1$.
+\end{proof}
+
+\begin{lemma}[Sum of anchored kernels]\label{lem:binary:anchor-sum}
+\[
+ \sum_{b\in I_\ell}W_b(X)=1+X^n.
+\]
+\end{lemma}
+\begin{proof}
+By definition only the term $W_{0_\ell}$
+differs from $K_{0_\ell}$, by the summand $X^n$.
+Thus $\sum_bW_b=\sum_bK_b+X^n=1+X^n$
+by Lemma~\ref{lem:binary:partition}.
+\end{proof}
+
+\begin{theorem}[Independence of the constant and all anchored kernels]\label{thm:binary:anchor-independence}
+The $n+1$ polynomials
+\[
+ \boxed{\{1\}\cup\{W_b:b\in I_\ell\}}
+\]
+are linearly independent over $L$ in $L[X]_{\leq n}$.
+\end{theorem}
+\begin{proof}
+Suppose
+\[
+ \delta+\sum_{b\in I_\ell}e_bW_b(X)=0
+ \qquad(\delta,e_b\in L).
+\]
+The coefficient of $X^n$ in the left side is
+exactly $e_{0_\ell}$ by Lemma~\ref{lem:binary:anchor-degree}.
+Hence $e_{0_\ell}=0$. The remaining polynomial identity is
+$\delta+\sum_{b\neq0_\ell}e_bK_b=0$.
+Using $1=\sum_bK_b$ from
+Lemma~\ref{lem:binary:partition}, rewrite it as
+\[
+ \delta K_{0_\ell}
+ +\sum_{b\neq0_\ell}(\delta+e_b)K_b=0.
+\]
+By the kernel basis theorem,
+Proposition~\ref{prop:intro:basis},
+all kernel coefficients vanish. In particular $\delta=0$,
+and then $\delta+e_b=0$ gives every $e_b=0$.
+Thus the anchored family together with $1$ is independent.
+\end{proof}
+
+\begin{corollary}[Anchored family is a basis in degree at most $n$]\label{cor:binary:anchor-basis}
+The $n+1$ polynomials from
+Theorem~\ref{thm:binary:anchor-independence}
+form an $L$-basis of $L[X]_{\leq n}$.
+\end{corollary}
+\begin{proof}
+The monomials $1,X,\ldots,X^n$ form a basis of
+$L[X]_{\leq n}$, which therefore has dimension $n+1$.
+The displayed family consists of $n+1$ linearly
+independent vectors in this space, hence is a basis.
+\end{proof}
+
+\begin{proposition}[Degree-$n$ anchoring is dimensionally minimal]\label{prop:binary:anchor-minimal}
+No family of $n+1$ polynomials, all of degree $<n$,
+can be linearly independent over $L$.
+\end{proposition}
+\begin{proof}
+The space $L[X]_{<n}$ has basis
+$1,X,\ldots,X^{n-1}$ and therefore dimension $n$.
+A vector space of dimension $n$ cannot contain $n+1$
+linearly independent vectors.
+\end{proof}
+
+\begin{lemma}[Anchored kernels commute with Frobenius evaluation]\label{lem:binary:anchor-frob}
+For every $b\in I_\ell$ and $z\in L$,
+\[
+ W_b(z)^2=W_b(z^2).
+\]
+\end{lemma}
+\begin{proof}
+Every coefficient of $W_b$ lies in $\F_2$
+by Definition~\ref{def:binary:anchored}.
+The coefficient Frobenius of $W_b$ is therefore $W_b$.
+Apply Lemma~\ref{lem:binary:poly-frob} with $j=1$
+and evaluate at $z$:
+$W_b(z)^2=W_b^{\sigma_1}(z^2)=W_b(z^2)$.
+\end{proof}
+
+\begin{definition}[Anchored residual polynomial]\label{def:binary:anchor-residual}
+For $\delta\in L$ and $e=(e_b)_{b\in I_\ell}\in L^{I_\ell}$,
+define
+\[
+ F_{\delta,e}(X):=\delta+\sum_{b\in I_\ell}e_bW_b(X).
+\]
+\end{definition}
+
+\begin{lemma}[Nonzero residual gives a nonzero polynomial]\label{lem:binary:anchor-nonzero}
+If $(\delta,e)\neq(0,0)$, then
+$F_{\delta,e}$ is a nonzero polynomial of degree at most $n$.
+\end{lemma}
+\begin{proof}
+Each $W_b$ has degree at most $n$,
+so the linear combination has degree at most $n$.
+If it vanished identically, the linear independence
+of $\{1,W_b\}_b$ proved in
+Theorem~\ref{thm:binary:anchor-independence}
+would force $\delta=0$ and $e_b=0$ for all $b$,
+contradicting the hypothesis.
+\end{proof}
+
+\begin{theorem}[Root bound for an anchored residual]\label{thm:binary:anchor-root}
+Fix $(\delta,e)\neq(0,0)$ independently of a uniform
+challenge $z\overset{\$}{\leftarrow}L$. Then
+\[
+ \boxed{\Pr_z\left[
+ \delta+\sum_be_bW_b(z)^2=0\right]\leq\frac{n}{q}.}
+\]
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:binary:anchor-frob},
+the tested expression is $F_{\delta,e}(z^2)$.
+By Corollary~\ref{cor:binary:frob-bijective},
+the map $z\mapsto z^2$ is a bijection of the finite
+field $L$, so $z^2$ is uniform on $L$.
+By Lemma~\ref{lem:binary:anchor-nonzero},
+$F_{\delta,e}$ is nonzero of degree at most $n$.
+The univariate root bound of
+Lemma~\ref{lem:history:rootcount} gives at most $n$
+roots. Divide by $q$.
+\end{proof}
+
+\begin{remark}[Challenge timing is necessary]
+The bound is conditional on $(\delta,e)$ being
+fixed independently of the fresh challenge $z$.
+If the coefficients are chosen after seeing $z$,
+the prover could select a nonzero polynomial
+that vanishes at that particular point.
+Thus the commit-then-challenge order is part
+of the soundness hypothesis, not a cosmetic
+presentation detail.
+\end{remark}
