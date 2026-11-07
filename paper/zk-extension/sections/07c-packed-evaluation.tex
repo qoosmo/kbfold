@@ -18,12 +18,14 @@ For $q_v$ and $y_w$ as in Definition~\ref{def:pack:weights},
 \]
 \end{lemma}
 \begin{proof}
-Substitute
-$s_v^*=\sum_jh_jw_{v,j}$
-into the right side and distribute the finite sums:
-$\sum_vq_v\sum_jh_jw_{v,j}
-=\sum_{v,j}q_vh_jw_{v,j}$.
-This equals $y_w$ by definition.
+Substitute the definition of $s_v^*$ and
+distribute the two finite sums:
+\[
+ \sum_vq_vs_v^*
+  =\sum_vq_v\left(\sum_jh_jw_{v,j}\right)
+  =\sum_{v,j}q_vh_jw_{v,j}.
+\]
+The last sum equals $y_w$ by definition.
 \end{proof}
 
 \begin{lemma}[Coordinate of a Boolean partial sum]\label{lem:pack:partial-coordinate}
@@ -192,10 +194,11 @@ For every $x\in L^I$ and $\theta\in L^\ell$,
 \begin{proof}
 By the complete kernel folding dictionary,
 Corollary~\ref{cor:kbff:full-evaluation},
-the fold of $S_x$ equals
-$\sum_u\operatorname{eq}_\ell(u,\theta)
-                  \mathcal T(x)_u$,
-which is exactly $B_x(\theta)$
+\[
+ \mathsf{PFold}^{[\ell]}_\theta(S_x)
+ =\sum_u\operatorname{eq}_\ell(u,\theta)\mathcal T(x)_u.
+\]
+The sum is exactly $B_x(\theta)$
 by Definition~\ref{def:pack:batch}.
 \end{proof}
 
