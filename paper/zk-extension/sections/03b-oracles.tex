@@ -1,0 +1,117 @@
+\subsection{Oracle proof systems and binding commitments}\label{sec:security:oracles}
+
+\begin{definition}[Evaluation domain and initial oracle]\label{def:security:domain}
+Let $\F$ be a finite field, let $m\geq1$, and put $N:=2^m$. Fix a finite set $\mathcal D\subseteq\F$ of $M\geq N$ pairwise distinct field elements. A \emph{word} on $\mathcal D$ is a function $w:\mathcal D\to\F$. Its read-only oracle $\mathcal O_w$ answers a query $\xi\in\mathcal D$ with $w(\xi)$.
+The original KBFold setting further requires $\operatorname{char}(\F)\neq2$ and a smooth multiplicative subgroup $\mathcal D$, as in Definition~\ref{def:history:rs}.
+\end{definition}
+
+\begin{definition}[Public-coin IOP transcript]\label{def:security:iop}
+Fix a number of rounds $t\geq1$ and nonempty finite challenge sets $\mathsf{Ch}_1,\ldots,\mathsf{Ch}_t$. In round $i$, a prover sends a pair
+\[
+ m_i=(a_i,\mathcal O_{w_i}),
+\]
+where $a_i$ is a finite, explicit message and $w_i:\Lambda_i\to\F$ is a full oracle word on a finite index set $\Lambda_i$. An omitted oracle component is interpreted as the unique empty word. The verifier then samples an independent uniform challenge $c_i\in\mathsf{Ch}_i$.
+A full transcript is the typed tuple
+\[
+ \tau=(x,m_1,c_1,\ldots,m_t,c_t),
+\]
+where $x$ may contain a read-only initial oracle $\mathcal O_{w_0}$. The honest verifier can subsequently query entries of the instance and message oracles, and its acceptance predicate depends only on explicit messages, challenges, and the queried entries.
+\end{definition}
+
+\begin{definition}[Timing-respecting prover]\label{def:security:causal-prover}
+A deterministic prover is a family of functions $(P_i)_{1\leq i\leq t}$ such that
+\[
+ m_i=P_i(x,\mathsf{wit},c_1,\ldots,c_{i-1}).
+\]
+In particular $m_i$ does not depend on $c_i$. A randomized prover is a finitely supported distribution over deterministic timing-respecting provers, sampled independently of the verifier challenges.
+\end{definition}
+
+\begin{lemma}[The honest transcript distribution is defined]\label{lem:security:finite-transcript}
+If every message, challenge, oracle domain, and random tape set is finite, then for each fixed $(x,\mathsf{wit})$ the interaction of a randomized prover and the honest public-coin verifier defines a probability distribution on full transcripts.
+\end{lemma}
+\begin{proof}
+Sample the prover's random tape first and sample each verifier challenge uniformly and independently. Since every prover message is a deterministic function of the already sampled data and the preceding challenges, induction on the round index uniquely determines the full transcript from the sampled tapes. The product of finitely many finite probability spaces is finite. Pushing its distribution forward through the transcript map produces the asserted distribution (Definition~\ref{def:security:kernel} for deterministic kernels).
+\end{proof}
+
+\begin{definition}[Adaptive verifier and query bound]\label{def:security:adaptive}
+An \emph{adaptive verifier} $V^*$ is a possibly randomized interactive strategy that may, after receiving an oracle handle, query that handle at valid indices, choose subsequent challenges as functions of its preceding observations, and finally output a bit. It is \emph{$Q$-query bounded} if every execution makes at most $Q$ read operations across all instance and prover-supplied oracles, counting repeated reads. Its query record is a sequence of triples
+\[
+ \mathsf{qry}=((j_1,\xi_1,a_1),\ldots,(j_h,\xi_h,a_h)),\qquad 0\leq h\leq Q,
+\]
+with $a_k=w_{j_k}(\xi_k)$; for authenticated commitments the record additionally includes an opening proof $\pi_k$. The verifier may not query an oracle handle before that oracle is registered.
+\end{definition}
+
+\begin{lemma}[Finite decision-tree representation]\label{lem:security:decision-tree}
+Fix the random tape of a $Q$-query-bounded adaptive verifier $V^*$. At every query step, its choice of the next oracle index, the next challenge, or termination is determined by the public input, explicit messages, and the previously received answers. Consequently its behavior can be represented by a decision tree of depth at most $Q$ for oracle-read nodes, with finite branching.
+\end{lemma}
+\begin{proof}
+For a fixed random tape the verifier is deterministic by definition. At the root its first action is determined by its public input. If that action requests an oracle answer, the finite set of possible field values labels the outgoing edges. On each child, the verifier's next action is determined by the previous action and answer; repeat. No execution has more than $Q$ query nodes, so the resulting tree has bounded query depth. Other finite explicit-message and challenge choices can be included as intermediate nodes. Finiteness of every message and index space ensures finite branching.
+\end{proof}
+
+\begin{definition}[Verifier's view]\label{def:security:view}
+For a complete execution with adversarial verifier $V^*$, define its \emph{view} as the tuple consisting of its public input, its own private random tape, every explicit prover message, every challenge, the ordered adaptive query-and-answer record (including any authentication proofs), and its final output bit. The full contents of an unopened oracle are \emph{not} included.
+Write
+\[
+ \operatorname{View}_{V^*}^{P}(x,\mathsf{wit})
+\]
+for the resulting finite random variable.
+\end{definition}
+
+\begin{definition}[Abstract oracle commitment]\label{def:security:commitment}
+An indexed commitment system with index set $\mathcal D$, field $\F$, and security parameter $\lambda_{\rm sec}\in\mathbb N$ is a triple of algorithms
+\[
+ \mathsf{Commit}_{\lambda_{\rm sec}}:\F^{\mathcal D}\times\mathsf R_{\lambda_{\rm sec}}
+       \to\mathsf{CM}_{\lambda_{\rm sec}}\times\mathsf{ST}_{\lambda_{\rm sec}},
+\]
+\[
+ \mathsf{Open}_{\lambda_{\rm sec}}:
+    \mathsf{ST}_{\lambda_{\rm sec}}\times\mathcal D
+      \to\F\times\mathsf{Proof}_{\lambda_{\rm sec}},
+\quad
+ \mathsf{Check}_{\lambda_{\rm sec}}:
+    \mathsf{CM}_{\lambda_{\rm sec}}\times\mathcal D
+    \times\F\times\mathsf{Proof}_{\lambda_{\rm sec}}\to\{0,1\}.
+\]
+The set $\mathsf R_{\lambda_{\rm sec}}$ contains the commitment random tapes.
+If $(\mathsf{cm},\mathsf{st})=\mathsf{Commit}(w;\rho)$ and
+$(a,\pi)=\mathsf{Open}(\mathsf{st},\xi)$, \emph{perfect correctness} is the assertion
+\[
+  a=w(\xi)\quad\text{and}\quad
+  \mathsf{Check}(\mathsf{cm},\xi,a,\pi)=1
+\]
+for every $w,\rho,\xi$.
+\end{definition}
+
+\begin{definition}[Coordinate-binding experiment]\label{def:security:binding}
+For an adversary $\mathcal A$ outputting a tuple
+$(\mathsf{cm},\xi,a,\pi,a',\pi')$, define
+\[
+ \mathsf{BadBind}(\mathcal A)
+ :=
+ \bigl\{a\neq a'\ \land\
+ \mathsf{Check}(\mathsf{cm},\xi,a,\pi)=1\ \land\
+ \mathsf{Check}(\mathsf{cm},\xi,a',\pi')=1\bigr\}.
+\]
+The scheme is $(\varepsilon_{\rm bind},\mathcal C)$-coordinate binding if
+$\Pr[\mathsf{BadBind}(\mathcal A)]\leq\varepsilon_{\rm bind}$
+for every adversary $\mathcal A$ in the specified algorithm class $\mathcal C$.
+All probabilities are over the adversary's and the experiment's randomness.
+\end{definition}
+
+\begin{definition}[Standalone commitment hiding]\label{def:security:commit-hiding}
+Let $w_0,w_1\in\F^\mathcal D$. For independent uniformly sampled commitment random tapes let
+\[
+ C_b:=\pi_{\mathsf{CM}}(\mathsf{Commit}(w_b;\rho_b)),\qquad b\in\{0,1\}.
+\]
+The commitment is \emph{$\varepsilon$-statistically hiding without openings} if
+$\Delta(C_0,C_1)\leq\varepsilon$ for every pair $w_0,w_1$.
+A computational variant restricts the tests to an explicitly chosen efficient distinguisher class.
+\end{definition}
+
+\begin{remark}[A commitment is not a simulator]
+Coordinate binding says that a root cannot be opened to two different values at the same index; it says nothing about hiding. Conversely, Definition~\ref{def:security:commit-hiding} does not address leaked values returned by $\mathsf{Open}$. A zero-knowledge KBFold statement must consider the \emph{joint} distribution of the root, the prover's explicit messages, the chosen oracle openings, and the authentication proofs. We will use the full view of Definition~\ref{def:security:view} for that purpose.
+\end{remark}
+
+\begin{remark}[Fiat--Shamir and BCS]
+The original KBFold paper treats the interactive oracle reduction first and then invokes a specific BCS/QROM theorem to obtain a noninteractive knowledge-soundness statement~\cite{MkhidaKBFold2026}. Neither a generic random-oracle replacement of the challenges nor salted Merkle commitments alone constitute a zero-knowledge theorem. Any later compilation result must separately state the required simulator and random-oracle security assumptions.
+\end{remark}
