@@ -1,0 +1,174 @@
+\subsection{Efficiency, assumptions, and the path to a genuine ZK-KBFold PCS}\label{sec:zkrs:ledger}
+
+\begin{definition}[Field-message accounting for the public core]\label{def:zkrs:count}
+Count only publicly transmitted elements of $L$
+in the core of Definition~\ref{def:zkrs:public-core},
+not commitments, field traces, challenge bits or
+the separate affine proofs. Let $n=|I|=2^\ell$.
+\end{definition}
+
+\begin{lemma}[Exact single-opening public-core message count]\label{lem:zkrs:count}
+The honest public core transmits $2n+2$ elements of $L$:
+$n$ entries of $m$, one $y'$, $n$ entries of $U$ and one $A$.
+It also receives $\ell+1$ challenge elements of $L$:
+the $\ell$ coordinates of $\theta$ and one $z$.
+\end{lemma}
+\begin{proof}
+Read the five ordered stages of
+Definition~\ref{def:zkrs:public-core}.
+The lengths of the prover-message
+vectors are $n,1,n,1$ respectively,
+whose sum is $2n+2$.
+The verifier supplies a vector
+$\theta\in L^\ell$ and
+a scalar $z\in L$, contributing
+$\ell+1$ challenge elements.
+No other elements are counted by
+Definition~\ref{def:zkrs:count}.
+\end{proof}
+
+\begin{lemma}[Naive affine-coefficient count]\label{lem:zkrs:H-count}
+The family of public affine coefficients
+$H_{v,k}(\theta)$ from
+Definition~\ref{def:binary:affine-H}
+contains $n^2$ elements of $L$.
+A direct implementation of their
+defining sums uses $n$ summands
+per coefficient, hence $n^3$
+basis-coordinate terms.
+\end{lemma}
+\begin{proof}
+Both indices $v,k$ range over
+$I$, a set of size $n$, so
+there are $n^2$ ordered pairs.
+By definition, each coefficient
+$H_{v,k}$ is a sum over a third
+index $u\in I$ with $n$ possible
+values. Counting the summands
+gives $n\cdot n^2=n^3$ terms.
+This is an operation-count upper
+bound for the naive formula,
+not a lower bound on optimized
+implementations.
+\end{proof}
+
+\begin{lemma}[Exact private state field-element count]\label{lem:zkrs:hidden-count}
+Excluding the already committed packed witness, the auxiliary
+private tuple $(p,p_{\rm in},c,t,\rho,\sigma)$ has
+$3n+3$ field slots: $n+1+n+n+1+1$.
+In the honest sampler the genuinely independent
+randomness in that tuple consists of
+$2n+2$ field elements: $n$ for $p$,
+one for $p_{\rm in}$, $n$ for $t$ and
+one for $\rho$.
+\end{lemma}
+\begin{proof}
+The displayed tuple has, in order,
+$n,1,n,n,1,1$ field entries, summing to
+$3n+3$. The honest sampler chooses
+only $p,p_{\rm in},t,\rho$ independently.
+Their entry counts sum to
+$n+1+n+1=2n+2$.
+The remaining entries satisfy
+$c=\mathcal T(p)$ and
+$\sigma=\rho^2$, so they
+are deterministic functions
+of the sampled entries.
+\end{proof}
+
+\begin{definition}[Certification milestones]\label{def:zkrs:milestones}
+The following are \emph{separate}
+certification tasks rather than
+consequences of the preceding theorems:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \textbf{Real commitment semantics:}
+a concrete binding and hiding scheme
+with a consistent simulator for
+commitments and authenticated queries.
+\item \textbf{Affine proof realization:}
+an implementation that enforces every
+relation in Definition~\ref{def:zkrs:affine-checks}
+on one fixed hidden tuple with explicit
+completeness, soundness and zero-knowledge error.
+\item \textbf{Online and multi-opening ZK:}
+commitment simulation before evaluation
+points are known; fresh masks per opening;
+and a joint simulator for every adaptive
+challenge, proof transcript and opening.
+\item \textbf{Cross-field KBFold integration:}
+the source KBFold PCS uses odd-characteristic
+multiplicative-subgroup word folding.
+The present binary-field checker does not
+inherit its proximity or QROM theorem.
+\item \textbf{Concrete optimization:}
+avoid or compress the naive $n^2$
+public affine coefficients and verify
+the resulting circuit/prover work,
+rather than asserting asymptotic
+efficiency without implementation.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[Binary-field folding is not directly interchangeable with KBFold's $\pm x$ fold]\label{prop:zkrs:cross-field}
+The characteristic-two ring-switching checker
+cannot reuse the original multiplicative
+domain pairing $x,-x$ as a two-point
+local fold over $L=\F_{2^n}$.
+\end{proposition}
+\begin{proof}
+In characteristic two, $-x=x$
+for every $x\in L$.
+Thus the supposed two distinct
+evaluation positions coincide.
+Furthermore the standard
+even/odd word-fold formulas
+divide by $2x$, but $2=0$
+in $L$, so this expression
+has no inverse for any $x$.
+The required field hypotheses
+of Definition~\ref{def:kbff:wordfold}
+therefore fail, as shown in
+Lemma~\ref{lem:binary:no-even-subgroup}.
+\end{proof}
+
+\begin{remark}[Historical and originality boundary]
+Diamond--Posen supply the original
+tensor-algebra compiler
+\cite{DiamondPosen2024}.
+Kochergin's 2026 note
+\cite{Kochergin2026}
+and Frigo--shelat's
+sumcheck bit-packing paper
+\cite{FrigoShelat2026} give
+different zero-knowledge routes
+for binary-field packing.
+The reusable mathematical contribution
+developed here is the exact
+kernel-coordinate/transposition
+dictionary, its anchored affine
+checker and a rigorous separation
+between perfect public-core
+simulation and full proof-system
+simulation. This chapter does not
+claim that trace-zero masking,
+the general idea of replacing
+quadratic witness constraints by
+public squaring, or a
+single-challenge polynomial identity
+test originated here.
+\end{remark}
+
+\begin{remark}[The next theorem genuinely needed]
+For the \emph{original} odd-characteristic
+KBFold PCS, the central outstanding
+theorem is a composable adaptive
+view simulator for committed masked
+fold oracles, including every
+sumcheck round polynomial,
+authenticated opening and the
+degree-aware linear final closure
+of Chapter~5.
+A public-core theorem for binary
+Ring Switching does not discharge
+that security obligation.
+\end{remark}
