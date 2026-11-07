@@ -1,0 +1,153 @@
+\subsection{Iterated polynomial folds and the tensor functional}\label{sec:kbfoldfold:polynomial}
+
+We use the even--odd decomposition of Lemma~\ref{lem:intro:split} and the normalized fold of Definition~\ref{def:history:globalfold}. All results in this subsection hold over \emph{any} field unless the characteristic is explicitly restricted.
+
+\begin{definition}[Bitwise fold weights]\label{def:kbff:bit-weights}
+For $r\in\F$ define
+\[
+ A_0(r):=2r-1,\qquad A_1(r):=1-r.
+\]
+For $j\geq0$, $e\in\mathbb N$, and $r=(r_0,\ldots,r_{j-1})\in\F^j$, define
+\[
+ W^{[j]}_e(r):=\prod_{i=0}^{j-1} A_{e_i}(r_i),
+\]
+where $e_i\in\{0,1\}$ is the $i$-th binary digit of $e$.
+For $j=0$, the product is $1$.
+\end{definition}
+
+\begin{lemma}[Monomial fold, even exponent]\label{lem:kbff:fold-even}
+For every $a\in\mathbb N$ and $r\in\F$,
+\[
+ \pfold_r(X^{2a})=(2r-1)X^a=A_0(r)X^a.
+\]
+\end{lemma}
+\begin{proof}
+The even--odd decomposition of $X^{2a}$ is $E(Y)=Y^a$, $O(Y)=0$. Substituting into
+$\pfold_r(P)=(2r-1)E+(1-r)O$ proves the identity.
+\end{proof}
+
+\begin{lemma}[Monomial fold, odd exponent]\label{lem:kbff:fold-odd}
+For every $a\in\mathbb N$ and $r\in\F$,
+\[
+ \pfold_r(X^{2a+1})=(1-r)X^a=A_1(r)X^a.
+\]
+\end{lemma}
+\begin{proof}
+The even--odd decomposition of $X^{2a+1}$ is $E(Y)=0$, $O(Y)=Y^a$. Substitute into the same definition.
+\end{proof}
+
+\begin{definition}[Iterated normalized polynomial fold]\label{def:kbff:fold-iterate}
+For a polynomial $P\in\F[X]$ and $r\in\F^j$, define
+\[
+ \mathsf{PFold}^{[0]}_{()}(P):=P,\qquad
+ \mathsf{PFold}^{[j+1]}_{(r,t)}(P):=
+       \pfold_t\left(\mathsf{PFold}^{[j]}_r(P)\right).
+\]
+Each step is defined on \emph{every} polynomial; no degree bound is required to define the operator.
+\end{definition}
+
+\begin{lemma}[Iterated fold of a monomial]\label{lem:kbff:fold-monomial}
+For every $e\in\mathbb N$, $0\leq j$, and $r\in\F^j$,
+\[
+ \mathsf{PFold}^{[j]}_r(X^e)
+ =W_e^{[j]}(r)X^{\lfloor e/2^j\rfloor}.
+\]
+\end{lemma}
+\begin{proof}
+Induct on $j$. When $j=0$, the weight is the empty product $1$ and
+$\lfloor e/1\rfloor=e$, so the formula is the definition.
+Assume it holds for $j$, and write $a=\lfloor e/2^j\rfloor$.
+By linearity of $\pfold_t$ and the induction hypothesis,
+\[
+ \mathsf{PFold}^{[j+1]}_{(r,t)}(X^e)
+ =W_e^{[j]}(r)\pfold_t(X^a).
+\]
+By Lemmas~\ref{lem:kbff:fold-even} and~\ref{lem:kbff:fold-odd},
+\[
+ \pfold_t(X^a)=A_{a\bmod2}(t)X^{\lfloor a/2\rfloor}.
+\]
+The least significant bit of $a=\lfloor e/2^j\rfloor$ is precisely
+$e_j$; also $\lfloor a/2\rfloor=\lfloor e/2^{j+1}\rfloor$.
+Hence the expression equals
+$W_e^{[j]}(r)A_{e_j}(t)X^{\lfloor e/2^{j+1}\rfloor}
+=W_e^{[j+1]}(r,t)X^{\lfloor e/2^{j+1}\rfloor}$.
+This proves the induction step.
+\end{proof}
+
+\begin{theorem}[Explicit polynomial-fold formula]\label{thm:kbff:fold-coefficients}
+For any polynomial $P(X)=\sum_{e=0}^d p_eX^e\in\F[X]$ and every $r\in\F^j$,
+\[
+ \boxed{\mathsf{PFold}^{[j]}_r(P)(Y)
+ =\sum_{e=0}^d p_e\,W_e^{[j]}(r)\,Y^{\lfloor e/2^j\rfloor}.}
+\]
+\end{theorem}
+\begin{proof}
+By Definition~\ref{def:history:globalfold}, $\pfold_t$ is linear in the polynomial argument, since the even and odd coefficient-extraction maps are linear. Compositions of linear maps are linear, so $\mathsf{PFold}^{[j]}_r$ is linear. Apply it to the finite monomial expansion of $P$ and use Lemma~\ref{lem:kbff:fold-monomial} on each term.
+\end{proof}
+
+\begin{corollary}[Degree-halving bound]\label{cor:kbff:fold-degree}
+If $D\geq1$ and $\deg P<D$ (allowing $P=0$), then
+\[
+ \deg\mathsf{PFold}^{[j]}_r(P)
+ <\left\lceil\frac{D}{2^j}\right\rceil
+\]
+or the iterated fold is zero.
+\end{corollary}
+\begin{proof}
+Every exponent in the sum of Theorem~\ref{thm:kbff:fold-coefficients} satisfies
+$e\leq D-1$. Thus every nonzero monomial in the result has exponent at most
+$\lfloor(D-1)/2^j\rfloor$. The integer identity
+$\lfloor(D-1)/2^j\rfloor+1=\lceil D/2^j\rceil$
+gives the asserted strict degree bound; cancellation can only lower degree.
+\end{proof}
+
+\begin{corollary}[Complete tensor functional]\label{cor:kbff:fold-tensor}
+For $N=2^m$, $P\in\F[X]_{<N}$ with monomial coefficients $p_e$, and $r\in\F^m$,
+\[
+ \boxed{\mathsf{PFold}^{[m]}_r(P)
+ =\sum_{e=0}^{N-1}p_e
+   \prod_{i=0}^{m-1}
+     \begin{cases}2r_i-1,&e_i=0,\\1-r_i,&e_i=1.\end{cases}}
+\]
+The result is a constant polynomial.
+\end{corollary}
+\begin{proof}
+Apply Theorem~\ref{thm:kbff:fold-coefficients} with $j=m$. Every $e<N=2^m$ satisfies $\lfloor e/2^m\rfloor=0$, so all powers of the output variable are $Y^0=1$. Expand the definition of the weights.
+\end{proof}
+
+\begin{definition}[Binary-exponent multilinearization]\label{def:kbff:ml}
+For $P=\sum_{e=0}^{N-1}p_eX^e$, define
+\[
+ \mathscr M_m(P)(Z_0,\ldots,Z_{m-1})
+ :=\sum_{e=0}^{N-1}p_e\prod_{i=0}^{m-1}Z_i^{e_i}.
+\]
+This is the $\F$-linear isomorphism between $\F[X]_{<N}$ and the space of multilinear polynomials already introduced in Chapter~4.
+\end{definition}
+
+\begin{lemma}[Characteristic-two specialization]\label{lem:kbff:char2}
+If $\operatorname{char}(\F)=2$, then for every $P\in\F[X]_{<N}$ and $r\in\F^m$,
+\[
+ \mathsf{PFold}^{[m]}_r(P)=
+ \mathscr M_m(P)(1+r_0,\ldots,1+r_{m-1}).
+\]
+\end{lemma}
+\begin{proof}
+When $2=0$, $2r_i-1=-1=1$ and $1-r_i=1+r_i$. Therefore the weight for a binary exponent $e$ in Corollary~\ref{cor:kbff:fold-tensor} is
+$\prod_{i:e_i=1}(1+r_i)$; factors with $e_i=0$ equal $1$. This is exactly the coefficient of $p_e$ in the evaluation of Definition~\ref{def:kbff:ml} at $Z_i=1+r_i$. Equality follows by summing over $e$.
+\end{proof}
+
+\begin{proposition}[Failure of the unshifted characteristic-two identity in odd characteristic]\label{prop:kbff:not-char2}
+Assume $\operatorname{char}(\F)\neq2$. For $m=1$, $P(X)=1$, and $r=0$,
+\[
+ \mathsf{PFold}^{[1]}_{(0)}(P)=-1\neq1
+ =\mathscr M_1(P)(1).
+\]
+\end{proposition}
+\begin{proof}
+Since $P=1$ is even with odd component zero,
+$\pfold_0(1)=(2\cdot0-1)\cdot1=-1$. By definition $\mathscr M_1(1)$ is the constant polynomial $1$. If $-1=1$ in $\F$, then $2=0$, contrary to the hypothesis. Hence the displayed inequality.
+\end{proof}
+
+\begin{remark}[No hidden ring-homomorphism step]
+The map $\mathscr M_m$ is linear but not multiplicative: products in $\F[X]$ may have degrees outside its domain, and even within that domain ordinary multiplication does not generally agree with multiplication of multilinear forms. Lemma~\ref{lem:kbff:char2} follows from the explicit monomial formula, not from an assumed multiplicativity property.
+\end{remark}
