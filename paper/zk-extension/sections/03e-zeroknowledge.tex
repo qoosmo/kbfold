@@ -1,0 +1,107 @@
+\subsection{Zero knowledge, simulation, and explicit leakage obstructions}\label{sec:security:zk}
+
+\begin{definition}[Witness-dependent real view]\label{def:security:real}
+Fix public parameters $(\F,m,\mathcal D)$, a public evaluation pair $(z,v)$, and a table $f:I_m\to\F$ satisfying $v=\widetilde f(z)$. An \emph{evaluation proof construction} consists of a randomized preprocessing algorithm $\mathsf{Prep}(f;\rho)$ outputting an initial public commitment $\mathsf{cm}$, private prover state $\mathsf{st}$, and any committed oracle handles, together with a subsequent interactive proof $\Pi$.
+For a $Q$-query-bounded verifier $V^*$, the \emph{real-view distribution} is
+\[
+ \mathsf{Real}_{\Pi,V^*}(z,v;f)
+ :=\operatorname{Law}\bigl(
+   \operatorname{View}_{V^*}^{P_f}((\mathsf{cm};z,v),\mathsf{st})
+  \bigr),
+\]
+where $\rho$ and the prover and verifier random tapes are freshly and independently sampled, except for any explicitly specified correlations. The view includes the public commitment but not the unopened oracle contents.
+\end{definition}
+
+\begin{definition}[Statistical zero knowledge for a fixed evaluation point]\label{def:security:szk}
+Let $Q$ be a nonnegative query bound, and let $\varepsilon\geq0$. The protocol $\Pi$ is \emph{$(Q,\varepsilon)$-statistical zero knowledge in the fixed-point commitment-generation game} if for every allowed $Q$-query-bounded verifier $V^*$ there exists a probabilistic simulator $\mathsf{Sim}_{V^*}$, depending on public parameters and $V^*$ but \emph{not on the witness}, such that for every $z\in\F^m$, $v\in\F$, and every $f$ satisfying $v=\widetilde f(z)$,
+\begin{equation}\label{eq:security:zk}
+ \Delta\bigl(\mathsf{Real}_{\Pi,V^*}(z,v;f),
+             \mathsf{Sim}_{V^*}(z,v)\bigr)\leq\varepsilon.
+\end{equation}
+\emph{Perfect} zero knowledge is the case $\varepsilon=0$. The simulator must generate the \emph{complete view}, including the commitment root and all authenticated query responses, not merely the prover's explicit messages.
+\end{definition}
+
+\begin{remark}[Order of commitment and evaluation point]\label{rem:security:point-order}
+Definition~\ref{def:security:szk} gives the public pair $(z,v)$ to the simulator before commitment generation. It is deliberately a \emph{fixed-point} security game. A protocol claiming security when the verifier selects $z$ only \emph{after} receiving a commitment must satisfy an \emph{online} version in which the simulator produces a commitment before learning the chosen $z$, later receives the authorized value $v$, and answers the verifier's proof and oracle queries consistently. The stronger game is a separate obligation for the final PCS theorem; a proof of Definition~\ref{def:security:szk} alone does not imply it.
+\end{remark}
+
+\begin{definition}[Computational distinguishing advantage]\label{def:security:computational}
+Let $(\Pi_{\lambda_{\rm sec}})_{\lambda_{\rm sec}\geq1}$ be a family of protocols with finite transcript spaces. A function $\varepsilon:\mathbb N\to\mathbb R_{\geq0}$ is \emph{negligible} if for every real-coefficient polynomial $p$ that is positive and unbounded on all sufficiently large integers, there exists $n_0$ such that
+$\varepsilon(n)<1/p(n)$ for all $n\geq n_0$.
+The computational zero-knowledge variant of Definition~\ref{def:security:szk} replaces total variation by the inequality
+\[
+ \bigl|\Pr[D(\mathsf{Real}_{\Pi,V^*})=1]
+ -\Pr[D(\mathsf{Sim}_{V^*})=1]\bigr|\leq\varepsilon(\lambda_{\rm sec})
+\]
+for all distinguishers $D$ in an explicitly chosen polynomial-time class and all allowed witnesses. The security model must specify the representation, running-time bound, and random-oracle access of $V^*$, $\mathsf{Sim}$ and $D$.
+\end{definition}
+
+\begin{lemma}[Two-witness closeness is necessary]\label{lem:security:two-witness}
+Assume Definition~\ref{def:security:szk}. For any two tables $f_0,f_1$ with
+$\widetilde{f_0}(z)=\widetilde{f_1}(z)=v$ and every allowed $V^*$,
+\[
+ \Delta\bigl(
+ \mathsf{Real}_{\Pi,V^*}(z,v;f_0),
+ \mathsf{Real}_{\Pi,V^*}(z,v;f_1)\bigr)\leq2\varepsilon.
+\]
+\end{lemma}
+\begin{proof}
+Let $S=\mathsf{Sim}_{V^*}(z,v)$, the \emph{same} simulator distribution for both witnesses. Lemma~\ref{lem:security:tv-triangle} gives
+\[
+ \Delta(\mathsf{Real}(f_0),\mathsf{Real}(f_1))
+ \leq\Delta(\mathsf{Real}(f_0),S)+\Delta(S,\mathsf{Real}(f_1))
+ \leq\varepsilon+\varepsilon=2\varepsilon.
+\]
+The final inequality is Definition~\ref{def:security:szk}.
+\end{proof}
+
+\begin{lemma}[A public-message projection remains simulatable]\label{lem:security:message-projection}
+Under Definition~\ref{def:security:szk}, for every deterministic projection $\pi$ of a complete verifier view, the distributions
+$\pi(\mathsf{Real}_{\Pi,V^*}(z,v;f))$ and
+$\pi(\mathsf{Sim}_{V^*}(z,v))$ have total variation distance at most $\varepsilon$.
+\end{lemma}
+\begin{proof}
+Apply Corollary~\ref{cor:security:projection} to the full-view distributions in~\eqref{eq:security:zk}. The projection can select one round polynomial, one oracle answer, a Merkle opening, or any fixed combination of fields of the view.
+\end{proof}
+
+\begin{theorem}[One-query leakage of an unmasked KBFold oracle]\label{thm:security:unmasked-obstruction}
+Suppose the oracle supplied to $V^*$ consists of the \emph{unmasked} word
+$\Enc_\mathcal D(f)$, and the verifier may make at least one read. Assume the public input to be simulated contains only the evaluation pair $(z,v)$ and public parameters, and not the entire oracle as trusted public information.
+Then for every $m\geq1$ there exist two tables $f_0\ne f_1$, a point $z$, a value $v$, and a deterministic one-query verifier $V^*$ for which
+\[
+ \widetilde{f_0}(z)=\widetilde{f_1}(z)=v,
+ \qquad
+ \Delta(\mathsf{Real}_{\Pi,V^*}(z,v;f_0),
+        \mathsf{Real}_{\Pi,V^*}(z,v;f_1))=1.
+\]
+Consequently such an unmasked-word protocol cannot satisfy
+Definition~\ref{def:security:szk} with $\varepsilon<\tfrac12$.
+\end{theorem}
+\begin{proof}
+Let $z=(0,\ldots,0)$ and $v=0$. Let $f_0$ be identically zero. Choose any nonzero Boolean index $b\in I_m$ and let $f_1$ be the table supported at $b$ with value $1$ there and $0$ elsewhere. Lemma~\ref{lem:intro:interpolation} gives
+$\widetilde{f_0}(z)=f_0(0)=0$ and
+$\widetilde{f_1}(z)=f_1(0)=0$ because $b\ne0$.
+By Lemma~\ref{lem:security:encoding-injective}, the two encoded words are distinct. Hence there is a coordinate $\xi\in\mathcal D$ where
+$\Enc_\mathcal D(f_0)(\xi)\ne\Enc_\mathcal D(f_1)(\xi)$.
+Construct $V^*$ to query this fixed public coordinate $\xi$ once and record the answer. Under witness $f_0$, the answer is the fixed value $a_0$; under witness $f_1$, it is the distinct fixed value $a_1$. The event that the recorded answer equals $a_0$ has probability $1$ in the first real view and $0$ in the second. Lemma~\ref{lem:security:events} implies their distance is at least $1$, and Lemma~\ref{lem:security:tv-range} implies it is at most $1$. Thus it equals $1$. Lemma~\ref{lem:security:two-witness} would force $1\leq2\varepsilon$, contradicting $\varepsilon<1/2$.
+\end{proof}
+
+\begin{remark}[Scope of the obstruction]\label{rem:security:obstruction}
+Theorem~\ref{thm:security:unmasked-obstruction} concerns witness privacy when the allowed public information is the evaluation claim and the commitment is to be simulated. It does \emph{not} assert that a protocol fails a weaker notion relative to an already revealed entire codeword: the entire codeword uniquely determines $f$ by Lemma~\ref{lem:security:encoding-injective}, so such a notion would allow that leakage as public input. Likewise, this theorem does not rule out salted and polynomially masked commitments whose opened values have randomized distributions. Those are precisely the mechanisms needed by the intended ZK extension.
+\end{remark}
+
+\begin{lemma}[Reusing one pad leaks a difference]\label{lem:security:pad-reuse}
+Let $V$ be an additive abelian group, let $s_1,s_2\in V$ be fixed, and let $p$ be an arbitrary random element of $V$. If $m_1=s_1+p$ and $m_2=s_2+p$, then
+\[
+ m_1-m_2=s_1-s_2
+\]
+with probability $1$.
+\end{lemma}
+\begin{proof}
+By the group laws,
+$m_1-m_2=(s_1+p)-(s_2+p)=s_1-s_2+(p-p)=s_1-s_2$ for every value of $p$.
+\end{proof}
+
+\begin{remark}[Why independent pad sampling is not a cosmetic choice]
+The marginal distribution of each $m_i$ may be uniform, while their \emph{joint} distribution leaks $s_1-s_2$ by Lemma~\ref{lem:security:pad-reuse}. A simulation proof for KBFold must establish the joint law across all folds and oracle openings, including correlations enforced by the folding equations. Marginal one-time-pad arguments do not suffice.
+\end{remark}
