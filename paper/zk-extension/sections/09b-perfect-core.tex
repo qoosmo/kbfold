@@ -1,0 +1,156 @@
+\subsection{Exact public-core distribution and a causal simulator}\label{sec:zkrs:core}
+
+\begin{lemma}[Masked input pair is jointly uniform]\label{lem:zkrs:input-uniform}
+For every admissible instance and every fixed witness $w$,
+$(m,y')$ is uniform on $L^I\times L$; this law is independent of $w$.
+\end{lemma}
+\begin{proof}
+The fresh independent masks $(p,p_{\rm in})$ are uniform
+on $L^I\times L$. For fixed $s^*$ and $y$,
+the map $(p,p_{\rm in})\mapsto(s^*+p,y+p_{\rm in})$
+is a translation and hence a bijection of the finite additive
+group. Every output pair has one preimage and therefore
+probability $q^{-(n+1)}$, independently of $w$.
+\end{proof}
+
+\begin{lemma}[Conditional trace-zero uniformity]\label{lem:zkrs:U-conditional}
+Fix any realized public prefix $(m,y',\theta)$ with
+positive probability in an honest execution, and fix any
+admissible witness $w$. Conditional on this prefix, the vector
+$U$ is uniform on
+\[
+ H^I,\qquad H:=\ker(\Tr:L\to\F_2).
+\]
+This conditional law is independent of the witness and of the prefix.
+\end{lemma}
+\begin{proof}
+The equality $m=s^*+p$ determines $p=m+s^*$
+once $m$ and the fixed witness are given. Likewise $y'=y+p_{\rm in}$
+determines $p_{\rm in}$. Therefore $c=\mathcal T(p)$ and
+the $V_k(p,c,\theta)$ are fixed under the conditioning.
+By Lemma~\ref{lem:zkrs:honest-correction}, every $V_k$
+lies in the trace-zero subspace $H$.
+The vector $t$, sampled only after $\theta$, is independent
+uniform on $L^I$, even under this conditioning.
+For each $k$, Theorem~\ref{thm:binary:single-mask}
+shows that $V_k+t_k^2+t_k$ is uniform on $H$,
+independent of the fixed $V_k$.
+Independence of the $t_k$ makes the coordinates of $U$
+independent. Consequently $U$ is uniform on $H^I$.
+Because this law does not depend on the fixed prefix or $w$,
+it remains the same after conditioning only on that prefix
+and averaging over any remaining private randomness.
+\end{proof}
+
+\begin{lemma}[The public final scalar is conditionally uniform]\label{lem:zkrs:A-conditional}
+Fix any realized history
+$(m,y',\theta,U,z)$ with positive probability,
+and fix an admissible witness $w$.
+Then the honest final scalar $A$ is uniform on $L$,
+and its conditional law is independent of $w$ and the history.
+\end{lemma}
+\begin{proof}
+The scalar $\rho$ is sampled independently and uniformly
+after $\theta$. It is independent of $p,p_{\rm in},t$,
+the public messages derived from them, and the verifier's
+private random tape. The challenge $z$ may be an arbitrary
+causal function of the already exposed history and this verifier
+tape, but it has no access to $\rho$. Thus, even after
+conditioning on $(m,y',\theta,U,z)$ and on any fixed value of $t$,
+the variable $\rho$ remains uniform on $L$.
+The expression
+$A=\rho+\sum_kW_k(z)t_k$
+is a translation of $\rho$ by a fixed element
+under this finer conditioning and hence is uniform.
+Averaging over the conditional values of $t$
+keeps the uniform law. Its value is therefore
+independent of both the witness and public history.
+\end{proof}
+
+\begin{definition}[Causal ideal public-core simulator]\label{def:zkrs:core-sim}
+For a fixed admissible public evaluation instance, the simulator
+$\mathsf{Sim}_{\rm core}$ has no witness and interacts with
+an arbitrary causal verifier as follows:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item Independently sample
+$\bar m\overset{\$}{\leftarrow}L^I$
+and $\bar y'\overset{\$}{\leftarrow}L$, and publish them.
+\item Receive the verifier's chosen $\theta\in L^\ell$.
+\item Independently sample $\bar U$ uniformly in $H^I$
+and publish it.
+\item Receive the verifier's chosen $z\in L$.
+\item Independently sample $\bar A$ uniformly in $L$
+and publish it.
+\end{enumerate}
+All verifier choices may depend on the public history
+and on its own private random tape.
+\end{definition}
+
+\begin{theorem}[Perfect public-core zero knowledge for one opening]\label{thm:zkrs:perfect-core}
+Let $V^*$ be any causal verifier making arbitrary (not necessarily
+uniform) choices of $\theta$ and $z$ in the domains above.
+For any two admissible witnesses having the same public instance,
+the complete joint distributions of the public core and
+the verifier's private random tape are identical.
+More precisely the honest public-core interaction has
+\emph{exactly} the same law as
+$\mathsf{Sim}_{\rm core}$ interacting with $V^*$:
+\[
+ \boxed{
+ \mathsf{Law}(\mathsf{Core}^{P_w,V^*})
+ =\mathsf{Law}(\mathsf{Core}^{\mathsf{Sim}_{\rm core},V^*}).
+ }
+\]
+This is a perfect simulation theorem for the \emph{public-message
+projection only}, not for commitment roots, authenticated queries,
+or auxiliary proof transcripts.
+\end{theorem}
+\begin{proof}
+Include the verifier's random tape in the experiment state
+and fix its sampled value for this proof.
+The verifier's next challenge is then a (possibly
+history-dependent) deterministic function of the messages so far.
+Initially Lemma~\ref{lem:zkrs:input-uniform} gives exactly the
+simulator's joint uniform distribution for $(m,y')$.
+Given any such realized pair, the verifier selects the same
+conditional distribution of $\theta$ in both processes
+(the same deterministic value under the fixed tape).
+Lemma~\ref{lem:zkrs:U-conditional} shows that the conditional
+distribution of the next message $U$ is exactly uniform on $H^I$,
+matching the simulator independently of the preceding history.
+The verifier therefore selects $z$ with the same conditional
+law in both processes. Finally
+Lemma~\ref{lem:zkrs:A-conditional} makes $A$ uniform on $L$
+conditional on the full history, matching the simulator.
+The probability of each complete finite transcript factors into
+these identical successive conditional probabilities.
+Thus the full joint laws, including the fixed verifier tape,
+coincide. Average over the verifier tape to obtain the theorem.
+\end{proof}
+
+\begin{corollary}[Conditional product law for fixed challenges]\label{cor:zkrs:product}
+For fixed nonadaptive $\theta,z$, the honest public messages
+$(m,y',U,A)$ have the product-uniform distribution
+\[
+ \boxed{\operatorname{Unif}(L^I)\otimes
+ \operatorname{Unif}(L)\otimes
+ \operatorname{Unif}(H^I)\otimes
+ \operatorname{Unif}(L).}
+\]
+\end{corollary}
+\begin{proof}
+In Theorem~\ref{thm:zkrs:perfect-core}, take the verifier
+to output the two fixed challenges.
+The simulator draws the four factors independently
+and uniformly by Definition~\ref{def:zkrs:core-sim}.
+Equality of laws gives the displayed product distribution.
+\end{proof}
+
+\begin{remark}[The mask $\rho$ is essential to this proof]
+Without an independent uniform $\rho$, the scalar
+$A=\sum_kW_k(z)t_k$ would be a function of the same $t$
+used to generate $U$. The conditional uniformity of $A$
+would no longer follow. This would require a new joint
+distribution analysis rather than relying on
+Theorem~\ref{thm:binary:masked-vector-uniform}.
+\end{remark}
