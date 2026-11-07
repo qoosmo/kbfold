@@ -1,0 +1,267 @@
+\subsection{Soundness of sumcheck over a tensor algebra}\label{sec:dpr:sumcheck}
+The ring $A$ is not a field, so the
+ordinary polynomial root bound over
+an integral domain cannot be invoked
+without a proof. The following
+elementary lemma is the precise
+ring-theoretic substitute needed
+for Diamond--Posen's sumcheck
+(cf.~\cite[Lemma~4.5]{DiamondPosen2024}).
+
+\begin{lemma}[Factor theorem for a commutative ring]\label{lem:dpr:factor}
+Let $R$ be a commutative ring with identity,
+$P\in R[X]$ and $a\in R$.
+There exist $Q\in R[X]$ and a constant
+remainder $c\in R$ with
+\[
+ P(X)=(X-a)Q(X)+c,\qquad c=P(a).
+\]
+If $P\neq0$ and $\deg P=d\geq1$,
+then $\deg Q=d-1$.
+\end{lemma}
+\begin{proof}
+For every exponent $j\geq1$,
+\[
+ X^j-a^j=(X-a)
+ \sum_{i=0}^{j-1}X^{j-1-i}a^i,
+\]
+as follows by distributing and canceling
+successive terms in the finite sum.
+Write $P(X)=\sum_{j=0}^dp_jX^j$.
+Subtracting $P(a)$ gives
+$(X-a)$ multiplied by the sum
+$\sum_{j=1}^dp_j\sum_{i=0}^{j-1}
+X^{j-1-i}a^i$.
+This supplies $Q$ and establishes
+$c=P(a)$. If $p_d\neq0$, the coefficient
+of $X^{d-1}$ in $Q$ is exactly $p_d$:
+only the term $j=d,i=0$ contributes
+to that degree. Thus $\deg Q=d-1$.
+\end{proof}
+
+\begin{lemma}[Units from the embedded challenge field]\label{lem:dpr:units}
+For distinct $a,b\in L$,
+the element $\varphi_1(a)-\varphi_1(b)$
+is a unit of $A$.
+\end{lemma}
+\begin{proof}
+The difference equals
+$\varphi_1(a-b)$, by additivity
+of $\varphi_1$. Since $a-b\neq0$,
+its inverse $(a-b)^{-1}$ exists in $L$.
+Multiplicativity and preservation of
+the unit show
+$\varphi_1(a-b)\varphi_1((a-b)^{-1})=1$.
+Hence the difference is invertible in $A$.
+\end{proof}
+
+\begin{theorem}[Root bound inside the embedded field]\label{thm:dpr:ring-roots}
+Let $P\in A[X]$ be nonzero with
+degree at most $d$, where $d\geq0$.
+Then
+\[
+ \boxed{
+ |\{z\in L:P(\varphi_1(z))=0\}|\leq d.}
+\]
+\end{theorem}
+\begin{proof}
+Induct on $\deg P$. If $\deg P=0$,
+$P$ is a nonzero constant and has
+no roots. Suppose $\deg P=D\geq1$.
+If it has no root of the form
+$\varphi_1(z)$, there is nothing to prove.
+Otherwise choose one such root $a$.
+Lemma~\ref{lem:dpr:factor} gives
+$P(X)=(X-\varphi_1(a))Q(X)$ with
+$\deg Q=D-1$.
+For any other root $b\neq a$,
+\[
+ 0=P(\varphi_1(b))
+   =(\varphi_1(b)-\varphi_1(a))
+                     Q(\varphi_1(b)).
+\]
+The first factor is a unit by
+Lemma~\ref{lem:dpr:units}, so
+$Q(\varphi_1(b))=0$.
+The inductive hypothesis gives at
+most $D-1$ such other roots.
+Including $a$, the total is
+at most $D\leq d$.
+No assumption that $A$ is an
+integral domain was used.
+\end{proof}
+
+\begin{corollary}[Uniform challenge root probability]\label{cor:dpr:ring-prob}
+For $P\neq0$ of degree at most $d$
+chosen independently of a fresh
+uniform $z\in L$,
+\[
+ \Pr_z[P(\varphi_1(z))=0]\leq d/q.
+\]
+\end{corollary}
+\begin{proof}
+Theorem~\ref{thm:dpr:ring-roots}
+allows at most $d$ values of $z$
+out of the $q$ equally likely
+field elements.
+\end{proof}
+
+\begin{definition}[True partial-sum polynomial]\label{def:dpr:true-partial}
+For each $0\leq i<h$ and each
+previously sampled challenge prefix
+$z_{<i}=(z_0,\ldots,z_{i-1})\in L^i$,
+define
+\[
+ G_i(X):=
+ \sum_{b\in I_{h-i-1}}
+ H(\varphi_1(z_0),\ldots,
+   \varphi_1(z_{i-1}),X,b)
+ \in A[X].
+\]
+The notation for $i=0$ means
+the empty prefix.
+\end{definition}
+
+\begin{lemma}[True sumcheck degree and endpoint identity]\label{lem:dpr:true-partial}
+For each $i$, the polynomial $G_i$
+has degree at most $2$, and
+\[
+ G_i(0)+G_i(1)
+ =\sum_{b\in I_{h-i}}
+ H(\varphi_1(z_{<i}),b).
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:dpr:H-degree},
+each variable of $H$ has degree
+at most $2$. Specializing earlier
+variables and later Boolean variables,
+then summing, cannot increase the
+degree in $X$.
+The right-hand finite sum splits
+uniquely according to its first bit
+$0$ or $1$; its two parts are
+$G_i(0)$ and $G_i(1)$, respectively.
+\end{proof}
+
+\begin{definition}[Degree-two tensor sumcheck]\label{def:dpr:sumcheck}
+Given public initial claim $S_0\in A$,
+let $s_0=S_0$. For $i=0,\ldots,h-1$:
+the prover sends a polynomial
+$g_i(X)\in A[X]$ of degree at most $2$
+\emph{before} the verifier samples
+$z_i\in L$ uniformly. The verifier
+requires
+\[
+ s_i=g_i(0)+g_i(1),
+\]
+then sets
+$s_{i+1}:=g_i(\varphi_1(z_i))$.
+At the end it checks
+$s_h=H(\varphi_1(z_0),\ldots,
+                  \varphi_1(z_{h-1}))$,
+provided the target evaluation can
+be obtained from the underlying
+large-field evaluation oracle.
+\end{definition}
+
+\begin{lemma}[A false running claim forces a nonzero discrepancy]\label{lem:dpr:false-prefix}
+Fix a legal round $i$ and a previously
+sampled prefix for which
+\[
+ s_i\neq
+ \sum_{b\in I_{h-i}}
+ H(\varphi_1(z_{<i}),b).
+\]
+If the endpoint condition
+$s_i=g_i(0)+g_i(1)$ passes,
+then the polynomial
+$g_i-G_i\in A[X]$ is nonzero
+and has degree at most $2$.
+\end{lemma}
+\begin{proof}
+Lemma~\ref{lem:dpr:true-partial}
+shows that the Boolean endpoint sum
+of $G_i$ is the true running sum.
+If $g_i=G_i$, the accepted endpoint
+condition would imply that the
+claimed $s_i$ equals this true sum,
+contrary to hypothesis. Thus
+$g_i-G_i\neq0$.
+Both polynomials have degree
+at most $2$ by the protocol and
+Lemma~\ref{lem:dpr:true-partial};
+their difference has degree
+at most $2$ or is zero, and we
+have excluded the latter.
+\end{proof}
+
+\begin{lemma}[One-round false-to-true transition bound]\label{lem:dpr:transition}
+Under the hypotheses of
+Lemma~\ref{lem:dpr:false-prefix},
+conditioned on the fixed prefix and
+the prover message $g_i$,
+\[
+ \Pr_{z_i}\left[
+ s_{i+1}=
+ \sum_{b\in I_{h-i-1}}
+ H(\varphi_1(z_{\leq i}),b)
+ \right]\leq 2/q.
+\]
+\end{lemma}
+\begin{proof}
+The true next running claim is
+$G_i(\varphi_1(z_i))$, by
+Definition~\ref{def:dpr:true-partial}.
+The new claimed value is
+$g_i(\varphi_1(z_i))$.
+Their equality means that
+the nonzero degree-at-most-two
+polynomial $g_i-G_i$ vanishes
+at $\varphi_1(z_i)$.
+The challenge is independent
+of the fixed prefix and polynomial,
+so Corollary~\ref{cor:dpr:ring-prob}
+bounds that probability by $2/q$.
+\end{proof}
+
+\begin{theorem}[Tensor sumcheck soundness]\label{thm:dpr:sumcheck-sound}
+Suppose $S_0\neq
+\sum_{b\in I_h}H(b)$ and the prover's
+messages are fixed before their
+respective fresh challenges.
+Then the probability that all
+degree-two sumcheck endpoint conditions
+pass \emph{and} the final true
+equality $s_h=H(\varphi_1(z))$
+holds is at most
+\[
+ \boxed{\min\{1,2h/q\}.}
+\]
+This statement holds for arbitrary
+adaptive, randomized causal provers.
+\end{theorem}
+\begin{proof}
+The initial running claim is false
+by hypothesis and the definition
+of $s_0$. If every endpoint condition
+passes and the final true equality
+holds, there must be a first round
+at which the false running claim
+becomes true. At every fixed prefix
+with a false claim and a passing
+endpoint check,
+Lemma~\ref{lem:dpr:transition}
+bounds the probability of that
+transition by $2/q$,
+conditional on the already chosen
+prover message. A conditional
+union bound over the $h$ rounds
+gives probability at most $2h/q$.
+For a randomized prover, condition
+on its private random tape and
+average using the finite law of total
+probability, as in
+Lemma~\ref{lem:security:randomized-prover}.
+The result is also at most $1$.
+\end{proof}
