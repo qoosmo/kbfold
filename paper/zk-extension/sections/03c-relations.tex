@@ -1,0 +1,118 @@
+\subsection{The evaluation relation and Reed--Solomon proximity}\label{sec:security:relations}
+
+\begin{definition}[Kernel encoding as a word]\label{def:security:encoding}
+Retain the finite field $\F$, integer $m\geq1$, $N=2^m$, and evaluation domain $\mathcal D\subseteq\F$ with $M:=|\mathcal D|\geq N$. For each table $f:I_m\to\F$ define
+\begin{equation}\label{eq:security:encoding}
+ \Enc_\mathcal D(f):\mathcal D\to\F,\qquad
+ \Enc_\mathcal D(f)(\xi):=U_f^{(m)}(\xi).
+\end{equation}
+The corresponding Reed--Solomon code is
+\[
+ \mathcal C_{\mathcal D,N}
+ :=\{\Enc_\mathcal D(f):f\in\F^{I_m}\}
+ \subseteq\F^\mathcal D.
+\]
+\end{definition}
+
+\begin{lemma}[Injectivity of kernel encoding]\label{lem:security:encoding-injective}
+If $\Enc_\mathcal D(f)=\Enc_\mathcal D(g)$ as words, then $f=g$.
+\end{lemma}
+\begin{proof}
+Let $P:=U_f^{(m)}-U_g^{(m)}$. By Lemma~\ref{lem:intro:degree} and the linear definition of $U_f$, $P$ has degree less than $N$, or is zero. The equality of words means that $P$ vanishes at every $\xi\in\mathcal D$. If $P$ were nonzero, Lemma~\ref{lem:history:rootcount} would imply at most $N-1$ roots, contradicting $|\mathcal D|=M\geq N$. Thus $P=0$. By the kernel basis theorem, Proposition~\ref{prop:intro:basis}, its coordinates satisfy $f(b)-g(b)=0$ for every $b$, hence $f=g$.
+\end{proof}
+
+\begin{definition}[Hamming distance]\label{def:security:hamming}
+For two words $w,w':\mathcal D\to\F$ define their Hamming distance by
+\[
+ d_H(w,w'):=\bigl|\{\xi\in\mathcal D:w(\xi)\neq w'(\xi)\}\bigr|
+       \in\{0,\ldots,M\}.
+\]
+The relative Hamming distance is $d_H(w,w')/M$.
+\end{definition}
+
+\begin{lemma}[Triangle inequality for Hamming distance]\label{lem:security:hamming-triangle}
+For every three words $w_1,w_2,w_3:\mathcal D\to\F$,
+\[
+ d_H(w_1,w_3)\leq d_H(w_1,w_2)+d_H(w_2,w_3).
+\]
+\end{lemma}
+\begin{proof}
+If $w_1(\xi)\neq w_3(\xi)$, then at least one of
+$w_1(\xi)\neq w_2(\xi)$ and $w_2(\xi)\neq w_3(\xi)$ holds; otherwise transitivity of equality would give $w_1(\xi)=w_3(\xi)$. Thus the set of coordinates where $w_1$ and $w_3$ differ is contained in the union of the two sets where consecutive words differ. Taking cardinalities and using the union bound for finite sets proves the inequality.
+\end{proof}
+
+\begin{theorem}[Reed--Solomon minimum distance]\label{thm:security:rs-distance}
+For any distinct tables $f,g:I_m\to\F$,
+\begin{equation}\label{eq:security:rs-distance}
+ d_H(\Enc_\mathcal D(f),\Enc_\mathcal D(g))\geq M-N+1.
+\end{equation}
+\end{theorem}
+\begin{proof}
+By Proposition~\ref{prop:intro:basis}, $f\neq g$ implies
+$P:=U_f^{(m)}-U_g^{(m)}\neq0$. This polynomial has degree at most $N-1$. The two encoded words agree precisely at positions $\xi\in\mathcal D$ with $P(\xi)=0$. Lemma~\ref{lem:history:rootcount} shows that there are at most $N-1$ such positions. Consequently there are at least $M-(N-1)=M-N+1$ differing positions, which is~\eqref{eq:security:rs-distance}.
+\end{proof}
+
+\begin{definition}[Exact evaluation relation]\label{def:security:exactrel}
+An \emph{exact oracle evaluation instance} is $(w;z,v)$ with
+$w:\mathcal D\to\F$, $z\in\F^m$, and $v\in\F$. Its witness relation is
+\begin{equation}\label{eq:security:exact-rel}
+ \mathcal R_{\rm eval}:=
+ \left\{((w;z,v),f):
+     w=\Enc_\mathcal D(f)\ \land\ v=\widetilde f(z)\right\}.
+\end{equation}
+The semicolon separates the oracle part $w$ from the explicit part $(z,v)$; the verifier may read $w$ only through its oracle.
+\end{definition}
+
+\begin{definition}[Proximity evaluation relation]\label{def:security:proxrel}
+For an integer $\tau$ satisfying $0\leq\tau\leq M$, define
+\begin{equation}\label{eq:security:prox-rel}
+ \mathcal R_{\tau}:=
+ \left\{((w;z,v),f):
+       d_H(w,\Enc_\mathcal D(f))\leq\tau\
+       \land\ v=\widetilde f(z)\right\}.
+\end{equation}
+Its language is
+\[
+ \mathcal L_\tau:=\{(w;z,v):\exists f,\ ((w;z,v),f)\in\mathcal R_\tau\}.
+\]
+The relation $\mathcal R_0$ equals $\mathcal R_{\rm eval}$.
+\end{definition}
+
+\begin{lemma}[Uniqueness of a nearby codeword]\label{lem:security:unique-near}
+Assume
+\[
+ 2\tau<M-N+1.
+\]
+For every received word $w:\mathcal D\to\F$ there exists \emph{at most one} table
+$f:I_m\to\F$ such that $d_H(w,\Enc_\mathcal D(f))\leq\tau$.
+\end{lemma}
+\begin{proof}
+Suppose $f$ and $g$ both satisfy the distance condition. By Lemma~\ref{lem:security:hamming-triangle},
+\[
+ d_H(\Enc_\mathcal D(f),\Enc_\mathcal D(g))
+ \leq d_H(\Enc_\mathcal D(f),w)+d_H(w,\Enc_\mathcal D(g))
+ \leq2\tau.
+\]
+If $f\neq g$, Theorem~\ref{thm:security:rs-distance} gives a contradictory lower bound $M-N+1>2\tau$. Therefore $f=g$.
+\end{proof}
+
+\begin{corollary}[At most one nearby evaluation value]\label{cor:security:unique-value}
+Under the inequality $2\tau<M-N+1$, for every pair $(w,z)$ there exists at most one $v\in\F$ such that $(w;z,v)\in\mathcal L_\tau$.
+\end{corollary}
+\begin{proof}
+Suppose $v$ and $v'$ both occur. By the definition of $\mathcal L_\tau$, there are corresponding tables $f,g$ within distance $\tau$ of $w$. By Lemma~\ref{lem:security:unique-near}, $f=g$. The relation requires $v=\widetilde f(z)$ and $v'=\widetilde g(z)$, so $v=v'$.
+\end{proof}
+
+\begin{definition}[Oracle evaluation soundness]\label{def:security:eval-sound}
+For the fixed proximity threshold $\tau$ and an oracle IOP $\Pi=(P,V)$, define
+\[
+ \mathsf{Sound}_\tau(\Pi)
+ :=\sup_{\substack{(w;z,v)\notin\mathcal L_\tau\\P^*\ {\rm causal}}}
+  \Pr\bigl[V^{P^*}(w;z,v)\text{ accepts}\bigr],
+\]
+where the prover's randomness and the honest verifier's challenges are independent, and the supremum over an empty class is defined to be $0$. The statement $\mathsf{Sound}_\tau(\Pi)\leq\varepsilon$ is \emph{$\varepsilon$-evaluation soundness at proximity $\tau$}.
+\end{definition}
+
+\begin{remark}[What the Reed--Solomon lemmas do and do not prove]
+Theorem~\ref{thm:security:rs-distance} and Lemma~\ref{lem:security:unique-near} establish only code-theoretic uniqueness. They do not prove the soundness of KBFold itself: that requires bounds on the probability of passing its fold and oracle queries. The parent KBFold paper supplies such a soundness analysis in the unique-decoding regime~\cite{MkhidaKBFold2026}, which must be revisited when the polynomial degree increases under zero-knowledge masking.
+\end{remark}
