@@ -29,8 +29,8 @@ Existing KBFold algebraic results are reproved here where required for self-cont
 
 ## Chapter order
 
-1. Introduction and exact mathematical problem (written)
-2. Historical background and related work
+1. Introduction and exact mathematical problem (complete)
+2. Historical background and related work (complete)
 3. Security model and preliminaries
 4. Full Boolean-kernel algebra
 5. Multilinearization and fold identities
@@ -44,3 +44,16 @@ Existing KBFold algebraic results are reproved here where required for self-cont
 21--23. Costs, Lean mapping, reproducibility
 
 Original reference: https://github.com/qoosmo/kbfold
+
+
+## Chapter 2 results
+
+- Historical mathematical progression: LFKN Sumcheck, Libra masking, FRI, BaseFold, Diamond--Posen, Kochergin, Frigo--shelat, and KBFold.
+- Complete sumcheck completeness and soundness proofs.
+- Zero-sum masking lemmas, including distributional conditions.
+- Odd-characteristic word-fold/degree invariants.
+- Exact high-degree mask propagation:
+  pfold^j(X^N R) = X^(N/2^j) R_j, for N=2^m and 0 <= j <= m.
+- Binary packing transposition and soundness of random multilinear batching.
+- Trace/Frobenius correction, backward recurrence, and trace-zero characterization.
+- A formal provenance and dependency ledger.
