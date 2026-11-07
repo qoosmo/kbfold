@@ -1,0 +1,90 @@
+\subsection{Kronecker transform and the basis theorem}\label{sec:kbalgebra:matrix}
+
+\begin{definition}[Coefficient vectors and kernel coordinates]\label{def:kbalgebra:coords}
+For $P\in\F[X]_{<N}$ define its monomial coefficient vector $a\in\F^{I_m}$ by $a(b):=[X^{e(\operatorname{supp}(b))}]P$. For any table $f\in\F^{I_m}$, its encoded polynomial is $U_f^{(m)}$. Define the $N\times N$ matrix $\mathbf K_m$, with rows indexed by $a\in I_m$ and columns by $b\in I_m$, by
+\[
+ \mathbf K_m[a,b]:=[X^{e(\operatorname{supp}(a))}]K_b^{(m)}.
+\]
+\end{definition}
+
+\begin{definition}[Bitwise tensor product of matrices]\label{def:kbalgebra:tensor}
+For matrices $A_i\in\operatorname{Mat}_{2\times2}(\F)$ indexed by $i\in J_m$, define $\bigotimes_{i=0}^{m-1}A_i$ to be the $I_m\times I_m$ matrix with entries
+\[
+ \left(\bigotimes_{i=0}^{m-1}A_i\right)[a,b]
+ :=\prod_{i=0}^{m-1}A_i[a_i,b_i].
+\]
+For $m=0$ this is the $1\times1$ identity matrix.
+\end{definition}
+
+\begin{lemma}[Tensor multiplication rule]\label{lem:kbalgebra:mixed-product}
+For each $i\in J_m$ let $A_i,B_i$ be $2\times2$ matrices over $\F$. Then
+\[
+ \left(\bigotimes_i A_i\right)\left(\bigotimes_i B_i\right)
+ =\bigotimes_i(A_iB_i).
+\]
+\end{lemma}
+\begin{proof}
+Fix $a,b\in I_m$. The $[a,b]$ entry of the matrix product on the left is
+\[
+ \sum_{c\in I_m}\prod_{i\in J_m}A_i[a_i,c_i]B_i[c_i,b_i].
+\]
+The finite sum ranges over all independent binary choices $c_i\in\{0,1\}$. Distributivity therefore rewrites it as
+\[
+ \prod_{i\in J_m}\left(\sum_{u\in\{0,1\}}A_i[a_i,u]B_i[u,b_i]\right)
+ =\prod_{i\in J_m}(A_iB_i)[a_i,b_i],
+\]
+which is the $[a,b]$ entry of the right-hand side. Equality of all entries proves the identity. For $m=0$, both sides are the $1\times1$ identity.
+\end{proof}
+
+\begin{lemma}[One-bit coefficient transform]\label{lem:kbalgebra:one-bit}
+Put
+\[
+ C=\begin{pmatrix}0&1\\1&1\end{pmatrix},\qquad
+ D=\begin{pmatrix}-1&1\\1&0\end{pmatrix}.
+\]
+Then $CD=DC=I_2$. The vector of monomial coefficients of $f_0K_0^{(1)}+f_1K_1^{(1)}$ is $C(f_0,f_1)^{\mathsf T}=(f_1,f_0+f_1)^{\mathsf T}$, and its inverse is $(f_0,f_1)=(a_1-a_0,a_0)$.
+\end{lemma}
+\begin{proof}
+Since $K_0^{(1)}=X$ and $K_1^{(1)}=X+1$, we have $f_0K_0^{(1)}+f_1K_1^{(1)}=f_1+(f_0+f_1)X$, giving the formula for $C$. Direct matrix multiplication shows
+$CD=\left(\begin{smallmatrix}1&0\\0&1\end{smallmatrix}\right)=DC$ over any field, since $-1+1=0$. Therefore $D(a_0,a_1)^{\mathsf T}=(a_1-a_0,a_0)^{\mathsf T}$ is the inverse coefficient map.
+\end{proof}
+
+\begin{proposition}[Kronecker coefficient matrix]\label{prop:kbalgebra:kronecker}
+With $C$ as in Lemma~\ref{lem:kbalgebra:one-bit},
+\[
+ \boxed{\mathbf K_m=C^{\otimes m}.}
+\]
+\end{proposition}
+\begin{proof}
+The coefficient formula in Lemma~\ref{lem:kbalgebra:coefficient-rule} gives
+\[
+ \mathbf K_m[a,b]=\prod_{i:a_i=0}b_i.
+\]
+But $C[0,b_i]=b_i$ and $C[1,b_i]=1$, so the same quantity equals $\prod_{i\in J_m}C[a_i,b_i]$, which is the defining entry of $C^{\otimes m}$. This proves equality entry by entry, including $m=0$.
+\end{proof}
+
+\begin{theorem}[Boolean-kernel basis and inverse transform]\label{thm:kbalgebra:basis}
+For every field $\F$ and $m\geq0$, the family $\{K_b^{(m)}:b\in I_m\}$ is an $\F$-basis of $\F[X]_{<N}$. Its coefficient matrix and inverse are
+\[
+ \mathbf K_m=C^{\otimes m},\qquad
+ \mathbf K_m^{-1}=D^{\otimes m}.
+\]
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:kbalgebra:one-bit}, $CD=DC=I_2$. Applying the mixed-product rule in Lemma~\ref{lem:kbalgebra:mixed-product} to $m$ identical factors gives
+\[
+ C^{\otimes m}D^{\otimes m}=(CD)^{\otimes m}=I_{I_m},
+ \quad D^{\otimes m}C^{\otimes m}=I_{I_m}.
+\]
+Thus the coefficient matrix is invertible. Its $N$ columns are the monomial coefficient vectors of the $N$ kernel polynomials. Invertibility implies linear independence of these column vectors. The monomials $1,X,\ldots,X^{N-1}$ form an $N$-element basis of $\F[X]_{<N}$, so its dimension is $N$. Therefore an independent set of $N$ kernel polynomials is a basis. No restriction on the characteristic was used.
+\end{proof}
+
+\begin{corollary}[Unique kernel coordinates]\label{cor:kbalgebra:unique-coordinates}
+For each $P\in\F[X]_{<N}$ there exists a unique $f:I_m\to\F$ with $P=U_f^{(m)}$, and if $a$ is its monomial coefficient vector, then
+\[
+ a=\mathbf K_m f,\qquad f=\mathbf K_m^{-1}a.
+\]
+\end{corollary}
+\begin{proof}
+The existence and uniqueness are the defining properties of a basis in Theorem~\ref{thm:kbalgebra:basis}. Passing to monomial coefficient vectors gives $a=\mathbf K_m f$. Applying its explicit inverse gives the second equality.
+\end{proof}
