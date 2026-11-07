@@ -1,0 +1,89 @@
+\subsection{Frobenius as a field and polynomial operation}\label{sec:binary:frobenius}
+Throughout this chapter, $\F$ denotes a field of characteristic $2$. Unless explicitly assumed finite, the statements do not require that $\F$ have finitely many elements. For integers $j\geq0$ we write $q_j:=2^j$.
+
+\begin{lemma}[Characteristic-two squaring]\label{lem:binary:square}
+For all $a,b\in\F$, $(a+b)^2=a^2+b^2$.
+\end{lemma}
+\begin{proof}
+Distributivity gives $(a+b)^2=a^2+ab+ba+b^2$. Since $\F$ is commutative and $2=0$, the middle terms sum to $2ab=0$.
+\end{proof}
+
+\begin{lemma}[Iterated Frobenius additivity]\label{lem:binary:frob-add}
+For all $a,b\in\F$ and $j\geq0$,
+\[
+ (a+b)^{2^j}=a^{2^j}+b^{2^j}.
+\]
+\end{lemma}
+\begin{proof}
+Induct on $j$. At $j=0$ the identity is $a+b=a+b$. If it holds at $j$, square both sides and apply Lemma~\ref{lem:binary:square}:
+\[
+ (a+b)^{2^{j+1}}
+ =\bigl(a^{2^j}+b^{2^j}\bigr)^2
+ =a^{2^{j+1}}+b^{2^{j+1}}.
+\]
+\end{proof}
+
+\begin{definition}[Frobenius on scalars]\label{def:binary:frob-scalar}
+For $j\geq0$ define $\sigma_j:\F\to\F$ by $\sigma_j(a)=a^{2^j}$.
+\end{definition}
+
+\begin{lemma}[Frobenius endomorphism]\label{lem:binary:frob-ring}
+For $j\geq0$, $\sigma_j$ preserves $0,1$, addition, and multiplication, and satisfies
+$\sigma_{i+j}=\sigma_i\circ\sigma_j$ for all $i,j\geq0$.
+\end{lemma}
+\begin{proof}
+The identities for $0,1$ are immediate. Additivity is Lemma~\ref{lem:binary:frob-add}. Multiplicativity follows from the exponent rule $(ab)^{2^j}=a^{2^j}b^{2^j}$ in a commutative field. Finally
+$\sigma_i(\sigma_j(a))=(a^{2^j})^{2^i}=a^{2^{i+j}}=\sigma_{i+j}(a)$.
+\end{proof}
+
+\begin{lemma}[Frobenius is injective]\label{lem:binary:frob-injective}
+For every $j\geq0$, $\sigma_j$ is injective.
+\end{lemma}
+\begin{proof}
+If $\sigma_j(a)=\sigma_j(b)$, then by Lemma~\ref{lem:binary:frob-add},
+$\sigma_j(a+b)=0$. Because a field has no zero divisors, $x^{2^j}=0$ implies $x=0$; therefore $a+b=0$, or $a=b$ in characteristic two.
+\end{proof}
+
+\begin{corollary}[Frobenius permutes a finite field]\label{cor:binary:frob-bijective}
+If $\F$ is finite, every $\sigma_j$ is bijective, and sends a uniform $\F$-valued variable to another uniform variable.
+\end{corollary}
+\begin{proof}
+An injective map from a finite set to itself is surjective, proving bijectivity. A bijection preserves the uniform distribution because every output has exactly one preimage.
+\end{proof}
+
+\begin{definition}[Coefficient Frobenius of a polynomial]\label{def:binary:poly-frob}
+For $P(X)=\sum_{e=0}^{d}p_eX^e\in\F[X]$, define
+\[
+ P^{\sigma_j}(X):=\sum_{e=0}^{d}p_e^{2^j}X^e.
+\]
+This notation acts on coefficients and does not replace $X$ by $X^{2^j}$.
+\end{definition}
+
+\begin{lemma}[Polynomial Frobenius identity]\label{lem:binary:poly-frob}
+For every $P\in\F[X]$ and $j\geq0$,
+\[
+ \boxed{P(X)^{2^j}=P^{\sigma_j}(X^{2^j}).}
+\]
+\end{lemma}
+\begin{proof}
+Write $P=\sum_ep_eX^e$. Repeated application of Lemma~\ref{lem:binary:square} in the polynomial ring $\F[X]$ gives
+$P(X)^{2^j}=\sum_e(p_eX^e)^{2^j}$. Exponent rules yield
+$\sum_ep_e^{2^j}X^{e2^j}$, which equals
+$\sum_ep_e^{2^j}(X^{2^j})^e=P^{\sigma_j}(X^{2^j})$ by definition.
+\end{proof}
+
+\begin{lemma}[Coefficient Frobenius and products]\label{lem:binary:poly-frob-mult}
+For $P,Q\in\F[X]$ and $j\geq0$,
+\[
+ (P+Q)^{\sigma_j}=P^{\sigma_j}+Q^{\sigma_j},\qquad
+ (PQ)^{\sigma_j}=P^{\sigma_j}Q^{\sigma_j}.
+\]
+\end{lemma}
+\begin{proof}
+The first identity follows coefficientwise from Lemma~\ref{lem:binary:frob-add}. The coefficient of $X^e$ in $PQ$ is $\sum_{a+b=e}p_aq_b$; applying $\sigma_j$ and using its additivity and multiplicativity gives
+$\sum_{a+b=e}p_a^{2^j}q_b^{2^j}$, which is the coefficient of $X^e$ in $P^{\sigma_j}Q^{\sigma_j}$.
+\end{proof}
+
+\begin{remark}[Formal distinction]
+The identity in Lemma~\ref{lem:binary:poly-frob} is an equality of ordinary polynomials. The operation $P\mapsto P^{\sigma_j}$ and the substitution $P\mapsto P(X^{2^j})$ have different types in Lean and must not be conflated.
+\end{remark}
