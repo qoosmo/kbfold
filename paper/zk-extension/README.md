@@ -152,3 +152,25 @@ Run `sh audit/RUN.sh` to execute the existing kernel tests plus the new determin
 **Open:** External PCS soundness, binding to packed bits, authenticated openings, joint online simulator for $m,y',U,A$, and application to the odd-characteristic KBFold IOP.
 
 **Reproducibility:** Chapter 7 Rust tests exercise packed Ring Switching identities and masking over GF(16) and GF(256).
+
+
+## Chapter 8 — Original Diamond--Posen Tensor Ring-Switching Compiler
+
+**Source:** `sections/08-diamond-posen.tex` and seven detailed subsections.
+**Lean map:** [CHAPTER_08_LEAN_MAP.md](CHAPTER_08_LEAN_MAP.md).
+**Paper audit:** 56 labeled definitions/results and **41 complete proofs**. None of the new Chapter 8 declarations has yet been Lean-certified.
+
+### Mathematical results proved in this chapter
+
+- Tensor algebra $A=L\otimes_{\F_2}L$, commuting embeddings $\varphi_0,\varphi_1$, explicit left-$L$ column coordinates and contraction.
+- Identity $\operatorname{Col}(\varphi_1(T')(\varphi_0(r_{\rm hi})))_v=s_v^*$ and $y_w=C_q(S)$, without replacing the tensor by ordinary field multiplication.
+- Degree-two tensor-valued sumcheck summand $H$ and exact Boolean-sum relation $\sum_b H(b)=S$.
+- Ring root-count lemma: a nonzero polynomial of degree at most $d$ has at most $d$ roots among values $\varphi_1(z)$, $z\in L$, because their pairwise differences are units in $A$.
+- Causal degree-two sumcheck with algebraic soundness at most $2h/|L|$.
+- Faithful Construction 4.1 reduction to a bound committed large-field multilinear polynomial, perfect completeness, and conditional false-claim soundness at most $2h/|L|+\varepsilon_{\mathrm{eval}}$.
+- Explicit privacy obstruction: the unmasked $A$-valued initial message reveals every partial evaluation; two equal-evaluation witnesses can be perfectly distinguished by one tensor column.
+- Strict separation from the masked kernel-coordinate checker of Chapters 6--7 and its still-unproved online zero-knowledge simulator.
+
+**Important attribution:** Diamond and Posen (ePrint 2024/504, §4) introduced this original tensor-algebra compiler; its reconstruction is not claimed as our novel result. The later mask techniques of Kochergin and Frigo--shelat are cited independently.
+
+**Rust audit:** GF(16)/GF(256) tests for tensor multiplication, embeddings, exact columns, original evaluation, terminal factor and the embedded-field polynomial root bound.
