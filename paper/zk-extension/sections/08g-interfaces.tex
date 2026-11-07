@@ -1,0 +1,135 @@
+\subsection{Assumptions, efficiencies, and formalization boundaries}\label{sec:dpr:interfaces}
+
+\begin{definition}[The three proof-system layers]\label{def:dpr:layers}
+The development distinguishes:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \emph{Algebraic reduction:}
+  exact packing, the tensor evaluation
+  $S$, and the sumcheck polynomial $H$;
+\item \emph{Committed evaluation:}
+  a fixed packed polynomial $T'$,
+  a binding representation $C'$, and
+  an underlying large-field evaluation proof;
+\item \emph{Zero-knowledge implementation:}
+  commitments, masked messages and
+  a simulator producing the full adaptive
+  verifier view.
+\end{enumerate}
+Only the first layer is proved
+unconditionally in this chapter.
+The second has an explicit
+conditional soundness theorem;
+the third remains an obligation.
+\end{definition}
+
+\begin{lemma}[No increase in the packed Boolean table size]\label{lem:dpr:table-size}
+The original Boolean table has
+$2^{\ell+h}=n\,2^h$ binary entries.
+The packed table has $2^h$
+elements of $L$, each represented
+by $n$ binary coordinates.
+Thus both data representations
+contain exactly $n\,2^h$
+binary coordinates.
+\end{lemma}
+\begin{proof}
+The set $I_\ell$ has cardinality
+$2^\ell=n$ and $I_h$ has
+cardinality $2^h$, so the original
+table has $n2^h$ entries.
+The packed table has one element
+of $L$ for each $j\in I_h$.
+Since $[L:\F_2]=n$, every field
+element has exactly $n$ binary
+basis coordinates, and hence
+the packed table has $n2^h$
+such coordinates.
+\end{proof}
+
+\begin{lemma}[Message types and sumcheck round count]\label{lem:dpr:round-count}
+The tensor reduction sends one
+initial $A$-element $S_0$,
+then exactly $h$ univariate
+$A$-polynomials of degree at most
+$2$, and one final field
+element $u\in L$ before
+invoking the delegated
+large-field evaluation protocol.
+\end{lemma}
+\begin{proof}
+The number and type of messages
+are specified in
+Definition~\ref{def:dpr:full-protocol}:
+one initial tensor message,
+one polynomial in each iteration
+$i=0,\ldots,h-1$, and one claimed
+evaluation in the last reduction
+step. The degree bound follows
+from Definition~\ref{def:dpr:sumcheck}.
+\end{proof}
+
+\begin{remark}[Why this is not the masked protocol]
+The initial tensor message
+$S_0$ reveals the partial table
+$s^*$ by Lemma~\ref{lem:dpr:leaks-partials}.
+The masking proposal in
+Chapters~6--7 changes the
+public messages and proof
+constraints; it cannot inherit
+the original sumcheck theorem
+merely by reusing the name
+ring switching.
+Its own proof needs an
+end-to-end simulation of
+$(m,y',U,A)$ and all
+commitment/opening messages,
+with every challenge timing
+and correlation checked.
+\end{remark}
+
+\begin{definition}[Chapter 8 Lean certification contract]\label{def:dpr:lean-contract}
+To certify the exact compiler
+in Lean~4, the formal model
+will provide:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item the finite extension
+$L/\F_2$, two $L$-module
+structures on $A$, tensor
+product and its universal map;
+\item binary packing/unpacking
+and the polynomial $T'$;
+\item the typed column functional
+and tensor equality interpolation;
+\item the polynomial ring $A[X]$
+and its root bound restricted
+to embedded units;
+\item causal sumcheck messages,
+independent challenge sampling,
+and its soundness event; and
+\item a separate abstract
+large-field commitment interface
+with an explicitly parameterized
+evaluation error.
+\end{enumerate}
+No Lean declaration is claimed
+certified until its code has
+been compiled and checked.
+\end{definition}
+
+\begin{remark}[History and non-novelty]
+The \emph{unmasked} compiler and
+its tensor-sumcheck soundness
+come from Diamond--Posen
+\cite[Construction~4.1, Theorems~4.2 and~4.4]{DiamondPosen2024}.
+The proof of the embedded-field
+root bound corresponds to
+their Lemma~4.5.
+The present chapter reorganizes
+those established arguments
+as small dependency-ordered
+proofs, specialized to the
+Boolean-kernel basis already
+used in this manuscript.
+It is not presented as a
+new ring-switching construction.
+\end{remark}
