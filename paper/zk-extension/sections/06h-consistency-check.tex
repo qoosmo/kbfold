@@ -221,9 +221,11 @@ paired points in $L^\times$.
 \begin{proof}
 The group $L^\times$ has order
 $|L|-1=2^n-1$, an odd integer.
-The order of any subgroup divides
-the order of the finite ambient group,
-so every subgroup has odd order.
+Let $H\leq L^\times$. The distinct left cosets $aH$
+partition $L^\times$, and each has cardinality $|H|$
+because multiplication by $a$ is a bijection.
+Consequently $|L^\times|=k|H|$ for some integer $k$.
+As $|L^\times|=2^n-1$ is odd, $|H|$ is odd.
 Furthermore $-x=x$ for every $x\in L$
 because the characteristic is two.
 Thus $x$ and $-x$ cannot form two distinct
