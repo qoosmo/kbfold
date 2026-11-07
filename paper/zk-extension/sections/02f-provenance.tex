@@ -1,0 +1,80 @@
+\subsection{The contribution of KBFold and the exact remaining gap}\label{sec:history:scope}
+
+The original KBFold construction~\cite{MkhidaKBFold2026} starts from the same kernel family as Chapter~1 and makes its normalized fold equal to restriction of the coefficient table. It then applies this dictionary to Reed--Solomon codewords and interleaves sumcheck with folding. The existing work proves correctness, soundness, evaluation binding, and round-by-round knowledge soundness in its stated regimes. The zero-knowledge extension is explicitly listed as future work; it was not among the results proved in that paper.
+
+\begin{definition}[Three different mathematical operations]\label{def:history:threeops}
+We distinguish:
+\begin{enumerate}[label=\textup{(\roman*)}]
+ \item \emph{Kernel table restriction}: $\Res_r(f)(b')=(1-r)f(0,b')+rf(1,b')$ over an arbitrary field.
+ \item \emph{Binary coordinate transposition}: $\mathcal T(s)_u=\sum_v\beta_vd_u(s_v)$ over $L/\F_2$.
+ \item \emph{Zero-knowledge masking}: replacing exposed, witness-dependent messages by masked messages, together with a proof that their algebraic verification relations hold.
+\end{enumerate}
+None of the three operations is, by definition, a cryptographic proof system.
+\end{definition}
+
+\begin{lemma}[Two ways to represent the same binary correction]\label{lem:history:kernelcorrection}
+In the binary-field setting of Section~\ref{sec:history:ring}, suppose the chosen packing basis is $\beta_u=K_u^{(\ell)}(\alpha)$ for an element $\alpha\in L$ of degree $n$ over $\F_2$. Define
+\[
+ c_u^p:=\mathcal T(p)_u,\qquad
+ C_p(X):=\sum_{u\in I}c_u^pK_u^{(\ell)}(X).
+\]
+Then, for every $\theta\in L^\ell$,
+\[
+ \Delta_p(\theta)
+ =\sum_{u\in I}\operatorname{eq}_\ell(u,\theta)c_u^p
+ =\KFold_\theta(C_p).
+\]
+\end{lemma}
+\begin{proof}
+By the definition of $\mathcal T$, $c_u^p=\sum_v\beta_vd_u(p_v)$. Substitute this expression into Definition~\ref{def:history:ringmask} to obtain the first equality. The second is the defining formula for $\KFold_\theta$ on the kernel-coefficient table of $C_p$ (Definition~\ref{def:intro:correction}), or equivalently Proposition~\ref{prop:intro:delta}. No property of an external commitment is required.
+\end{proof}
+
+\begin{proposition}[The kernel representation does not depend on the masking protocol]\label{prop:history:structural}
+For fixed $p$, the polynomial $C_p$ in Lemma~\ref{lem:history:kernelcorrection} is uniquely determined by its kernel coefficients $c_u^p$, and its successive normalized folds yield $\Delta_p(\theta)$. Neither the Frobenius recurrence of Lemma~\ref{lem:history:backward} nor the trace-zero characterization of Lemma~\ref{lem:history:artinschreier} is needed for that algebraic identity.
+\end{proposition}
+\begin{proof}
+Uniqueness follows from Proposition~\ref{prop:intro:basis} over $L$. Corollary~\ref{cor:intro:iterated} identifies the successive folds of $C_p$ with the multilinear evaluation of the coefficient table at $\theta$. By Lemma~\ref{lem:history:kernelcorrection} this is $\Delta_p(\theta)$. The proof uses only the kernel basis theorem, restriction, and the definition of binary transposition, so the final independence assertion follows from the cited dependencies.
+\end{proof}
+
+\begin{remark}[Characteristic and domain restrictions]\label{rem:history:characteristic}
+The map $x\mapsto x^2+x$ in the Frigo--shelat/Kochergin discussion is a characteristic-two Artin--Schreier map. The original KBFold word fold in Definition~\ref{def:history:wordparts} requires $\operatorname{char}(\F)\neq2$ and an even-order multiplicative subgroup; its formulas divide by $2x$. One cannot equate these two settings by simply changing notation. A genuine ZK extension of the original KBFold scheme must provide masks and a complete simulation argument over that scheme's field and oracle model.
+\end{remark}
+
+\subsection{Precise comparison and chapter dependencies}\label{sec:history:comparison}
+
+For reference, the following comparisons identify the mathematical objects and the \emph{source} of each step; they are not measurements of full proving time.
+\begin{center}
+\small
+\begin{tabular}{p{.20\linewidth}p{.32\linewidth}p{.36\linewidth}}
+\hline
+Construction & Principal algebraic operation & Role in our manuscript\\
+\hline
+LFKN sumcheck~\cite{LFKN1992} & Partial-sum polynomials and random evaluation & Exact sumcheck completeness and soundness\\
+Libra~\cite{XieEtAl2019Libra} & Zero-knowledge masking of polynomial messages & Motivation for degree-compatible masking\\
+FRI~\cite{BBHR2018} & Reed--Solomon codeword folding & Oracle proximity and local consistency\\
+BaseFold~\cite{ZCF2023} & Foldable codes interleaved with sumcheck & Multilinear proof architecture\\
+Diamond--Posen~\cite{DiamondPosen2024} & Packed-bit transposition and batching & Binary ring-switching relation\\
+Kochergin~\cite{Kochergin2026} & Trace/Frobenius powers and masked recurrence & $n-1$ squaring relations in a ZK reduction\\
+Frigo--shelat~\cite{FrigoShelat2026} & Trace-linearity and trace-zero masking & General linear-constraint bit-packing approach\\
+KBFold~\cite{MkhidaKBFold2026} & Boolean-kernel basis and normalized fold dictionary & Original unmasked commitment protocol\\
+Present chapter & Exact kernel mask propagation and correction identities & Starting lemmas for the new development\\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{definition}[Later proof obligations]\label{def:history:obligations}
+A complete zero-knowledge extension of the original KBFold protocol will require, in addition to its existing soundness analysis:
+\begin{enumerate}[label=\textup{(\roman*)}]
+ \item an explicit distribution of the random polynomial and codeword masks;
+ \item a revised degree and folding invariant, including Theorem~\ref{thm:history:maskpropagation};
+ \item a masked sumcheck protocol with the same public evaluation relation;
+ \item a joint hiding theorem for every exposed round polynomial, oracle response and final message;
+ \item completeness and soundness of the modified oracle/query procedure;
+ \item an explicit simulator under a stated verifier-query bound and commitment interface.
+\end{enumerate}
+These are mathematical conditions to be proved, not assumptions silently inherited from any one of the historical constructions.
+\end{definition}
+
+\begin{remark}[Roadmap of the formal development]
+Chapter~3 defines the exact IOP, commitment and zero-knowledge security games. The subsequent binary-field chapters develop the kernel transposition correction and compare its verification with the two 2026 protocols. The final KBFold chapters use the odd-characteristic fold, enlarged-degree mask propagation, masked sumcheck and oracle simulation. At each step the theorem ledger records the precise Lean declaration and all imported hypotheses.
+\end{remark}
