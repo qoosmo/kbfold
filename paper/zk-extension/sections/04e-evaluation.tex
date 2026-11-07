@@ -1,0 +1,88 @@
+\subsection{Evaluation on a curve in multilinear coordinates}\label{sec:kbalgebra:evaluation}
+
+\begin{definition}[Multilinear equality weights]\label{def:kbalgebra:eq}
+For $b\in I_m$ and $z=(z_i)_{i\in J_m}\in\F^m$, define
+\[
+ \lambda_b(z):=\prod_{i=0}^{m-1}\bigl((1-b_i)(1-z_i)+b_i z_i\bigr),
+ \qquad \widetilde f(z):=\sum_{b\in I_m}f(b)\lambda_b(z).
+\]
+For $m=0$, $\lambda_{()}(())=1$ and $\widetilde f(())=f(())$.
+\end{definition}
+
+\begin{lemma}[Kernel evaluation in factored form]\label{lem:kbalgebra:point-eval}
+For $b\in I_m$ and $\zeta\in\F$, write $t_i:=\zeta^{2^i}$. Then
+\begin{equation}\label{eq:kbalgebra:point-eval}
+ K_b^{(m)}(\zeta)=\prod_{i=0}^{m-1}
+ \bigl((1-b_i)t_i+b_i(t_i+1)\bigr).
+\end{equation}
+\end{lemma}
+\begin{proof}
+For $b_i=0$ the $i$-th factor on the right is $t_i$, and for $b_i=1$ it is $t_i+1$. Both equal $t_i+b_i=\zeta^{2^i}+b_i$, the corresponding factor in the definition of $K_b^{(m)}(\zeta)$. Multiplication over $i$ gives the equality.
+\end{proof}
+
+\begin{definition}[Evaluation curve and scaling]\label{def:kbalgebra:curve}
+Fix $\zeta\in\F$. For every $i\in J_m$ put
+\[
+ t_i(\zeta):=\zeta^{2^i},\qquad
+ \gamma_i(\zeta):=2t_i(\zeta)+1,
+ \qquad \Gamma_m(\zeta):=\prod_{i\in J_m}\gamma_i(\zeta).
+\]
+When $\Gamma_m(\zeta)\neq0$, define
+\[
+ \psi_i(\zeta):=\frac{t_i(\zeta)+1}{\gamma_i(\zeta)},
+ \qquad\psi(\zeta):=(\psi_0(\zeta),\ldots,\psi_{m-1}(\zeta)).
+\]
+\end{definition}
+
+\begin{lemma}[One-factor scaled equality identity]\label{lem:kbalgebra:one-factor-eval}
+Suppose $\gamma_i(\zeta)\neq0$. Then for each $b_i\in\{0,1\}$,
+\[
+ t_i(\zeta)+b_i
+ =\gamma_i(\zeta)\bigl((1-b_i)(1-\psi_i(\zeta))+b_i\psi_i(\zeta)\bigr).
+\]
+\end{lemma}
+\begin{proof}
+For $b_i=1$, the right side is $\gamma_i\psi_i=t_i+1$ by definition of $\psi_i$. For $b_i=0$, the right side is $\gamma_i(1-\psi_i)=\gamma_i-(t_i+1)=(2t_i+1)-(t_i+1)=t_i$. Both equal $t_i+b_i$. The two Boolean cases exhaust all possibilities.
+\end{proof}
+
+\begin{theorem}[Scaled multilinear evaluation]\label{thm:kbalgebra:curve}
+For any field $\F$, any table $f:I_m\to\F$, and every $\zeta\in\F$ with $\Gamma_m(\zeta)\neq0$,
+\begin{equation}\label{eq:kbalgebra:curve}
+ \boxed{U_f^{(m)}(\zeta)=\Gamma_m(\zeta)\,\widetilde f\bigl(\psi(\zeta)\bigr).}
+\end{equation}
+\end{theorem}
+\begin{proof}
+Since a product in a field is nonzero precisely when all factors are nonzero, the assumption $\Gamma_m(\zeta)\neq0$ implies $\gamma_i(\zeta)\neq0$ for every $i$. Apply Lemma~\ref{lem:kbalgebra:one-factor-eval} to every factor in $K_b^{(m)}(\zeta)=\prod_i(t_i+b_i)$ to obtain
+\[
+ K_b^{(m)}(\zeta)=\left(\prod_i\gamma_i(\zeta)\right)
+ \prod_i\bigl((1-b_i)(1-\psi_i(\zeta))+b_i\psi_i(\zeta)\bigr)
+ =\Gamma_m(\zeta)\lambda_b(\psi(\zeta)).
+\]
+Multiply this identity by $f(b)$ and sum over $b\in I_m$. The left side is $U_f^{(m)}(\zeta)$ by definition and the right side is $\Gamma_m(\zeta)\widetilde f(\psi(\zeta))$ by Definition~\ref{def:kbalgebra:eq}.
+\end{proof}
+
+\begin{proposition}[Exceptional-point bound]\label{prop:kbalgebra:exceptional}
+Assume $m\geq1$ and $\operatorname{char}\F\neq2$. Then $\Gamma_m\in\F[X]$ is nonzero of degree $N-1$. Consequently
+\[
+ \bigl|\{\zeta\in\F:\Gamma_m(\zeta)=0\}\bigr|\leq N-1.
+\]
+When $\F$ is finite and $|\F|>N-1$, at least $|\F|-(N-1)$ points admit the evaluation formula~\eqref{eq:kbalgebra:curve}.
+\end{proposition}
+\begin{proof}
+Each polynomial $2X^{2^i}+1$ is nonzero with leading coefficient $2\neq0$ and degree $2^i$. Their product $\Gamma_m$ has nonzero leading coefficient $2^m$ and degree $\sum_i2^i=N-1$. A nonzero degree-$d$ polynomial has at most $d$ roots by Lemma~\ref{lem:history:rootcount}. For a finite field, subtracting the number of exceptional roots from the field cardinality gives the final lower bound.
+\end{proof}
+
+\begin{corollary}[Characteristic-two evaluation curve]\label{cor:kbalgebra:char2-curve}
+If $\operatorname{char}\F=2$, then $\Gamma_m(\zeta)=1$ for every $\zeta$, and
+\begin{equation}\label{eq:kbalgebra:char2-curve}
+ \boxed{U_f^{(m)}(\zeta)=\widetilde f\bigl(\zeta+1,\zeta^2+1,\ldots,\zeta^{2^{m-1}}+1\bigr).}
+\end{equation}
+No evaluation points are exceptional.
+\end{corollary}
+\begin{proof}
+In characteristic two, $2t_i+1=1$ for every $i$, so $\Gamma_m=1$ and $\psi_i=(t_i+1)/1=\zeta^{2^i}+1$. Substitute these identities into Theorem~\ref{thm:kbalgebra:curve}. The proof also covers $m=0$ with the empty-product convention.
+\end{proof}
+
+\begin{remark}[No division on exceptional points]
+When $\Gamma_m(\zeta)=0$ in odd characteristic, the rational expression defining $\psi$ is not available. The universal polynomial identity~\eqref{eq:kbalgebra:point-eval} remains valid at that point; one must use it instead of dividing by a vanishing $\gamma_i$. This distinction is essential for a formalized evaluation algorithm.
+\end{remark}
