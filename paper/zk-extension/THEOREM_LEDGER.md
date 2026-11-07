@@ -125,3 +125,25 @@ This exact identity is the starting point for analyzing the enlarged Reed--Solom
 - Original KBFold kernel algebra was previously proved; this manuscript rederives it self-containedly before the new masking-specific consequences.
 
 - Chapter 4 tradeoff theorem: a uniform degree-<2^t mask hides up to 2^t adaptive queries to one nonzero-point oracle, while increasing the Reed--Solomon degree limit from N to N+2^t; exact distance and unique-radius bounds follow.
+
+
+## Chapter 5: Multilinearization, Folding, and Masks
+
+**Source:** `sections/05-folding.tex` with seven small subsections.
+**Lean map:** [CHAPTER_05_LEAN_MAP.md](CHAPTER_05_LEAN_MAP.md).
+**Audit:** 62 individually labeled definitions/results; 49 complete paper proofs. New Chapter 5 declarations are **not yet checked in Lean**.
+
+Main proved algebraic statements:
+
+- Prefix restriction and multilinear evaluation, with complete finite-sum reindexing.
+- Global normalized polynomial fold on monomials; tensor form valid in every field.
+- Characteristic-two specialization and explicit odd-characteristic counterexample.
+- Kernel polynomial/table restriction commutative diagram at every fold depth.
+- Direct-sum high-degree masked encoding `(f,R) ↦ U_f+X^N R`.
+- Full masked fold invariant and degree budget `D_j=N/2^j+ceil(B/2^j)`.
+- **Linear final closure** `Q_m=MLE(f)(r)+rho_r(R) X` for `1≤B≤N`.
+- Exact enlarged-degree RS codeword folding and rate transition for `B=2^t`.
+- Local residual root count and two-point constant-term check for a degree-<2 final polynomial.
+- Exact fixed-schedule joint masking criterion via the image of a finite-field linear map.
+
+**Security boundary:** The chapter does not prove that a malicious oracle lies near the enlarged RS code, nor the joint authenticated online ZK simulator. Those are new protocol theorems, not consequences of the algebraic identities.
