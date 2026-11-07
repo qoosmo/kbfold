@@ -1,0 +1,107 @@
+\subsection{Completeness, soundness, and extraction}\label{sec:security:soundness}
+
+\begin{definition}[Perfect completeness for kernel evaluation]\label{def:security:complete}
+Let $\Pi=(P,V)$ be an oracle IOP for Definition~\ref{def:security:exactrel}. It is \emph{perfectly complete} if for every table $f:I_m\to\F$ and every point $z\in\F^m$, with
+\[
+ w=\Enc_\mathcal D(f),\qquad v=\widetilde f(z),
+\]
+the honest prover $P$ using witness $f$ makes the honest verifier $V$ accept with probability $1$ over all independent prover coins and verifier challenges.
+\end{definition}
+
+\begin{definition}[False-statement acceptance experiment]\label{def:security:bad-proof}
+Fix $\tau\geq0$. The experiment $\mathsf{FalseAccept}_{\Pi,\tau}(w,z,v;P^*)$ samples all random tapes and public-coin challenges according to $\Pi$, runs the causal adversarial prover $P^*$ with the fixed initial oracle $w$ and explicit instance $(z,v)$, and outputs $1$ exactly when
+\[
+  (w;z,v)\notin\mathcal L_\tau
+  \quad\land\quad V\text{ accepts}.
+\]
+Its success probability is taken over the sampled tapes and challenges, never over an unbound choice of $w$ made \emph{after} challenge sampling.
+\end{definition}
+
+\begin{lemma}[Deterministic-prover reduction]\label{lem:security:randomized-prover}
+Let $E$ be any event determined by a full IOP transcript. Suppose every deterministic causal prover has probability at most $\varepsilon$ of producing a transcript in $E$. Then every randomized causal prover whose random tape is independent of verifier challenges also has probability at most $\varepsilon$.
+\end{lemma}
+\begin{proof}
+Let $\rho$ denote the randomized prover tape. Conditioned on $\rho$, the prover becomes deterministic and causal, so $\Pr[E\mid\rho]\leq\varepsilon$. By the finite law of total probability,
+\[
+  \Pr[E]=\sum_\rho\Pr[\rho]\Pr[E\mid\rho]
+   \leq\sum_\rho\Pr[\rho]\varepsilon=\varepsilon.
+\]
+\end{proof}
+
+\begin{definition}[Doomed partial transcript]\label{def:security:doomed}
+For a public-coin IOP with rounds $1,\ldots,t$, let $\mathscr T_i$ be its set of typed partial transcripts after $i$ challenges; let $\mathscr T_0$ consist of the initial instances. A \emph{doomed family} is a tuple of subsets
+\[
+ \mathscr D_i\subseteq\mathscr T_i,\qquad 0\leq i\leq t.
+\]
+It is a \emph{round-by-round soundness certificate} with error vector
+$(\varepsilon_1,\ldots,\varepsilon_t)$ for relation $\mathcal R_\tau$ if:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item every initial instance outside $\mathcal L_\tau$ belongs to $\mathscr D_0$;
+\item for each $i=1,\ldots,t$, each $\sigma\in\mathscr D_{i-1}$, and every legally timed prover message $m_i$,
+\[
+ \Pr_{c_i\leftarrow\mathsf{Unif}_{\mathsf{Ch}_i}}
+ \bigl[(\sigma,m_i,c_i)\notin\mathscr D_i\bigr]\leq\varepsilon_i;
+\]
+\item every full transcript in $\mathscr D_t$ is rejected by the honest verifier.
+\end{enumerate}
+All conditions are pointwise in the preceding partial transcript; in (ii) the message is fixed before the fresh challenge.
+\end{definition}
+
+\begin{lemma}[First escape is necessary for acceptance]\label{lem:security:first-escape}
+Suppose $(\mathscr D_i)$ satisfies (i) and (iii) in Definition~\ref{def:security:doomed}. For a false instance $(w;z,v)\notin\mathcal L_\tau$, every accepted transcript has at least one index $i\in\{1,\ldots,t\}$ such that the transcript after $i-1$ challenges belongs to $\mathscr D_{i-1}$ but the transcript after $i$ challenges does not belong to $\mathscr D_i$.
+\end{lemma}
+\begin{proof}
+The initial transcript is in $\mathscr D_0$ by (i). The accepted full transcript is not in $\mathscr D_t$ by contraposition of (iii). Along the finite sequence of membership indicators, there is therefore a first index at which membership changes from true to false. This index has the stated property.
+\end{proof}
+
+\begin{theorem}[Round-by-round implies overall soundness]\label{thm:security:rbr-sound}
+If $\Pi$ admits a doomed family as in Definition~\ref{def:security:doomed}, then
+\[
+ \mathsf{Sound}_\tau(\Pi)\leq
+ \min\left\{1,\sum_{i=1}^t\varepsilon_i\right\}.
+\]
+\end{theorem}
+\begin{proof}
+Fix a false instance and a deterministic causal prover. For each $i$, let $E_i$ be the event that the preceding transcript belongs to $\mathscr D_{i-1}$ and the next transcript is outside $\mathscr D_i$. Conditional on every fixed prefix of earlier challenges for which the preceding transcript is doomed, the causal prover's message $m_i$ is fixed. Condition (ii) gives conditional probability at most $\varepsilon_i$ for $E_i$; if the preceding transcript is not doomed, $E_i$ is empty. Averaging over the preceding prefixes yields $\Pr[E_i]\leq\varepsilon_i$. By Lemma~\ref{lem:security:first-escape}, acceptance is contained in $\bigcup_iE_i$. The union bound gives
+\[
+ \Pr[\mathrm{accept}]\leq\sum_i\Pr[E_i]\leq\sum_i\varepsilon_i.
+\]
+Lemma~\ref{lem:security:randomized-prover} extends the bound to randomized provers. Probabilities are at most $1$, proving the minimum.
+\end{proof}
+
+\begin{definition}[Round-by-round knowledge witness]\label{def:security:rbr-knowledge}
+Let $(\mathscr D_i)$ be a doomed family. An \emph{extractor family} consists of functions
+\[
+ \mathsf{Ext}_i:
+ \{(\sigma,m_i):\sigma\in\mathscr T_{i-1},\
+                   m_i\text{ a legal next message}\}
+ \to\F^{I_m},\quad 1\leq i\leq t.
+\]
+It is a knowledge certificate with errors $(\varepsilon_i)$ for $\mathcal R_\tau$ if:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item every initial instance (including true instances) is in $\mathscr D_0$;
+\item every full transcript in $\mathscr D_t$ is rejected;
+\item for all $i,\sigma\in\mathscr D_{i-1}$, and legal $m_i$, if
+\[
+ \Pr_{c_i}\left[(\sigma,m_i,c_i)\notin\mathscr D_i\right]>\varepsilon_i,
+\]
+then $\mathsf{Ext}_i(\sigma,m_i)$ is a valid witness for the instance encoded by $\sigma$, in the sense of $\mathcal R_\tau$.
+\end{enumerate}
+For a computational knowledge theorem one must additionally require that the extractors run within an explicitly specified time bound.
+\end{definition}
+
+\begin{theorem}[Knowledge certificate implies witness or bounded acceptance]\label{thm:security:knowledge-overall}
+Assume Definition~\ref{def:security:rbr-knowledge} holds. Fix an instance $x$ and a deterministic causal prover $P^*$. If every pair $(\sigma,m_i)$ reached with $\sigma\in\mathscr D_{i-1}$ satisfies
+\[
+ (x,\mathsf{Ext}_i(\sigma,m_i))\notin\mathcal R_\tau,
+\]
+then the acceptance probability is at most $\sum_{i=1}^t\varepsilon_i$.
+Equivalently, acceptance probability strictly greater than this sum implies that some reachable pair $(\sigma,m_i)$ has a valid extracted witness.
+\end{theorem}
+\begin{proof}
+Under the stated failure of all reached extraction outputs, the contrapositive of condition (iii) in Definition~\ref{def:security:rbr-knowledge} shows that, for every reachable doomed prefix and its next message, the probability of leaving the doomed family is at most $\varepsilon_i$. The initial transcript is doomed by condition (i), and any accepted transcript is non-doomed by condition (ii). The first-escape argument of Lemma~\ref{lem:security:first-escape} therefore applies; the conditional union-bound proof of Theorem~\ref{thm:security:rbr-sound} gives the asserted acceptance bound. Its logical contrapositive proves the equivalent formulation.
+\end{proof}
+
+\begin{remark}[Security properties are distinct]
+Theorems~\ref{thm:security:rbr-sound} and~\ref{thm:security:knowledge-overall} concern acceptance and extraction. They place no restriction on information transmitted in the prover's messages or oracle openings. A knowledge-sound proof need not be zero knowledge, and a hiding commitment alone need not yield a knowledge-sound evaluation proof. Zero knowledge is defined separately below.
+\end{remark}
