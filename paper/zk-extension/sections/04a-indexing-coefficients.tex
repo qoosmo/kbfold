@@ -1,0 +1,83 @@
+\subsection{Bit indexing, kernels, and coefficients}\label{sec:kbalgebra:bits}
+
+The statements in this section do not require a finite field or an assumption on the characteristic. They rederive the structural facts of the original KBFold basis~\cite{MkhidaKBFold2026} with complete proofs and explicit indexing conventions.
+
+\begin{definition}[Bit sets and binary exponents]\label{def:kbalgebra:bits}
+Let $\F$ be an arbitrary field and let $m\geq0$ be an integer. Write $J_m:=\{0,\ldots,m-1\}$, $I_m:=\{0,1\}^m$, and $N:=2^m$. For $S\subseteq J_m$, define
+\[
+ e(S):=\sum_{i\in S}2^i\in\{0,\ldots,N-1\}.
+\]
+For $b\in I_m$, set $\operatorname{supp}(b):=\{i:b_i=1\}$, $Z(b):=J_m\setminus\operatorname{supp}(b)$, and $\operatorname{wt}(b):=|\operatorname{supp}(b)|$. The empty set $J_0$ and empty tuple $I_0=\{()\}$ have their usual meanings.
+\end{definition}
+
+\begin{lemma}[Binary-subset bijection]\label{lem:kbalgebra:binary-bijection}
+The function $e:\mathcal P(J_m)\to\{0,\ldots,N-1\}$ is a bijection. Its inverse sends the binary expansion $a=\sum_{i=0}^{m-1}a_i2^i$ to $\{i:a_i=1\}$.
+\end{lemma}
+\begin{proof}
+For every $S$, $0\leq e(S)\leq\sum_{i=0}^{m-1}2^i=2^m-1$. If $e(S)=e(T)$ and $S\neq T$, choose the largest $j$ in the symmetric difference. The contribution of $2^j$ to $e(S)-e(T)$ has absolute value $2^j$, whereas the sum of all contributions from smaller indices has absolute value at most $\sum_{i=0}^{j-1}2^i=2^j-1$. Equality is impossible. Thus $e$ is injective. Domain and codomain both have cardinality $2^m$, so it is bijective. The inverse formula follows directly from the definition of $e$.
+\end{proof}
+
+\begin{definition}[General kernel and Boolean kernel]\label{def:kbalgebra:kernel}
+For $y=(y_i)_{i\in J_m}\in\F^m$ define
+\[
+ K_y^{(m)}(X):=\prod_{i=0}^{m-1}(X^{2^i}+y_i)\in\F[X].
+\]
+For $b\in I_m\subseteq\F^m$ write $K_b^{(m)}:=K_y^{(m)}|_{y=b}$. We put $K_{()}^{(0)}=1$. For a table $f:I_m\to\F$, set
+\[
+ U_f^{(m)}(X):=\sum_{b\in I_m}f(b)K_b^{(m)}(X).
+\]
+\end{definition}
+
+\begin{lemma}[Explicit product expansion]\label{lem:kbalgebra:product-expansion}
+For every $y\in\F^m$,
+\begin{equation}\label{eq:kbalgebra:expansion}
+ K_y^{(m)}(X)=\sum_{S\subseteq J_m}\left(\prod_{i\in J_m\setminus S}y_i\right)X^{e(S)}.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Apply distributivity to the product defining $K_y^{(m)}$. For each factor indexed by $i$, choose either the monomial $X^{2^i}$ or the constant $y_i$. Let $S$ be the set of indices where the monomial is chosen. The resulting term is exactly $\left(\prod_{i\notin S}y_i\right)X^{\sum_{i\in S}2^i}$. Every choice corresponds to precisely one subset $S$, so summing the terms gives~\eqref{eq:kbalgebra:expansion}.
+\end{proof}
+
+\begin{lemma}[Coefficient formula]\label{lem:kbalgebra:coefficient-rule}
+For $S\subseteq J_m$ and $y\in\F^m$,
+\[
+ [X^{e(S)}]K_y^{(m)}=\prod_{i\notin S}y_i.
+\]
+For Boolean $b\in I_m$, this coefficient equals $1$ precisely when $Z(b)\subseteq S$ and equals $0$ otherwise.
+\end{lemma}
+\begin{proof}
+Lemma~\ref{lem:kbalgebra:binary-bijection} shows that the exponents $e(T)$ in~\eqref{eq:kbalgebra:expansion} are pairwise distinct. Thus the only term of exponent $e(S)$ is the one indexed by $S$, proving the first formula. If $y=b$ is Boolean, the product equals $1$ if all factors indexed by $J_m\setminus S$ are $1$, and is zero if any of those factors is $0$. The condition is $(J_m\setminus S)\cap Z(b)=\varnothing$, which is equivalent to $Z(b)\subseteq S$.
+\end{proof}
+
+\begin{corollary}[Degree, leading term, and constant term]\label{cor:kbalgebra:monic}
+For each $b\in I_m$, $K_b^{(m)}$ is monic of degree $N-1$ and
+\[
+ [X^0]K_b^{(m)}=\prod_{i\in J_m}b_i,
+ \qquad [X^{N-1}]K_b^{(m)}=1.
+\]
+The same degree and leading coefficient assertion holds for $K_y^{(m)}$ with arbitrary $y\in\F^m$.
+\end{corollary}
+\begin{proof}
+The greatest exponent occurring in~\eqref{eq:kbalgebra:expansion} is $e(J_m)=N-1$, and its coefficient is the empty product $1$. The exponent $e(\varnothing)=0$ has coefficient $\prod_iy_i$. These statements hold also for $m=0$, where $K_{()}^{(0)}=1$.
+\end{proof}
+
+\begin{lemma}[Block factorization]\label{lem:kbalgebra:block}
+For integers $0\leq t\leq m$, $c\in I_t$, and $h\in I_{m-t}$, write $(c,h)$ for the concatenation of the $t$ low-index bits of $c$ with the $m-t$ high-index bits of $h$. Then
+\begin{equation}\label{eq:kbalgebra:block}
+ K_{(c,h)}^{(m)}(X)=K_c^{(t)}(X)\,K_h^{(m-t)}(X^{2^t}).
+\end{equation}
+\end{lemma}
+\begin{proof}
+Split the defining product into factors with indices $i<t$ and $i\geq t$. The low-index product is $K_c^{(t)}(X)$. In the remaining product put $i=t+j$, so that $X^{2^i}=(X^{2^t})^{2^j}$. The high-index product is therefore $K_h^{(m-t)}(X^{2^t})$. Multiply the two expressions.
+\end{proof}
+
+\begin{corollary}[Lowest-bit kernel recursion]\label{cor:kbalgebra:recursion}
+For $m\geq1$ and $b'\in I_{m-1}$,
+\[
+ K_{(0,b')}^{(m)}(X)=XK_{b'}^{(m-1)}(X^2),\qquad
+ K_{(1,b')}^{(m)}(X)=(X+1)K_{b'}^{(m-1)}(X^2).
+\]
+\end{corollary}
+\begin{proof}
+Take $t=1$ in Lemma~\ref{lem:kbalgebra:block} and note that $K_0^{(1)}(X)=X$ and $K_1^{(1)}(X)=X+1$.
+\end{proof}
