@@ -1,0 +1,123 @@
+\subsection{Folds on monomials and the general multilinearization functional}\label{sec:kbalgebra:dual}
+
+\begin{definition}[Even--odd polynomial operators]\label{def:kbalgebra:evenodd}
+For every polynomial $P(X)=\sum_{j\geq0}p_jX^j\in\F[X]$, define
+\[
+ E(P)(Y):=\sum_{j\geq0}p_{2j}Y^j,
+ \qquad O(P)(Y):=\sum_{j\geq0}p_{2j+1}Y^j.
+\]
+Thus $P(X)=E(P)(X^2)+XO(P)(X^2)$. Both operators are $\F$-linear. For $r\in\F$ put
+\[
+ \pfold_r(P):=(2r-1)E(P)+(1-r)O(P).
+\]
+\end{definition}
+
+\begin{lemma}[Fold of a single monomial]\label{lem:kbalgebra:monomial-fold}
+For every integer $j\geq0$ and $r\in\F$,
+\[
+ \pfold_r(X^{2j})=(2r-1)Y^j,
+ \qquad \pfold_r(X^{2j+1})=(1-r)Y^j.
+\]
+\end{lemma}
+\begin{proof}
+For $P(X)=X^{2j}$, its even component is $E(P)=Y^j$ and its odd component is $0$ by the coefficient definition; substitute into Definition~\ref{def:kbalgebra:evenodd}. For $P(X)=X^{2j+1}$, the even component is $0$ and the odd component is $Y^j$. Substitute once more.
+\end{proof}
+
+\begin{definition}[Complete normalized fold]\label{def:kbalgebra:complete-fold}
+For $P\in\F[X]_{<N}$ and $r=(r_0,\ldots,r_{m-1})\in\F^m$, define polynomials $P_0:=P$ and $P_{i+1}:=\pfold_{r_i}(P_i)$ for $0\leq i<m$. The polynomial $P_m$ is constant. Define $\KFold_r(P)\in\F$ to be its constant coefficient. For $m=0$ this is the constant value of $P$.
+\end{definition}
+
+\begin{lemma}[Degree halving]\label{lem:kbalgebra:halving}
+If $\deg P<2d$, then $\deg\pfold_r(P)<d$, including the zero polynomial. In particular $\KFold_r(P)$ is well defined.
+\end{lemma}
+\begin{proof}
+When all nonzero coefficients of $P$ have indices strictly less than $2d$, both $E(P)$ and $O(P)$ have all coefficients at degrees strictly less than $d$ by Definition~\ref{def:kbalgebra:evenodd}. Their linear combination $\pfold_r(P)$ has no term of degree $\geq d$. Applying this with $d=2^{m-i-1}$ at every step shows that $P_m$ has degree $<1$, i.e. is constant or zero.
+\end{proof}
+
+\begin{lemma}[Iterated fold of one monomial]\label{lem:kbalgebra:iterated-monomial}
+For $S\subseteq J_m$ and $r\in\F^m$,
+\begin{equation}\label{eq:kbalgebra:monomial-fold}
+ \boxed{\KFold_r(X^{e(S)})=
+ \left(\prod_{i\in J_m\setminus S}(2r_i-1)\right)
+ \left(\prod_{i\in S}(1-r_i)\right).}
+\end{equation}
+\end{lemma}
+\begin{proof}
+We induct on $m$. At $m=0$, $S=\varnothing$, $e(S)=0$ and the fold is $X^0=1$, while both products are empty and equal $1$. Suppose $m\geq1$. Write $e(S)=b_0+2j$, where $b_0=1$ if $0\in S$ and $0$ otherwise, and $j=\sum_{i\in S,i>0}2^{i-1}$. By Lemma~\ref{lem:kbalgebra:monomial-fold}, the first fold yields $(2r_0-1)Y^j$ if $b_0=0$, or $(1-r_0)Y^j$ if $b_0=1$. All remaining folds are $\F$-linear, so this scalar factors out. Apply the induction hypothesis to $Y^j$ and the remaining challenge coordinates $(r_1,\ldots,r_{m-1})$. Multiplying the scalar from the first fold by the inductively obtained factors gives exactly the two products in~\eqref{eq:kbalgebra:monomial-fold}.
+\end{proof}
+
+\begin{definition}[Binary-exponent multilinearization]\label{def:kbalgebra:multilinearization}
+Let $\mathscr V_m:=\F[Z_0,\ldots,Z_{m-1}]_{\mathrm{ml}}$ be the $\F$-linear span of squarefree monomials. Define the unique $\F$-linear map $\mathscr M_m:\F[X]_{<N}\to\mathscr V_m$ by
+\[
+ \mathscr M_m(X^{e(S)})=\prod_{i\in S}Z_i.
+\]
+For $P(X)=\sum_{S\subseteq J_m}a_SX^{e(S)}$ we consequently have $\mathscr M_m(P)(Z)=\sum_S a_S\prod_{i\in S}Z_i$. No multiplicativity of $\mathscr M_m$ is assumed.
+\end{definition}
+
+\begin{lemma}[Multilinearization is a vector-space isomorphism]\label{lem:kbalgebra:multilinear-iso}
+The map $\mathscr M_m$ is an $\F$-linear isomorphism $\F[X]_{<N}\to\mathscr V_m$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:kbalgebra:binary-bijection}, the monomials $X^{e(S)}$ for $S\subseteq J_m$ form the usual basis $1,X,\ldots,X^{N-1}$. The squarefree monomials $\prod_{i\in S}Z_i$ form an $N$-element basis of $\mathscr V_m$ by its definition. The map $\mathscr M_m$ sends the first basis bijectively onto the second; a linear map doing so has a linear inverse determined by the reverse basis correspondence.
+\end{proof}
+
+\begin{lemma}[Multilinearization of kernels, every characteristic]\label{lem:kbalgebra:multilinear-kernel}
+For every $b\in I_m$ and every field $\F$,
+\begin{equation}\label{eq:kbalgebra:ml-kernel}
+ \boxed{\mathscr M_m(K_b^{(m)})(Z)=\prod_{i\in J_m}(Z_i+b_i).}
+\end{equation}
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:kbalgebra:product-expansion},
+$K_b^{(m)}=\sum_{S\subseteq J_m}(\prod_{i\notin S}b_i)X^{e(S)}$.
+Apply the $\F$-linearity of $\mathscr M_m$ and then its defining formula on each monomial:
+\[
+ \mathscr M_m(K_b^{(m)})(Z)=\sum_{S\subseteq J_m}
+ \left(\prod_{i\notin S}b_i\right)\left(\prod_{i\in S}Z_i\right).
+\]
+By distributivity, the right-hand side is precisely the expansion of $\prod_i(Z_i+b_i)$. This proof explicitly expands the product; it does not use, or assert, that $\mathscr M_m$ is a ring homomorphism.
+\end{proof}
+
+\begin{definition}[Tensor evaluation functional]\label{def:kbalgebra:weighted-eval}
+For $r\in\F^m$ define an $\F$-linear map $\Lambda_r:\mathscr V_m\to\F$ on squarefree monomials by
+\[
+ \Lambda_r\left(\prod_{i\in S}Z_i\right):=
+ \prod_{i\notin S}(2r_i-1)\prod_{i\in S}(1-r_i).
+\]
+This is well defined because the squarefree monomials form a basis.
+\end{definition}
+
+\begin{theorem}[Complete fold as a tensor functional]\label{thm:kbalgebra:tensor-fold}
+For every field $\F$, every $m\geq0$, $P\in\F[X]_{<N}$, and $r\in\F^m$,
+\begin{equation}\label{eq:kbalgebra:tensor-fold}
+ \boxed{\KFold_r(P)=\Lambda_r(\mathscr M_m(P)).}
+\end{equation}
+\end{theorem}
+\begin{proof}
+Both sides define $\F$-linear functionals in $P$: the left side is a composition of $\F$-linear folds by Definition~\ref{def:kbalgebra:evenodd}, and the right side is a composition of the $\F$-linear maps $\mathscr M_m$ and $\Lambda_r$. It suffices to check equality on the basis monomials $X^{e(S)}$. The left side on such a monomial is given explicitly in Lemma~\ref{lem:kbalgebra:iterated-monomial}. The right side is $\Lambda_r(\prod_{i\in S}Z_i)$ by Definition~\ref{def:kbalgebra:multilinearization}, which equals the same product by Definition~\ref{def:kbalgebra:weighted-eval}. Thus the functionals agree on a basis and therefore on every $P$.
+\end{proof}
+
+\begin{corollary}[Ordinary evaluation when all weights are invertible]\label{cor:kbalgebra:weighted-eval}
+If $2r_i-1\neq0$ for every $i$, then
+\begin{equation}\label{eq:kbalgebra:weighted-eval}
+ \KFold_r(P)=\left(\prod_i(2r_i-1)\right)
+ \mathscr M_m(P)\left(\frac{1-r_0}{2r_0-1},\ldots,\frac{1-r_{m-1}}{2r_{m-1}-1}\right).
+\end{equation}
+\end{corollary}
+\begin{proof}
+Apply Theorem~\ref{thm:kbalgebra:tensor-fold} and expand $P$ in monomials. In the summand indexed by $S$, each factor with $i\in S$ is $(1-r_i)$; since $2r_i-1$ is invertible, this equals $(2r_i-1)\cdot(1-r_i)/(2r_i-1)$. Factoring $\prod_i(2r_i-1)$ from all summands leaves the evaluation of $\mathscr M_m(P)$ at the displayed point.
+\end{proof}
+
+\begin{corollary}[Characteristic-two fold identity]\label{cor:kbalgebra:char2-multilinear}
+If $\operatorname{char}\F=2$, then $2r_i-1=1$ and $1-r_i=1+r_i$ for every $i$, and hence
+\begin{equation}\label{eq:kbalgebra:char2-multilinear}
+ \boxed{\KFold_r(P)=\mathscr M_m(P)(1+r_0,\ldots,1+r_{m-1}).}
+\end{equation}
+\end{corollary}
+\begin{proof}
+In characteristic two the hypotheses of Corollary~\ref{cor:kbalgebra:weighted-eval} hold automatically because $2r_i-1=-1=1$. Substituting $2r_i-1=1$ and $1-r_i=1+r_i$ into~\eqref{eq:kbalgebra:weighted-eval} yields the statement.
+\end{proof}
+
+\begin{remark}[Critical characteristic distinction]
+The identity~\eqref{eq:kbalgebra:char2-multilinear} is special to characteristic two. In odd characteristic the correct universal identity is the weighted tensor functional~\eqref{eq:kbalgebra:tensor-fold}; one must not evaluate $\mathscr M_m(P)$ at $1+r$ without the appropriate weights and reparametrization.
+\end{remark}
