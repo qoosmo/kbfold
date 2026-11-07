@@ -131,7 +131,7 @@ This exact identity is the starting point for analyzing the enlarged Reed--Solom
 
 **Source:** `sections/05-folding.tex` with seven small subsections.
 **Lean map:** [CHAPTER_05_LEAN_MAP.md](CHAPTER_05_LEAN_MAP.md).
-**Audit:** 62 individually labeled definitions/results; 49 complete paper proofs. New Chapter 5 declarations are **not yet checked in Lean**.
+**Audit:** 64 individually labeled definitions/results; 51 complete paper proofs. New Chapter 5 declarations are **not yet checked in Lean**.
 
 Main proved algebraic statements:
 
@@ -145,5 +145,6 @@ Main proved algebraic statements:
 - Exact enlarged-degree RS codeword folding and rate transition for `B=2^t`.
 - Local residual root count and two-point constant-term check for a degree-<2 final polynomial.
 - Exact fixed-schedule joint masking criterion via the image of a finite-field linear map.
+- Explicit one-query attack showing that disclosure of the final mask slope can cancel a degree-zero mask from an earlier oracle opening, even when both messages are individually uniform.
 
 **Security boundary:** The chapter does not prove that a malicious oracle lies near the enlarged RS code, nor the joint authenticated online ZK simulator. Those are new protocol theorems, not consequences of the algebraic identities.
