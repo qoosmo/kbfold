@@ -1,0 +1,68 @@
+\subsection{Masking a sumcheck: the precise linear algebra}\label{sec:history:masking}
+
+The purpose of zero knowledge is separate from completeness and soundness: a verifier should be able to check the stated relation without learning witness-dependent information beyond the allowed public input. The definitions of full transcript simulation and the oracle-query model will be fixed in Chapter~3. This section proves the elementary masking identities that are used throughout later chapters. Libra~\cite{XieEtAl2019Libra} is an important historical example of masking intermediate polynomial messages in an efficient zero-knowledge proof system.
+
+\begin{definition}[Uniform additive mask]\label{def:history:pad}
+Let $V$ be a finite-dimensional vector space over a finite field $\F$. Let $s\in V$ be fixed and let $p\in V$ be a uniform random variable. The \emph{additively masked message} is $m:=s+p$.
+\end{definition}
+
+\begin{lemma}[One-time-pad distribution]\label{lem:history:otp}
+For each fixed $s\in V$, the masked message $m=s+p$ is uniformly distributed on $V$. In particular, its distribution does not depend on $s$.
+\end{lemma}
+\begin{proof}
+For any $a\in V$, the event $m=a$ is equivalent to $p=a-s$. Since $p$ is uniform, its probability is $1/|V|$. This is the same for every $a$ and every fixed $s$.
+\end{proof}
+
+\begin{definition}[Boolean summation functional]\label{def:history:sumfunctional}
+Let $m\geq1$ and let $\mathcal V$ be a finite-dimensional $\F$-vector space of polynomials in $m$ variables containing the constant polynomials. Define the $\F$-linear functional
+\[
+ \mathscr S:\mathcal V\to\F,\qquad
+ \mathscr S(P):=\sum_{b\in\{0,1\}^m}P(b).
+\]
+Put $\mathcal Z:=\ker \mathscr S$.
+\end{definition}
+
+\begin{lemma}[Zero-sum polynomial masks]\label{lem:history:zerosum}
+For every $G\in\mathcal V$ and every $R\in\mathcal Z$,
+\[
+ \mathscr S(G+R)=\mathscr S(G).
+\]
+If $R$ is uniform on the finite vector space $\mathcal Z$, then $G+R$ is uniform on the affine coset $G+\mathcal Z$. Its distribution depends only on the coset, or equivalently on $\mathscr S(G)$ when $\mathscr S$ is surjective.
+\end{lemma}
+\begin{proof}
+By linearity, $\mathscr S(G+R)=\mathscr S(G)+\mathscr S(R)$, and the second term is zero. Translation by $G$ is a bijection $\mathcal Z\to G+\mathcal Z$, which proves uniformity. If $\mathscr S$ is surjective, its fibers are precisely the affine cosets of its kernel: $\mathscr S(G_1)=\mathscr S(G_2)$ iff $G_1-G_2\in\mathcal Z$. This proves the final assertion.
+\end{proof}
+
+\begin{lemma}[An explicit zero-sum polynomial]\label{lem:history:explicit-mask}
+For any field $\F$, any integer $m\geq1$, and any polynomial $H\in\F[X_1,\ldots,X_{m-1}]$, put
+\[
+ R(X_0,\ldots,X_{m-1}):=(2X_0-1)H(X_1,\ldots,X_{m-1}).
+\]
+Then $\mathscr S(R)=0$ whenever $R$ lies in the chosen ambient space $\mathcal V$.
+\end{lemma}
+\begin{proof}
+For each fixed $b\in\{0,1\}^{m-1}$, the sum over $x_0\in\{0,1\}$ is
+\[
+  (-1)H(b)+(2-1)H(b)=(-1+1)H(b)=0.
+\]
+Summing this identity over all $b$ proves the claim. The calculation holds in every characteristic; in characteristic two the polynomial $2X_0-1$ is the constant $1$, which still sums to zero over the two Boolean values.
+\end{proof}
+
+\begin{lemma}[First-round masking identity]\label{lem:history:round-mask}
+Let $G$ and $R$ be multivariate polynomials in $m$ variables, and let
+\[
+ h^G_0(T)=\sum_{b\in\{0,1\}^{m-1}}G(T,b),\qquad
+ h^R_0(T)=\sum_{b\in\{0,1\}^{m-1}}R(T,b).
+\]
+Then the first honest sumcheck message for $G+R$ is exactly
+\[
+ h^{G+R}_0(T)=h^G_0(T)+h^R_0(T).
+\]
+\end{lemma}
+\begin{proof}
+Distribute the finite sum $\sum_b(G(T,b)+R(T,b))$ in $\F[T]$. No probabilistic hypothesis is needed.
+\end{proof}
+
+\begin{remark}[The condition missing from a simple algebraic mask]\label{rem:history:mask-not-full}
+Preserving $\mathscr S(G)$ is only one algebraic requirement. To obtain zero knowledge for a concrete interactive protocol one must ensure that the \emph{joint distribution} of all exposed polynomial coefficients, oracle replies, final tables, and authentication information can be simulated from allowed public data. A uniform mask in $\ker\mathscr S$ does not, without a degree-compatible hiding oracle and a simulation theorem, establish zero knowledge. We will not transfer Lemma~\ref{lem:history:zerosum} into a full ZK theorem without those hypotheses.
+\end{remark}
