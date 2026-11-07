@@ -8,8 +8,12 @@ Let $\Pi=(P,V)$ be an oracle IOP for Definition~\ref{def:security:exactrel}. It 
 the honest prover $P$ using witness $f$ makes the honest verifier $V$ accept with probability $1$ over all independent prover coins and verifier challenges.
 \end{definition}
 
-\begin{definition}[False-statement acceptance experiment]\label{def:security:bad-proof}
-Fix $\tau\geq0$. The experiment $\mathsf{FalseAccept}_{\Pi,\tau}(w,z,v;P^*)$ samples all random tapes and public-coin challenges according to $\Pi$, runs the causal adversarial prover $P^*$ with the fixed initial oracle $w$ and explicit instance $(z,v)$, and outputs $1$ exactly when
+\begin{definition}[False-claim experiment]\label{def:security:bad-proof}
+Fix $\tau\geq0$. Define the experiment
+\[
+ \mathsf{FalseAccept}_{\Pi,\tau}(w,z,v;P^*).
+\]
+It samples the tapes and public-coin challenges of $\Pi$, runs a causal adversarial prover $P^*$ on oracle $w$ and explicit instance $(z,v)$, and outputs $1$ exactly when
 \[
   (w;z,v)\notin\mathcal L_\tau
   \quad\land\quad V\text{ accepts}.
