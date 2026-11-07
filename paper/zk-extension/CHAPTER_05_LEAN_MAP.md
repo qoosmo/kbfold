@@ -2,7 +2,7 @@
 
 **Scope:** Multilinear restrictions, arbitrary-characteristic normalized folds, the exact degree-aware masked polynomial chain, odd-characteristic codeword folding, local closure tests, and the joint fixed-schedule oracle masking criterion.
 
-**Audit:** 62 labeled definitions/results; 49 mathematical results with complete proofs in LaTeX. These are **paper proofs**, not yet new Lean-certified results.
+**Audit:** 64 labeled definitions/results; 51 mathematical results with complete proofs in LaTeX. These are **paper proofs**, not yet new Lean-certified results.
 
 ## Statement-by-statement map
 
@@ -70,6 +70,8 @@
 | `05g-joint-observations` | theorem | Exact joint fixed-schedule masking criterion | `thm:kbff:joint-mask` | `ZKFold.joint_mask` | Paper proof |
 | `05g-joint-observations` | corollary | Sufficient condition for witness-independent fixed-schedule answers | `cor:kbff:joint-surjective` | `ZKFold.joint_surjective` | Paper proof |
 | `05g-joint-observations` | lemma | Dimension obstruction to surjectivity | `lem:kbff:rank-obstruction` | `ZKFold.rank_obstruction` | Paper proof |
+| `05g-joint-observations` | theorem | One-query attack on a reused degree-zero mask | `thm:kbff:one-query-attack` | `ZKFold.one_query_attack` | Paper proof |
+| `05g-joint-observations` | corollary | Separate uniform marginals are insufficient | `cor:kbff:uniform-marginals` | `ZKFold.uniform_marginals` | Paper proof |
 
 ## Dependency-order Lean modules
 
@@ -79,7 +81,7 @@
 4. `ZKFold/MaskedModule.lean` — direct-sum embedding, high-degree masks, degree budget, linear final closure.
 5. `ZKFold/CodewordFold.lean` — odd characteristic, multiplicative 2-power subgroup, word fold, RS rate bounds.
 6. `ZKFold/LocalVerification.lean` — root-count detection under degree membership and two-point linear closure.
-7. `ZKFold/JointMasking.lean` — finite-field linear mask image, uniform cosets, exact total-variation criterion for fixed schedules.
+7. `ZKFold/JointMasking.lean` — finite-field linear mask image, uniform cosets, exact total-variation criterion for fixed schedules and an explicit one-query joint-leakage attack.
 
 ## Algebraic interface to subsequent ZK-KBFold chapters
 
@@ -88,7 +90,8 @@ Let `N=2^m`, `1 ≤ B ≤ N`, `deg R<B`, and `Q₀=U_f + X^N R`. Theorems from t
 - `deg Qⱼ < N/2^j + ceil(B/2^j)`;
 - `Q_m = MLE(f)(r) + rho_r(R)*X`, hence `coeff(Q_m,0)=MLE(f)(r)`;
 - local word-fold verification against degree-bounded polynomials;
-- exact fixed-schedule joint privacy criterion `S(f-g) ∈ range(T)`.
+- exact fixed-schedule joint privacy criterion `S(f-g) ∈ range(T)`;
+- **reused-mask attack:** even when an initial opening and the final line slope are each uniform, their joint distribution can reveal the witness perfectly.
 
 **Unproved protocol obligations:** malicious non-codeword soundness at the increased code rate, masked Sumcheck, authenticated-oracle online simulator, and QROM compilation. None follows merely from the algebraic theorems.
 
