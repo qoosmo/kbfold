@@ -1,0 +1,263 @@
+\subsection{Elimination, random batching, and algebraic composition soundness}\label{sec:packing:soundness}
+
+The following analysis fixes the hidden witness and
+all algebraic values that enter the outgoing equation
+\emph{before} the first random batching challenge.
+This is necessary to apply Schwartz--Zippel:
+if the prover could change the witness or the
+masked vector after seeing $\theta$, it could
+manufacture a root of the discrepancy polynomial.
+
+\begin{definition}[The three public-value constraints]\label{def:pack:interfaces}
+For public $w$-dependent packed values
+$(\widehat w_j)_j$, public masked messages
+$m\in L^I$, $y'\in L$, a public claimed
+evaluation $y_{\mathrm{pub}}$, and hidden
+$p,p_{\mathrm{in}},c$, consider:
+\begin{align}
+ y'&=y_{\mathrm{pub}}+p_{\mathrm{in}},
+   \tag{$\mathsf{CLAIM}$}\label{eq:pack:claim}\\
+ \sum_vq_vm_v+y'&=\sum_vq_vp_v+p_{\mathrm{in}},
+   \tag{$\mathsf{IN}$}\label{eq:pack:in-new}\\
+ \sum_ja_j(\theta)\widehat w_j
+   &=B_m(\theta)+D_c(\theta).
+   \tag{$\mathsf{OUT}$}\label{eq:pack:out-new}
+\end{align}
+The first two are affine relations in hidden
+extension-field values; the third is affine
+in hidden packed witness elements and $c$
+after $m,\theta$ are public. The further
+constraint $c=\mathcal T(p)$ is not
+$L$-affine; it will be checked by the
+characteristic-two algebraic checker from
+Chapter~6.
+\end{definition}
+
+\begin{definition}[Partial-evaluation and correction errors]\label{def:pack:errors}
+For arbitrary $m,p,c$, define
+\[
+ e:=m+s^*+p\in L^I,\qquad
+ \kappa:=c+c^p\in L^I.
+\]
+Because the characteristic is two,
+$e=0$ is equivalent to $m=s^*+p$,
+and $\kappa=0$ to $c=c^p$.
+\end{definition}
+
+\begin{lemma}[Exact outgoing discrepancy decomposition]\label{lem:pack:out-error}
+For every $\theta\in L^\ell$,
+\[
+ \boxed{
+ B_m(\theta)+D_c(\theta)
+   +\sum_ja_j(\theta)\widehat w_j
+ = B_e(\theta)+D_\kappa(\theta).
+ }
+\]
+\end{lemma}
+\begin{proof}
+By the correct packed identity
+Theorem~\ref{thm:pack:batch-correct},
+$\sum_ja_j\widehat w_j=B_{s^*}$.
+By the definition $e=m+s^*+p$,
+we have $m=e+s^*+p$. Since $B$
+is additive,
+$B_m=B_e+B_{s^*}+B_p$.
+Substitution into the left side cancels
+the two copies of $B_{s^*}$.
+The remaining expression is
+$B_e+B_p+D_c$.
+By Definition~\ref{def:pack:pad-coeff},
+$B_p=D_{c^p}$, and linearity of
+$D$ in its coefficient table gives
+$D_{c^p}+D_c=D_{c^p+c}=D_\kappa$.
+\end{proof}
+
+\begin{lemma}[A correct correction isolates the partial-evaluation error]\label{lem:pack:out-isolates}
+If $c=c^p$, then the outgoing
+equation~\eqref{eq:pack:out-new} holds
+exactly when $B_e(\theta)=0$.
+\end{lemma}
+\begin{proof}
+The assumption gives $\kappa=0$,
+so $D_\kappa=0$ by its defining sum.
+Lemma~\ref{lem:pack:out-error}
+shows that the sum of the two
+sides of the outgoing equation is
+$B_e(\theta)$. In characteristic two,
+two field elements are equal precisely
+when their sum is zero.
+\end{proof}
+
+\begin{lemma}[A false claim and the incoming relations force a row error]\label{lem:pack:false-forces-error}
+Assume $\mathsf{CLAIM}$ and $\mathsf{IN}$,
+and suppose
+$y_{\mathrm{pub}}\neq y_w$.
+Then $e\neq0$.
+\end{lemma}
+\begin{proof}
+Suppose instead $e=0$.
+By Definition~\ref{def:pack:errors},
+$m=s^*+p$. The claim and
+incoming equations imply
+$y_{\mathrm{pub}}=\sum_vq_v(m_v+p_v)$
+by Lemma~\ref{lem:pack:incoming-eliminate}.
+Substituting $m+p=s^*$ gives
+$y_{\mathrm{pub}}=\sum_vq_vs_v^*$,
+which equals $y_w$ by
+Lemma~\ref{lem:pack:partial-eval}.
+This contradicts the false-claim hypothesis.
+\end{proof}
+
+\begin{theorem}[False-claim soundness with exact correction]\label{thm:pack:sound-exact}
+Fix $w,m,p,c,y',p_{\mathrm{in}},
+y_{\mathrm{pub}},r_{\mathrm{lo}},r_{\mathrm{hi}}$
+before uniform $\theta\in L^\ell$.
+Suppose $c=c^p$ and
+$y_{\mathrm{pub}}\neq y_w$.
+Then
+\[
+ \Pr_\theta[
+ \mathsf{CLAIM}\land\mathsf{IN}
+               \land\mathsf{OUT}]
+ \leq \min\{1,\ell/q\}.
+\]
+\end{theorem}
+\begin{proof}
+If either the claim or incoming equation
+fails, the acceptance event is empty.
+Otherwise Lemma~\ref{lem:pack:false-forces-error}
+implies that the fixed vector
+$e=m+s^*+p$ is nonzero.
+Lemma~\ref{lem:pack:out-isolates}
+makes the outgoing equation equivalent
+to $B_e(\theta)=0$.
+Because $e$ is fixed before $\theta$,
+Theorem~\ref{thm:pack:batch-sound}
+bounds that event by $\ell/q$.
+\end{proof}
+
+\begin{definition}[Combined algebraic acceptance event]\label{def:pack:combined}
+Let $\mathsf{Check}_{6}(\theta,z)$ denote
+acceptance of the algebraic consistency
+checker in Definition~\ref{def:binary:checks},
+instantiated with the same hidden pad
+vector $p$, candidate coefficient table $c$,
+and public challenge $\theta$.
+It uses auxiliary hidden vectors/scalars
+$t,\rho,\sigma$ and published values $U,A$
+subject to the timing in Chapter~6.
+Define
+\[
+ \mathsf{Accept}_{7}:=
+ \mathsf{CLAIM}\land\mathsf{IN}
+ \land\mathsf{OUT}\land
+ \mathsf{Check}_{6}(\theta,z).
+\]
+\end{definition}
+
+\begin{theorem}[Complete algebraic soundness of packed Ring Switching]\label{thm:pack:algebraic-sound}
+Fix $w$, its packed column elements
+$(\widehat w_j)$, $m,p,c$,
+$y_{\mathrm{pub}},y',p_{\mathrm{in}}$,
+and the evaluation points
+$r_{\mathrm{lo}},r_{\mathrm{hi}}$
+before an independent uniform
+$\theta\in L^\ell$.
+After $\theta$, an adversary may choose
+the auxiliary hidden values and public
+trace-zero vector of the Chapter~6 checker,
+but all those choices are fixed before
+an independent uniform $z\in L$;
+it may choose the final public scalar
+$A$ after seeing $z$.
+Suppose $y_{\mathrm{pub}}\neq y_w$.
+Then
+\[
+ \boxed{
+ \Pr_{\theta,z}[\mathsf{Accept}_{7}]
+ \leq
+ \min\left\{1,\frac{\ell+n}{q}\right\},
+ \qquad n=2^\ell,\ q=2^n.}
+\]
+The bound is for the \emph{algebraic constraints},
+not for a concrete externally instantiated
+commitment or affine-proof system.
+\end{theorem}
+\begin{proof}
+Because $p,c$ are fixed before
+$\theta$, precisely one of the two
+cases below holds before challenges
+are drawn.
+
+If $c\neq c^p$, acceptance of
+$\mathsf{Accept}_{7}$ entails
+acceptance of the Chapter~6 checker.
+Theorem~\ref{thm:binary:two-challenge}
+bounds this probability by
+$\min\{1,(\ell+n)/q\}$
+under the stated timing, regardless
+of the additional incoming and outgoing
+constraints.
+
+If $c=c^p$, the Chapter~6 checker
+can only reduce the probability of
+acceptance. Therefore
+$\Pr[\mathsf{Accept}_{7}]$ is at most
+the probability of satisfying
+$\mathsf{CLAIM}$, $\mathsf{IN}$ and
+$\mathsf{OUT}$.
+By Theorem~\ref{thm:pack:sound-exact},
+this is at most $\min\{1,\ell/q\}$.
+
+The maximum of the bounds of the two
+mutually exclusive cases is
+$\min\{1,(\ell+n)/q\}$.
+This proves the theorem.
+\end{proof}
+
+\begin{theorem}[Complete algebraic correctness of packed Ring Switching]\label{thm:pack:algebraic-complete}
+Fix a Boolean witness $w$,
+its exact packed columns $\widehat w_j$,
+and the true public claim
+$y_{\mathrm{pub}}=y_w$.
+Choose any $p,p_{\mathrm{in}}\in L$
+of the declared vector/scalar types,
+set $m=s^*+p$, $c=c^p$ and
+$y'=y_{\mathrm{pub}}+p_{\mathrm{in}}$.
+Choose the Chapter~6 auxiliary
+secrets with its honest square relation
+and the public messages as in
+Theorem~\ref{thm:binary:checker-complete}.
+Then $\mathsf{Accept}_{7}$ holds
+for every $\theta,z$.
+\end{theorem}
+\begin{proof}
+The honest masked interfaces satisfy
+$\mathsf{IN}$ and $\mathsf{OUT}$ by
+Theorem~\ref{thm:pack:honest-interfaces};
+the defining choice of $y'$
+gives $\mathsf{CLAIM}$.
+Theorem~\ref{thm:binary:checker-complete}
+proves that the Chapter~6 checker
+accepts every challenge for the honest
+choices of its auxiliary secrets and
+public messages. Thus every conjunct
+in $\mathsf{Accept}_{7}$ is true.
+\end{proof}
+
+\begin{remark}[What the bound excludes]
+The theorem assumes exact enforcement of
+the claimed field-affine relations,
+and that the packed columns, witnesses,
+pads, and correction table cannot be
+changed after seeing $\theta$.
+In an actual system, a commitment or
+auxiliary proof protocol must bind
+those values and prove each affine
+relation with its own soundness bound.
+Our theorem does not claim that
+the resulting IOP has a
+zero-knowledge simulator, nor does it
+prove the odd-characteristic
+KBFold proximity theorem.
+\end{remark}
