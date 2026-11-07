@@ -148,6 +148,64 @@ Surjectivity would give
 $k+1=\dim\operatorname{im}\mathcal T_{r,\Sigma}\leq B$.
 \end{proof}
 
+\begin{theorem}[One-query attack on a reused degree-zero mask]\label{thm:kbff:one-query-attack}
+Assume $\F$ is a finite field of odd characteristic and
+$\Omega_0\leq\F^\times$ is a multiplicative subgroup of order at least $4$,
+containing the point $1$.
+Let $m=1$, $N=2$, $B=1$, and fix the fold challenge $r=0$.
+Consider the tables $f^{(0)},f^{(1)}:I_1\to\F$ given by
+\[
+ f^{(0)}(0)=f^{(0)}(1)=0,\qquad
+ f^{(1)}(0)=0,\quad f^{(1)}(1)=1.
+\]
+Both satisfy the \emph{same} folded evaluation
+$\widetilde{f^{(0)}}(0)=\widetilde{f^{(1)}}(0)=0$.
+Let $R=c$ be uniform on $\F[X]_{<1}$, so $c$ is a uniform scalar.
+For the schedule containing the initial oracle query $Q_0(1)$
+and the final slope $\rho_0(R)$, the joint observations of the two
+tables have total variation distance exactly $1$.
+\end{theorem}
+\begin{proof}
+By the kernel definition for $m=1$, $K_0(X)=X$ and
+$K_1(X)=X+1$. Thus
+$U_{f^{(0)}}=0$ and $U_{f^{(1)}}=X+1$.
+The initial masked polynomial is
+$Q_0^{(0)}(X)=cX^2$ for the first table and
+$Q_0^{(1)}(X)=X+1+cX^2$ for the second.
+Evaluating at $X=1$ gives, respectively,
+$Q_0^{(0)}(1)=c$ and $Q_0^{(1)}(1)=2+c$.
+
+The normalized fold of the constant mask $R=c$ at challenge $0$ is
+$\pfold_0(c)=(2\cdot0-1)c=-c$, by
+Lemma~\ref{lem:kbff:fold-even} with exponent zero.
+Therefore the final folded line has slope
+$\rho_0(R)=-c$ for both witnesses.
+For the observed pair $(a,\rho)=(Q_0(1),\rho_0(R))$,
+the verifier computes the deterministic statistic $a+\rho$.
+It equals $c-c=0$ under $f^{(0)}$, and
+$(2+c)-c=2$ under $f^{(1)}$.
+Because $\operatorname{char}(\F)\neq2$, these two values are distinct.
+The supports of the two observed-pair distributions are therefore
+disjoint. By Lemma~\ref{lem:security:events}, their total variation
+distance is $1$. The common public folded scalar is zero by
+Boolean interpolation, Lemma~\ref{lem:intro:interpolation}.
+\end{proof}
+
+\begin{corollary}[Separate uniform marginals are insufficient]\label{cor:kbff:uniform-marginals}
+In Theorem~\ref{thm:kbff:one-query-attack}, each of
+$Q_0(1)$ and $\rho_0(R)$ is individually uniform on $\F$ for
+both witnesses, although their joint distributions are perfectly
+distinguishable.
+\end{corollary}
+\begin{proof}
+The variable $c$ is uniform on $\F$. Each initial opening has
+the form $c+a$ for a fixed $a\in\{0,2\}$, so it is uniform by
+Lemma~\ref{lem:history:otp}. The slope is $-c$ and negation
+is a bijection of $\F$, so the slope is uniform as well.
+Theorem~\ref{thm:kbff:one-query-attack} proves the perfect
+distinguishability of the joint pair.
+\end{proof}
+
 \begin{remark}[Final line coefficients are correlated with earlier openings]
 The last observation $\rho_r(R)$ is a linear functional of the
 \emph{same} mask that randomizes the earlier oracle values.
