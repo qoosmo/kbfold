@@ -18,7 +18,7 @@ A full transcript is the typed tuple
 where $x$ may contain a read-only initial oracle $\mathcal O_{w_0}$. The honest verifier can subsequently query entries of the instance and message oracles, and its acceptance predicate depends only on explicit messages, challenges, and the queried entries.
 \end{definition}
 
-\begin{definition}[Timing-respecting prover]\label{def:security:causal-prover}
+\begin{definition}[Causal prover]\label{def:security:causal-prover}
 A deterministic prover is a family of functions $(P_i)_{1\leq i\leq t}$ such that
 \[
  m_i=P_i(x,\mathsf{wit},c_1,\ldots,c_{i-1}).
@@ -82,9 +82,12 @@ $(a,\pi)=\mathsf{Open}(\mathsf{st},\xi)$, \emph{perfect correctness} is the asse
 for every $w,\rho,\xi$.
 \end{definition}
 
-\begin{definition}[Coordinate-binding experiment]\label{def:security:binding}
+\begin{definition}[Coordinate binding]\label{def:security:binding}
 For an adversary $\mathcal A$ outputting a tuple
-$(\mathsf{cm},\xi,a,\pi,a',\pi')$, define
+\[
+ (\mathsf{cm},\xi,a,\pi,a',\pi'),
+\]
+define
 \[
  \mathsf{BadBind}(\mathcal A)
  :=
