@@ -245,3 +245,115 @@ fn chapter7_packed_ring_switching(){
  ring_switch_case(GF{degree:4,irreducible:0x13},2,&mut seed);
  ring_switch_case(GF{degree:8,irreducible:0x11b},3,&mut seed);
 }
+
+
+// Chapter 8: explicit L tensor_(F2) L using a left-L basis 1 ⊗ beta_v.
+// All operations are executable over GF(16) and GF(256).
+fn ten_zero(n:usize)->Vec<u16>{vec![0u16;n]}
+fn ten_add(a:&[u16],b:&[u16])->Vec<u16>{
+ assert_eq!(a.len(),b.len());a.iter().zip(b).map(|(x,y)|x^y).collect()
+}
+fn ten_phi0(f:GF,coord:&[usize],a:u16)->Vec<u16>{
+ (0..f.degree).map(|v|if (coord[1]>>v)&1==1 {a}else{0}).collect()
+}
+fn ten_phi1(f:GF,coord:&[usize],a:u16)->Vec<u16>{
+ (0..f.degree).map(|v|((coord[a as usize]>>v)&1)as u16).collect()
+}
+fn ten_mul(f:GF,beta:&[u16],coord:&[usize],a:&[u16],b:&[u16])->Vec<u16>{
+ let n=f.degree;
+ assert_eq!(a.len(),n);assert_eq!(b.len(),n);
+ let mut out=ten_zero(n);
+ for i in 0..n {for j in 0..n{
+  let scalar=f.mul(a[i],b[j]);
+  let bits=coord[f.mul(beta[i],beta[j]) as usize];
+  for v in 0..n {if (bits>>v)&1==1 {out[v]^=scalar;}}
+ }}
+ out
+}
+fn ten_mu(f:GF,beta:&[u16],a:&[u16])->u16{
+ a.iter().enumerate().fold(0,|acc,(i,x)|acc^f.mul(*x,beta[i]))
+}
+fn ten_contraction(f:GF,q:&[u16],a:&[u16])->u16{
+ q.iter().zip(a).fold(0,|acc,(x,y)|acc^f.mul(*x,*y))
+}
+fn ring_switch_tensor_case(f:GF,ell:usize,seed:&mut u64){
+ let n=f.degree;let q=f.q();let (beta,coord,_eta)=basis_and_coords(f,ell);
+ for high in 1usize..=3 {
+  let cols=1usize<<high;
+  for _trial in 0..34 {
+   let mut bits=vec![vec![0u16;cols];n];
+   for v in 0..n{for j in 0..cols{bits[v][j]=next(seed,q)&1;}}
+   let mut packed=vec![0u16;cols];
+   for j in 0..cols{for v in 0..n{if bits[v][j]==1{packed[j]^=beta[v];}}}
+   let r_hi:Vec<u16>=(0..high).map(|_|next(seed,q)).collect();
+   let r_lo:Vec<u16>=(0..ell).map(|_|next(seed,q)).collect();
+   let hi:Vec<u16>=(0..cols).map(|j|f.lambda(j,&r_hi)).collect();
+   let lo:Vec<u16>=(0..n).map(|v|f.lambda(v,&r_lo)).collect();
+   let unit=ten_phi0(f,&coord,1);
+   assert_eq!(unit,ten_phi1(f,&coord,1));
+   // Both embeddings preserve multiplication, and mu agrees with multiplication.
+   let a=next(seed,q);let b=next(seed,q);
+   assert_eq!(ten_mul(f,&beta,&coord,&ten_phi0(f,&coord,a),&ten_phi0(f,&coord,b)),
+              ten_phi0(f,&coord,f.mul(a,b)));
+   assert_eq!(ten_mul(f,&beta,&coord,&ten_phi1(f,&coord,a),&ten_phi1(f,&coord,b)),
+              ten_phi1(f,&coord,f.mul(a,b)));
+   let mut S=ten_zero(n);
+   let mut partial=vec![0u16;n];
+   for j in 0..cols{
+    let term=ten_mul(f,&beta,&coord,
+      &ten_phi1(f,&coord,packed[j]),&ten_phi0(f,&coord,hi[j]));
+    S=ten_add(&S,&term);
+   }
+   for v in 0..n{for j in 0..cols{if bits[v][j]==1{partial[v]^=hi[j];}}}
+   assert_eq!(S,partial,"tensor columns equal partial evaluation vector");
+   let mut expected_y=0u16;
+   for v in 0..n {expected_y^=f.mul(lo[v],partial[v]);}
+   assert_eq!(ten_contraction(f,&lo,&S),expected_y);
+   let mut packed_hi=0u16;
+   for j in 0..cols{packed_hi^=f.mul(hi[j],packed[j]);}
+   assert_eq!(ten_mu(f,&beta,&S),packed_hi);
+   let z:Vec<u16>=(0..high).map(|_|next(seed,q)).collect();
+   let mut tprime=0u16;
+   for j in 0..cols {tprime^=f.mul(packed[j],f.lambda(j,&z));}
+   let mut factor=unit.clone();
+   for t in 0..high{
+     // In characteristic 2, eq(R,Z) = 1+R+Z in the tensor ring.
+     let eq=ten_add(&ten_add(&unit,&ten_phi0(f,&coord,r_hi[t])),
+                   &ten_phi1(f,&coord,z[t]));
+     factor=ten_mul(f,&beta,&coord,&factor,&eq);
+   }
+   let hterm=ten_mul(f,&beta,&coord,
+         &ten_phi1(f,&coord,tprime),&factor);
+   // Independently expand the tensor H on Boolean columns.
+   let mut hx=ten_zero(n);
+   for j in 0..cols {
+    let weighted=ten_mul(f,&beta,&coord,
+      &ten_phi1(f,&coord,packed[j]),&ten_phi1(f,&coord,f.lambda(j,&z)));
+    hx=ten_add(&hx,&weighted);
+   }
+   hx=ten_mul(f,&beta,&coord,&hx,&factor);
+   assert_eq!(hterm,hx,"terminal tensor reduction");
+   let mut roots=0;
+   let aa0:(Vec<u16>)=(0..n).map(|_|next(seed,q)).collect();
+   let aa1:(Vec<u16>)=(0..n).map(|_|next(seed,q)).collect();
+   let mut aa2:(Vec<u16>)=(0..n).map(|_|next(seed,q)).collect();
+   if aa0.iter().all(|x|*x==0)&&aa1.iter().all(|x|*x==0)&&aa2.iter().all(|x|*x==0){aa2[0]=1;}
+   for zval in 0..q {
+    let zt=ten_phi1(f,&coord,zval as u16);
+    let z2=ten_mul(f,&beta,&coord,&zt,&zt);
+    let v=ten_add(&aa0,&ten_add(
+      &ten_mul(f,&beta,&coord,&aa1,&zt),
+      &ten_mul(f,&beta,&coord,&aa2,&z2)));
+    if v.iter().all(|x|*x==0){roots+=1;}
+   }
+   assert!(roots<=2,"degree two polynomial must have <=2 embedded roots");
+  }
+ }
+ println!("Chapter 8: tensor columns, contraction, terminal and roots over GF(2^{n}) passed");
+}
+#[test]
+fn chapter8_diamond_posen_tensor_ring(){
+ let mut seed=0xC8A8_2026_BCDE_4455u64;
+ ring_switch_tensor_case(GF{degree:4,irreducible:0x13},2,&mut seed);
+ ring_switch_tensor_case(GF{degree:8,irreducible:0x11b},3,&mut seed);
+}
