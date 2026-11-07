@@ -1,0 +1,72 @@
+\section{Zero-Knowledge Ring Switching: Public Simulation and Proof Interfaces}\label{sec:zkrs}
+This chapter formalizes the masking interface built in Chapters~6--7
+and distinguishes three progressively stronger statements:
+\emph{perfect privacy of the public field messages},
+\emph{perfect complete-view privacy under an opaque ideal proof
+functionality}, and \emph{conditional real-world zero knowledge}
+requiring a separately proved external-interface simulator.
+The order matters. One cannot infer that a cryptographic protocol
+is zero knowledge merely because each individual field message
+is uniform. The original unmasked tensor compiler is treated
+in Chapter~8~\cite{DiamondPosen2024}; the ZK ring-switching
+literature is discussed in
+\cite{Kochergin2026,FrigoShelat2026}.
+We make no claim that our specific binary-field kernel encoding
+is a drop-in zero-knowledge extension of the existing
+odd-characteristic KBFold PCS.
+
+\input{sections/09a-model-and-protocol}
+\input{sections/09b-perfect-core}
+\input{sections/09c-conditional-witnesses}
+\input{sections/09d-affine-interface}
+\input{sections/09e-soundness-and-reuse}
+\input{sections/09f-ideal-and-composition}
+\input{sections/09g-efficiency-ledger}
+
+\subsection{Summary and exact theorem boundary}\label{sec:zkrs:conclusion}
+
+For one admissible opening, sample independent uniform
+$p\in L^{I_\ell}$, $p_{\rm in}\in L$, $t\in L^{I_\ell}$
+and $\rho\in L$ and define
+\[
+ m=s^*+p,\quad y'=y+p_{\rm in},\quad c=\mathcal T(p),\quad
+ U_k=V_k(p,c,\theta)+t_k^2+t_k,\quad
+ A=\rho+\sum_kW_k(z)t_k.
+\]
+Theorem~\ref{thm:zkrs:perfect-core} establishes the
+\emph{exact} witness-independent joint distribution of
+the public core for every causal verifier:
+\[
+ \boxed{
+ \mathsf{Law}(\mathsf{Core}_{w,V^*})
+ =\mathsf{Law}(\mathsf{Sim}_{\rm core}^{V^*}).
+ }
+\]
+All enforced algebraic constraints are affine in hidden
+extension-field variables after the public challenges
+and messages are fixed, and a nonzero anchored residual
+is detected with probability at least $1-n/q$
+(Theorem~\ref{thm:zkrs:residual-detection}).
+For the combined ideal masked Ring Switching interface,
+a false committed evaluation claim is accepted with probability
+at most
+\[
+ \boxed{\varepsilon_{\rm alg}\leq
+         \min\{1,(\ell+n)/q\}.}
+\]
+Theorem~\ref{thm:zkrs:ideal-full-zk} gives perfect complete-view
+zero knowledge only in a strictly opaque ideal interface.
+Theorem~\ref{thm:zkrs:conditional-zk} states the precise
+additional requirement on a concrete external proof system:
+a sequential witness-independent simulator for its complete
+commitment, proof and authenticated-opening transcripts.
+
+Neither of those results is an unconditional cryptographic
+zero-knowledge proof for a deployed PCS. In particular,
+the multiple-opening pad-reuse construction is provably
+insecure (Theorem~\ref{thm:zkrs:reuse-attack}),
+and an unmasked original KBFold oracle is not private
+(Theorem~\ref{thm:security:unmasked-obstruction}).
+The next stage must instantiate and prove the missing
+external-interface realization and the odd-characteristic
+KBFold-specific adaptive view simulator.
