@@ -1,0 +1,116 @@
+\subsection{Frobenius stability and the Boolean kernel partition}\label{sec:binary:kernel}
+
+Fix $\ell\geq1$ and put $n:=2^\ell$. Let $I_\ell=\{0,1\}^\ell$, and let
+$K_b(X)=\prod_{i=0}^{\ell-1}(X^{2^i}+b_i)$ denote the Boolean kernel from Definition~\ref{def:intro:kernel}.
+
+\begin{lemma}[Binary coefficients of a kernel]\label{lem:binary:binary-coeffs}
+For every $b\in I_\ell$, the polynomial $K_b$ has all coefficients in
+the prime subfield $\F_2\subseteq\F$.
+\end{lemma}
+\begin{proof}
+Every factor $X^{2^i}+b_i$ has coefficients in $\F_2$ because
+$b_i\in\{0,1\}$. A finite product of polynomials with coefficients
+in a subfield again has coefficients in that subfield, by the
+finite-sum formula for multiplication coefficients.
+\end{proof}
+
+\begin{lemma}[Kernel coefficient Frobenius invariance]\label{lem:binary:kernel-coeff-frob}
+For $b\in I_\ell$ and $j\geq0$,
+\[
+ K_b^{\sigma_j}(X)=K_b(X).
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:binary:binary-coeffs}, each coefficient is
+$0$ or $1$. Both are fixed by $\sigma_j$, so the coefficientwise
+Frobenius operation leaves the polynomial unchanged.
+\end{proof}
+
+\begin{theorem}[Kernel Frobenius substitution]\label{thm:binary:kernel-square}
+For every $b\in I_\ell$ and $j\geq0$,
+\[
+ \boxed{K_b(X)^{2^j}=K_b(X^{2^j}).}
+\]
+\end{theorem}
+\begin{proof}
+Lemma~\ref{lem:binary:poly-frob} gives
+$K_b(X)^{2^j}=K_b^{\sigma_j}(X^{2^j})$.
+By Lemma~\ref{lem:binary:kernel-coeff-frob} the latter equals
+$K_b(X^{2^j})$.
+\end{proof}
+
+\begin{definition}[Kernel coefficient Frobenius]\label{def:binary:table-frob}
+For a coefficient table $c:I_\ell\to\F$ and $j\geq0$, define
+$c^{\sigma_j}(b):=c(b)^{2^j}$ and
+$U_c(X):=\sum_{b\in I_\ell}c(b)K_b(X)$.
+\end{definition}
+
+\begin{theorem}[Frobenius covariance of kernel encoding]\label{thm:binary:encoding-frob}
+For every coefficient table $c$ and $j\geq0$,
+\[
+ \boxed{U_c(X)^{2^j}=U_{c^{\sigma_j}}(X^{2^j}).}
+\]
+\end{theorem}
+\begin{proof}
+Repeatedly apply Lemma~\ref{lem:binary:square} to the finite sum
+defining $U_c$:
+\[
+ U_c(X)^{2^j}
+ =\sum_b c(b)^{2^j}K_b(X)^{2^j}.
+\]
+Theorem~\ref{thm:binary:kernel-square} turns each kernel factor
+into $K_b(X^{2^j})$, giving
+$\sum_b c^{\sigma_j}(b)K_b(X^{2^j})$,
+which is $U_{c^{\sigma_j}}(X^{2^j})$.
+\end{proof}
+
+\begin{lemma}[Kernel partition sum]\label{lem:binary:partition}
+\[
+ \boxed{\sum_{b\in I_\ell}K_b(X)=1.}
+\]
+\end{lemma}
+\begin{proof}
+Distribute the sum over all bit strings:
+\[
+ \sum_{b\in I_\ell}\prod_{i=0}^{\ell-1}(X^{2^i}+b_i)
+ =\prod_{i=0}^{\ell-1}
+    \bigl((X^{2^i}+0)+(X^{2^i}+1)\bigr).
+\]
+Inside each parenthesis, $X^{2^i}+X^{2^i}=0$ in
+characteristic two, leaving the scalar $1$. The product of
+$\ell$ copies of $1$ is $1$.
+\end{proof}
+
+\begin{corollary}[All-one kernel coordinates of the constant polynomial]\label{cor:binary:one-coeffs}
+Let $\mathbf1:I_\ell\to\F$ be the constant table with value $1$.
+Then $U_{\mathbf1}(X)=1$. Moreover the coordinates of $1$
+in the kernel basis are uniquely all equal to $1$.
+\end{corollary}
+\begin{proof}
+By definition $U_{\mathbf1}=\sum_bK_b=1$,
+using Lemma~\ref{lem:binary:partition}. Uniqueness follows
+from the kernel basis theorem, Proposition~\ref{prop:intro:basis}.
+\end{proof}
+
+\begin{lemma}[Two complementary lowest-bit kernels]\label{lem:binary:complementary}
+For every $b'\in I_{\ell-1}$,
+\[
+ K_{(0,b')}(X)+K_{(1,b')}(X)=K_{b'}^{(\ell-1)}(X^2).
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:intro:recursion},
+$K_{(0,b')}=XK_{b'}^{(\ell-1)}(X^2)$ and
+$K_{(1,b')}=(X+1)K_{b'}^{(\ell-1)}(X^2)$.
+Add and factor out the common polynomial. The scalar
+$X+(X+1)$ equals $1$ because $X+X=0$.
+\end{proof}
+
+\begin{remark}[One important characteristic restriction]
+Lemma~\ref{lem:binary:partition} is false over a general
+odd-characteristic field. The exact all-characteristic identity
+is Proposition~\ref{prop:kbalgebra:partition}. We will use
+$\sum_bK_b=1$ to identify the degeneracy of an \emph{unanchored}
+residual polynomial, so the characteristic assumption cannot
+be dropped.
+\end{remark}
