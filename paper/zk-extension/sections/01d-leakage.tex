@@ -1,0 +1,34 @@
+\subsection{Why zero knowledge is a separate requirement}\label{sec:intro:leakage}
+
+The original KBFold protocol sends a univariate polynomial in each sumcheck round, followed by folded-oracle data and a final table, as specified in the unmasked protocol~\cite{MkhidaKBFold2026}. The next lemma demonstrates a concrete leakage channel, without claiming that an abstract binding commitment has any particular hiding property.
+
+\begin{lemma}[A witness-dependent sumcheck message]\label{lem:intro:leak}
+Let $m=1$, let $z=0\in\F$, and consider two tables $f^{(0)},f^{(1)}:I_1\to\F$ defined by
+\[
+ f^{(0)}(0)=f^{(0)}(1)=0,\qquad f^{(1)}(0)=0,\quad f^{(1)}(1)=1.
+\]
+Then $\widetilde{f^{(0)}}(z)=\widetilde{f^{(1)}}(z)=0$, but their honest first-round sumcheck polynomials for the product $\widetilde f(X)\operatorname{eq}_1(X,z)$ are different: the first is zero and the second is $X(1-X)$.
+\end{lemma}
+\begin{proof}
+By the definition of the multilinear extension in one variable, $\widetilde{f^{(0)}}(X)=0$ and $\widetilde{f^{(1)}}(X)=(1-X)\cdot0+X\cdot1=X$. The weight for $z=0$ is $\operatorname{eq}_1(X,0)=1-X$. Multiplication gives the claimed polynomials. The polynomial $X(1-X)$ has coefficient $1$ at $X$ and is therefore nonzero over every field. Evaluating either multilinear extension at $X=0$ gives the same public value $0$.
+\end{proof}
+
+\begin{remark}[Interpretation of Lemma~\ref{lem:intro:leak}]
+The first-round message is not determined solely by $(z,v)$. In a model where the original witness is supposed to remain hidden, it therefore requires masking or a separate simulation argument. This lemma does not by itself prove a failure of zero knowledge for an arbitrary concrete commitment: the public commitment and the full transcript must be included in the eventual security game.
+\end{remark}
+
+\begin{lemma}[Linearity of kernel masking]\label{lem:intro:linear-masks}
+For any tables $f,R:I_m\to\F$ and $r\in\F$,
+\begin{align}
+ U_{f+R}^{(m)}&=U_f^{(m)}+U_R^{(m)},\label{eq:intro:mask-lin}\\
+ \pfold_r(U_{f+R}^{(m)})&=U_{\Res_r(f)}^{(m-1)}+U_{\Res_r(R)}^{(m-1)},\label{eq:intro:maskfold}\\
+ \widetilde{f+R}(z)&=\widetilde f(z)+\widetilde R(z).\label{eq:intro:maskmle}
+\end{align}
+\end{lemma}
+\begin{proof}
+The first identity follows by distributing the finite sum defining $U_{f+R}$. The second follows by applying the $\F$-linear map $\pfold_r$ to the first identity and then applying Theorem~\ref{thm:intro:dictionary} separately to $f$ and $R$. The third follows by distributing the finite sum defining the multilinear extension.
+\end{proof}
+
+\begin{remark}[High-degree commitment masking]
+The original KBFold conclusion also proposes masking $U_f$ by adding $X^N R(X)$ to the committed polynomial. Such a mask changes the degree, and consequently the code and the proof of the fold dictionary must be re-examined on the enlarged polynomial space. Equations~\eqref{eq:intro:mask-lin}--\eqref{eq:intro:maskmle} apply to the separate table mask $f+R$; they do not by themselves establish a folding theorem for $U_f+X^N R$.
+\end{remark}
