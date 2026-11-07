@@ -1,0 +1,212 @@
+\subsection{Exact transposed evaluation identities}\label{sec:packing:evaluation}
+
+\begin{definition}[Partial evaluations of the original Boolean witness]\label{def:pack:partials}
+For the Boolean table $w$ and public high-variable
+weights $h_j$ from Definition~\ref{def:pack:weights},
+define
+\[
+ s_v^*:=\sum_{j\in J}h_jw_{v,j}\in L,
+ \qquad v\in I.
+\]
+Write $s^*=(s_v^*)_{v\in I}\in L^I$.
+\end{definition}
+
+\begin{lemma}[Partial evaluations recover the claimed value]\label{lem:pack:partial-eval}
+For $q_v$ and $y_w$ as in Definition~\ref{def:pack:weights},
+\[
+ \boxed{y_w=\sum_{v\in I}q_vs_v^*.}
+\]
+\end{lemma}
+\begin{proof}
+Substitute
+$s_v^*=\sum_jh_jw_{v,j}$
+into the right side and distribute the finite sums:
+$\sum_vq_v\sum_jh_jw_{v,j}
+=\sum_{v,j}q_vh_jw_{v,j}$.
+This equals $y_w$ by definition.
+\end{proof}
+
+\begin{lemma}[Coordinate of a Boolean partial sum]\label{lem:pack:partial-coordinate}
+For every $u,v\in I$,
+\[
+ \boxed{d_u(s_v^*)=\sum_{j\in J}d_u(h_j)w_{v,j},}
+\]
+where the sum on the right is taken in $\F_2$.
+\end{lemma}
+\begin{proof}
+By Definition~\ref{def:pack:partials},
+$s_v^*=\sum_jh_jw_{v,j}$.
+The coordinate map $d_u$ is additive and
+$\F_2$-linear; as $w_{v,j}\in\F_2$,
+$d_u(h_jw_{v,j})=d_u(h_j)w_{v,j}$.
+Distribute $d_u$ over the finite sum.
+\end{proof}
+
+\begin{theorem}[Packed transposition identity]\label{thm:pack:transpose-packed}
+For every $u\in I$,
+\[
+ \boxed{
+ \mathcal T(s^*)_u
+ =\sum_{j\in J}d_u(h_j)\widehat w_j.}
+\]
+\end{theorem}
+\begin{proof}
+Expand the transpose and apply
+Lemma~\ref{lem:pack:partial-coordinate}:
+\[
+ \mathcal T(s^*)_u
+ =\sum_v\beta_vd_u(s_v^*)
+ =\sum_v\beta_v\sum_jd_u(h_j)w_{v,j}.
+\]
+Interchange the finite sums and take the
+binary scalar $d_u(h_j)$ outside the inner sum:
+\[
+ \mathcal T(s^*)_u
+ =\sum_jd_u(h_j)\left(\sum_v\beta_vw_{v,j}\right).
+\]
+The term in parentheses is $\widehat w_j$
+by Definition~\ref{def:pack:columns}.
+\end{proof}
+
+\begin{definition}[Random batching weights]\label{def:pack:batch}
+For a public challenge
+$\theta\in L^\ell$, put
+\[
+ \lambda_u(\theta):=\operatorname{eq}_\ell(u,\theta)
+\]
+and define
+\[
+ a_j(\theta):=\sum_{u\in I}
+       \lambda_u(\theta)d_u(h_j)\in L,\qquad
+ B_x(\theta):=\sum_{u\in I}
+       \lambda_u(\theta)\mathcal T(x)_u\in L
+\]
+for any $x\in L^I$.
+\end{definition}
+
+\begin{lemma}[Linearity of batching over the binary prime field]\label{lem:pack:batch-add}
+For $x,y\in L^I$,
+\[
+ B_{x+y}(\theta)=B_x(\theta)+B_y(\theta).
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:pack:transpose-linear},
+$\mathcal T(x+y)=\mathcal T(x)+\mathcal T(y)$.
+Substitute into
+$\sum_u\lambda_u(\theta)\mathcal T(x+y)_u$,
+then distribute the sum.
+\end{proof}
+
+\begin{theorem}[Packed evaluation batching identity]\label{thm:pack:batch-correct}
+For every $\theta\in L^\ell$,
+\[
+ \boxed{
+ B_{s^*}(\theta)=
+   \sum_{j\in J}a_j(\theta)\widehat w_j.}
+\]
+\end{theorem}
+\begin{proof}
+Multiply Theorem~\ref{thm:pack:transpose-packed}
+by $\lambda_u(\theta)$ and sum over $u$:
+\[
+ B_{s^*}(\theta)
+ =\sum_u\lambda_u(\theta)\sum_jd_u(h_j)\widehat w_j.
+\]
+Interchange the two finite sums and factor
+out $\widehat w_j$:
+\[
+ B_{s^*}(\theta)
+ =\sum_j\left(\sum_u\lambda_u(\theta)d_u(h_j)\right)
+      \widehat w_j.
+\]
+The inner sum is $a_j(\theta)$.
+\end{proof}
+
+\begin{definition}[Transposition discrepancy polynomial]\label{def:pack:batch-error}
+For $x\in L^I$ define
+\[
+ E_x(\Theta):=
+ \sum_{u\in I}\mathcal T(x)_u
+       \operatorname{eq}_\ell(u,\Theta)
+ \in L[\Theta_0,\ldots,\Theta_{\ell-1}].
+\]
+\end{definition}
+
+\begin{lemma}[Nonzero vector gives a nonzero discrepancy]\label{lem:pack:batch-nonzero}
+If $x\neq0$, then $E_x$ is nonzero and
+has total degree at most $\ell$.
+\end{lemma}
+\begin{proof}
+The invertibility of $\mathcal T$ from
+Theorem~\ref{thm:pack:transpose-involutive}
+implies $\mathcal T(x)\neq0$.
+Choose $u$ with $\mathcal T(x)_u\neq0$.
+Evaluate the discrepancy at the Boolean
+challenge $\Theta=u$.
+Boolean interpolation
+(Lemma~\ref{lem:intro:interpolation})
+gives $E_x(u)=\mathcal T(x)_u\neq0$.
+Thus $E_x$ is not identically zero.
+Each summand is a scalar multiple of
+a product of $\ell$ affine factors,
+so its total degree is at most $\ell$;
+summing cannot increase it.
+\end{proof}
+
+\begin{theorem}[Unmasked batching soundness]\label{thm:pack:batch-sound}
+Fix $x\in L^I$, $x\neq0$, before an independent
+uniform $\theta\in L^\ell$. Then
+\[
+ \boxed{
+ \Pr_\theta[B_x(\theta)=0]
+ \leq\min\{1,\ell/q\}.}
+\]
+\end{theorem}
+\begin{proof}
+By Definition~\ref{def:pack:batch-error},
+$B_x(\theta)=E_x(\theta)$.
+Lemma~\ref{lem:pack:batch-nonzero}
+makes $E_x$ a nonzero polynomial of
+total degree at most $\ell$.
+Apply the multivariate Schwartz--Zippel
+bound, Lemma~\ref{lem:history:schwartz-zippel},
+to the independent uniform coordinates of $\theta$.
+\end{proof}
+
+\begin{definition}[Kernel representation of a transposed vector]\label{def:pack:kernel-transpose}
+For $x\in L^I$, define
+\[
+ S_x(X):=\sum_{u\in I}\mathcal T(x)_uK_u^{(\ell)}(X)
+       \in L[X]_{<n}.
+\]
+\end{definition}
+
+\begin{lemma}[Kernel-fold representation of batching]\label{lem:pack:kernel-batch}
+For every $x\in L^I$ and $\theta\in L^\ell$,
+\[
+ \boxed{
+ B_x(\theta)=\mathsf{PFold}^{[\ell]}_\theta(S_x).}
+\]
+\end{lemma}
+\begin{proof}
+By the complete kernel folding dictionary,
+Corollary~\ref{cor:kbff:full-evaluation},
+the fold of $S_x$ equals
+$\sum_u\operatorname{eq}_\ell(u,\theta)
+                  \mathcal T(x)_u$,
+which is exactly $B_x(\theta)$
+by Definition~\ref{def:pack:batch}.
+\end{proof}
+
+\begin{remark}[Index and field constraints]
+The packed identity is valid because the
+\emph{witness entries} $w_{v,j}$ belong to $\F_2$.
+The high-axis weights $h_j$ and low-axis
+weights $q_v$ may be arbitrary elements
+of $L$. We never move $h_j$ through the
+coordinate map as an extension-field scalar:
+in general $d_u(h_jx)\neq h_jd_u(x)$.
+Instead we apply $d_u$ to $h_j$ and use
+the Boolean scalar $w_{v,j}$.
+\end{remark}
