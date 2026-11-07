@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Chapters 4–6 Rust algebra audits
+      - name: Chapters 4–7 Rust algebra audits
         run: |
           cd paper/zk-extension
           sh audit/RUN.sh
@@ -41,5 +41,6 @@ jobs:
             paper/zk-extension/CHAPTER_04_LEAN_MAP.md
             paper/zk-extension/CHAPTER_05_LEAN_MAP.md
             paper/zk-extension/CHAPTER_06_LEAN_MAP.md
+            paper/zk-extension/CHAPTER_07_LEAN_MAP.md
             paper/zk-extension/audit/
           if-no-files-found: error
