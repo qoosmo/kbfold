@@ -113,6 +113,6 @@ For the fixed proximity threshold $\tau$ and an oracle IOP $\Pi=(P,V)$, define
 where the prover's randomness and the honest verifier's challenges are independent, and the supremum over an empty class is defined to be $0$. The statement $\mathsf{Sound}_\tau(\Pi)\leq\varepsilon$ is \emph{$\varepsilon$-evaluation soundness at proximity $\tau$}.
 \end{definition}
 
-\begin{remark}[What the Reed--Solomon lemmas do and do not prove]
+\begin{remark}[Scope of the Reed--Solomon lemmas]
 Theorem~\ref{thm:security:rs-distance} and Lemma~\ref{lem:security:unique-near} establish only code-theoretic uniqueness. They do not prove the soundness of KBFold itself: that requires bounds on the probability of passing its fold and oracle queries. The parent KBFold paper supplies such a soundness analysis in the unique-decoding regime~\cite{MkhidaKBFold2026}, which must be revisited when the polynomial degree increases under zero-knowledge masking.
 \end{remark}
