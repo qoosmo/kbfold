@@ -1,0 +1,148 @@
+\subsection{A degree-aware module of masked kernel polynomials}\label{sec:kbfoldfold:masked}
+
+The original KBFold paper proposes adding a random high-degree term $X^NR$ to its kernel encoding as part of a zero-knowledge extension~\cite{MkhidaKBFold2026}. The following statements explain exactly how this term transforms under the same normalized folds. No privacy or soundness claim is made without an explicit verifier game.
+
+\begin{definition}[Mask degree and extended encoding]\label{def:kbff:mask-encoding}
+Fix $1\leq B\leq N$. Let $\mathcal R_B:=\F[X]_{<B}$ and let $\mathcal T_m:=\F^{I_m}$. Define
+\[
+ \mathscr Q_{m,B}:\mathcal T_m\times\mathcal R_B\longrightarrow
+   \F[X]_{<N+B},\qquad
+ \mathscr Q_{m,B}(f,R):=U_f^{(m)}+X^NR.
+\]
+Both arguments are field vectors, and the map is linear in the pair.
+\end{definition}
+
+\begin{lemma}[No overlap between table and high-degree masks]\label{lem:kbff:direct-sum}
+If $P\in\F[X]_{<N}$ and $R\in\F[X]_{<B}$ satisfy
+$P+X^NR=0$, then $P=0$ and $R=0$.
+\end{lemma}
+\begin{proof}
+For every exponent $e<N$, the coefficient of $X^e$ in $X^NR$ equals zero. Coefficient comparison in $P+X^NR=0$ therefore shows that all coefficients of $P$ vanish, so $P=0$. The equality reduces to $X^NR=0$ in the polynomial ring $\F[X]$. Since $\F$ is a field, $\F[X]$ has no zero divisors and $X^N\neq0$, so $R=0$.
+\end{proof}
+
+\begin{proposition}[Extended encoding is a linear isomorphism]\label{prop:kbff:extended-iso}
+The map $\mathscr Q_{m,B}$ is an $\F$-linear bijection from
+$\mathcal T_m\times\mathcal R_B$ onto $\F[X]_{<N+B}$.
+\end{proposition}
+\begin{proof}
+Linearity follows from linearity of $f\mapsto U_f^{(m)}$ and of multiplication by $X^N$. If $\mathscr Q_{m,B}(f,R)=0$, Lemma~\ref{lem:kbff:direct-sum} gives $R=0$ and $U_f^{(m)}=0$; the kernel basis theorem implies $f=0$. Thus the map is injective. For surjectivity, let
+$Q(X)=\sum_{e=0}^{N+B-1}q_eX^e$. Define
+$P(X)=\sum_{e=0}^{N-1}q_eX^e$ and
+$R(X)=\sum_{e=0}^{B-1}q_{N+e}X^e$. Then
+$Q=P+X^NR$ by coefficient comparison. The kernel basis theorem provides a table $f$ with $P=U_f^{(m)}$, whence
+$Q=\mathscr Q_{m,B}(f,R)$.
+\end{proof}
+
+\begin{lemma}[Fold of an even monomial shift]\label{lem:kbff:even-shift}
+For every $a\in\mathbb N$, $S\in\F[X]$, and $r\in\F$,
+\[
+ \pfold_r(X^{2a}S)=X^a\pfold_r(S).
+\]
+\end{lemma}
+\begin{proof}
+Write $S(X)=E(X^2)+XO(X^2)$. Then
+$X^{2a}S(X)=(X^2)^aE(X^2)+X(X^2)^aO(X^2)$.
+By uniqueness of the even--odd decomposition, the even and odd parts of the shifted polynomial are respectively $Y^aE(Y)$ and $Y^aO(Y)$. Its normalized fold is therefore
+$(2r-1)Y^aE+(1-r)Y^aO=Y^a\pfold_r(S)$.
+\end{proof}
+
+\begin{definition}[Masked-table and residual-mask sequences]\label{def:kbff:masked-chain}
+Fix a vector $r=(r_0,\ldots,r_{m-1})\in\F^m$.
+Define, for $0\leq j\leq m$,
+\[
+ f_j:=\mathsf{Res}^{[j]}_{(r_0,\ldots,r_{j-1})}(f),\qquad
+ R_j:=\mathsf{PFold}^{[j]}_{(r_0,\ldots,r_{j-1})}(R),
+\]
+and
+\[
+ Q_j:=\mathsf{PFold}^{[j]}_{(r_0,\ldots,r_{j-1})}
+                 \bigl(\mathscr Q_{m,B}(f,R)\bigr).
+\]
+\end{definition}
+
+\begin{theorem}[Masked folding invariant at every level]\label{thm:kbff:masked-invariant}
+For each $0\leq j\leq m$,
+\[
+ \boxed{Q_j(X)=U_{f_j}^{(m-j)}(X)+X^{2^{m-j}}R_j(X).}
+\]
+\end{theorem}
+\begin{proof}
+For $j=0$, $Q_0=\mathscr Q_{m,B}(f,R)=U_f^{(m)}+X^NR$, which is the assertion. Suppose the formula holds at $j<m$. By linearity of $\pfold_{r_j}$,
+\[
+ Q_{j+1}=\pfold_{r_j}(U_{f_j}^{(m-j)})
+ +\pfold_{r_j}(X^{2^{m-j}}R_j).
+\]
+Lemma~\ref{lem:kbff:intertwining} identifies the first term as
+$U_{\Res_{r_j}(f_j)}^{(m-j-1)}=U_{f_{j+1}}^{(m-j-1)}$
+by Lemma~\ref{lem:kbff:prefix-step}.
+Since $j<m$, the exponent $2^{m-j}$ is even. Applying Lemma~\ref{lem:kbff:even-shift} with $a=2^{m-j-1}$ transforms the second term into
+$X^{2^{m-j-1}}\pfold_{r_j}(R_j)=X^{2^{m-(j+1)}}R_{j+1}$.
+This proves the induction step.
+\end{proof}
+
+\begin{lemma}[Degree of the residual mask]\label{lem:kbff:residual-degree}
+For each $0\leq j\leq m$,
+\[
+ \deg R_j< B_j,\qquad
+ B_j:=\left\lceil\frac{B}{2^j}\right\rceil,
+\]
+where the zero polynomial is allowed.
+\end{lemma}
+\begin{proof}
+By definition $R_j$ is the $j$-fold polynomial fold of a polynomial of degree less than $B$. Apply Corollary~\ref{cor:kbff:fold-degree} with $D=B$.
+\end{proof}
+
+\begin{corollary}[Exact upper degree budget]\label{cor:kbff:masked-degree}
+For $N_j=2^{m-j}$ and $D_j:=N_j+B_j$,
+\[
+ \deg Q_j<D_j
+ \qquad(0\leq j\leq m).
+\]
+\end{corollary}
+\begin{proof}
+The kernel encoding $U_{f_j}^{(m-j)}$ has degree less than $N_j$ by Lemma~\ref{lem:intro:degree}. By Lemma~\ref{lem:kbff:residual-degree}, the shifted mask $X^{N_j}R_j$ has degree less than $N_j+B_j$. The sum of two polynomials of degrees below $D_j$ also has degree below $D_j$, proving the claim.
+\end{proof}
+
+\begin{lemma}[Residual mask is constant at the final level]\label{lem:kbff:residual-constant}
+Under $1\leq B\leq N=2^m$, $R_m$ has degree less than $1$, hence is a constant polynomial.
+\end{lemma}
+\begin{proof}
+From Lemma~\ref{lem:kbff:residual-degree},
+$\deg R_m<\lceil B/N\rceil=1$ because $0<B\leq N$. Thus $R_m$ is a constant or is the zero polynomial.
+\end{proof}
+
+\begin{theorem}[Linear final closure for high-degree masked KBFold]\label{thm:kbff:linear-closure}
+For every $f:I_m\to\F$, every mask $R\in\F[X]_{<B}$ with $1\leq B\leq N$, and every $r\in\F^m$, there exists a unique scalar
+$\rho_r(R)\in\F$ such that
+\[
+ \boxed{
+ Q_m(X)=\widetilde f(r)+\rho_r(R)X.
+ }
+\]
+More precisely,
+\[
+ \rho_r(R)
+  =\mathsf{PFold}^{[m]}_r(R)
+  =\sum_{e=0}^{B-1}[X^e]R\,
+       \prod_{i=0}^{m-1}A_{e_i}(r_i).
+\]
+\end{theorem}
+\begin{proof}
+Apply Theorem~\ref{thm:kbff:masked-invariant} with $j=m$:
+$Q_m=U_{f_m}^{(0)}+XR_m$.
+The first polynomial is constant and equals $\widetilde f(r)$ by Corollary~\ref{cor:kbff:full-prefix}. By Lemma~\ref{lem:kbff:residual-constant} there is a unique scalar $\rho_r(R)$ such that $R_m=\rho_r(R)$; uniqueness follows from uniqueness of coefficients in $\F[X]$. Since $R_m=\mathsf{PFold}^{[m]}_r(R)$ by definition, Corollary~\ref{cor:kbff:fold-tensor}, with missing coefficients of $R$ filled by zero, gives the displayed formula.
+\end{proof}
+
+\begin{corollary}[Constant-term closure identity]\label{cor:kbff:masked-constant}
+For $B\leq N$,
+\[
+ \boxed{[X^0]Q_m=\widetilde f(r).}
+\]
+\end{corollary}
+\begin{proof}
+Theorem~\ref{thm:kbff:linear-closure} expresses $Q_m$ as a constant plus $\rho_r(R)X$. The coefficient of $X^0$ in the second summand is zero.
+\end{proof}
+
+\begin{remark}[What this corrects]
+Chapter~3 proved that an unchanged \emph{constant-polynomial} closure test rejects certain honestly masked executions. Theorem~\ref{thm:kbff:linear-closure} supplies the correct algebraic replacement: a \emph{linear} final polynomial whose constant coefficient equals the folded evaluation. This resolves that algebraic closure obstruction but does not supply a hiding proof for the final authentication paths or the whole interactive transcript.
+\end{remark}
