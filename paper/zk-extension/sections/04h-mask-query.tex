@@ -1,0 +1,45 @@
+\subsection{Kernel-mask subspaces and bounded-query hiding}\label{sec:kbalgebra:maskquery}
+Throughout this subsection, $\F$ is a \emph{finite} field.
+
+\begin{definition}[Random low-degree kernel mask]\label{def:kbalgebra:random-mask}
+Let $\F$ be a finite field. Fix $0\leq t\leq m$ and let $B=2^t$. Let $\mathcal H_t\subseteq\F^{I_m}$ be the coefficient subspace of Corollary~\ref{cor:kbalgebra:dimension}. Sample a random table $H$ uniformly from $\mathcal H_t$, and let $R:=U_H^{(m)}$ be its encoded polynomial, which satisfies $\deg R<B$. For an arbitrary fixed $P\in\F[X]$, the 
+\emph{high-degree masked polynomial} is
+\[
+ Q(X):=P(X)+X^N R(X),\qquad N=2^m.
+\]
+\end{definition}
+
+\begin{lemma}[Uniformity of the mask polynomial]\label{lem:kbalgebra:uniform-polynomial}
+Under Definition~\ref{def:kbalgebra:random-mask}, the random polynomial $R$ is uniform on the $B$-dimensional vector space $\F[X]_{<B}$.
+\end{lemma}
+\begin{proof}
+Theorem~\ref{thm:kbalgebra:low-degree} identifies $\mathcal H_t$ with the tables $\varphi:I_t\to\F$ via an injective linear map onto $\mathcal H_t$. The same theorem identifies $U_H^{(m)}$ with $U_\varphi^{(t)}$. By the basis theorem (Theorem~\ref{thm:kbalgebra:basis}) with $t$ variables, the map $\varphi\mapsto U_\varphi^{(t)}$ is a linear bijection from $\F^{I_t}$ to $\F[X]_{<B}$. The composition $H\mapsto R$ is therefore a bijection between the finite sets $\mathcal H_t$ and $\F[X]_{<B}$. A bijection sends the uniform distribution to the uniform distribution.
+\end{proof}
+
+\begin{lemma}[Uniform answers at prescribed nonzero points]\label{lem:kbalgebra:uniform-queries}
+Let $1\leq q\leq B$, and let $\xi_1,\ldots,\xi_q\in\F^\times$ be pairwise distinct. With $R$ as in Definition~\ref{def:kbalgebra:random-mask}, for any fixed $P\in\F[X]$ the random vector
+\[
+ (Q(\xi_1),\ldots,Q(\xi_q))\in\F^q,
+ \qquad Q=P+X^N R,
+\]
+is uniform on $\F^q$ and independent of the choice of $P$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:kbalgebra:uniform-polynomial}, $R$ is uniform on $\F[X]_{<B}$. Let $\operatorname{Ev}_q:\F[X]_{<B}\to\F^q$ be evaluation at the $q$ specified points. Since $q\leq B$, the Lagrange polynomials of Lemma~\ref{lem:security:lagrange} have degree $<q\leq B$, and prove that $\operatorname{Ev}_q$ is surjective. As an $\F$-linear surjection between finite vector spaces, all its fibers are cosets of the same kernel and have equal cardinality. Consequently the evaluation vector $(R(\xi_1),\ldots,R(\xi_q))$ is uniform on $\F^q$. Every $\xi_j$ is nonzero, so multiplication of coordinate $j$ by $\xi_j^N$ is invertible. The diagonal map $(a_j)_j\mapsto(\xi_j^Na_j)_j$ is a bijection of $\F^q$, and adding the fixed vector $(P(\xi_j))_j$ is another bijection. Their composition sends the uniform vector of $R$-evaluations to a uniform vector of $Q$-evaluations, independently of $P$.
+\end{proof}
+
+\begin{theorem}[Adaptive bounded-query hiding for one masked polynomial]\label{thm:kbalgebra:adaptive-queries}
+Let $R$ be sampled as in Definition~\ref{def:kbalgebra:random-mask} with $B=2^t$. Consider a possibly randomized verifier whose random tape is independent of $R$ and which adaptively queries the oracle $Q=P+X^N R$ at at most $B$ distinct nonzero field points, with repeat queries allowed but returning their previous value. The strategy for selecting the next query depends only on public parameters, the verifier's tape, and the earlier query-and-answer pairs. If the verifier receives no other $P$-dependent messages, the distribution of its complete query-and-answer record is independent of the fixed secret polynomial $P$.
+\end{theorem}
+\begin{proof}
+Condition first on a fixed random tape of the verifier, so the query strategy is deterministic. We prove by induction on the number $q$ of distinct queried points that the conditional law of the next \emph{fresh} answer, given any realized history of $q<B$ distinct queries, is uniform on $\F$ and independent of $P$. The base $q=0$ is Lemma~\ref{lem:kbalgebra:uniform-queries} with one point. For the induction step, fix a history of $q$ pairwise distinct nonzero indices $\xi_1,\ldots,\xi_q$ and answers $a_1,\ldots,a_q$ with positive probability. The verifier's deterministic strategy fixes its next fresh point $\xi_{q+1}$ from this history. Since it is distinct from previous points and $q+1\leq B$, Lemma~\ref{lem:kbalgebra:uniform-queries} applied to this fixed $(q+1)$-tuple states that the joint vector of answers is uniform on $\F^{q+1}$. Thus
+\[
+ \Pr[Q(\xi_{q+1})=a\mid Q(\xi_j)=a_j\ (1\leq j\leq q)]
+ =\frac{|\F|^{-(q+1)}}{|\F|^{-q}}=|\F|^{-1},
+\]
+for each $a\in\F$, independently of $P$. On a repeated query the answer is deterministically the previously observed value, again independent of $P$ conditional on the history. By induction on query steps, the distributions of the entire records coincide for all choices of $P$. Finally average over the verifier's independent random tape; the mixture is the same for every $P$.
+\end{proof}
+
+\begin{remark}[Exact scope of the bounded-query theorem]\label{rem:kbalgebra:mask-scope}
+Theorem~\ref{thm:kbalgebra:adaptive-queries} concerns \emph{only} direct oracle evaluations of a single high-degree masked polynomial at nonzero points. It does not prove zero knowledge of KBFold: the original protocol reveals additional sumcheck round polynomials, correlated folded words, a last-round table, and authenticated commitment openings. Those additional messages can invalidate the theorem's hypotheses. Moreover, to use the masked word in a proximity protocol the Reed--Solomon degree and final closure must be modified as proved in Corollary~\ref{cor:kbalgebra:mask-rate} and Theorem~\ref{thm:security:naive-closure}.
+\end{remark}
