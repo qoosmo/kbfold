@@ -87,7 +87,7 @@ The chapter also establishes an exact mask-budget versus code-rate tradeoff: for
 
 ## Chapter 5 results
 
-The chapter contains **62 labeled definitions/results and 49 complete paper proofs** in seven subsections.
+The chapter contains **64 labeled definitions/results and 51 complete paper proofs** in seven subsections.
 
 - All-prefix restrictions and multilinear evaluations.
 - An explicit monomial/tensor functional for normalized folding over arbitrary fields, plus the characteristic-two specialization.
@@ -98,6 +98,7 @@ The chapter contains **62 labeled definitions/results and 49 complete paper proo
 - Enlarged degree budgets `D_j=N/2^j+ceil(B/2^j)` and honest RS codeword-fold correctness.
 - Local fold-check detection bounds, under explicit low-degree code membership.
 - A necessary-and-sufficient image/coset criterion for jointly hiding fixed-schedule queries across folded oracles.
+- A concrete one-query joint-leakage attack against a reused degree-zero mask, despite perfectly uniform individual messages.
 
 **Security status:** All above are algebraic results. They do not prove the full ZK-KBFold protocol against malicious, adaptively querying verifiers. The masked sumcheck, authenticated online simulator, and adversarial proximity proof remain open.
 
