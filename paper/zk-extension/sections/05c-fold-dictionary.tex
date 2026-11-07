@@ -1,0 +1,126 @@
+\subsection{The normalized fold dictionary as a commuting diagram}\label{sec:kbfoldfold:dictionary}
+
+This subsection relates prefix restriction and polynomial folding for every intermediate level. The result is the algebraic input to the oracle-level proofs, not yet a claim about an authenticated proof transcript. The structural identity originates in KBFold~\cite{MkhidaKBFold2026}.
+
+\begin{lemma}[First-bit kernel decomposition]\label{lem:kbff:kernel-first}
+For $f:I_m\to\F$, $m\geq1$, write $f_0(b):=f(0,b)$,
+$f_1(b):=f(1,b)$ for $b\in I_{m-1}$. Then
+\[
+ U_f^{(m)}(X)=
+ U_{f_1}^{(m-1)}(X^2)
+ +X\bigl(U_{f_0}^{(m-1)}+U_{f_1}^{(m-1)}\bigr)(X^2).
+\]
+\end{lemma}
+\begin{proof}
+Split the defining finite sum for $U_f^{(m)}$ into terms indexed by $(0,b)$ and $(1,b)$. Lemma~\ref{lem:intro:recursion} gives
+$K_{(0,b)}^{(m)}(X)=XK_b^{(m-1)}(X^2)$ and
+$K_{(1,b)}^{(m)}(X)=(X+1)K_b^{(m-1)}(X^2)$.
+Substitution gives
+$XU_{f_0}^{(m-1)}(X^2)+(X+1)U_{f_1}^{(m-1)}(X^2)$.
+Distribute the second term and collect the constant and $X$ parts to obtain the stated formula.
+\end{proof}
+
+\begin{lemma}[Single-fold intertwining]\label{lem:kbff:intertwining}
+For every $f:I_m\to\F$ and $r\in\F$,
+\[
+ \pfold_r(U_f^{(m)})=U_{\Res_r(f)}^{(m-1)}.
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:kbff:kernel-first}, the unique even--odd components of $U_f$ are $E=U_{f_1}^{(m-1)}$ and
+$O=U_{f_0}^{(m-1)}+U_{f_1}^{(m-1)}$. Hence
+\begin{align*}
+ \pfold_r(U_f^{(m)})
+ &=(2r-1)U_{f_1}^{(m-1)}
+   +(1-r)(U_{f_0}^{(m-1)}+U_{f_1}^{(m-1)})\\
+ &=(1-r)U_{f_0}^{(m-1)}
+   +\bigl((2r-1)+(1-r)\bigr)U_{f_1}^{(m-1)}\\
+ &=(1-r)U_{f_0}^{(m-1)}+rU_{f_1}^{(m-1)}.
+\end{align*}
+Linearity of the kernel encoding makes the last expression
+$U_{(1-r)f_0+rf_1}^{(m-1)}=U_{\Res_r(f)}^{(m-1)}$.
+\end{proof}
+
+\begin{theorem}[Iterated folding--restriction dictionary]\label{thm:kbff:iterated-dictionary}
+For every $0\leq j\leq m$, $r\in\F^j$, and $f:I_m\to\F$,
+\[
+ \boxed{\mathsf{PFold}^{[j]}_r(U_f^{(m)})
+ =U_{\mathsf{Res}^{[j]}_r(f)}^{(m-j)}.}
+\]
+\end{theorem}
+\begin{proof}
+Induct on $j$. For $j=0$, the left side is $U_f^{(m)}$ and the right side equals the same polynomial by Lemma~\ref{lem:kbff:prefix-zero}. Suppose the identity holds for $j<m$. For $t\in\F$,
+\begin{align*}
+ \mathsf{PFold}^{[j+1]}_{(r,t)}(U_f^{(m)})
+ &=\pfold_t\left(\mathsf{PFold}^{[j]}_r(U_f^{(m)})\right)\\
+ &=\pfold_t\left(U_{\mathsf{Res}^{[j]}_r(f)}^{(m-j)}\right)\\
+ &=U_{\Res_t(\mathsf{Res}^{[j]}_r(f))}^{(m-j-1)}\\
+ &=U_{\mathsf{Res}^{[j+1]}_{(r,t)}(f)}^{(m-j-1)}.
+\end{align*}
+The first step uses Definition~\ref{def:kbff:fold-iterate}, the second is the induction hypothesis, the third is Lemma~\ref{lem:kbff:intertwining}, and the last is Lemma~\ref{lem:kbff:prefix-step}. This completes the induction.
+\end{proof}
+
+\begin{corollary}[Complete fold equals multilinear evaluation]\label{cor:kbff:full-evaluation}
+For every $f:I_m\to\F$ and $r\in\F^m$,
+\[
+ \boxed{\mathsf{PFold}^{[m]}_r(U_f^{(m)})=\widetilde f(r).}
+\]
+\end{corollary}
+\begin{proof}
+Apply Theorem~\ref{thm:kbff:iterated-dictionary} with $j=m$.
+The right side is the encoding of the one-entry table
+$\mathsf{Res}^{[m]}_r(f)$, hence equals its sole entry because
+$K_{()}^{(0)}=1$. That entry is $\widetilde f(r)$ by Corollary~\ref{cor:kbff:full-prefix}.
+\end{proof}
+
+\begin{corollary}[Two descriptions of the complete fold]\label{cor:kbff:two-functional}
+For any polynomial $P\in\F[X]_{<N}$, write uniquely
+$P=\sum_bf(b)K_b^{(m)}$ and also $P=\sum_{e=0}^{N-1}p_eX^e$.
+Then for each $r\in\F^m$,
+\[
+ \sum_b f(b)\operatorname{eq}_m(b,r)
+ =\sum_{e=0}^{N-1}p_e W_e^{[m]}(r).
+\]
+\end{corollary}
+\begin{proof}
+By Corollary~\ref{cor:kbff:full-evaluation}, the left side is
+$\mathsf{PFold}^{[m]}_r(P)$. By Corollary~\ref{cor:kbff:fold-tensor}, the right side is the same complete normalized fold. Equality follows by transitivity, using uniqueness of the two polynomial expansions from Proposition~\ref{prop:intro:basis}.
+\end{proof}
+
+\begin{lemma}[Composition of prefix restrictions]\label{lem:kbff:restriction-compose}
+Let $j,k\geq0$ with $j+k\leq m$, and let
+$r\in\F^j$, $s\in\F^k$. Then
+\[
+ \mathsf{Res}^{[k]}_s\bigl(\mathsf{Res}^{[j]}_r(f)\bigr)
+ =\mathsf{Res}^{[j+k]}_{(r,s)}(f).
+\]
+\end{lemma}
+\begin{proof}
+For each $b\in I_{m-j-k}$, expand the left side as
+\[
+ \sum_{c\in I_k}\lambda_c^{(k)}(s)
+ \left(\sum_{a\in I_j}\lambda_a^{(j)}(r)f(a,c,b)\right).
+\]
+Interchange the two finite sums and use
+$\lambda_{(a,c)}^{(j+k)}(r,s)=\lambda_a^{(j)}(r)\lambda_c^{(k)}(s)$,
+which follows by splitting the defining product across the first
+$j$ and next $k$ coordinates. Reindex the sum via the bijection
+$I_j\times I_k\to I_{j+k}$. The result is
+$\sum_{d\in I_{j+k}}\lambda_d^{(j+k)}(r,s)f(d,b)$,
+the right-hand side.
+\end{proof}
+
+\begin{corollary}[Compatibility of nested polynomial folds]\label{cor:kbff:fold-compose}
+For $j+k\leq m$ and a kernel polynomial $U_f^{(m)}$,
+\[
+ \mathsf{PFold}^{[k]}_s
+ \left(\mathsf{PFold}^{[j]}_r(U_f^{(m)})\right)
+ =\mathsf{PFold}^{[j+k]}_{(r,s)}(U_f^{(m)}).
+\]
+\end{corollary}
+\begin{proof}
+The left side equals
+$U_{\mathsf{Res}^{[k]}_s(\mathsf{Res}^{[j]}_r(f))}^{(m-j-k)}$
+by two applications of Theorem~\ref{thm:kbff:iterated-dictionary}. Lemma~\ref{lem:kbff:restriction-compose} turns its coefficient table into
+$\mathsf{Res}^{[j+k]}_{(r,s)}(f)$, whose encoding is the right side by Theorem~\ref{thm:kbff:iterated-dictionary}.
+\end{proof}
