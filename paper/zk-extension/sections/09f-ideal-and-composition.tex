@@ -98,36 +98,57 @@ coincide.
 \end{proof}
 
 \begin{definition}[Sequential external-interface simulation contract]\label{def:zkrs:realization}
-Fix an interactive implementation, a causal verifier $V^*$,
-and a number of externally generated transcript stages $N_{\rm ext}$.
-A \emph{sequential ideal-interface realization with errors}
-$(\varepsilon_0,\ldots,\varepsilon_{N_{\rm ext}-1})$
-is a family of witness-independent simulators for
-the commitment/proof/opening stages, with the following property:
-in an ordered sequence of hybrids replacing external stages
-one at a time by their simulators, each adjacent pair of
-complete verifier-view distributions has statistical distance
-at most $\varepsilon_i$, uniformly over every admissible witness
-and every allowed adaptive verifier strategy.
-The final hybrid must be the opaque ideal interaction of
-Definition~\ref{def:zkrs:ideal-view}, with the same public-core
-message schedule and authorized public instance.
-The contract includes correlations with the public-core
-messages and any authenticated queries; it cannot be
-replaced by marginal commitment hiding.
+Fix a finite interactive implementation, a verifier class and
+a bound on authenticated queries. Resolve each protocol step into
+a finite transition on its \emph{visible history}, which records the
+entire public prefix and the verifier's random tape.
+For a fixed admissible witness $w$, let
+$K_i^w(h)$ be the real conditional distribution
+of the next visible state from history $h$.
+Let $L_i(h)$ be a causal, \emph{witness-independent}
+transition kernel producing an ideal opaque-interface
+view as in Definition~\ref{def:zkrs:ideal-view}.
+An \emph{online sequential realization with local errors}
+$(\varepsilon_0,\ldots,\varepsilon_N)$ means:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item initial real and ideal visible-state distributions
+have statistical distance at most $\varepsilon_0$;
+\item for each stage $1\leq i\leq N$ and each possible
+visible history $h$,
+\[
+ \Delta(K_i^w(h),L_i(h))\leq\varepsilon_i,
+\]
+uniformly over all admissible witnesses and
+all verifiers in the chosen class;
+\item the ideal kernels $L_i$ faithfully implement
+the public-core simulator and opaque-interface
+simulator, including the same ordering and
+causal challenge dependence as the real protocol.
+\end{enumerate}
+This requires checking correlations with any
+preceding commitments and authenticated openings:
+the perfect public-core law of
+Theorem~\ref{thm:zkrs:perfect-core}
+does \emph{not} alone establish (ii)
+for histories containing real commitment roots.
+For histories that are unreachable under a
+particular process, one may choose a regular
+conditional kernel arbitrarily, but the uniform
+bound must still hold under the chosen extension.
 \end{definition}
 
 \begin{theorem}[Conditional real-world statistical ZK composition]\label{thm:zkrs:conditional-zk}
 Suppose a concrete single-opening implementation satisfies
-the sequential external-interface simulation contract
-of Definition~\ref{def:zkrs:realization} for a given query
-bound and verifier class. Then for every admissible witness,
+Definition~\ref{def:zkrs:realization} with local errors
+$(\varepsilon_0,\ldots,\varepsilon_N)$
+for a given query bound and verifier class.
+Then for every admissible witness,
 the implemented complete view has a witness-independent
 simulator with statistical distance at most
 \[
  \boxed{
  \varepsilon_{\rm ZK}\leq
- \min\left\{1,\sum_{i=0}^{N_{\rm ext}-1}\varepsilon_i\right\}.
+ \min\left\{1,\sum_{i=0}^{N}\varepsilon_i\right\}.
  }
 \]
 If all external interfaces are perfectly simulatable,
@@ -135,25 +156,30 @@ the complete protocol is perfect zero knowledge for
 that single-opening game.
 \end{theorem}
 \begin{proof}
-Use the simulator of
-Theorem~\ref{thm:zkrs:ideal-full-zk}
-for the final opaque ideal hybrid,
-and use the stage simulators from
+Use the finite visible history spaces of the
+real and ideal processes, with the verifier's
+random tape incorporated into each history.
+Condition (ii) of
 Definition~\ref{def:zkrs:realization}
-for the intervening external stages.
-The statistical distance between the
-real complete view and the ideal
-complete view is at most the sum
-of the adjacent-hybrid distances
-by repeated application of
-Lemma~\ref{lem:security:tv-triangle}.
-By definition of the realization
-contract, each adjacent distance is
-at most $\varepsilon_i$.
-The final ideal simulator is witness
-independent by
-Theorem~\ref{thm:zkrs:ideal-full-zk}.
-Cap the resulting bound by $1$.
+bounds the total variation between the real
+and ideal transition kernels at every stage
+and every visible history.
+Condition (i) bounds the initial-state
+distance. The stepwise hybrid lemma,
+Lemma~\ref{lem:security:hybrid},
+therefore bounds the distance between the
+final visible-history distributions by
+$\sum_{i=0}^{N}\varepsilon_i$.
+Condition (iii) and
+Theorem~\ref{thm:zkrs:ideal-full-zk}
+provide a witness-independent implementation
+of the ideal visible process.
+A deterministic projection from final
+histories to the actual verifier view
+cannot increase total variation, by
+Corollary~\ref{cor:security:projection}.
+Finally, total variation is at most
+one for any two distributions.
 \end{proof}
 
 \begin{definition}[External algebraic-soundness failure]\label{def:zkrs:sound-failure}
