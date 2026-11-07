@@ -70,7 +70,7 @@ Original reference: https://github.com/qoosmo/kbfold
 - Adaptive linear-mask simulation via affine cosets and conditional distributions.
 - Explicit counterexample proving that the high-degree polynomial mask requires a revised final-round closure.
 
-See `CHAPTER_03_LEAN_MAP.md` for all 62 individually labeled definitions/results and their proposed Lean declarations.
+See `CHAPTER_03_LEAN_MAP.md` for all 63 individually labeled definitions/results and their proposed Lean declarations.
 
 **Scope:** Chapter 3 defines and proves the foundational security statements. It does not claim that the full zero-knowledge KBFold protocol has already been constructed or certified.
 
@@ -81,3 +81,5 @@ This chapter develops the original kernel basis over arbitrary fields, including
 ## Chapter 4 Rust regression tests
 
 From `paper/zk-extension`, run `sh audit/RUN.sh`. This compiles a self-contained Rust test harness that checks kernel coordinate inversions, normalized fold identities, low-degree patterns, scaled evaluation curves, and an exhaustive two-query masking distribution. The CI workflow runs the Rust harness independently from the LaTeX build. These tests supplement but do not replace proofs.
+
+The chapter also establishes an exact mask-budget versus code-rate tradeoff: for B=2^t, a degree-<B mask yields bounded-query hiding for B distinct nonzero oracle queries, while the Reed--Solomon degree bound becomes N+B.
