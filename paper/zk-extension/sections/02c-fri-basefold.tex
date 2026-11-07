@@ -1,0 +1,140 @@
+\subsection{FRI, BaseFold, and the high-degree masking question}\label{sec:history:fri}
+
+FRI~\cite{BBHR2018} introduces a fast interactive oracle proof of proximity to Reed--Solomon codes. BaseFold~\cite{ZCF2023} combines foldable codes with sumcheck to obtain multilinear polynomial commitments. Here we isolate the elementary polynomial and codeword identities used in KBFold, including the exact effect of a high-degree masking term proposed as future work in~\cite{MkhidaKBFold2026}. All proofs below are algebraic and are independent of the proximity-soundness theorems of FRI and BaseFold.
+
+\begin{definition}[Multiplicative-domain evaluation code]\label{def:history:rs}
+Assume $\operatorname{char}(\F)\neq2$. Let $\Omega\subseteq\F^\times$ be a finite multiplicative subgroup of even order $M$. Let $1\leq D\leq M$.
+For $P\in\F[X]$ write $\operatorname{ev}_{\Omega}(P):=(P(x))_{x\in\Omega}$ and set
+\[
+ \operatorname{RS}_{\F}(\Omega,D)
+ :=\{\operatorname{ev}_\Omega(P):P\in\F[X],\,\deg P<D\}.
+\]
+The squaring image is $\Omega^2:=\{x^2:x\in\Omega\}$.
+\end{definition}
+
+\begin{lemma}[Two-element square fibers]\label{lem:history:fibers}
+For each $y\in\Omega^2$ there are exactly two elements of $\Omega$ whose square is $y$, namely $x$ and $-x$ for any chosen square root $x\in\Omega$.
+\end{lemma}
+\begin{proof}
+Because $\Omega$ has even order, $-1\in\Omega$. As $\operatorname{char}(\F)\neq2$ and $x\neq0$, the points $x$ and $-x$ are distinct and both square to $y$. If $t^2=x^2$, then $(t-x)(t+x)=0$ in the field $\F$, so $t\in\{x,-x\}$. Thus there are no further preimages.
+\end{proof}
+
+\begin{definition}[Even--odd evaluations]\label{def:history:wordparts}
+For any function $w:\Omega\to\F$ and $y=x^2\in\Omega^2$, define
+\[
+ w_{\mathrm e}(y):=\frac{w(x)+w(-x)}{2},
+ \qquad
+ w_{\mathrm o}(y):=\frac{w(x)-w(-x)}{2x}.
+\]
+These expressions are independent of the choice of square root $x$.
+\end{definition}
+
+\begin{lemma}[Well-definedness and polynomial consistency]\label{lem:history:wordparts}
+The values $w_{\mathrm e}(y)$ and $w_{\mathrm o}(y)$ in Definition~\ref{def:history:wordparts} are independent of the choice between $x$ and $-x$. If $w=\operatorname{ev}_\Omega(P)$ and $P(X)=E(X^2)+XO(X^2)$, then
+\[
+ w_{\mathrm e}=\operatorname{ev}_{\Omega^2}(E),
+ \qquad
+ w_{\mathrm o}=\operatorname{ev}_{\Omega^2}(O).
+\]
+\end{lemma}
+\begin{proof}
+Replacing $x$ by $-x$ leaves the first numerator unchanged. In the second expression both numerator and denominator change sign, hence their quotient is unchanged.
+For a polynomial $P$, substitute $P(x)=E(x^2)+xO(x^2)$ and $P(-x)=E(x^2)-xO(x^2)$. Adding gives $2E(x^2)$ and subtracting gives $2xO(x^2)$. Division is legal because $2x\neq0$. This proves the two identities.
+\end{proof}
+
+\begin{definition}[Normalized word fold]\label{def:history:wfold}
+For $r\in\F$ define $\mathsf{wfold}_r(w):\Omega^2\to\F$ by
+\[
+ \mathsf{wfold}_r(w):=(2r-1)w_{\mathrm e}+(1-r)w_{\mathrm o}.
+\]
+\end{definition}
+
+\begin{proposition}[Compatibility of polynomial and word folding]\label{prop:history:codefold}
+For every polynomial $P$ and every $r\in\F$,
+\[
+ \mathsf{wfold}_r(\operatorname{ev}_\Omega(P))
+ =\operatorname{ev}_{\Omega^2}(\pfold_r(P)).
+\]
+\end{proposition}
+\begin{proof}
+Let $P(X)=E(X^2)+XO(X^2)$. By Lemma~\ref{lem:history:wordparts}, the even and odd parts of the evaluation word are evaluations of $E$ and $O$. Therefore the left side is the evaluation on $\Omega^2$ of $(2r-1)E+(1-r)O$, which is $\pfold_r(P)$ by Definition~\ref{def:intro:pfold}.
+\end{proof}
+
+\begin{corollary}[Degree preservation under a fold]\label{cor:history:degree}
+If $P$ has degree less than $2D$, then $\pfold_r(P)$ has degree less than $D$, for every $r\in\F$. Consequently, provided $2D\leq|\Omega|$, the word fold sends $\operatorname{RS}_\F(\Omega,2D)$ into $\operatorname{RS}_\F(\Omega^2,D)$.
+\end{corollary}
+\begin{proof}
+The unique even--odd decomposition of a polynomial of degree less than $2D$ has components $E,O$ each of degree less than $D$ (Lemma~\ref{lem:intro:split}). Their linear combination $\pfold_r(P)$ has the same strict degree bound. Apply Proposition~\ref{prop:history:codefold}.
+\end{proof}
+
+\begin{definition}[Arbitrary-degree polynomial fold]\label{def:history:globalfold}
+For a polynomial $P\in\F[X]$ with finite even--odd decomposition $P(X)=E(X^2)+XO(X^2)$, use the same formula
+\[
+ \pfold_r(P):=(2r-1)E+(1-r)O.
+\]
+This extends Definition~\ref{def:intro:pfold} to every polynomial; it is independent of a degree bound.
+\end{definition}
+
+\begin{lemma}[Even-power shift]\label{lem:history:shift}
+For every polynomial $R\in\F[X]$, every integer $a\geq0$, and every $r\in\F$,
+\[
+ \pfold_r(X^{2a}R(X))(Y)=Y^a\,\pfold_r(R)(Y).
+\]
+\end{lemma}
+\begin{proof}
+Write $R(X)=E(X^2)+XO(X^2)$. Then
+\[
+ X^{2a}R(X)
+ =(X^2)^aE(X^2)+X(X^2)^aO(X^2).
+\]
+By uniqueness of the even--odd decomposition, its even and odd components are $Y^aE(Y)$ and $Y^aO(Y)$, respectively. Substituting into Definition~\ref{def:history:globalfold} yields
+\[
+ (2r-1)Y^aE(Y)+(1-r)Y^aO(Y)
+ =Y^a\bigl((2r-1)E(Y)+(1-r)O(Y)\bigr),
+\]
+which is the claimed formula.
+\end{proof}
+
+\begin{theorem}[Propagation of a high-degree mask through kernel folds]\label{thm:history:maskpropagation}
+Let $m\geq1$, let $N=2^m$, and let $R\in\F[X]$. Fix arbitrary challenges $r_0,\ldots,r_{m-1}\in\F$. Define
+\[
+ R_0:=R,\qquad R_{j+1}:=\pfold_{r_j}(R_j)\quad(0\leq j<m),
+\]
+and separately
+\[
+ P_0:=X^N R(X),\qquad P_{j+1}:=\pfold_{r_j}(P_j)\quad(0\leq j<m).
+\]
+Then, for every $0\leq j\leq m$,
+\[
+ \boxed{P_j(X)=X^{2^{m-j}}R_j(X).}
+\]
+\end{theorem}
+\begin{proof}
+Induct on $j$. For $j=0$ the formula is the definition of $P_0$, since $N=2^m$. Suppose it holds at some $j<m$. The exponent $2^{m-j}$ is even; write it as $2a$ with $a=2^{m-j-1}$. Applying Lemma~\ref{lem:history:shift} gives
+\[
+ P_{j+1}=\pfold_{r_j}(X^{2a}R_j)
+ =X^a\pfold_{r_j}(R_j)
+ =X^{2^{m-(j+1)}}R_{j+1}.
+\]
+This is the induction statement at $j+1$. Thus the equality holds for every $j\leq m$.
+\end{proof}
+
+\begin{corollary}[Folding a masked KBFold polynomial]\label{cor:history:masked-kbfold}
+For every table $f:I_m\to\F$, every $R\in\F[X]$, and every $0\leq j\leq m$, the $j$-fold polynomial fold of
+\[
+ Q(X):=U_f^{(m)}(X)+X^N R(X)
+\]
+is
+\[
+ Q_j(X)
+ =U_{f_j}^{(m-j)}(X)+X^{2^{m-j}}R_j(X),
+\]
+where $f_0=f$ and $f_{j+1}=\Res_{r_j}(f_j)$, and $R_j$ is as in Theorem~\ref{thm:history:maskpropagation}.
+\end{corollary}
+\begin{proof}
+The fold is $\F$-linear by Definition~\ref{def:history:globalfold}. Induction therefore separates the fold of $U_f^{(m)}$ from that of $X^N R$. Corollary~\ref{cor:intro:iterated} and Theorem~\ref{thm:history:maskpropagation} give the two displayed terms.
+\end{proof}
+
+\begin{remark}[Where the original proof must change]
+The identity in Corollary~\ref{cor:history:masked-kbfold} is a polynomial identity for \emph{any} $R$. It does not imply that a Reed--Solomon proof with degree bound $N$ can commit to $Q$: if $R\neq0$, then $\deg Q\geq N$ in general. The codeword rate, last-round closure, query rules, and proximity analysis must therefore use the \emph{enlarged} degree bound. This is the precise algebraic obstruction recorded as future work in the original KBFold conclusion~\cite{MkhidaKBFold2026}.
+\end{remark}
