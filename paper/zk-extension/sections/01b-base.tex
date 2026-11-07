@@ -1,0 +1,78 @@
+\subsection{Basic finite algebra}\label{sec:intro:base}
+
+\begin{definition}[Parameters and bit indices]\label{def:intro:indices}
+Let $\F$ be a field, let $m\in\mathbb N$ with $m\geq1$, and put $N:=2^m$. Let $I_m:=\B^m$. Its members are ordered tuples $b=(b_0,\ldots,b_{m-1})$, with $b_i\in\B\subseteq\F$. Put
+\[
+ \operatorname{ind}_m(b):=\sum_{i=0}^{m-1}b_i2^i\in\{0,\ldots,N-1\}.
+\]
+For $m\geq1$ we write $(a,b')\in I_m$ when $a\in\B$ is the lowest-index bit and $b'\in I_{m-1}$. We use $I_0:=\{()\}$ and the usual conventions for empty products and sums.
+\end{definition}
+
+\begin{definition}[Kernel polynomial and encoding]\label{def:intro:kernel}
+For $b\in I_m$ define
+\begin{equation}\label{eq:intro:kernel}
+ K_b^{(m)}(X):=\prod_{i=0}^{m-1}\bigl(X^{2^i}+b_i\bigr)\in\F[X].
+\end{equation}
+For a table $f:I_m\rightarrow\F$, define
+\begin{equation}\label{eq:intro:encoding}
+ U_f^{(m)}(X):=\sum_{b\in I_m}f(b)K_b^{(m)}(X).
+\end{equation}
+For the unique element $()\in I_0$ define $K_{()}^{(0)}(X):=1$.
+\end{definition}
+
+\begin{lemma}[Degree and leading coefficient]\label{lem:intro:degree}
+For every $b\in I_m$, $K_b^{(m)}$ is monic and has degree $N-1$.
+\end{lemma}
+\begin{proof}
+Each factor $X^{2^i}+b_i$ is monic of degree $2^i$. The leading term in the product is the product of the leading terms, namely $X^{\sum_{i=0}^{m-1}2^i}$. Since $\sum_{i=0}^{m-1}2^i=2^m-1=N-1$, no other selection of terms has as large a degree. Therefore $K_b^{(m)}$ has degree $N-1$ and leading coefficient $1$.
+\end{proof}
+
+\begin{lemma}[Even--odd kernel recursion]\label{lem:intro:recursion}
+For $b'\in I_{m-1}$, let $Y$ be a formal variable. Then
+\begin{align}
+K_{(0,b')}^{(m)}(X)&=X\,K_{b'}^{(m-1)}(X^2),\label{eq:intro:rec0}\\
+K_{(1,b')}^{(m)}(X)&=(X+1)K_{b'}^{(m-1)}(X^2).\label{eq:intro:rec1}
+\end{align}
+\end{lemma}
+\begin{proof}
+Writing $b=(a,b')$, the $i=0$ factor in~\eqref{eq:intro:kernel} is $X+a$. For $i\geq1$ put $j=i-1$. Then $X^{2^i}=(X^2)^{2^j}$, and the remaining product equals $K_{b'}^{(m-1)}(X^2)$. Taking $a=0$ and $a=1$ gives the two formulas.
+\end{proof}
+
+\begin{lemma}[Unique even--odd decomposition]\label{lem:intro:split}
+Let $d\geq1$ and $P\in\F[X]$ satisfy $\deg P<2d$, or $P=0$. There exist unique polynomials $E,O\in\F[Y]$ of degree $<d$ (allowing zero) such that
+\begin{equation}\label{eq:intro:split}
+ P(X)=E(X^2)+XO(X^2).
+\end{equation}
+\end{lemma}
+\begin{proof}
+Write $P(X)=\sum_{j=0}^{2d-1}a_jX^j$, with zero coefficients beyond the actual degree. Define $E(Y):=\sum_{i=0}^{d-1}a_{2i}Y^i$ and $O(Y):=\sum_{i=0}^{d-1}a_{2i+1}Y^i$. This gives existence. If $E_1(X^2)+XO_1(X^2)=E_2(X^2)+XO_2(X^2)$, comparison of coefficients of every even power $X^{2i}$ gives $E_1=E_2$; comparison of every odd power $X^{2i+1}$ gives $O_1=O_2$. This proves uniqueness.
+\end{proof}
+
+\begin{proposition}[Kernel basis theorem]\label{prop:intro:basis}
+The family $(K_b^{(m)})_{b\in I_m}$ is an $\F$-basis of the vector space $\F[X]_{<N}$.
+\end{proposition}
+\begin{proof}
+This vector space has dimension $N$, and there are $|I_m|=N$ kernel polynomials. It therefore suffices to prove their linear independence. We prove it by induction on $m$. For $m=0$ the only polynomial is $K_{()}^{(0)}=1$, which is linearly independent.
+
+Suppose the assertion holds for $m-1$, and assume that
+\begin{equation}\label{eq:intro:linearzero}
+ \sum_{b'\in I_{m-1}}a_{0,b'}K_{(0,b')}^{(m)}(X)
+ +\sum_{b'\in I_{m-1}}a_{1,b'}K_{(1,b')}^{(m)}(X)=0.
+\end{equation}
+Define $A(Y):=\sum_{b'}a_{0,b'}K_{b'}^{(m-1)}(Y)$ and $B(Y):=\sum_{b'}a_{1,b'}K_{b'}^{(m-1)}(Y)$. Lemma~\ref{lem:intro:recursion} turns~\eqref{eq:intro:linearzero} into
+\[
+ X A(X^2)+(X+1)B(X^2)=B(X^2)+X(A+B)(X^2)=0.
+\]
+By uniqueness in Lemma~\ref{lem:intro:split}, $B=0$ and $A+B=0$; hence $A=B=0$. By the induction hypothesis all $a_{0,b'}$ and $a_{1,b'}$ vanish. This proves linear independence for $m$ and completes the induction.
+\end{proof}
+
+\begin{corollary}[Top-coefficient identity]\label{cor:intro:top}
+For every table $f:I_m\to\F$,
+\begin{equation}\label{eq:intro:top}
+ [X^{N-1}]U_f^{(m)}=\sum_{b\in I_m}f(b),
+\end{equation}
+where $[X^j]P$ denotes the coefficient of $X^j$ in $P$.
+\end{corollary}
+\begin{proof}
+By Lemma~\ref{lem:intro:degree}, the coefficient of $X^{N-1}$ in every $K_b^{(m)}$ equals $1$. Coefficient extraction is linear, so~\eqref{eq:intro:encoding} gives $[X^{N-1}]U_f^{(m)}=\sum_b f(b)\cdot1$.
+\end{proof}
