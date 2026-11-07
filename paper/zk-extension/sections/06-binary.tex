@@ -1,0 +1,77 @@
+\section{Characteristic-Two Specializations and Kernel Consistency}\label{sec:binary}
+
+This chapter develops the characteristic-two algebra required to
+express and verify the masked correction of binary-field ring
+switching in Boolean-kernel coordinates. The distinction from the
+original KBFold protocol is essential: KBFold's smooth
+multiplicative-domain word fold assumes odd characteristic, while
+the trace-zero and Artin--Schreier identities here assume
+characteristic two. We use the original Boolean-kernel basis
+and normalized polynomial folds established in
+Chapters~1, 4, and~5~\cite{MkhidaKBFold2026}.
+The trace/Frobenius techniques should be compared with
+Kochergin~\cite{Kochergin2026} and
+Frigo--shelat~\cite{FrigoShelat2026};
+we do not claim their trace-zero masking principle as new.
+
+Every theorem is split into elementary lemmas with full proofs.
+The principal new algebraic statements of this chapter are the
+kernel-coordinate affine trace identity,
+the independent anchored residual basis,
+and a conditional two-challenge coefficient-consistency bound.
+The final result is \emph{not} a zero-knowledge theorem for
+the whole Ring Switching reduction or for the original KBFold PCS.
+
+\input{sections/06a-frobenius}
+\input{sections/06b-kernel-frobenius}
+\input{sections/06c-multilinearization}
+\input{sections/06d-trace-artin-schreier}
+\input{sections/06e-dual-coordinates}
+\input{sections/06f-masked-traces}
+\input{sections/06g-anchored-kernels}
+\input{sections/06h-consistency-check}
+
+\subsection{The theorem chain and its formal boundary}\label{sec:binary:conclusion}
+
+For $L=\F_{2^n}$ with $n=2^\ell$ and
+$c,p\in L^{I_\ell}$, the algebraic chain is
+\[
+ \boxed{
+ \Delta_p(\theta)
+ =D_{C_p}(\theta)
+ =\mathsf{PFold}^{[\ell]}_\theta(C_p)
+ =\mathscr M_\ell(C_p)(1+\theta).
+ }
+\]
+The correction can be verified through traces of affine
+expressions over $L$:
+\[
+ \boxed{
+ D_c(\theta)=\Delta_p(\theta)
+ \iff
+ \Tr(V_k(p,c,\theta))=0\quad\forall k.
+ }
+\]
+The Artin--Schreier map $\wp(t)=t^2+t$ has image
+$\ker\Tr$, and independent uniform masks make the
+\emph{individual public trace vector} uniformly distributed
+over $(\ker\Tr)^{I_\ell}$ for a fixed consistent instance.
+The anchored family
+\[
+ W_b=K_b+\mathbf 1_{\{b=0_\ell\}}X^n
+\]
+satisfies that $\{1,W_b:b\in I_\ell\}$ is a basis of
+$L[X]_{\leq n}$. With secret coefficients and messages
+fixed before the relevant fresh challenges, the
+two-challenge consistency checker has mismatch-acceptance
+probability at most
+\[
+ \boxed{\min\{1,(\ell+n)/2^n\}.}
+\]
+This bound concerns algebraic coefficient consistency alone.
+The complete security claim requires the remaining
+ring-switching equations, binding commitments, a
+joint-transcript simulator, and the composition analysis
+developed in later chapters. No new Lean certificate is
+asserted here; each result is mapped to a proposed Lean
+declaration in the chapter ledger.
