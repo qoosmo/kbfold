@@ -1,0 +1,183 @@
+\subsection{The masked fold chain and confidential local checks}\label{sec:full:fold-oracle}
+
+\begin{definition}[Honest masked fold-oracle chain]\label{def:full:masked-oracles}
+Before the evaluation point $z$ is known, sample
+$R\overset{\$}{\leftarrow}\F[X]_{<B}$ and set
+\[
+ Q_0=U_f^{(m)}+X^NR.
+\]
+After the sumcheck round challenge $r_j$,
+define $Q_{j+1}=\pfold_{r_j}(Q_j)$
+for $0\le j<m$. At each level set
+\[
+ w_j(x):=Q_j(x)\quad(x\in\Omega_j),
+\]
+and commit to \emph{every} $w_j(x)$ with
+fresh independent field-symbol commitment
+$\mathsf{VC}(w_j(x);\mathbf r_{j,x})$.
+The resulting Merkle root $\mathsf{root}_j$
+is published \emph{before} that level's
+local authentication-query indices
+are selected.
+\end{definition}
+
+\begin{lemma}[Exact degree and word-fold invariants]\label{lem:full:fold-invariants}
+For an honest masked chain,
+\[
+ \deg Q_j<D_j,\qquad
+ w_{j+1}=\mathsf{WFold}_{r_j,j}(w_j)
+\]
+for every $0\le j<m$.
+At the final level,
+$Q_m=a+\rho X$ with
+$a=\widetilde f(r)$.
+\end{lemma}
+\begin{proof}
+The degree and codeword statements
+are respectively
+Theorem~\ref{thm:kbff:code-rate}
+and Corollary~\ref{cor:kbff:wordchain}.
+The final linear form and its
+constant coefficient follow from
+Theorem~\ref{thm:kbff:linear-closure}.
+\end{proof}
+
+\begin{definition}[Confidential authenticated fold query]\label{def:full:fold-query}
+For a query $(j,y)$ with
+$0\le j<m$ and $y\in\Omega_{j+1}$,
+choose either public square root
+$x\in\Omega_j$ satisfying $x^2=y$.
+The prover gives public Merkle
+authentication shells for
+$(j,x)$, $(j,-x)$ and $(j+1,y)$.
+It then proves in zero knowledge
+that the three authenticated
+commitment vectors possess
+\emph{valid field-symbol openings}
+$(a_+,a_-,b)$ satisfying
+\[
+ \boxed{
+ b=(2r_j-1)\frac{a_++a_-}{2}
+   +(1-r_j)\frac{a_+-a_-}{2x}.}
+\]
+The proof uses the same hidden
+openings as the corresponding
+registered word, not independently
+chosen values for each query.
+No $a_+,a_-,b$ or commitment
+blindings are disclosed.
+\end{definition}
+
+\begin{lemma}[The query equation is independent of square-root choice]\label{lem:full:fold-query-choice}
+Replacing $x$ by $-x$ and
+interchanging the two level-$j$
+openings leaves the equation
+of Definition~\ref{def:full:fold-query}
+unchanged.
+\end{lemma}
+\begin{proof}
+The sum $a_++a_-$ is unchanged.
+The difference $a_+-a_-$ and
+the denominator $2x$ both
+change sign, so their quotient
+is unchanged. The coefficients
+$(2r_j-1)$ and $(1-r_j)$
+do not depend on the root.
+\end{proof}
+
+\begin{lemma}[Honest confidential fold queries pass]\label{lem:full:fold-query-complete}
+Every honest authenticated fold query
+has valid committed field openings
+satisfying its hidden fold equation.
+\end{lemma}
+\begin{proof}
+By Definition~\ref{def:full:masked-oracles},
+the three openings are the
+true values
+$Q_j(x),Q_j(-x),Q_{j+1}(y)$.
+The word-fold identity of
+Lemma~\ref{lem:full:fold-invariants}
+is exactly the query equation
+at $y=x^2$. The blinding
+values are those generated
+for the registered leaves.
+Therefore all queried statements
+have valid witnesses.
+\end{proof}
+
+\begin{definition}[Confidential final closure]\label{def:full:final-close}
+Let $Q_m(X)=a+\rho X$ be the
+last hidden polynomial.
+The public verifier requests
+authenticated commitment shells
+at two publicly fixed, distinct
+points $x_0,x_1\in\Omega_m$.
+The prover supplies a zero-knowledge
+relation proof that:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item the two hidden authenticated
+field values $u_0,u_1$ lie on
+a common degree-$<2$ polynomial;
+\item the constant $a$ of that
+line satisfies
+$x_1u_0-x_0u_1=(x_1-x_0)a$;
+\item $a$ agrees with the hidden
+sumcheck terminal relation
+$\mu_m(r_{m-1})=\chi_m a+b_m$.
+\end{enumerate}
+The proof binds $a$ to the
+same final degree-$<2$ word
+as the registered final root.
+\end{definition}
+
+\begin{lemma}[Honest final closure is valid]\label{lem:full:final-complete}
+The final closure relation of
+Definition~\ref{def:full:final-close}
+has a witness in every honest
+execution, provided $|\Omega_m|\ge2$.
+\end{lemma}
+\begin{proof}
+The group domain has
+$M_m=2^s\ge2$ elements by
+Lemma~\ref{lem:kbff:domain-sizes},
+so distinct $x_0,x_1$ exist.
+By Lemma~\ref{lem:full:fold-invariants},
+$Q_m=a+\rho X$. Its two
+evaluations lie on this line
+and Lemma~\ref{lem:kbff:two-point-line}
+gives the required constant
+coefficient equation.
+Corollary~\ref{cor:full:masked-final-link}
+gives the final hidden sumcheck
+equation, proving every item.
+\end{proof}
+
+\begin{lemma}[Degree-certified final word is uniquely determined by two values]\label{lem:full:two-unique}
+If $P,Q\in\F[X]_{<2}$ agree at
+two distinct points of $\F$,
+then $P=Q$.
+\end{lemma}
+\begin{proof}
+The difference $P-Q$ has
+degree at most one and
+two distinct roots.
+The univariate root bound
+Lemma~\ref{lem:history:rootcount}
+forces $P-Q=0$.
+\end{proof}
+
+\begin{remark}[The proximity gap]
+A zero-knowledge proof of the
+\emph{entire} degree-$<D_j$ word
+and each fold relation is a valid
+but nonsuccinct baseline.
+Replacing that full relation
+by sparse local checks requires
+a proximity theorem for
+\emph{arbitrary adversarial words}
+in the enlarged degree budgets
+$D_j$, not merely a root-count
+lemma for two known polynomials.
+Chapter~14 keeps those two
+verification modes separate.
+\end{remark}
