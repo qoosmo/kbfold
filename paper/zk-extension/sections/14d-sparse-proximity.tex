@@ -1,0 +1,419 @@
+\subsection{Sparse verification: exact rates and a decisive counterexample}\label{sec:security14:sparse}
+The completed full-relation protocol verifies the
+degree and source relations explicitly in its NP
+circuit. A sparse-query replacement is not secured
+by the algebraic fold dictionary alone. The
+following quantitative statements identify precisely
+which piece of a new proximity theorem is missing.
+
+\begin{definition}[Enlarged masked Reed--Solomon codes]\label{def:security14:codes}
+At fold level $j$ put
+\[
+ M_j=2^{m+s-j},\quad
+ N_j=2^{m-j},\quad
+ B_j=\lceil B/2^j\rceil,\quad
+ D_j=N_j+B_j,
+\]
+and define the code
+\[
+ \mathcal C_j:=
+ \operatorname{RS}(\Omega_j,D_j)
+ =\{(P(x))_{x\in\Omega_j}:
+          \deg P<D_j\}
+ \subseteq\F^{M_j}.
+\]
+Its Hamming distance is the
+ordinary number of unequal
+evaluation coordinates, and
+$\delta_j$ denotes its
+relative minimum distance.
+\end{definition}
+
+\begin{lemma}[Exact dimension and minimum distance]\label{lem:security14:rs-distance}
+For $1\le D_j\le M_j$,
+the code $\mathcal C_j$ has
+dimension $D_j$, minimum
+Hamming distance
+\[
+ \boxed{d_j=M_j-D_j+1}
+\]
+and relative distance
+$\delta_j=(M_j-D_j+1)/M_j$.
+\end{lemma}
+\begin{proof}
+Evaluation at $M_j$
+distinct field points
+is injective on the
+space of polynomials of
+degree below $D_j$,
+because a nonzero polynomial
+of degree at most
+$D_j-1<M_j$ cannot vanish
+at all domain points.
+Thus the dimension is
+$D_j$. The difference
+of two distinct codewords
+is the evaluation of a
+nonzero polynomial of degree
+at most $D_j-1$, with at most
+$D_j-1$ roots on $\Omega_j$.
+Its Hamming weight is
+therefore at least
+$M_j-(D_j-1)$.
+Equality is attained by
+a polynomial which is the
+product of $D_j-1$ distinct
+linear factors at evaluation
+points (use the constant
+polynomial $1$ when
+$D_j=1$). Hence the
+minimum distance is
+exactly $M_j-D_j+1$.
+\end{proof}
+
+\begin{lemma}[Degree-rate bounds and required blow-up]\label{lem:security14:rates}
+For $1\le B\le N$ and
+$0\le j\le m$,
+\[
+ \boxed{
+ \frac{D_j}{M_j}
+ =2^{-s}\left(
+ 1+\frac{\lceil B/2^j\rceil}{N_j}
+ \right)\le2^{1-s}.}
+\]
+In particular, $s\ge2$
+guarantees rate at most
+$1/2$ at every level.
+When $s=1,B=N$, the
+code is the entire ambient
+space at every level.
+\end{lemma}
+\begin{proof}
+Divide $D_j=N_j+B_j$
+by $M_j=2^sN_j$.
+Since $B\le N=2^m$,
+we have
+$B_j=\lceil B/2^j\rceil
+\le\lceil2^{m-j}\rceil=N_j$.
+This gives the inequality.
+For $s=1,B=N$,
+$B_j=N_j$ and hence
+$D_j=2N_j=M_j$,
+so evaluation polynomials
+of degree below $M_j$
+give every word in
+$\F^{M_j}$ by
+interpolation.
+\end{proof}
+
+\begin{lemma}[Folding a monomial halves its exponent]\label{lem:security14:half-exp}
+For every integer $e\ge0$
+and fold parameter $r\in\F$,
+the polynomial $\pfold_r(X^e)$
+has degree at most
+$\lfloor e/2\rfloor$.
+Consequently for any
+$m$ fold parameters,
+\[
+ \boxed{
+ \deg(\pfold_{r_{m-1}}\circ\cdots
+ \circ\pfold_{r_0}(X^e))
+ \le \lfloor e/2^m\rfloor.}
+\]
+\end{lemma}
+\begin{proof}
+The defining monomial
+rules of
+Lemmas~\ref{lem:kbff:fold-even}
+and~\ref{lem:kbff:fold-odd}
+send $X^{2a}$ and
+$X^{2a+1}$ to
+public scalar multiples
+of $X^a$, respectively.
+The scalar may vanish,
+which can only reduce
+the output degree.
+Thus the degree after
+one fold is at most
+$\lfloor e/2\rfloor$.
+Iterate this inequality
+$m$ times and use
+$\lfloor\lfloor e/2\rfloor/2
+\rfloor=\lfloor e/4\rfloor$.
+\end{proof}
+
+\begin{theorem}[Sparse local folds and final linearity do not certify initial degree]\label{thm:security14:sparse-counterexample}
+Assume $1\le B<N$ and
+$M\ge2N$.
+Let
+\[
+ \boxed{P_0(X):=X^{N+B}.}
+\]
+The evaluation word of $P_0$
+is \emph{not} in
+$\mathcal C_0=\operatorname{RS}
+(\Omega_0,N+B)$.
+Nevertheless, for \emph{every}
+sequence of fold challenges
+$r_0,\ldots,r_{m-1}\in\F$,
+the chain
+$P_{j+1}=\pfold_{r_j}(P_j)$
+passes \emph{every}
+polynomial/local-word fold
+consistency check, and its
+final polynomial satisfies
+$\deg P_m<2$.
+Therefore even exhaustive
+local fold consistency
+and final degree-one closure
+do not imply the required
+initial Reed--Solomon
+membership.
+\end{theorem}
+\begin{proof}
+The polynomial $P_0$ has
+degree $N+B=D_0$.
+Because $B<N$,
+\[
+ D_0=N+B<2N\le M.
+\]
+If its evaluation word
+were in $\mathcal C_0$,
+some polynomial $Q$
+of degree below $D_0$
+would agree with $P_0$
+at all $M$ domain points.
+Then $P_0-Q$ would be
+nonzero of degree $D_0<M$
+with $M$ distinct roots,
+contradicting the univariate
+root bound. Thus its word
+is outside $\mathcal C_0$.
+
+Define all later polynomials
+by the \emph{actual}
+normalized folding rule.
+For each pair
+$x,-x$ and square
+$y=x^2$, the evaluation
+fold identity
+Theorem~\ref{thm:kbff:wordfold}
+holds identically.
+Hence every local
+consistency check passes,
+regardless of the chosen
+challenges or the number
+of queries.
+By
+Lemma~\ref{lem:security14:half-exp},
+\[
+ \deg P_m
+ \le\left\lfloor
+      \frac{N+B}{N}
+    \right\rfloor=1,
+\]
+since $0<B<N$.
+Thus the final degree-one
+check also passes.
+This proves the stated
+non-implication.
+\end{proof}
+
+\begin{remark}[Precise interpretation of the counterexample]
+The word $P_0$ above does
+\emph{not} satisfy the
+full protocol's preprocessing
+source/mask relation.
+The theorem is a
+counterexample to the
+\emph{proposed sparse
+replacement of that relation
+by local folding and a
+final line check}, not a
+forgery against the fully
+checked Chapter~13 protocol.
+An optimized sparse protocol
+must enforce both
+initial source/degree binding
+and robust proximity of
+the adversarial word chain.
+\end{remark}
+
+\begin{lemma}[Exact fixed-discrepancy sampling error]\label{lem:security14:query-detection}
+Fix two words on a domain of
+size $M_j$ which disagree
+at exactly $e$ coordinates,
+and sample $q$ positions
+uniformly and independently
+\emph{with replacement}
+after both words are fixed.
+The probability that all
+sampled coordinates miss
+the discrepancy is
+\[
+ \boxed{(1-e/M_j)^q.}
+\]
+\end{lemma}
+\begin{proof}
+The complement of the
+discrepancy set has
+$M_j-e$ points.
+Each independent uniform
+sample avoids the
+discrepancy with probability
+$(M_j-e)/M_j$.
+The probability of all
+$q$ misses is the
+product of those
+$q$ equal factors.
+\end{proof}
+
+\begin{definition}[Actual sparse proximity contract]\label{def:security14:proximity-contract}
+A valid sparse KBFold security
+theorem must prove a quantitative
+bound $\varepsilon_{\rm prox}$
+for the following full
+adaptive experiment:
+all committed word shells and
+their associated codeword
+commitments are fixed before
+their corresponding query
+indices; the adversary may
+supply arbitrary non-codeword
+words, may correlate words
+across rounds, and may adapt
+them to preceding public fold
+challenges, but not to the
+fresh query coins after a
+root is bound.
+The verifier's local fold
+checks, initial source/degree
+test, final line test and
+claim consistency must be
+specified. The reduction
+must bound acceptance of
+a chain not representing
+one valid initial
+degree-$<D_0$ masked word
+and its legal folds.
+The bound must use the
+\emph{actual} budgets
+$D_j/M_j$ from
+Lemma~\ref{lem:security14:rates}.
+\end{definition}
+
+\begin{proposition}[A fixed discrepancy bound is not a proximity theorem]\label{prop:security14:not-proximity}
+Lemma~\ref{lem:security14:query-detection}
+does not imply
+Definition~\ref{def:security14:proximity-contract}
+without an additional
+lower bound on discrepancy
+for every invalid adversarial
+chain.
+\end{proposition}
+\begin{proof}
+The fixed-discrepancy
+lemma assumes that the
+two words and the number
+$e$ of their disagreements
+are already given.
+A proximity theorem must
+derive a positive
+discrepancy lower bound
+from non-membership
+in the appropriate
+degree-bounded code
+under correlated adaptive
+folds. The polynomial
+in
+Theorem~\ref{thm:security14:sparse-counterexample}
+is outside the initial
+code but has \emph{zero}
+local fold discrepancy
+at every location.
+Thus local disagreement
+cannot be inferred from
+initial non-membership
+alone. The missing
+implication requires
+separate code/commitment
+structure.
+\end{proof}
+
+\begin{theorem}[Conditional sparse soundness composition]\label{thm:security14:sparse-sound}
+Suppose a particular
+sparse replacement of
+Chapter~13's full
+word-relation checks
+satisfies
+Definition~\ref{def:security14:proximity-contract}
+with error
+$\varepsilon_{\rm prox}$,
+and retains the
+prefix-preserving source
+extraction, Pedersen binding,
+Merkle collision resistance
+and remaining valid
+relation proofs of
+Theorem~\ref{thm:security14:full-binding}.
+Then its false-evaluation
+acceptance probability is
+at most
+\[
+ \boxed{\min\{1,\,
+ \varepsilon_{\rm KE}
+ +\varepsilon_{\rm DL}
+ +\varepsilon_{\rm CRH}
+ +\varepsilon_{\rm prox}\}.}
+\]
+\end{theorem}
+\begin{proof}
+As in
+Theorem~\ref{thm:security14:full-binding},
+exclude preprocessing
+extraction failures,
+conflicting registered
+field openings and
+conflicting authenticated
+Merkle shells.
+Their union probability
+is bounded by the first
+three errors. Outside
+these events, the sparse
+proximity contract ensures
+except with probability
+$\varepsilon_{\rm prox}$
+that all accepted sparse
+checks correspond to a
+valid initial source-bound
+masked word and its legal
+fold chain. On that good
+event the initial claimed
+evaluation is the true
+multilinear evaluation
+of the extracted source
+table by the same
+exact algebraic argument
+as in
+Lemma~\ref{lem:full:fixed-eval}.
+Thus false acceptance
+belongs to the union
+of the four bad events.
+Apply the union bound.
+\end{proof}
+
+\begin{remark}[Locked research boundary]
+No value of
+$\varepsilon_{\rm prox}$
+is supplied or implied
+by the current Chapter~13
+reference implementation.
+The sparse optimization
+is not declared secure.
+Chapter~15 records this
+unresolved component
+inside its final
+certification ledger;
+no extra research
+chapter is added.
+\end{remark}
