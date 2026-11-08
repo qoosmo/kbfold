@@ -51,11 +51,10 @@ Summing their products over
 $b\in I_{m-j}$ gives $\sigma_j$.
 \end{proof}
 
-\begin{definition}[Hidden-offset masked sumcheck]\label{def:full:masked-round}
-Choose independently uniform masks
-$c_1,\ldots,c_m\in\F$, each sampled
-when its round begins, and initialize
-$b_0:=0$. For round $j$ define
+\begin{definition}[Hidden-offset Sumcheck]\label{def:full:masked-round}
+Initialize $b_0:=0$. At the beginning
+of round $j$, sample a fresh independent
+$c_j\leftarrow\F$ and define
 \[
  \begin{aligned}
  H_j(T)&:=\frac{b_{j-1}}{2}
