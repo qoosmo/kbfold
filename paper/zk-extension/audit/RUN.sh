@@ -20,3 +20,6 @@ rustc --edition=2021 --test audit/global_extraction.rs -o /tmp/kbfold-zk-global-
 
 rustc --edition=2021 --test audit/full_kbfold.rs -o /tmp/kbfold-zk-full-kbfold-audit
 /tmp/kbfold-zk-full-kbfold-audit --nocapture
+
+rustc --edition=2021 --test audit/final_security.rs -o /tmp/kbfold-zk-final-security-audit
+/tmp/kbfold-zk-final-security-audit --nocapture
