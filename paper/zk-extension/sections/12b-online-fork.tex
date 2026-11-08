@@ -1,0 +1,239 @@
+\subsection{A quantitative extract-and-restore lemma}\label{sec:global:fork}
+Put $a_\kappa:=2^{-\kappa}$.
+The central improvement over Chapter~11 is to
+\emph{condition on the already sampled accepting
+main path} and search only for an \emph{alternative}
+accepted inner challenge string. The main path is
+never replaced by the successful fork.
+The elementary probability bound below makes
+this strategy work uniformly over all adaptive
+pre-block histories.
+
+\begin{definition}[Local accepted challenge tree]\label{def:global:tree}
+Fix a pre-block public history, a public OR
+statement $(C,S)$, and the entire saved private
+state and random tape of a causal prover.
+For each challenge string
+$e\in\{0,1\}^{\kappa}$,
+run the deterministic prover from that state.
+Let
+\[
+ \mathcal A:=\{e:\text{all }\kappa
+ \text{ mini-proofs accept}\},\quad
+ m:=|\mathcal A|,\quad
+ p:=m/2^\kappa.
+\]
+For an accepted main string $e\in\mathcal A$,
+a side run is a \emph{fork} if it accepts on
+some string $e'\in\mathcal A\setminus\{e\}$.
+\end{definition}
+
+\begin{lemma}[Probability of a distinct accepting side string]\label{lem:global:side-success}
+For every fixed accepted main string $e$,
+one independently sampled uniform side
+challenge string gives a fork with probability
+\[
+ \boxed{p-a_\kappa}.
+\]
+\end{lemma}
+\begin{proof}
+The accepted challenge set has $m$ elements,
+exactly one of which is the fixed main
+string $e$. Each of the other $m-1$
+strings has probability $2^{-\kappa}$.
+Thus the success probability equals
+$(m-1)2^{-\kappa}
+=p-2^{-\kappa}=p-a_\kappa$.
+\end{proof}
+
+\begin{lemma}[Exact failure probability after bounded replay]\label{lem:global:exact-fail}
+Fix the deterministic pre-block state.
+Run a fresh uniform main OR block and,
+only if it accepts, make $R\ge1$ independent
+side attempts for a \emph{distinct}
+accepted challenge string.
+The joint probability that the main block
+accepts but no fork is found is
+\[
+ \boxed{p(1-p+a_\kappa)^R.}
+\]
+\end{lemma}
+\begin{proof}
+The main string is accepted with
+probability $p$.
+Conditioned on any accepted main
+string, Lemma~\ref{lem:global:side-success}
+makes the failure probability of one
+side attempt $1-p+a_\kappa$.
+The side challenge strings are mutually
+independent and also independent of the
+main sample. Thus all $R$ attempts
+fail with probability
+$(1-p+a_\kappa)^R$.
+This expression does not depend on
+the particular accepted main string.
+Multiplying by $p$ gives the formula.
+\end{proof}
+
+\begin{lemma}[Uniform elementary replay bound]\label{lem:global:uniform-fail}
+For every admissible
+$p=m2^{-\kappa}$ and every integer
+$R\ge1$,
+\[
+ \boxed{
+ p(1-p+a_\kappa)^R
+ \le a_\kappa+\frac{1}{R+1}.}
+\]
+\end{lemma}
+\begin{proof}
+If $m=0$, the left side is zero.
+Otherwise $p\ge a_\kappa$.
+Put $u:=p-a_\kappa\in[0,1]$.
+Then
+\[
+ p(1-p+a_\kappa)^R
+ =(u+a_\kappa)(1-u)^R
+ \le u(1-u)^R+a_\kappa.
+\]
+The real-valued function
+$f(u)=u(1-u)^R$ on $[0,1]$
+is zero at the endpoints.
+For $0<u<1$ its derivative is
+\[
+ f'(u)=(1-u)^{R-1}(1-(R+1)u).
+\]
+Hence the maximum is attained at
+$u=1/(R+1)$ and equals
+$R^R/(R+1)^{R+1}$,
+which is at most $1/(R+1)$.
+Substitution gives the required bound.
+\end{proof}
+
+\begin{theorem}[Per-block online extraction with a preserved main path]\label{thm:global:one-block}
+Fix a public OR statement before its
+first one-bit challenge and let a causal
+randomized classical prover be
+checkpoint-replayable.
+There is a black-box procedure that:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item runs the unmodified main OR block
+against $\kappa$ independent uniform
+challenge bits;
+\item if it accepts, makes at most $R$
+independent side replays and attempts
+the explicit special-soundness
+extraction of Chapter~11;
+\item restores the exact main post-block
+state before the next protocol stage.
+\end{enumerate}
+It produces a valid OR opening
+on every successful fork, and
+\[
+ \boxed{
+ \Pr[\text{main accepts but extraction fails}]
+ \le 2^{-\kappa}+\frac{1}{R+1}.}
+\]
+The bound holds for every pre-block
+history, including adaptively
+chosen public statements.
+\end{theorem}
+\begin{proof}
+Condition on the complete saved
+prover state and tape at the start
+of the block. The statement is
+then fixed and
+Definition~\ref{def:global:tree}
+gives the deterministic accepted
+challenge set.
+By Lemma~\ref{lem:global:uniform-fail},
+the probability that main acceptance
+is followed by $R$ failed side
+attempts is at most
+$2^{-\kappa}+1/(R+1)$.
+
+If a distinct accepting side string
+is found, the two runs start from
+the identical saved state and tape.
+Lemma~\ref{lem:mv:earliest}
+supplies two accepting transcripts
+with the same OR first message
+and different one-bit challenges
+at the earliest differing index.
+Theorem~\ref{thm:mv:two-run-extract}
+computes a valid permitted opening.
+The procedure then restores the main
+post-block state by
+Definition~\ref{def:global:access}.
+The conditional bound is uniform
+over saved states, so averaging
+over the prover tape and all
+earlier adaptive public histories
+preserves it.
+\end{proof}
+
+\begin{corollary}[Uniform extraction error over sequential blocks]\label{cor:global:J-blocks}
+For at most $J$ sequential OR blocks,
+suppose every accepted block is followed
+by the extract-and-restore procedure of
+Theorem~\ref{thm:global:one-block}.
+The probability that the \emph{main
+protocol accepts} yet at least one
+accepted OR block fails to yield an
+extracted opening is at most
+\[
+ \boxed{
+ \varepsilon_{\rm fork}(J,\kappa,R)
+ :=\min\left\{1,
+ J\left(2^{-\kappa}+\frac1{R+1}\right)\right\}.}
+\]
+\end{corollary}
+\begin{proof}
+At the start of the $j$-th reached
+block, condition on the entire
+history and saved prover state.
+Theorem~\ref{thm:global:one-block}
+bounds the event that this block
+accepts but extraction fails.
+If the final main protocol accepts,
+every reached mandatory OR block
+accepted, so failure at any such
+block lies in one of these events.
+A union bound over at most $J$
+block positions gives the displayed
+bound, capped by one.
+\end{proof}
+
+\begin{lemma}[Expected and worst-case replay overhead]\label{lem:global:runtime}
+The $J$-block procedure uses at most
+$JR$ side block executions,
+and at most $J(R+1)$ total
+main-plus-side block executions.
+If a block contains $\kappa$
+one-bit mini-proofs, the number
+of executed mini-proof instances
+is at most $\kappa J(R+1)$.
+\end{lemma}
+\begin{proof}
+At each reached block the procedure
+makes exactly one main execution
+and at most $R$ side executions.
+There are at most $J$ blocks.
+Multiply the resulting number
+of blocks by the maximum of
+$\kappa$ mini-proofs per block.
+\end{proof}
+
+\begin{remark}[Why this is stronger than isolated forking]
+Chapter~11 obtained two accepting
+runs for one fixed statement.
+Theorem~\ref{thm:global:one-block}
+instead \emph{retains the actual main
+accepted run}, constructs a fork only
+as a private side computation, and
+restores the precise state that will
+receive the next outer challenge.
+The failure bound is unconditional
+over histories; no lower bound on
+the prover's conditional acceptance
+probability needs to be assumed.
+\end{remark}
