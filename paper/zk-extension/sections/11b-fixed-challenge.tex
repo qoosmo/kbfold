@@ -1,0 +1,136 @@
+\subsection{A simulator for any fixed one-bit challenge}\label{sec:mv:fixed}
+The central technical fact is stronger than ordinary
+honest-verifier zero knowledge: for every \emph{fixed}
+global challenge bit the Schnorr OR transcript admits
+a perfect witness-free simulator whose first message
+has the same distribution, independently of that bit.
+
+\begin{definition}[Fixed-bit OR transcript simulator]\label{def:mv:fixed-sim}
+Given only $(C,S,e)$ for a specified bit $e\in\{0,1\}$,
+write $Y_j=Cg^{-t_j}$. Independently sample
+$e_1,\dots,e_{d-1},z_1,\dots,z_d$
+uniformly in $\mathbb Z_P$; set
+\[
+ e_d:=e-\sum_{j<d}e_j\pmod P,\qquad
+ T_j:=h^{z_j}Y_j^{-e_j}.
+\]
+Output $(T,(e_j,z_j)_{j=1}^d)$.
+This produces a transcript accepted for the global
+challenge $e$, and requires no OR witness.
+\end{definition}
+
+\begin{lemma}[The simulator always satisfies the verifier equations]\label{lem:mv:fixed-accepts}
+For every public input and bit $e$, the output of
+Definition~\ref{def:mv:fixed-sim} is accepting.
+\end{lemma}
+\begin{proof}
+By definition $\sum_je_j=e$ in $\mathbb Z_P$.
+Multiplying $T_j=h^{z_j}Y_j^{-e_j}$
+by $Y_j^{e_j}$ gives $h^{z_j}$.
+These are exactly the OR verifier equations.
+\end{proof}
+
+\begin{lemma}[Honest local challenges are uniform subject to their sum]\label{lem:mv:local-hyperplane}
+Fix an honest OR witness branch $j_*$ and a
+global challenge $e\in\mathbb Z_P$.
+The complete local challenge vector in an honest
+execution is uniform over
+\[
+ \mathcal H_e:=\{(e_1,\dots,e_d)\in
+ \mathbb Z_P^d:\ \sum_je_j=e\}.
+\]
+\end{lemma}
+\begin{proof}
+The honest prover chooses the $d-1$ local
+challenges outside branch $j_*$ independently
+uniformly, and sets the remaining coordinate
+to $e$ minus their sum. This is a bijection
+between $\mathbb Z_P^{d-1}$ and $\mathcal H_e$,
+so every vector in $\mathcal H_e$ occurs with
+the same probability $P^{-(d-1)}$.
+\end{proof}
+
+\begin{lemma}[Honest responses are independent uniforms given challenges]\label{lem:mv:responses}
+For fixed $(C,S)$, honest witness $(j_*,r)$,
+and global challenge $e$, conditional on
+the complete local challenge vector,
+the responses $z_1,\dots,z_d$
+are independent uniform elements of $\mathbb Z_P$.
+\end{lemma}
+\begin{proof}
+The honest prover sampled all false-branch
+responses $z_j$ independently uniformly.
+The true-branch response is
+$z_{j_*}=u+e_{j_*}r$ with independent
+uniform nonce $u$.
+Once the challenge vector and witness are
+fixed, the map $u\mapsto u+e_{j_*}r$
+is a translation and hence preserves the
+uniform distribution. It is independent
+of all false-branch responses.
+\end{proof}
+
+\begin{theorem}[Perfect simulation conditional on any fixed challenge]\label{thm:mv:fixed-perfect}
+For every valid OR witness and every fixed
+$e\in\{0,1\}$, the distribution of the entire
+honest transcript
+\[
+ (T,(e_j,z_j)_j)\mid e
+\]
+is \emph{identical} to the distribution produced
+by Definition~\ref{def:mv:fixed-sim}.
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:mv:local-hyperplane},
+the honest challenge vector is uniform over
+$\mathcal H_e$. Definition~\ref{def:mv:fixed-sim}
+selects exactly this uniform law by freely
+choosing $d-1$ coordinates and solving
+for the last. By Lemma~\ref{lem:mv:responses},
+the honest responses conditioned on the
+challenge vector are independent uniforms;
+the simulator samples the same conditional law.
+Finally every accepting transcript uniquely
+determines the first message as
+$T_j=h^{z_j}Y_j^{-e_j}$.
+The simulator and honest prover therefore
+use identical laws for all coordinates
+and the same deterministic relation for $T$.
+\end{proof}
+
+\begin{lemma}[First message is challenge-independent]\label{lem:mv:first-uniform}
+For either fixed challenge bit, the first message
+$T=(T_1,\dots,T_d)$ of the fixed-challenge simulator
+is uniform on $G^d$. In particular its law is
+independent of the challenge and the OR witness.
+\end{lemma}
+\begin{proof}
+Condition on any local challenge vector.
+Each $z_j$ is independent uniform in $\mathbb Z_P$.
+Since $h$ generates $G$, the map
+$z_j\mapsto h^{z_j}Y_j^{-e_j}$
+is a bijection onto $G$.
+The coordinates $T_j$ are thus conditionally
+independent uniform elements of $G$,
+with a law independent of the selected local
+challenge vector. Averaging over that vector
+does not change the uniform product law.
+\end{proof}
+
+\begin{corollary}[Fixed-bit response simulation conditioned on $T$]\label{cor:mv:conditional-response}
+For every fixed valid witness, every
+$e\in\{0,1\}$ and every possible first message $T$,
+the conditional distribution of the honest
+OR response given $(T,e)$ is the same as that
+of Definition~\ref{def:mv:fixed-sim} given $(T,e)$.
+\end{corollary}
+\begin{proof}
+Theorem~\ref{thm:mv:fixed-perfect}
+identifies the joint laws of first messages
+and responses for the specified $e$.
+Lemma~\ref{lem:mv:first-uniform} assigns
+every possible $T$ positive probability
+$|G|^{-d}$ in both experiments.
+Therefore their conditional response
+laws at each $(T,e)$ are identical.
+\end{proof}
