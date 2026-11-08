@@ -293,3 +293,36 @@ This is a **classical, honest-sigma-verifier** construction, not a complete mali
 ### Rust verification
 
 `audit/malicious_sigma.rs` exhaustively enumerates tiny-group Schnorr OR transcript distributions, a malicious verifier's adaptive challenge/abort behavior, and challenge-tree forking and extraction. The tiny group is for algebraic regression testing only, not cryptographic deployment.
+
+
+## Chapter 12 — Global Temporal Extraction and Classical Soundness
+
+**Source:** `sections/12-global-extraction.tex` (five detailed subsections).
+**Lean map:** [CHAPTER_12_LEAN_MAP.md](CHAPTER_12_LEAN_MAP.md).
+**Fixed roadmap:** [ROADMAP_LOCK.md](ROADMAP_LOCK.md) — Chapters **12–15 only**, no additional chapters.
+**Audit:** 32 labeled statements: 11 definitions and **21 complete mathematical proofs**, with no new Lean-certified declaration yet.
+
+### Main theorem
+
+A classical checkpoint/replay extractor follows **one unchanged accepted main transcript**, and privately searches for a second accepted challenge string at each of at most `J` sequential OR proof blocks with `kappa` one-bit challenges. For at most `R` side attempts per block:
+
+```
+Pr[main accepts AND any OR opening missing]
+    <= J * (2^(-kappa) + 1/(R+1)).
+```
+
+It fixes one canonical bit-commitment registry before `theta` and the new auxiliary variables before `z`; conflicting valid openings compute the forbidden Pedersen setup discrete logarithm. It preserves **the exact original main transcript** and fresh independent outer challenges. This replaces the formerly unspecified global temporal extractor for the **classical sequential OR affine component**.
+
+Consequently, under the separate authenticated-oracle error `eps_oracle`,
+
+```
+Pr[false evaluation claim accepted]
+    <= (ell+n)/2^n + eps_oracle + Adv_DL(D_R)
+       + J*(2^(-kappa) + 1/(R+1)).
+```
+
+If an attacker has non-negligible success, choosing a polynomial replay budget inverse in that success yields a non-negligible discrete-log reduction whenever the three baseline errors are negligible.
+
+**Exact boundary:** This does not implement or prove authentication/zero knowledge for the original KBFold folded polynomial oracle, Merkle/FRI openings or odd-characteristic PCS; those belong strictly to Chapters 13–14. Quantum rewinding and post-quantum commitments are also excluded.
+
+**Regression audit:** `audit/global_extraction.rs` verifies the combinatorial replay bound in exact integer arithmetic, exhaustively checks small challenge trees and tests commitment collision recovery.
