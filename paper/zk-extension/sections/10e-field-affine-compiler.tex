@@ -1,0 +1,178 @@
+\subsection{A complete field-affine proof compiler}\label{sec:realize:compiler}
+
+\begin{definition}[Bit-committed field variables]\label{def:realize:field-commit}
+To register a hidden field element $x\in L$, commit
+independently to its $n$ fixed-basis coordinates
+\[
+ C_i(x):=\mathsf{Com}(d_i(x);r_i),\qquad
+ 0\leq i<n,\quad r_i\overset{\$}{\leftarrow}\mathbb Z_P.
+\]
+Write $\mathbf C(x)$ for the $n$-tuple.
+The $n$ bitness OR proofs establish that every
+registered group element has a known binary opening.
+Registration occurs before the outer random challenge
+whose soundness argument relies on the field value.
+\end{definition}
+
+\begin{lemma}[Registered coordinates reconstruct one field element]\label{lem:realize:field-reconstruct}
+Given extracted binary openings $(b_i,r_i)$ of
+every $C_i(x)$, there is a unique associated field value
+\[
+ x^{\rm ext}:=\sum_{i=0}^{n-1}\gamma_i b_i\in L.
+\]
+\end{lemma}
+\begin{proof}
+The fixed basis coefficients $b_i\in\F_2$ determine
+the displayed field element. Uniqueness follows
+from the uniqueness of basis expansions;
+no second field element can have the same
+coordinate vector.
+\end{proof}
+
+\begin{definition}[Affine-proof compilation algorithm]\label{def:realize:affine-compiler}
+For registered hidden field variables $x_1,\ldots,x_s$
+and a public affine equation $\sum_ja_jx_j=b$,
+the compiler:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item computes all public binary coefficients
+$M_{k,j,i}=d_k(a_j\gamma_i)$ and $b_k=d_k(b)$;
+\item for each row $k$, selects the set
+$T_k=\{(j,i):M_{k,j,i}=1\}$;
+\item forms the public group product
+$C_{T_k}=\prod_{(j,i)\in T_k}C_i(x_j)$;
+\item proves the integer opening of $C_{T_k}$
+lies in $\mathcal S_{|T_k|,b_k}$
+using the OR protocol of
+Definition~\ref{def:realize:or}.
+\end{enumerate}
+Each registered bit must additionally have a valid
+bitness proof from Definition~\ref{def:realize:parity-proof}.
+No secret field element is transmitted or opened.
+\end{definition}
+
+\begin{lemma}[All affine row statements are publicly computable]\label{lem:realize:rows-public}
+Given the public group commitments, public
+basis, coefficients $(a_j)_j$ and right side $b$,
+a verifier can compute every $C_{T_k}$ and
+candidate set $\mathcal S_{|T_k|,b_k}$
+without knowing a hidden field element.
+\end{lemma}
+\begin{proof}
+Every $M_{k,j,i}$ equals the publicly
+computable coordinate $d_k(a_j\gamma_i)$.
+The set $T_k$ and $b_k=d_k(b)$ therefore
+depend only on public data. Its aggregate
+commitment is the product of public
+commitments indexed by $T_k$, and the
+candidate set depends only on the publicly
+known row cardinality and target bit.
+\end{proof}
+
+\begin{theorem}[Perfect completeness of the field-affine compiler]\label{thm:realize:compiler-complete}
+If every registered commitment opens to the correct
+coordinate of $x_j$ and
+$\sum_ja_jx_j=b$ holds in $L$, then
+all bitness and compiled parity proofs
+accept for any public coefficient choices.
+\end{theorem}
+\begin{proof}
+Every bitness proof has a known binary opening
+and is complete by
+Lemma~\ref{lem:realize:or-complete}.
+By Theorem~\ref{thm:realize:affine-to-parity},
+each of the $n$ compiled parity rows
+is true for these coordinate bits.
+Theorem~\ref{thm:realize:parity-complete}
+makes every corresponding parity
+OR proof complete. All checks pass.
+\end{proof}
+
+\begin{theorem}[Extracted field-affine correctness]\label{thm:realize:compiler-extract}
+Suppose all registered commitments have
+extracted binary openings, and each compiled
+parity OR proof has an extracted opening
+to one of its allowed candidates.
+If the public field equation is false for
+the extracted field elements
+$x_j^{\rm ext}$, then the extracted openings
+give a polynomial-time solution to the
+setup discrete-logarithm problem.
+\end{theorem}
+\begin{proof}
+If the field equation is false,
+Theorem~\ref{thm:realize:affine-to-parity}
+implies that at least one output-coordinate
+parity row is false for the extracted bits.
+Apply
+Theorem~\ref{thm:realize:parity-binding}
+to that row's extracted bit openings
+and allowed aggregate opening.
+It computes $\log_g h$ in polynomial time,
+contradicting setup hardness.
+\end{proof}
+
+\begin{lemma}[Faithful compilation of the Chapter 9 checker]\label{lem:realize:chapter9-affine}
+Each hidden-field equation in
+Definition~\ref{def:zkrs:affine-checks}
+can be expressed in the affine input
+format of Definition~\ref{def:realize:affine-compiler}
+after its stipulated public messages
+and challenges are fixed.
+The trace constraints are public
+and require no hidden-field proof.
+\end{lemma}
+\begin{proof}
+Lemma~\ref{lem:zkrs:claim-in-affine}
+handles the claimed-value and
+incoming equations.
+Lemma~\ref{lem:zkrs:out-affine}
+handles the outgoing equation, and
+Lemma~\ref{lem:zkrs:anchor-affine}
+handles both anchored equations.
+In each case, all coefficients multiplying
+hidden field variables belong to the
+publicly known field $L$ once the
+respective public messages and
+challenges have been received.
+Lemma~\ref{lem:zkrs:public-traces}
+makes every trace-zero test directly
+computable from public values.
+\end{proof}
+
+\begin{lemma}[Packed-column equality is also field affine in bits]\label{lem:realize:packing-link}
+For a binary witness column $(w_{v,j})_{v\in I}$,
+its packed field value
+$\widehat w_j=\sum_v\beta_vw_{v,j}$
+is equivalent to $n$ binary linear
+relations between the bits of $\widehat w_j$
+and the witness bits $w_{v,j}$.
+\end{lemma}
+\begin{proof}
+Apply each coordinate map $d_k$ to
+$\widehat w_j=\sum_v\beta_vw_{v,j}$.
+Since every $w_{v,j}\in\F_2$,
+linearity gives
+\[
+ d_k(\widehat w_j)
+   =\sum_v d_k(\beta_v)w_{v,j}
+   =w_{k,j},
+\]
+using $d_k(\beta_v)=\delta_{kv}$.
+Thus the $n$ equalities are simply
+$ d_k(\widehat w_j)=w_{k,j}$.
+Conversely these $n$ coordinate
+equalities imply the field equality
+by unique basis reconstruction.
+\end{proof}
+
+\begin{remark}[Separate global witness binding]
+The last lemma allows commitment-level linking
+between the packed table and a separately
+committed binary table if both are exposed to
+the concrete bit-proof system. It does not
+automatically link those commitments to an
+\emph{external KBFold polynomial oracle}
+whose authentication structure is different.
+That link needs an explicitly specified
+cross-commitment statement and a proof.
+\end{remark}
