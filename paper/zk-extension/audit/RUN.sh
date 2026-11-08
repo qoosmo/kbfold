@@ -14,3 +14,6 @@ rustc --edition=2021 --test audit/affine_sigma.rs -o /tmp/kbfold-zk-affine-sigma
 
 rustc --edition=2021 --test audit/malicious_sigma.rs -o /tmp/kbfold-zk-malicious-sigma-audit
 /tmp/kbfold-zk-malicious-sigma-audit --nocapture
+
+rustc --edition=2021 --test audit/global_extraction.rs -o /tmp/kbfold-zk-global-extraction-audit
+/tmp/kbfold-zk-global-extraction-audit --nocapture
