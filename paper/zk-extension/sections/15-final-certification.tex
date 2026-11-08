@@ -1,0 +1,86 @@
+\section{Final certification ledger and manuscript audit}\label{sec:cert15}
+This is the fifteenth and last chapter of the same KBFold ZK manuscript. It records the exact theorem chain, the formal and executable verification obligations, and the final limitations. It does not claim unexecuted Lean proofs or an uninstantiated NP proof engine have been certified.
+
+\subsection{The final reference theorem}
+\begin{definition}[Scope]\label{def:cert15:scope}
+The reference protocol is the fully checked, odd-characteristic, single-opening, classical full-relation protocol $\Pi_{\rm KBFold}^{\rm hid}$ of Chapter~13. Its assumptions are exactly those of Definition~\ref{def:security14:package}: prefix-preserving pre-point knowledge extraction, adaptive joint witness indistinguishability for the complete proof transcript, classical Pedersen binding, collision-resistant authenticated commitments, and an independent evaluation challenge. The source encoding and circuit relations must agree across all invocations.
+\end{definition}
+\begin{theorem}[Final conditional classical guarantee]\label{thm:cert15:final}
+Under Definition~\ref{def:cert15:scope}, for the source $\widetilde f_{\rm pre}$ committed before $z$,
+\[
+\Pr[\mathrm{accept}\wedge v\ne \widetilde f_{\rm pre}(z)]
+\le\min\{1,\varepsilon_{\rm KE}+\varepsilon_{\rm DL}+\varepsilon_{\rm CRH}\},
+\qquad
+\operatorname{Adv}^{\rm ZK}_{\rm online}\le\varepsilon_{\rm WI}.
+\]
+Honest true openings have acceptance probability one. This is a classical CRS theorem, conditional on the explicitly quantified NP proof-engine contracts; the full-relation protocol is not claimed succinct.
+\end{theorem}
+\begin{proof}
+This is precisely Theorem~\ref{thm:security14:final}, preserving all its assumptions and experiment order. Completeness follows from Lemma~\ref{lem:security14:complete}, binding from Theorem~\ref{thm:security14:full-binding}, and online simulation from Theorem~\ref{thm:security14:online-zk}. The group-element count for fold-word commitments is $bM(2-2^{-m})$ by Lemma~\ref{lem:full:word-count}.
+\end{proof}
+\begin{remark}[Chronology]
+Extraction after learning $z$ is not a substitute for a prefix-preserving extraction before $z$. Witness indistinguishability of a single relation proof does not automatically imply adaptive joint witness indistinguishability of the transcript.
+\end{remark}
+
+\subsection{Algebraic and negative-results checks}
+\begin{lemma}[Pedersen equivocation identity]\label{lem:cert15:equiv}
+Let $h=g^\alpha$ in a prime-order cyclic group, $\alpha\ne0$, and let $C=h^\rho$. For each desired bit $b$ set $r_b=\rho-b\alpha^{-1}$. Then $C=g^b h^{r_b}$.
+\end{lemma}
+\begin{proof}
+$g^b h^{r_b}=g^{b+\alpha(\rho-b\alpha^{-1})}=g^{\alpha\rho}=C$.
+\end{proof}
+The identity alone does not simulate every NP proof message; adaptive joint witness indistinguishability remains a separate hypothesis.
+
+\begin{proposition}[Sparse local checks are insufficient]\label{prop:cert15:sparse}
+The sparse local fold equations and the final linear check alone do not enforce the enlarged Reed--Solomon degree requirement.
+\end{proposition}
+\begin{proof}
+The polynomial $P_0(X)=X^N+B$ in the parameter regime of Theorem~\ref{thm:security14:sparse-counterexample} passes those checks while violating the degree condition. Hence no universal sparse proximity conclusion follows from those checks alone.
+\end{proof}
+\begin{proposition}[No post-quantum claim]\label{prop:cert15:pq}
+The unchanged Pedersen-based reference instantiation is not post-quantum evaluation-binding.
+\end{proposition}
+\begin{proof}
+Theorem~\ref{thm:security14:quantum-break} constructs a quantum false-evaluation strategy. It defeats the classical discrete-logarithm binding premise when transferred unchanged to the quantum setting.
+\end{proof}
+
+\subsection{Lean 4 certification targets and acceptance rule}
+A theorem is \emph{Lean certified} only when its exact declaration and dependencies compile under the recorded Lean/Mathlib toolchain, without \texttt{sorry}, hidden axioms masquerading as proofs, or missing imports. Cryptographic assumptions must remain explicit parameters.
+\begin{enumerate}[label=\textbf{L\arabic*.}]
+\item Normalize the odd-field fold recurrence, degree invariant, masked chain, and hidden final linear closure (Chapters~4--5, 13).
+\item Formalize source encoding, authenticated relation circuits, and the masked Sumcheck running-offset identities (Chapter~13).
+\item Formalize the checkpoint/replay prefix-preserving chronological extractor and its extraction-or-binding-failure disjunction (Chapter~12).
+\item Encode the pre-point source-binding event split and adaptive joint-WI simulation interface, retaining assumptions as theorem parameters (Chapter~14).
+\item Certify the explicit sparse high-degree counterexample and the algebraic equivocation identity above.
+\end{enumerate}
+The manuscript's paper proofs must not be relabeled as machine-checked Lean proofs. Each certified item needs a source path, theorem identifier, pinned toolchain, build command and successful exit status.
+
+\subsection{Rust executable regression targets}
+Rust tests can catch counterexamples and implementation errors but cannot replace universal proof reductions. The required integration tests are:
+\begin{enumerate}[label=\textbf{R\arabic*.}]
+\item Odd-field masked fold and final-closure identities with degree budgets $D_j=N_j+B_j$.
+\item Malformed authentication paths, inconsistent source prefixes, reordered messages, correlated challenges and mask reuse.
+\item The sparse high-degree counterexample with a rejection check once an explicit initial degree test is implemented.
+\item Reproducible end-to-end prover/verifier/extractor/simulator transcript fixtures after the NP proof engine is instantiated.
+\end{enumerate}
+Every executable claim must identify a commit, command, fixed seed where relevant, test result and exit code. These are obligations, not assertions that tests were executed for this chapter.
+
+\subsection{Open obligations: four locked categories}
+The outstanding list is the same as Definition~\ref{def:security14:open}.
+\begin{enumerate}[label=\textbf{O\arabic*.}]
+\item \textbf{NP engine:} instantiate an odd-field relation proof engine with pre-point prefix-preserving extraction and adaptive joint WI. Until then the final classical security theorem is conditional.
+\item \textbf{Sparse proximity:} add source/degree binding and prove an adversarial correlated Reed--Solomon proximity bound at enlarged rates. Sparse succinctness and soundness are not established.
+\item \textbf{ROM/QROM:} analyze any Fiat--Shamir transcript separately; replace Pedersen and proof machinery before asserting post-quantum security.
+\item \textbf{Certification:} compile Lean declarations, execute Rust integration checks, record communication/runtime and cross-check bibliography, labels, and source paths.
+\end{enumerate}
+
+\subsection{Final verdict and closure}
+\begin{proposition}[No further chapter required]\label{prop:cert15:closure}
+Chapters~1--15 constitute the closed manuscript scope. The positive endpoint is the explicitly conditional classical full-relation theorem; the sparse and quantum limitations are explicit negative results. The four obligations above remain engineering and proof-certification tasks, not additional manuscript chapters.
+\end{proposition}
+\begin{proof}
+Chapters~1--12 establish algebra, interfaces and chronological extraction; Chapter~13 specifies the full relation; Chapter~14 proves conditional security and gives both counterexamples; this chapter audits those dependencies and separates their evidentiary status.
+\end{proof}
+\begin{remark}[Certification status]
+Paper theorem chain: established under its named assumptions. Concrete NP engine and complete Lean end-to-end verification: outstanding. Sparse and post-quantum guarantees: not established. This is a final manuscript audit, not a claim of formal/software certification.
+\end{remark}
