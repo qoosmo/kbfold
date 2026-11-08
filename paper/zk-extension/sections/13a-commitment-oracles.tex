@@ -111,11 +111,12 @@ to equal input distributions yields equal
 output distributions.
 \end{proof}
 
-\begin{definition}[Authenticated commitment opening]\label{def:full:auth-commit}
-Given a public root $\mathsf{root}_j$,
-$\mathsf{AuthComOpen}(j,x)$ reveals the
-\emph{commitment vector} $\mathbf C_{j,x}$
-and Merkle path only. The verifier recomputes
+\begin{definition}[Authenticated shell opening]\label{def:full:auth-commit}
+For a public root $\mathsf{root}_j$,
+the authenticated shell at $(j,x)$
+reveals a \emph{commitment vector}
+$\mathbf C_{j,x}$ and its Merkle path,
+but not its field-symbol opening. The verifier recomputes
 the leaf and root and checks equality with
 $\mathsf{root}_j$.
 Any assertion about the hidden symbol
