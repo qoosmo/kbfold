@@ -34,7 +34,9 @@ fn honest(c:i64,branch:usize,r:i64,fa:i64,fb:i64,u:i64,e:i64)->Tr{
     Tr{t:tt,e:ee,z:zz}
 }
 fn simulated(c:i64,e0:i64,z0:i64,z1:i64,e:i64)->Tr{
-    let ee=[e0,norm(e-e0)],zz=[z0,z1],y=ys(c);
+    let ee=[e0,norm(e-e0)];
+    let zz=[z0,z1];
+    let y=ys(c);
     let tt=[mul(exp(H,z0),inv(exp(y[0],ee[0]))),
             mul(exp(H,z1),inv(exp(y[1],ee[1])))];
     Tr{t:tt,e:ee,z:zz}
@@ -132,8 +134,8 @@ fn forking_first_difference_and_exact_probability(){
     // For any accepting set of m distinct k-bit strings, two
     // independently uniform challenge strings fork with exact count m(m-1).
     let denominator=(1<<K)*(1<<K);
-    for m in 0..=(1<<K){
-        let numerator=m*(m.saturating_sub(1));
+    for m in 0usize..=(1usize<<K){
+        let numerator=m*m.saturating_sub(1);
         let p=m as f64/((1<<K) as f64);
         let expected=p*(p-1.0/((1<<K) as f64));
         let actual=numerator as f64/denominator as f64;
