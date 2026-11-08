@@ -1,0 +1,270 @@
+\subsection{Computational false-claim soundness with the constructed extractor}\label{sec:global:soundness}
+
+\begin{definition}[External authenticated-oracle error]\label{def:global:oracle-error}
+Let $\mathcal B_{\rm oracle}$ be the event that
+a concrete external PCS, Merkle/FRI authentication
+layer or packed-witness link accepts, even though
+its exposed field words or authenticated evaluations
+do not correspond to the one registered binary
+witness table extracted in Epoch 0.
+Assume a \emph{separately proven} bound
+\[
+ \Pr[\mathcal B_{\rm oracle}]
+ \le \varepsilon_{\rm oracle}.
+\]
+The present chapter does not instantiate
+the original KBFold oracle or prove this bound.
+When the external oracle is replaced by an
+exact ideal functionality, put
+$\varepsilon_{\rm oracle}=0$.
+\end{definition}
+
+\begin{definition}[Forking reduction against the group setup]\label{def:global:dl-reduction}
+For any fixed PPT classical cheating prover
+$\mathcal P^*$ and integer $R\ge1$,
+define $\mathcal D_R^{\mathcal P^*}(g,h)$:
+it emulates the honest public-coin verifier,
+runs the global checkpoint extractor
+$\mathcal E_R$ at every accepted OR block,
+and outputs $\log_g h$ if a pair
+of inconsistent extracted openings
+is found. It otherwise outputs failure.
+Write
+\[
+ \varepsilon_{\rm DL}(R)
+ :=\Pr[\mathcal D_R^{\mathcal P^*}(g,h)
+     \text{ solves }\log_g h].
+\]
+For polynomial $J,\kappa,R$ and polynomial
+prover runtime, this is a PPT algorithm
+in the checkpoint-replay model.
+\end{definition}
+
+\begin{lemma}[A good accepting false claim is an algebraic exception]\label{lem:global:good-ideal}
+Suppose a false public evaluation claim is
+accepted by the concrete affine verifier.
+Outside the events of (i) a missing
+fork for an accepted OR block,
+(ii) an extracted opening collision
+revealing $\log_g h$, and
+(iii) $\mathcal B_{\rm oracle}$,
+the main transcript satisfies all ideal
+algebraic checks of
+Definition~\ref{def:zkrs:affine-checks}
+on one extracted field tuple, with
+the first-challenge variables fixed
+before $\theta$ and second-challenge
+variables fixed before $z$.
+\end{lemma}
+\begin{proof}
+Theorem~\ref{thm:global:chronological}
+gives valid consistent openings
+for all accepted bitness and aggregate
+OR blocks outside the first two events.
+Lemma~\ref{lem:global:all-affine}
+then makes the claim, incoming,
+outgoing and anchored field-affine
+relations true on the extracted tuple.
+Public trace constraints are checked
+directly and do not involve a hidden
+extraction. Outside
+$\mathcal B_{\rm oracle}$, the same
+registered packed bit table defines
+the committed witness underlying the
+claimed evaluation, so the claim is
+false for that very table.
+The epoch boundary assertion in
+Theorem~\ref{thm:global:chronological}
+fixes the appropriate tuple coordinates
+before the two respective challenges,
+and Lemma~\ref{lem:global:outer-uniform}
+preserves their uniform independence.
+These are exactly the hypotheses
+of the ideal algebraic checker.
+\end{proof}
+
+\begin{theorem}[Explicit finite-replay soundness reduction]\label{thm:global:finite-sound}
+Let $\mathcal P^*$ be a PPT classical
+prover in the checkpoint-replay model
+attempting a false public evaluation
+claim. Suppose the prescribed affine
+compiler and commitment timing satisfy
+Definitions~\ref{def:global:epochs}
+and~\ref{def:global:registry},
+with at most $J$ sequential OR blocks,
+each using $\kappa$ one-bit challenges,
+and let the authenticated-oracle
+error be as in
+Definition~\ref{def:global:oracle-error}.
+For every integer $R\ge1$,
+\[
+ \boxed{
+ \begin{aligned}
+ \Pr[\mathrm{false\ claim\ accepted}]
+ &\le \min\Bigl\{1,\
+ \frac{\ell+n}{2^n}
+ +\varepsilon_{\rm oracle}
+ +\varepsilon_{\rm DL}(R)\\[-1mm]
+ &\hspace{28mm}
+ +J\Bigl(2^{-\kappa}+\frac1{R+1}\Bigr)
+ \Bigr\}.
+ \end{aligned}}
+\]
+No abstract $\varepsilon_{\rm couple}$
+is assumed for the concrete affine
+compiler: its extraction error is
+the explicit last term.
+\end{theorem}
+\begin{proof}
+Run $\mathcal D_R^{\mathcal P^*}$
+and focus on its unchanged main
+protocol transcript, which has
+the honest-verifier distribution
+by Lemma~\ref{lem:global:main-law}.
+Let $F$ be the event that some
+accepted mandatory block lacks
+a successful fork. By
+Corollary~\ref{cor:global:J-blocks},
+$\Pr[\mathrm{main\ accepts}\cap F]
+\le J(2^{-\kappa}+1/(R+1))$.
+Let $D$ denote a successful
+output of the setup logarithm
+by $\mathcal D_R$ and let
+$O=\mathcal B_{\rm oracle}$.
+On the event of main acceptance
+outside $F\cup D\cup O$,
+Lemma~\ref{lem:global:good-ideal}
+places the main transcript in
+the ideal algebraic accepting
+event with an unchanged false
+public claim.
+By Theorem~\ref{thm:zkrs:false-sound},
+the probability of that event
+is at most $(\ell+n)/2^n$.
+The union bound therefore gives
+\[
+ \Pr[\mathrm{accept}]
+ \le\frac{\ell+n}{2^n}
+  +\Pr[O]+\Pr[D]
+  +\Pr[\mathrm{accept}\cap F].
+\]
+Substitute
+$\Pr[O]\le\varepsilon_{\rm oracle}$,
+$\Pr[D]=\varepsilon_{\rm DL}(R)$
+and the bound on $F$.
+Every probability is at most one,
+giving the displayed result.
+\end{proof}
+
+\begin{corollary}[Choose replay budget from a claimed cheating advantage]\label{cor:global:advantage}
+Suppose a cheating prover's false-claim
+acceptance probability is
+$\varepsilon>0$, and write
+\[
+ \varepsilon_0:=
+ \frac{\ell+n}{2^n}
+ +\varepsilon_{\rm oracle}
+ +J2^{-\kappa}.
+\]
+For
+$R=\max\{1,\lceil4J/\varepsilon\rceil\}$,
+the explicit reduction satisfies
+\[
+ \boxed{
+ \varepsilon_{\rm DL}(R)
+ \ge \frac34\varepsilon-\varepsilon_0.
+ }
+\]
+In particular, if
+$\varepsilon_0\le\varepsilon/4$,
+then $\varepsilon_{\rm DL}(R)
+\ge\varepsilon/2$.
+\end{corollary}
+\begin{proof}
+Rearrange
+Theorem~\ref{thm:global:finite-sound}
+before its cap at one:
+\[
+ \varepsilon_{\rm DL}(R)
+ \ge\varepsilon-\varepsilon_0-\frac{J}{R+1}.
+\]
+The choice $R\ge4J/\varepsilon$
+implies $J/(R+1)\le\varepsilon/4$.
+Substitution gives the first
+claimed bound. Under the additional
+hypothesis
+$\varepsilon_0\le\varepsilon/4$,
+it is at least $\varepsilon/2$.
+\end{proof}
+
+\begin{theorem}[Classical computational soundness of the affine component]\label{thm:global:asymptotic}
+Let $\lambda$ be a security parameter.
+Assume $J,\kappa$ and the cheating prover's
+runtime are polynomial in $\lambda$,
+the setup discrete logarithm is hard
+for PPT algorithms, and
+\[
+ \frac{\ell+n}{2^n},\quad
+ \varepsilon_{\rm oracle},\quad
+ J2^{-\kappa}
+\]
+are negligible in $\lambda$.
+Assume checkpoint-replay access and
+the exact pre-challenge registration
+schedule of Chapter~12.
+Then any PPT cheating prover has
+negligible probability of accepting
+a false evaluation claim in the
+concrete sequential-bit affine
+verification protocol.
+\end{theorem}
+\begin{proof}
+Assume toward a contradiction
+that some PPT prover has a
+non-negligible false-claim
+acceptance function $\varepsilon(\lambda)$.
+Then there exist a polynomial
+$p(\lambda)$ and infinitely
+many security parameters such that
+$\varepsilon(\lambda)\ge1/p(\lambda)$.
+Choose a polynomial replay budget
+$R(\lambda)=\max\{1,\lceil
+4J(\lambda)p(\lambda)\rceil\}$.
+The runtime bound of
+Lemma~\ref{lem:global:runtime}
+makes $\mathcal D_R$ PPT.
+For all sufficiently large
+parameters in the infinite
+subsequence, negligibility of
+the three error terms implies
+$\varepsilon_0\le\varepsilon/4$.
+Corollary~\ref{cor:global:advantage}
+then gives
+$\varepsilon_{\rm DL}(R)
+\ge\varepsilon/2
+\ge1/(2p(\lambda))$.
+This is a non-negligible
+discrete-logarithm advantage,
+contradicting the assumed
+hardness.
+\end{proof}
+
+\begin{remark}[Scope of the result]
+The theorem discharges the
+\emph{classical global temporal
+extraction} obligation for the
+registered Pedersen/Schnorr
+affine component under a strict
+sequencing and reset model.
+It does \emph{not} certify the
+external KBFold oracle: its
+error $\varepsilon_{\rm oracle}$
+is an explicit additional
+assumption that Chapter~13
+must instantiate. Nor does it
+establish a quantum rewinding
+extractor or a quantum-hard
+commitment. Those belong to
+Chapters~13--14 within the
+locked plan.
+\end{remark}
