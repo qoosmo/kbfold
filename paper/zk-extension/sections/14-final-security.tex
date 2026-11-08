@@ -1,0 +1,147 @@
+\section{Final Security Theorems: Classical Reference Protocol, Sparse Obstruction, and Quantum Boundary}\label{sec:security14}
+Chapters~1--13 established the odd-characteristic
+kernel/folding algebra, the masked Sumcheck
+recurrence and a fully specified
+authenticated-commitment reference
+protocol. This chapter closes their
+\emph{end-to-end security statement}
+without confusing that nonsuccinct
+reference with a proved succinct
+zero-knowledge KBFold PCS.
+
+There are three distinct results.
+First, complete-word circuit checks
+reduce classical false-evaluation
+acceptance to prefix-preserving
+knowledge extraction, discrete-log
+binding and Merkle collision
+resistance. Second, a \emph{constructive}
+online simulator follows from
+equivocal Pedersen commitments and
+adaptive multi-proof witness
+indistinguishability of the chosen
+NP proof engine. Its source may be
+changed \emph{inside the simulation}
+after an authorized evaluation is
+known, because the simulator retains
+the generator-relation trapdoor.
+Third, we give \emph{negative}
+theorems: sparse folding does not
+certify initial Reed--Solomon
+membership, and the Pedersen
+instantiation is broken by a
+quantum discrete-log algorithm
+\cite{Shor1997}.
+The exact remaining proof-engine,
+sparse proximity and QROM
+obligations are contained in
+this chapter and passed directly
+to the locked final Chapter~15.
+
+\input{sections/14a-security-games}
+\input{sections/14b-full-soundness}
+\input{sections/14c-equivocal-online-zk}
+\input{sections/14d-sparse-proximity}
+\input{sections/14e-classical-rom-quantum}
+\input{sections/14f-final-ledger}
+
+\subsection{Final theorem chain and exact logical status}\label{sec:security14:conclusion}
+Let $\Pi_{\rm KBFold}^{\rm hid}$
+be the Chapter~13
+\emph{full-relation},
+single-opening, classical
+reference protocol.
+Under its explicit
+source-extractable,
+adaptive-WI NP proof-engine
+and Pedersen/Merkle
+assumptions,
+Theorem~\ref{thm:security14:final}
+proves
+\[
+ \boxed{
+ \begin{gathered}
+ \Pr[\mathrm{accept}\land
+ v\ne\widetilde f_{\rm pre}(z)]
+ \le
+ \varepsilon_{\rm KE}
+ +\varepsilon_{\rm DL}
+ +\varepsilon_{\rm CRH},\\
+ \operatorname{Adv}^{\rm ZK}_{\rm online}
+ \le\varepsilon_{\rm WI},\qquad
+ \Pr[\mathrm{accept\ true}]=1.
+ \end{gathered}}
+\]
+The ZK simulator makes its
+first commitments
+\emph{before} learning $z$.
+For a source-bit
+commitment initially
+published as
+$C=h^\rho$, and
+the trapdoor
+$h=g^\alpha$, the
+simulator can open
+that very same public
+commitment to any bit
+$b$ using
+\[
+ \boxed{r_b=\rho-b\alpha^{-1}.}
+\]
+It constructs genuine
+post-evaluation
+witnesses for the
+virtual table
+$f^z(a)=v$, which
+satisfies
+$\widetilde{f^z}(z)=v$,
+and uses the prescribed
+adaptive-WI guarantee
+to hide the difference
+from the real
+pre-committed source.
+The complete
+proof-engine WI
+and extraction
+contracts are
+\emph{not yet
+instantiated} by
+a concrete audited
+implementation.
+
+For the sparse version,
+Theorem~\ref{thm:security14:sparse-counterexample}
+shows that the
+invalid initial
+polynomial
+$P_0=X^{N+B}$
+passes every local
+fold equation and
+the final linear
+check when $1\le B<N$.
+Thus no sparse
+proximity error may
+be inferred from
+the algebraic
+fold identities.
+Moreover
+Theorem~\ref{thm:security14:quantum-break}
+gives an explicit
+quantum false-evaluation
+strategy against the
+current Pedersen
+instantiation:
+\emph{the present
+protocol is not
+post-quantum secure}.
+
+The manuscript remains
+strictly locked:
+Chapter~15 is the
+\emph{final} block,
+covering Lean 4 and
+Rust certification,
+proof-engine/sparse
+open-obligation ledger
+and the final
+consolidated audit.
