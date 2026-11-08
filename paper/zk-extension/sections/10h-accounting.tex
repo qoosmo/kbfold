@@ -96,13 +96,11 @@ challenge optimization is
 assumed.
 \end{proof}
 
-\begin{proposition}[The naive compiler is not succinct]\label{prop:realize:not-succinct}
-The uncompressed compiler's
-bit-commitment count is linear
-in the total number of secret
-field coordinates, and its
-parity-proof transcript grows
-with the sum of binary row weights.
+\begin{proposition}[Raw compiler overhead]\label{prop:realize:not-succinct}
+The raw compiler commits to every
+secret field coordinate separately.
+Its parity proofs also grow with
+the number of binary row entries.
 Consequently the construction
 in this chapter \emph{does not}
 establish a polylogarithmic-size
@@ -176,13 +174,11 @@ manuscript~\cite{MkhidaKBFold2026}.
 \end{remark}
 
 \begin{remark}[Main remaining theorem]
-The next mathematically meaningful
-goal is to replace the honest-sigma
-restriction with a malicious-verifier
-simulator \emph{and} prove an
-extractor/commitment-binding theorem
-that remains valid through all
-adaptive outer challenges.
+The next goal is a malicious-verifier
+simulator and a sound extractor for
+the bound commitments. Both must
+remain secure under adaptive outer
+challenges.
 After that, one must bridge
 these characteristic-two
 bit commitments to KBFold's
