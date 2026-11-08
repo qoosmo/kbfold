@@ -1,0 +1,96 @@
+\subsection{Compiling binary-field affine equations into parity constraints}\label{sec:realize:binary}
+Throughout Chapter~10 let $L=\F_{2^n}$ with $n=2^\ell$,
+and fix a public $\F_2$-basis $(\gamma_i)_{0\le i<n}$ of $L$
+with coordinate maps $d_k:L\to\F_2$.
+The basis may be the Boolean-kernel evaluation basis of Chapter~6;
+the statements in this section only need a binary basis.
+
+\begin{definition}[Field-variable bit representation]\label{def:realize:bits}
+For field variables $x_1,\ldots,x_s\in L$ define their bits
+$x_{j,i}:=d_i(x_j)\in\F_2$, so that
+\[
+ x_j=\sum_{i=0}^{n-1}\gamma_i x_{j,i}.
+\]
+Let $a_1,\ldots,a_s,b\in L$ be public.
+The target affine equation is
+$\sum_{j=1}^s a_jx_j=b$.
+\end{definition}
+
+\begin{definition}[Public binary coefficient matrix]\label{def:realize:matrix}
+For every output coordinate $k$ and input coordinate $(j,i)$ set
+\[
+ M_{k,j,i}:=d_k(a_j\gamma_i)\in\F_2,
+ \qquad b_k:=d_k(b)\in\F_2.
+\]
+The $k$-th associated parity constraint is
+\[
+ \sum_{j=1}^s\sum_{i=0}^{n-1}M_{k,j,i}x_{j,i}
+ =b_k\quad\text{in }\F_2.
+\]
+\end{definition}
+
+\begin{lemma}[Coordinates of a publicly scaled element]\label{lem:realize:scaled}
+For $a,x\in L$ and $0\le k<n$,
+\[
+ d_k(ax)=\sum_{i=0}^{n-1}d_k(a\gamma_i)d_i(x).
+\]
+\end{lemma}
+\begin{proof}
+Expand $x=\sum_i\gamma_id_i(x)$, multiply by $a$, and apply
+the $\F_2$-linear coordinate map $d_k$.
+Because $d_i(x)\in\F_2$, each scalar may be moved through $d_k$.
+The result is the displayed finite sum.
+\end{proof}
+
+\begin{theorem}[Exact affine-to-parity equivalence]\label{thm:realize:affine-to-parity}
+For any $x_1,\ldots,x_s\in L$,
+\[
+ \boxed{\sum_ja_jx_j=b
+ \quad\Longleftrightarrow\quad
+ \sum_{j,i}M_{k,j,i}x_{j,i}=b_k
+ \text{ for every }0\le k<n.}
+\]
+The equivalence holds for arbitrary public coefficients
+chosen after the bit variables have been committed.
+\end{theorem}
+\begin{proof}
+Apply $d_k$ to $\sum_ja_jx_j$ and use its additivity.
+Apply Lemma~\ref{lem:realize:scaled} to each summand.
+This gives the $k$-th displayed parity expression.
+If the original field equality holds, all its coordinates agree.
+Conversely, if all $n$ coordinates agree, then the field element
+$\sum_ja_jx_j+b$ has every binary coordinate zero, so it is zero
+by uniqueness of the fixed basis expansion.
+The coefficients are only parameters of the algebraic identity;
+their time of choice does not affect its validity.
+\end{proof}
+
+\begin{corollary}[No multiplication of two hidden field elements]\label{cor:realize:linear-gates}
+Every affine field equation with public coefficients reduces
+to $n$ parity equations in committed Boolean coordinates,
+with no hidden-variable multiplication gates.
+\end{corollary}
+\begin{proof}
+Each row in Definition~\ref{def:realize:matrix}
+is a sum of terms $0$, $x_{j,i}$, or their
+$\F_2$-linear sum, equal to a public bit.
+No term contains a product of two hidden coordinates.
+\end{proof}
+
+\begin{lemma}[Row size bound]\label{lem:realize:row-weight}
+For $s$ field variables, each parity row has at most $sn$
+hidden bits, and there are exactly $n$ output-coordinate rows.
+\end{lemma}
+\begin{proof}
+There are $s$ input-variable indices and $n$ coordinate
+indices. Each row uses only a subset of their $sn$ pairs.
+The output-coordinate index takes exactly $n$ values.
+\end{proof}
+
+\begin{remark}[Distinct scalar characteristics]
+The field $L$ has characteristic $2$; the prime-order group
+used for Pedersen commitments below has an \emph{odd} prime
+order $P$. The reduction above is the required bridge.
+In particular, binary XOR may not be implemented by simply
+adding commitment exponents modulo $P$.
+\end{remark}
