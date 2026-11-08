@@ -1,9 +1,14 @@
 \subsection{Compiling binary-field affine equations into parity constraints}\label{sec:realize:binary}
-Throughout Chapter~10 let $L=\F_{2^n}$ with $n=2^\ell$,
-and fix a public $\F_2$-basis $(\gamma_i)_{0\le i<n}$ of $L$
-with coordinate maps $d_k:L\to\F_2$.
-The basis may be the Boolean-kernel evaluation basis of Chapter~6;
-the statements in this section only need a binary basis.
+Throughout Chapter~10 let $L=\F_{2^n}$ with $n=2^\ell$.
+For compatibility with the packed columns of Chapters~6--9,
+fix the \emph{Boolean-kernel evaluation basis}
+$\gamma_i:=\beta_i$ for $0\le i<n$,
+identifying $I_\ell$ with its binary integer indices,
+and let $d_k:L\to\F_2$ be its corresponding
+coordinate maps. The affine-to-parity equivalence
+itself holds for every public binary basis, but
+the packed-column identity later in the chapter
+uses the specific choice $\gamma_i=\beta_i$.
 
 \begin{definition}[Field-variable bit representation]\label{def:realize:bits}
 For field variables $x_1,\ldots,x_s\in L$ define their bits
