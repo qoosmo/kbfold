@@ -1,0 +1,241 @@
+\subsection{The complete security statement and what remains conditional}\label{sec:mv:boundary}
+
+\begin{definition}[Per-proof conditional false-parity bound]\label{def:mv:row-error}
+Let $Q$ be an upper bound on the number
+of affine parity rows tested during one
+protocol execution. Assume every row
+commitment and its extracted individual
+bit openings are fixed before the
+\emph{first inner bit challenge} of that row.
+For any row whose parity is false
+on these extracted bits, suppose the
+probability that its $\kappa$ sequential
+OR mini-proofs all accept, conditional
+on the entire earlier visible history,
+is at most $\eta_{\rm row}$.
+In the stand-alone resettable
+model with a uniform discrete-log
+reduction bound $\delta_{\rm DL}$,
+Theorem~\ref{thm:mv:false-parity-bound}
+allows the choice
+\[
+ \eta_{\rm row}:=
+ \min\{1,\,2^{-\kappa}+\sqrt{\delta_{\rm DL}}\}.
+\]
+Applying this bound uniformly over
+adaptive histories is a hypothesis of
+the composed security theorem.
+\end{definition}
+
+\begin{lemma}[Union bound for false accepted parity rows]\label{lem:mv:row-union}
+Under Definition~\ref{def:mv:row-error},
+the probability that any false
+parity row is accepted is at most
+$\min\{1,Q\eta_{\rm row}\}$.
+\end{lemma}
+\begin{proof}
+Order the at most $Q$ row checks
+by their occurrence in the protocol.
+For each row, condition on its
+prior visible history and the
+already extracted bit openings.
+If the row is false, its
+conditional acceptance probability
+is at most $\eta_{\rm row}$ by
+hypothesis; if it is true, it
+contributes nothing to the
+false-row event. Averaging over
+histories bounds each false-row
+acceptance event by $\eta_{\rm row}$.
+The probability union bound
+over at most $Q$ rows gives
+$Q\eta_{\rm row}$, capped by one.
+\end{proof}
+
+\begin{definition}[Global extraction error]\label{def:mv:coupling-error}
+Write $\varepsilon_{\rm couple}$ for
+a proven failure bound of an actual
+multi-stage extractor satisfying
+Definition~\ref{def:mv:global-coupling}.
+Write $\varepsilon_{\rm oracle}$ for
+a separately proven probability of
+an accepted but inconsistent
+external polynomial-commitment
+or authenticated-opening relation.
+These quantities are \emph{parameters}
+and are not assigned numerical values
+until the corresponding constructions
+and reductions are supplied.
+\end{definition}
+
+\begin{theorem}[Conditional soundness of the sequential-bit compiler]\label{thm:mv:conditional-sound}
+Assume the honest uniform outer
+challenges, field representation,
+packing consistency and fixed-value
+conditions of
+Theorem~\ref{thm:zkrs:false-sound}.
+Suppose the implemented protocol
+satisfies the global extraction
+and oracle assumptions of
+Definition~\ref{def:mv:coupling-error},
+and each false accepted compiled
+parity row obeys
+Definition~\ref{def:mv:row-error}.
+For every false public evaluation
+claim,
+\[
+ \boxed{
+ \Pr[\mathrm{accept}]
+ \leq\min\left\{1,\,
+ \frac{\ell+n}{2^n}
+ +\varepsilon_{\rm couple}
+ +Q\eta_{\rm row}
+ +\varepsilon_{\rm oracle}
+ \right\}.}
+\]
+\end{theorem}
+\begin{proof}
+Let $B_1$ be failure of the
+global extraction coupling,
+$B_2$ the event that a false
+compiled parity row is accepted,
+and $B_3$ an external oracle or
+packing-link failure. Their
+probabilities are bounded by
+$\varepsilon_{\rm couple}$,
+$Q\eta_{\rm row}$, and
+$\varepsilon_{\rm oracle}$
+by hypothesis and
+Lemma~\ref{lem:mv:row-union}.
+Outside $B_1\cup B_2\cup B_3$,
+all registered field variables
+are fixed at their required
+outer challenge boundaries
+and every accepted affine
+constraint holds on the
+extracted field values.
+The coupled accepting run is
+then an accepting run of the
+ideal algebraic checker of
+Chapter~9, with the same
+independent uniform
+$\theta,z$.
+Theorem~\ref{thm:zkrs:false-sound}
+bounds the probability of
+accepting the false public claim
+by $(\ell+n)/2^n$.
+Add the probabilities of the
+three excluded events and
+cap by one.
+\end{proof}
+
+\begin{lemma}[Malicious-verifier ZK does not depend on uniform outer challenges]\label{lem:mv:outer-adaptive}
+The malicious-verifier simulation
+Theorem~\ref{thm:mv:affine-mvzk}
+allows arbitrary causal outer
+challenges $\theta,z$.
+The soundness bound of
+Theorem~\ref{thm:mv:conditional-sound}
+requires these outer challenges
+to be fresh independent uniforms.
+\end{lemma}
+\begin{proof}
+The simulation proof proceeds by
+comparing conditional transition
+laws at each public history.
+Lemmas~\ref{lem:zkrs:U-conditional}
+and~\ref{lem:zkrs:A-conditional}
+hold after fixing any causal
+outer challenge values, and
+the inner simulator matches
+arbitrary verifier challenge bits.
+By contrast, the algebraic
+root bounds invoked in
+Theorem~\ref{thm:zkrs:false-sound}
+are Schwartz--Zippel bounds
+that count roots under uniform
+independent $\theta,z$.
+Without that sampling condition
+their numerical probabilities
+do not follow.
+\end{proof}
+
+\begin{theorem}[An unmasked authenticated opening defeats witness privacy]\label{thm:mv:raw-oracle-leak}
+Suppose an otherwise perfectly
+simulated single-opening verifier
+view additionally publishes the
+entire unmasked partial vector
+$s^*$, or publishes the full
+transposed pad $c^p$ together
+with the masked vector $m$.
+Then there exist two admissible
+witnesses with the same public
+evaluation instance whose
+resulting complete views are
+perfectly distinguishable.
+\end{theorem}
+\begin{proof}
+For the first disclosure rule,
+use the two equal-evaluation
+witnesses constructed in
+Theorem~\ref{thm:dpr:not-zk}.
+Their partial vectors differ
+in one coordinate, which
+directly distinguishes the
+views with probability one.
+For the second rule,
+Theorem~\ref{thm:pack:reveal-leak}
+gives the deterministic
+reconstruction
+$s^*=m+\mathcal T(c^p)$.
+Apply the same distinguishing
+test to the reconstructed
+partial vector. All other
+transcript messages can be
+ignored by the distinguisher.
+\end{proof}
+
+\begin{proposition}[The Chapter 11 transcript result does not certify original KBFold]\label{prop:mv:not-kbfold}
+Theorem~\ref{thm:mv:affine-mvzk}
+does not imply an end-to-end
+zero-knowledge or quantum-soundness
+theorem for the original
+odd-characteristic KBFold PCS.
+\end{proposition}
+\begin{proof}
+The transcript modeled in
+Definition~\ref{def:mv:affine-protocol}
+contains only binary-field
+masked Ring Switching messages,
+Pedersen bit commitments and
+their affine proof transcripts.
+It does not contain KBFold's
+odd-characteristic folded codeword
+oracles, authenticated openings,
+or its proximity and final-closure
+checks. Moreover the simulator
+uses classical rewinding of the
+malicious verifier, which is not
+the quantum simulation model.
+The conclusion therefore has
+a strictly smaller transcript
+domain and different field and
+adversary hypotheses than the
+claimed PCS statement.
+\end{proof}
+
+\begin{remark}[What Chapter 11 genuinely advances]
+The honest-sigma-verifier restriction
+of Chapter~10 is removed for the
+\emph{concrete affine transcript}
+by sequential one-bit challenges
+and a perfect expected-time
+classical rewinding simulator.
+Local temporal extraction is proved
+with an exact two-run forking
+probability. The global extraction
+contract, malicious verifier access
+to the underlying oracle and the
+post-quantum KBFold composition
+are still independent obligations.
+\end{remark}
