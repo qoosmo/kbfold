@@ -1,0 +1,191 @@
+\subsection{Cost accounting, historical placement, and formal certification}\label{sec:realize:cost}
+
+\begin{definition}[Affine compilation parameters]\label{def:realize:complexity}
+Let $s$ be the number of distinct secret field
+elements registered in one stage, and let
+$E$ be the number of field-affine equations
+verified after registration.
+For the $e$-th equation and $k$-th
+output coordinate, write $m_{e,k}$
+for the number of nonzero binary
+coefficients in that parity row.
+Write $B:=sn$ for the number
+of committed binary coordinates.
+\end{definition}
+
+\begin{lemma}[Exact bit commitment and parity proof counts]\label{lem:realize:count}
+The compiler registers $B=sn$ Pedersen
+commitments and, if every coordinate is
+registered once, executes $B$ binary
+bitness OR proofs.
+It executes exactly $nE$ parity rows,
+except that a zero-length row may be
+checked directly and omitted.
+Each nonempty row's OR proof has
+\[
+ d_{e,k}=|\mathcal S_{m_{e,k},b_{e,k}}|
+ \leq\left\lceil\frac{m_{e,k}+1}{2}\right\rceil
+\]
+candidate branches.
+\end{lemma}
+\begin{proof}
+Every field element has exactly
+$n$ binary basis coordinates,
+so $s$ elements supply $sn=B$
+commitments and one bitness
+proof per coordinate.
+Theorem~\ref{thm:realize:affine-to-parity}
+produces one parity equation for
+each of the $n$ output coordinates
+of each of the $E$ field equations.
+For a row with $m$ inputs,
+the allowed integers in $[0,m]$
+of one specified parity form
+one of the two parity classes.
+The larger class has
+$\lceil(m+1)/2\rceil$ elements,
+giving the branch bound.
+The empty-row handling follows
+Corollary~\ref{cor:realize:empty-row}.
+\end{proof}
+
+\begin{lemma}[Linear branch-size upper bound]\label{lem:realize:branch-upper}
+The total number of candidate
+branches across all nonempty
+parity OR proofs is at most
+\[
+ \boxed{
+ \sum_{e=1}^{E}\sum_{k=0}^{n-1}
+ \left\lceil\frac{m_{e,k}+1}{2}\right\rceil
+ \leq nE\left\lceil\frac{sn+1}{2}\right\rceil.}
+\]
+\end{lemma}
+\begin{proof}
+The first inequality follows
+from Lemma~\ref{lem:realize:count}
+applied rowwise, and zero rows
+contribute no actual proof branches.
+Every row weight is at most
+$sn$ by Lemma~\ref{lem:realize:row-weight}.
+The ceiling function is monotone,
+so each term in the double sum
+is at most $\lceil(sn+1)/2\rceil$.
+There are $nE$ such terms,
+giving the second inequality.
+\end{proof}
+
+\begin{lemma}[Two group elements per branch in a raw OR proof]\label{lem:realize:or-communication}
+An uncompressed $d$-branch
+Schnorr OR proof transmits $d$
+group elements in its first
+message and $2d$ elements of
+$\mathbb Z_P$ in its responses,
+in addition to one verifier
+challenge in $\mathbb Z_P$.
+\end{lemma}
+\begin{proof}
+Definition~\ref{def:realize:or}
+sends the vector $(T_j)_{j=1}^d$
+of $d$ group elements, followed
+by the vector $(e_j,z_j)$ of
+two scalars per branch.
+The verifier supplies one
+global challenge $e$.
+No compression or derived
+challenge optimization is
+assumed.
+\end{proof}
+
+\begin{proposition}[The naive compiler is not succinct]\label{prop:realize:not-succinct}
+The uncompressed compiler's
+bit-commitment count is linear
+in the total number of secret
+field coordinates, and its
+parity-proof transcript grows
+with the sum of binary row weights.
+Consequently the construction
+in this chapter \emph{does not}
+establish a polylogarithmic-size
+zero-knowledge PCS, even if
+the original KBFold commitment
+scheme has succinct opening proofs.
+\end{proposition}
+\begin{proof}
+Lemma~\ref{lem:realize:count}
+requires $sn$ separate bit
+commitments and bitness proofs
+in the direct implementation.
+Lemma~\ref{lem:realize:branch-upper}
+counts a candidate set for
+each parity row, and
+Lemma~\ref{lem:realize:or-communication}
+requires a group message
+and scalar responses for
+every candidate branch.
+These costs are proportional
+to explicit field-coordinate
+and row representations;
+nothing in the construction
+compresses them to a
+polylogarithmic dependence
+on the witness length.
+\end{proof}
+
+\begin{definition}[Chapter 10 Lean module contract]\label{def:realize:lean-map}
+The formalization splits into:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item exact finite-field affine-to-binary
+coordinate matrices;
+\item prime-order cyclic group algebra
+and Pedersen hiding/binding;
+\item Schnorr and OR-protocol
+message equations, HVZK simulators
+and two-transcript extraction;
+\item integer-lift parity candidate
+sets and wrong-parity
+discrete-log reduction;
+\item compilation of all Chapter~9
+affine equations and packing links;
+\item finite adaptive public-core plus
+honest-sigma proof-transcript simulation;
+\item a parameterized early-extraction
+contract and its conditional
+outer soundness implication.
+\end{enumerate}
+\end{definition}
+
+\begin{remark}[Prior work and originality]
+The commitment construction and
+its hiding/binding theorem come
+from Pedersen~\cite{Pedersen1991}.
+The logarithm proof is Schnorr's
+\cite{Schnorr1991}, while OR
+proofs of partial knowledge
+are classical
+\cite{CramerDamgardSchoenmakers1994}.
+The affine-to-parity application
+here is an explicit composition
+in our Boolean-kernel
+Ring Switching notation,
+not a claim to have invented
+bit commitments or OR proofs.
+The target PCS and its
+post-quantum motivation are
+from the original KBFold
+manuscript~\cite{MkhidaKBFold2026}.
+\end{remark}
+
+\begin{remark}[Main remaining theorem]
+The next mathematically meaningful
+goal is to replace the honest-sigma
+restriction with a malicious-verifier
+simulator \emph{and} prove an
+extractor/commitment-binding theorem
+that remains valid through all
+adaptive outer challenges.
+After that, one must bridge
+these characteristic-two
+bit commitments to KBFold's
+odd-characteristic, authenticated
+folding-oracle PCS.
+\end{remark}
