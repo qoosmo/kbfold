@@ -1,0 +1,171 @@
+\subsection{Executable extractor contract, cost, and handoff to KBFold}\label{sec:global:handoff}
+The proof above replaces the abstract
+$\varepsilon_{\rm couple}$ of Chapter~11
+by an explicit bounded-replay operation
+on the prescribed classical OR blocks.
+The following pseudocode fixes which
+messages are visible to the \emph{main}
+verifier and which are private to the
+reduction.
+
+\begin{definition}[Checkpoint extractor pseudocode]\label{def:global:pseudocode}
+For each mandatory public OR statement
+$Q=(C,S)$, the reduction executes:
+\begin{verbatim}
+saved = snapshot(prover_before_Q)
+(main_bits, main_messages, main_end) =
+    run_one_block_with_fresh_uniform_bits(Q)
+
+if not verify_all(main_messages):
+    reject_main_and_stop
+
+restore(saved)
+repeat at most R times:
+    (side_bits, side_messages, _) =
+        run_one_block_with_fresh_uniform_bits(Q)
+    if verify_all(side_messages) and side_bits != main_bits:
+        opening = extract_at_earliest_difference(
+                    main_messages, side_messages)
+        record_or_compare_with_canonical_registry(opening)
+        break
+restore(main_end)
+continue_main_verifier()
+\end{verbatim}
+The snapshot includes the private
+random tape and complete prover
+state. The side executions neither
+change the group commitments in the
+statement nor publish messages to
+the main verifier. The extractor
+invokes no irreversible external
+or authenticated oracle during
+a replayed block.
+\end{definition}
+
+\begin{lemma}[Every successful replay extracts from the original statement]\label{lem:global:tag-same}
+If the extractor reaches the
+\texttt{extract\_at\_earliest\_difference}
+line, the extracted opening is for
+the original main-path public
+statement $Q=(C,S)$.
+\end{lemma}
+\begin{proof}
+Every side run begins at the same
+pre-block checkpoint and receives
+the same fixed public statement $Q$.
+The challenge paths differ only in
+fresh inner verifier bits.
+By causality, their first messages
+are identical up to the earliest
+different challenge bit, and the
+verifier accepts both mini-proofs
+at that index. The OR special
+soundness theorem
+(Theorem~\ref{thm:realize:or-extract})
+returns an opening of the
+unchanged group element $C$
+to one of the unchanged
+candidates in $S$.
+\end{proof}
+
+\begin{lemma}[All extracted bit values are registered before use]\label{lem:global:before-use}
+On an accepted main run with
+successful extraction of every
+bitness block, no first-challenge
+field variable is defined by an
+extraction occurring after $\theta$,
+and no second-challenge residual
+variable is defined by an extraction
+occurring after $z$.
+\end{lemma}
+\begin{proof}
+By Definition~\ref{def:global:epochs},
+every mandatory bitness block
+for the first-challenge variables
+completes in Epoch 0, and all
+auxiliary second-challenge bitness
+blocks complete in Epoch 1.
+The pseudocode always performs
+its side replays immediately
+after the main block and
+\emph{before} continuing to the
+next stage. Thus the registered
+field values are extracted before
+the respective outer sampling
+boundaries, as also quantified
+in Theorem~\ref{thm:global:chronological}.
+\end{proof}
+
+\begin{proposition}[Polynomial overhead for non-negligible cheating advantage]\label{prop:global:polynomial}
+Let the cheating advantage be at
+least $\varepsilon(\lambda)\ge1/p(\lambda)$
+for some polynomial $p$. Choosing
+$R=\lceil4Jp\rceil$ makes the
+reduction execute at most
+\[
+ \boxed{O(J^2\kappa p)}
+\]
+one-bit mini-proof instances,
+apart from the cost of restoring
+and executing the prover state.
+\end{proposition}
+\begin{proof}
+Lemma~\ref{lem:global:runtime}
+bounds the count by
+$\kappa J(R+1)$.
+With $R=\lceil4Jp\rceil$,
+this is at most
+$\kappa J(4Jp+2)$,
+which has the displayed
+polynomial order.
+\end{proof}
+
+\begin{definition}[Chapter 13 external interface]\label{def:global:external}
+The next chapter receives the
+following \emph{fixed contract}:
+a binary-field affine verifier
+whose public messages and
+sequential OR proofs satisfy
+Theorem~\ref{thm:global:chronological},
+with internal algebraic error
+$(\ell+n)/2^n$ and an explicit
+computational discrete-log
+reduction. It must add a
+\emph{separately proven}
+authenticated polynomial-oracle
+interface that:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item binds the original committed
+witness/codeword to the extracted
+canonical bit registry before
+the corresponding challenge;
+\item keeps masked opening responses
+and Merkle/FRI authentication data
+compatible with one globally
+simulatable verifier view;
+\item preserves KBFold's original
+odd-characteristic local
+fold/degree and proximity checks,
+without transferring a binary-field
+characteristic-two identity to
+an odd-characteristic word fold.
+\end{enumerate}
+Its total failure is recorded as
+$\varepsilon_{\rm oracle}$ until
+a concrete theorem proves it.
+\end{definition}
+
+\begin{remark}[No fifth workstream]
+All remaining work belongs inside
+the locked final structure:
+Chapter~13 constructs the full
+masked KBFold prover/verifier
+and external oracle; Chapter~14
+proves or precisely bounds its
+end-to-end security; Chapter~15
+completes Lean and Rust
+certification, complexity and
+the final manuscript audit.
+No additional numbered chapter
+is introduced.
+\end{remark}
