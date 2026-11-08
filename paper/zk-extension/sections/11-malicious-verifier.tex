@@ -1,0 +1,105 @@
+\section{Malicious-Verifier Zero Knowledge and Temporal Extraction}\label{sec:mv}
+Chapter~10 constructed a concrete classical commitment-and-affine
+proof with perfect honest-sigma-verifier simulation, but did
+not allow the inner sigma challenges to depend on the prover's
+first messages. This chapter removes that restriction for the
+\emph{concrete binary-coordinate affine transcript}.
+The key tool is a sequentially repeated \emph{one-bit}
+Schnorr OR proof~\cite{Schnorr1991,CramerDamgardSchoenmakers1994}
+and classical verifier rewinding~\cite{Goldreich2001Foundations}.
+We derive its exact fixed-challenge law, an abort-corrected
+malicious-verifier simulator, a quantitative two-run
+forking theorem, and the precise limit of local temporal
+knowledge extraction. The underlying KBFold polynomial oracle,
+Merkle paths and post-quantum model are \emph{not}
+part of this chapter's concrete simulator.
+
+\input{sections/11a-bit-challenge}
+\input{sections/11b-fixed-challenge}
+\input{sections/11c-malicious-simulator}
+\input{sections/11d-sequential-composition}
+\input{sections/11e-forking}
+\input{sections/11f-temporal-extraction}
+\input{sections/11g-security-boundaries}
+\input{sections/11h-cost-and-roadmap}
+
+\subsection{The theorem chain and exact achieved security}\label{sec:mv:conclusion}
+A single one-bit OR transcript has a perfect
+witness-free simulator for each \emph{fixed} verifier
+challenge $e\in\{0,1\}$. Its first message is uniform
+on $G^d$, independent of the challenge and witness
+(Theorem~\ref{thm:mv:fixed-perfect} and
+Lemma~\ref{lem:mv:first-uniform}).
+The balanced rewinding simulator accepts one trial
+with probability $1/2$, even when the verifier
+aborts, and perfectly simulates any classical
+schedule-respecting verifier in two expected
+trials (Theorem~\ref{thm:mv:one-perfect}).
+Sequential composition gives perfect
+expected-time \emph{malicious-verifier zero knowledge}
+for the full single-opening \emph{affine commitment
+and proof transcript}, including adaptive
+outer Ring Switching challenges:
+\[
+ \boxed{
+ \operatorname{Law}(\mathsf{View}^{P_w,V^*}_{\rm affine})
+ =
+ \operatorname{Law}(\mathsf{View}^{\mathsf{Sim},V^*}_{\rm affine}).
+ }
+\]
+Theorem~\ref{thm:mv:affine-mvzk} does not cover
+the original KBFold oracle or its authenticated
+openings. A strict polynomial-time simulator
+with $M$ mini-proofs and $R$ trials per
+mini-proof has statistical error
+$\leq M2^{-R}$
+(Theorem~\ref{thm:mv:truncated}).
+
+For knowledge extraction, two accepted
+\emph{distinct} $\kappa$-bit challenge
+strings against one reset deterministic
+prover expose a common first-message
+fork. If its acceptance probability is
+$\varepsilon$, the two-run extractor
+succeeds with probability at least
+\[
+ \boxed{
+ \max\{0,\varepsilon(\varepsilon-2^{-\kappa})\}.
+ }
+\]
+Theorem~\ref{thm:mv:false-parity-bound}
+turns an extracted false parity proof
+into a discrete-log solver and yields
+$\varepsilon\le2^{-\kappa}+
+\sqrt{\delta_{\rm DL}}$ for a fixed
+statement with known true bit openings.
+Its extraction can occur \emph{before}
+the protected outer challenge when
+the complete OR registration prologue
+runs before that challenge
+(Theorem~\ref{thm:mv:standalone-early}).
+
+The stronger \emph{global temporal extraction
+coupling} for all interleaved commitments
+remains an open formal obligation:
+the conditional full false-claim bound is
+\[
+ \boxed{
+ \Pr[\mathrm{false\ claim\ accepted}]
+ \leq\min\left\{1,\,
+ \frac{\ell+n}{2^n}+
+ \varepsilon_{\rm couple}+
+ Q\eta_{\rm row}+
+ \varepsilon_{\rm oracle}\right\}.
+ }
+\]
+This statement is conditional on the
+explicit coupling and authenticated-oracle
+hypotheses of
+Theorem~\ref{thm:mv:conditional-sound}.
+The direct bit proof is nonsuccinct,
+discrete-log based, and not
+post-quantum; the original
+odd-characteristic KBFold PCS requires
+a separate end-to-end adaptive
+zero-knowledge and proximity proof.
