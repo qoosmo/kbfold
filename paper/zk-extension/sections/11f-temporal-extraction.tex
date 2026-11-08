@@ -1,0 +1,264 @@
+\subsection{Extraction before the outer challenges}\label{sec:mv:temporal}
+
+\begin{definition}[Pre-challenge registration boundary]\label{def:mv:boundary}
+The first outer challenge boundary is the instant
+immediately before $\theta$ is sampled.
+All commitments to the witness, packed columns,
+$m,p,p_{\rm in},c,y'$ that influence the first
+discrepancy must be registered before this instant.
+All bitness proofs required to bind their
+binary-coordinate interpretations are completed
+before this boundary.
+The second boundary is immediately before $z$
+is sampled. The post-$\theta$ variables
+$t,\rho,\sigma$ and their required bitness proofs
+are completed before this second boundary.
+The \emph{registration prologue} at either boundary
+consists of the appropriate bit commitments
+followed by sequential one-bit OR proof repetitions,
+with no outer random challenge interleaved
+inside that prologue.
+\end{definition}
+
+\begin{lemma}[A local reset occurs before the protected challenge]\label{lem:mv:temporal-local}
+If the entire OR prologue for a statement
+$C,S$ is completed before an outer challenge
+is sampled, then the two-run forking experiment
+of Theorem~\ref{thm:mv:fork-average} can be
+performed using only states and verifier
+challenge bits from \emph{before} that
+outer challenge.
+\end{lemma}
+\begin{proof}
+The prologue begins with fixed public
+statement and a prover state prior to
+the protected outer challenge.
+Both forked runs replay the prologue
+from this saved state and use only
+new independent \emph{inner} verifier bits.
+By the defined schedule, neither run
+needs or receives the future outer
+challenge. The extractor's messages,
+including the second branch challenge
+that creates the fork, are therefore
+all generated before the outer challenge.
+\end{proof}
+
+\begin{theorem}[Stand-alone early extraction with quantitative success]\label{thm:mv:standalone-early}
+Fix one registration OR statement and a
+resettable polynomial-time prover in a
+$\kappa$-copy prologue that ends before
+an outer challenge. If its probability
+of passing this prologue against
+independent uniform challenge bits is
+$\varepsilon$, then a two-run
+extractor \emph{before that outer challenge}
+produces a valid permitted opening of the
+statement with probability at least
+\[
+ \boxed{\max\{0,\varepsilon(\varepsilon-2^{-\kappa})\}.}
+\]
+Its two executions use no outer challenge
+value and therefore do not condition on
+one.
+\end{theorem}
+\begin{proof}
+Lemma~\ref{lem:mv:temporal-local}
+places the fork entirely in the
+pre-challenge prologue.
+Theorem~\ref{thm:mv:fork-average}
+gives the probability of two
+distinct accepting challenge strings,
+and Theorem~\ref{thm:mv:two-run-extract}
+computes an allowed witness from the
+resulting fork. All actions happen
+before the protected outer challenge
+is sampled.
+\end{proof}
+
+\begin{lemma}[At most one successful challenge path without a fork]\label{lem:mv:single-leaf}
+For a fixed deterministic prover state and
+random tape, if no pair of distinct
+accepting challenge strings yields
+a valid fork, then at most one of
+the $2^\kappa$ challenge strings can
+be accepting; its acceptance probability
+is therefore at most $2^{-\kappa}$.
+\end{lemma}
+\begin{proof}
+If two distinct accepting challenge
+strings existed, Lemma~\ref{lem:mv:earliest}
+would yield a pair of accepting
+responses to one first message
+under different challenge bits.
+That is a valid fork, contrary to
+hypothesis. Thus the accepting set
+has cardinality at most one.
+Its uniform probability is
+at most $1/2^\kappa$.
+\end{proof}
+
+\begin{lemma}[False parity plus a fork solves setup discrete log]\label{lem:mv:false-parity-fork}
+Suppose the registered bits of an
+aggregate commitment are fixed and
+the extractor knows valid binary
+openings $(b_i,r_i)$.
+Let $S=\sum_ib_i$ be its integer
+sum, and assume the claimed parity
+target is false for these bits.
+If an accepting $\kappa$-copy
+aggregate parity OR proof yields
+a fork, one can compute
+$\alpha=\log_g h$ in polynomial time.
+\end{lemma}
+\begin{proof}
+Theorem~\ref{thm:mv:two-run-extract}
+extracts an opening $(t,R)$ with
+$t$ in the parity-compatible candidate
+set. The aggregate commitment also
+has the known true opening
+$(S,\sum_ir_i)$ by
+Lemma~\ref{lem:realize:aggregate}.
+Because the target parity is false
+and $P$ exceeds the row length,
+Lemma~\ref{lem:realize:parity-equivocation}
+shows that $t$ and $S$ are distinct
+modulo $P$. The explicit formula of
+Theorem~\ref{thm:realize:parity-binding}
+then recovers the setup logarithm.
+\end{proof}
+
+\begin{theorem}[Quantitative soundness for a false parity with known true opening]\label{thm:mv:false-parity-bound}
+Suppose the correct binary openings
+of a fixed aggregate commitment are
+known to the reduction, but their
+parity disagrees with the public
+permitted candidate set. Let
+$\varepsilon$ be the success
+probability of a causal prover
+against $\kappa$ sequential honest
+one-bit challenges.
+There is a two-run discrete-log
+reduction whose success probability
+is at least
+\[
+ \boxed{
+ \max\{0,\varepsilon(\varepsilon-2^{-\kappa})\}.}
+\]
+Consequently, if that reduction's
+discrete-log success probability is
+at most $\delta_{\rm DL}$, then
+\[
+ \boxed{\varepsilon\le
+ 2^{-\kappa}+\sqrt{\delta_{\rm DL}}.}
+\]
+\end{theorem}
+\begin{proof}
+Apply the two-run forking bound
+Theorem~\ref{thm:mv:fork-average}.
+For every successful fork,
+Lemma~\ref{lem:mv:false-parity-fork}
+computes the forbidden logarithm,
+giving the first inequality.
+Write $a=2^{-\kappa}$.
+If $\varepsilon\le a$, the
+second bound holds trivially.
+Otherwise
+$\varepsilon(\varepsilon-a)
+\le\delta_{\rm DL}$.
+Since $\varepsilon\ge\varepsilon-a$,
+we have
+$(\varepsilon-a)^2\le
+\delta_{\rm DL}$.
+Taking nonnegative square roots
+yields $\varepsilon\le a+
+\sqrt{\delta_{\rm DL}}$.
+\end{proof}
+
+\begin{lemma}[Different first messages do not imply extractability]\label{lem:mv:fork-needs-same-first}
+Two accepting OR mini-proof transcripts
+with the same statement but different
+first-message vectors are not sufficient
+to apply the special-soundness formula
+of Theorem~\ref{thm:realize:or-extract}.
+\end{lemma}
+\begin{proof}
+Special soundness explicitly assumes
+the same $T$ in both transcripts.
+Indeed, for any public OR statement
+and either challenge bit, the
+witness-free algorithm of
+Definition~\ref{def:mv:fixed-sim}
+generates accepting transcripts.
+Two independent runs generally
+produce different first messages
+yet require no witness to generate.
+Thus the mere existence of two
+accepting transcripts with
+different first messages supplies
+none of the algebraic cancellation
+used by the extraction proof.
+\end{proof}
+
+\begin{definition}[Global temporal coupling obligation]\label{def:mv:global-coupling}
+The \emph{global extraction obligation}
+is to build an efficient extractor for
+the actual adaptive interaction that:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item assigns a unique extracted binary
+value to \emph{all} pre-$\theta$
+committed field variables before
+sampling the real $\theta$;
+\item similarly extracts all required
+post-$\theta$, pre-$z$ values before
+the real $z$;
+\item preserves a \emph{single}
+consistent accepted visible transcript,
+including its already sampled outer
+challenge and authenticated openings;
+\item keeps the real independent
+outer challenge laws intact in the
+coupled ideal run; and
+\item incurs an explicitly bounded
+bad-event probability efficient enough
+to combine with the algebraic
+soundness theorem of Chapter~9.
+\end{enumerate}
+This is the stronger contract of
+Definition~\ref{def:realize:early-extract}
+with a fully instantiated, efficient
+multi-statement extractor.
+\end{definition}
+
+\begin{proposition}[Local extraction does not yet prove global coupling]\label{prop:mv:coupling-open}
+The extraction theorem
+Theorem~\ref{thm:mv:standalone-early}
+does not by itself discharge the
+global obligation of
+Definition~\ref{def:mv:global-coupling}.
+\end{proposition}
+\begin{proof}
+The stand-alone theorem concerns
+one fixed statement, one saved
+initial prover state and two
+replayed \emph{inner} challenge
+sequences. It yields a witness
+on the fork event but says
+nothing about selecting one
+accepted continuation that
+simultaneously matches all
+other registered bit statements,
+their dependent affine rows,
+and the later public history.
+The global obligation additionally
+requires consistent extraction
+of all statements, a coupling of
+the final real accepted transcript,
+and preservation of the independent
+outer challenges. None of these
+conclusions is among the hypotheses
+or statements proved for one
+isolated OR prologue. A separate
+multi-stage extractor is therefore
+required; no impossibility is claimed.
+\end{proof}
