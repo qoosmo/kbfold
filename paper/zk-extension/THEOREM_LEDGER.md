@@ -356,3 +356,28 @@ The ordinary binary-field affine proof from Chapters 10–12 does **not** automa
 ### Tests and deliverables
 
 `audit/full_kbfold.rs` runs deterministic finite-field checks of masked Sumcheck offsets, codeword folds, final closure, and hiding distributions for small pedagogical prime groups; the full manuscript is built by GitHub CI.
+
+
+## Chapter 14 — Final Security Theorems
+
+**Source:** `sections/14-final-security.tex` and six subsections.
+**Lean map:** [CHAPTER_14_LEAN_MAP.md](CHAPTER_14_LEAN_MAP.md).
+**Proof audit:** 43 labeled formal statements, including **28 full paper proofs** and 15 definitions. Chapter 14 has not yet been Lean-certified.
+
+### Proved under exact hypotheses
+
+- **Perfect completeness** of the full-word classical reference protocol under a perfectly complete NP relation-proof engine.
+- **Conditional classical evaluation binding**: `eps_sound <= eps_KE + eps_DL + eps_CRH`. `eps_KE` is the still-to-be-instantiated prefix-preserving argument-of-knowledge extraction error; no code-proximity term appears because complete word/source equalities are proved in the circuit.
+- **Constructive online simulator**: simulator retains a Pedersen CRS exponent `alpha`, sends commitments and Merkle root before the point, then uses the authorized result `v` and a virtual constant table `f^z=v`; the equivocation formula is `r_b=rho-b/alpha`. Under a real NP engine satisfying *adaptive multi-proof witness indistinguishability*, its full-view computational ZK advantage is bounded by `eps_WI`.
+- **Sparse no-go theorem**: `P=X^(N+B)` for `1 <= B < N` lies outside the initial enlarged RS degree code, but every local folded-word consistency check and final linear check holds under any challenge vector. Therefore sparse mode **needs** independent source/degree binding and adversarial proximity analysis for `D_j=N_j+ceil(B/2^j)`.
+- **Quantum insecurity**: a quantum discrete-log solver recovers the Pedersen generator relation, equivocates source and masked-word commitments and creates accepting proofs of a false evaluation. The unchanged classical Pedersen reference scheme is **not** post-quantum binding or secure in the QROM against such an adversary.
+
+### Remaining conditional / unsupported security claims
+
+A concrete audited argument of knowledge for the **entire odd-field NP relation** with prefix-preserving extraction and adaptive WI has not been selected or implemented. The sparse optimization has no proved quantitative proximity bound. Neither Fiat--Shamir ROM nor a quantum-proof replacement is demonstrated. These are tracked in **Chapter 15 only**; no new numbered chapters.
+
+### Tests
+
+`audit/final_security.rs` checks the exact trapdoor-equivocation equations, a full sparse-fold invalid-codeword counterexample over F_97, and RS rate/distance budgets with deterministic Rust regression tests.
+
+**Locked roadmap:** [ROADMAP_LOCK.md](ROADMAP_LOCK.md) — Chapter 15 is final.
