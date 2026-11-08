@@ -1,0 +1,150 @@
+\subsection{One accepted main path with protected challenge boundaries}\label{sec:global:checkpoints}
+The only new proof mechanism in this chapter is an
+\emph{extract-and-restore} operation at the end of an
+already accepted sequential OR proof. It does not change
+the verifier messages on the main execution path.
+All extra executions run from saved classical prover
+states, with the \emph{same} prover random tape, and their
+messages are discarded before continuing the main path.
+This is a stand-alone, classical interactive reduction;
+the external KBFold oracle is explicitly separated.
+
+\begin{definition}[Three outer epochs]\label{def:global:epochs}
+A \emph{two-challenge execution} is divided into
+three ordered epochs:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \emph{Epoch 0}, before the first fresh independent
+outer challenge $\theta\leftarrow L^\ell$: all
+witness and packed-column bits and the field variables
+$m,p,p_{\rm in},c,y'$ entering the first discrepancy
+are registered and subjected to their mandatory
+bitness proofs.
+\item \emph{Epoch 1}, between $\theta$ and the second
+fresh independent outer challenge $z\leftarrow L$:
+all additional hidden variables $t,\rho,\sigma$
+and the public trace vector $U$ are fixed, with
+their mandatory bitness proofs completed.
+\item \emph{Epoch 2}, after $z$: all remaining
+prescribed public-coefficient affine parity
+proofs and authenticated-oracle checks are completed.
+An affine parity proof may also occur in an earlier
+epoch once its public coefficients are available.
+\end{enumerate}
+No commitment or field variable from a later
+epoch may replace an already registered value
+used in an earlier discrepancy polynomial.
+\end{definition}
+
+\begin{definition}[Sequential OR blocks]\label{def:global:block}
+An \emph{OR block} consists of one public fixed
+statement $(C,S)$ and $\kappa\ge1$ sequential
+one-bit OR mini-proofs of
+Definition~\ref{def:mv:repeat}, with one
+fresh uniform verifier bit after each first
+message. The prover's behavior, including
+later first messages in this block, may depend
+on earlier bits in that same block.
+The verifier requires all $\kappa$ mini-proofs
+to accept before continuing.
+There are at most $J$ OR blocks on any
+accepting main path; $J$ is a public
+polynomial bound.
+\end{definition}
+
+\begin{definition}[Checkpoint-replay access]\label{def:global:access}
+Immediately before each OR block, a classical
+black-box reduction may save the prover's
+complete machine state and random tape.
+It can execute alternative sequences of
+inner verifier bits from that state and
+then \emph{restore the exact state at the
+end of the already sampled main block}.
+The reduction does not send alternative
+transcripts to the main verifier.
+It cannot rewind a quantum prover,
+cannot change an outer challenge already
+sampled, and cannot reset an external
+stateful oracle unless that capability is
+included in the explicit external model.
+\end{definition}
+
+\begin{definition}[Main and side executions]\label{def:global:main}
+At every OR block the reduction first runs
+one \emph{main} execution using the usual
+independent uniform verifier bits. If the
+main block rejects, the entire main
+execution rejects. If it accepts, the
+reduction may run \emph{side} executions
+from the saved pre-block checkpoint,
+using new independent uniform inner bits,
+before restoring the accepted main
+post-block state and proceeding.
+Every later main inner or outer challenge
+is sampled exactly as in the unmodified
+honest-verifier protocol.
+\end{definition}
+
+\begin{lemma}[Replay preserves the main-path law]\label{lem:global:main-law}
+For every causal randomized classical prover
+satisfying Definition~\ref{def:global:access},
+the public main transcript, including both outer
+challenges and all inner verifier bits, has
+exactly the same distribution with or without
+any number of checkpoint-replay side executions.
+\end{lemma}
+\begin{proof}
+Fix the prover's random tape and induct over
+the ordered main protocol stages.
+At a stage with no OR block, both executions
+send the same messages and sample the same
+distribution of verifier challenges.
+At an OR block, the main challenge sequence
+and the resulting accepting or rejecting
+post-block state are sampled first, just
+as in the unmodified protocol.
+Every side execution begins from the
+saved pre-block state, and the reduction
+restores the fixed sampled main post-block
+state before the next main stage.
+Thus the side runs do not alter any
+main message, state or verifier coin.
+Induction gives equality of conditional
+main-transcript laws for the fixed
+prover tape. Averaging over that tape
+proves the lemma.
+\end{proof}
+
+\begin{lemma}[Protected outer challenges stay independent]\label{lem:global:outer-uniform}
+Suppose $\theta$ is sampled by the honest
+verifier only after all Epoch 0 extraction
+attempts, and $z$ only after all Epoch 1
+extraction attempts. Conditional on the
+entire state of the reduction immediately
+before either sampling, that outer
+challenge has its prescribed fresh
+uniform law.
+\end{lemma}
+\begin{proof}
+The verifier samples its outer challenge
+from fresh independent randomness, which
+has not been used in either the main
+preceding transcript or any side replay.
+The reduction's pre-challenge state is a
+function of earlier prover states, inner
+bits and replay coins only. Independence
+of the fresh random sample from that
+sigma-field yields the uniform
+conditional law.
+\end{proof}
+
+\begin{remark}[Essential scheduling rule]
+The bitness proof for a value that enters
+the first challenge-dependent discrepancy
+must finish in Epoch 0; a bitness proof for
+an auxiliary residual value must finish in
+Epoch 1. Simply committing to a Pedersen
+group element before a challenge and
+deferring its \emph{knowledge proof}
+until afterward does not meet this
+extractor schedule.
+\end{remark}
