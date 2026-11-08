@@ -1,0 +1,256 @@
+\subsection{Sequential repetition and full affine-transcript simulation}\label{sec:mv:sequential}
+
+\begin{definition}[Sequential amplification parameter]\label{def:mv:repeat}
+Fix an integer $\kappa\ge1$.
+For every prescribed Chapter~10 bitness or
+parity OR statement, replace its single
+proof by $\kappa$ \emph{sequential}
+fresh copies of Definition~\ref{def:mv:mini}.
+The verifier sends the bit challenge for
+copy $i$ before the prover sends the first
+message for copy $i+1$.
+All $\kappa$ copies must accept.
+An honest verifier samples independent
+uniform challenge bits; a malicious
+verifier may choose them causally.
+All corresponding commitments and
+the statement are fixed before the
+first copy begins.
+\end{definition}
+
+\begin{lemma}[Sequential composition preserves honest completeness]\label{lem:mv:repeat-complete}
+Every valid OR witness causes all
+$\kappa$ honest mini-proofs to accept
+for every possible verifier challenge sequence.
+\end{lemma}
+\begin{proof}
+Each mini-proof has perfect completeness
+for either challenge by
+Lemma~\ref{lem:mv:mini-complete}.
+Sequential execution does not change
+the witness relation or any individual
+verifier identity, so all $\kappa$ pass.
+\end{proof}
+
+\begin{lemma}[Sequential simulator cost]\label{lem:mv:repeat-cost}
+For a fixed valid OR statement, its
+$\kappa$-copy malicious-verifier simulator
+has expected at most $2\kappa$ mini-proof
+trials. For $M$ prescribed mini-proofs
+in one execution, the expected total
+number of trials is at most $2M$,
+where $M$ counts the already repeated
+one-bit mini-proofs.
+\end{lemma}
+\begin{proof}
+At each mini-proof start, condition on
+the current visible history and verifier state.
+Lemma~\ref{lem:mv:expected-two} gives
+expected trial count $2$. If the verifier
+aborts, fewer future proofs are executed,
+so that only decreases the total cost.
+Linearity of expectation, applied to
+the at most $\kappa$ mini-proofs
+per statement and at most $M$ in
+the entire run, gives the bounds.
+\end{proof}
+
+\begin{theorem}[Perfect simulation of sequential OR statements]\label{thm:mv:repeat-perfect}
+For any causal rewindable verifier, the
+joint transcript of $\kappa$ sequential
+honest OR mini-proofs of a fixed valid
+statement is identically distributed to
+the transcript obtained by invoking the
+balanced simulator separately at each copy.
+The claim includes aborts and arbitrary
+history-dependent verifier challenge bits.
+\end{theorem}
+\begin{proof}
+Induct over the sequential mini-proofs.
+At the first, Theorem~\ref{thm:mv:one-perfect}
+identifies the real and simulated
+conditional transition laws.
+Suppose the visible prefix laws agree
+through copy $i-1$.
+For any realized non-aborting prefix,
+the next OR statement is the same public
+statement with a fresh independent
+honest prover random tape.
+Theorem~\ref{thm:mv:one-perfect}
+holds pointwise for every such prefix
+and verifier state, giving identical
+conditional laws for copy $i$.
+The verifier's own next action is
+a function of that visible history
+and its private tape, so it is
+coupled identically. If a prefix
+aborts, both processes terminate
+with the same conditional distribution.
+Induction gives equality of the
+entire ordered transcript laws.
+\end{proof}
+
+\begin{definition}[Chapter 11 concrete affine protocol]\label{def:mv:affine-protocol}
+The \emph{sequential-bit affine protocol}
+uses the Pedersen bit-commitment register
+and field-affine parity compilation of
+Chapter~10, but replaces \emph{every}
+Schnorr OR bitness and aggregate proof
+by the sequential repetition of
+Definition~\ref{def:mv:repeat}.
+The Chapter~9 public-core messages
+$(m,y',U,A)$ and outer challenges
+$(\theta,z)$ are unchanged.
+Fresh Pedersen blindings and fresh
+private Ring Switching masks are used
+as in Chapters~9--10.
+This protocol's transcript does
+\emph{not} include the original
+KBFold folded-oracle commitment or
+Merkle openings.
+\end{definition}
+
+\begin{theorem}[Perfect expected-time malicious-verifier ZK of the affine transcript]\label{thm:mv:affine-mvzk}
+For any two admissible witnesses for the
+same single-opening public instance and
+any probabilistic polynomial-time,
+classically rewindable, schedule-respecting
+verifier $V^*$, the complete visible
+transcripts of
+Definition~\ref{def:mv:affine-protocol}
+have identical distributions.
+There is a witness-independent,
+expected-polynomial-time black-box simulator
+for those transcripts, allowing $V^*$
+to choose \emph{all inner bit challenges}
+and the outer Ring Switching challenges
+adaptively.
+\end{theorem}
+\begin{proof}
+Simulate every registered Pedersen bit
+commitment by an independent uniform
+element of $G$, as justified by
+Lemma~\ref{lem:realize:conditional-commit}.
+Simulate the public-core messages
+using Definition~\ref{def:zkrs:core-sim}.
+For each prescribed bitness or parity
+OR mini-proof, execute the balanced
+simulator of
+Definition~\ref{def:mv:balanced-sim}
+relative to the current public statement.
+The statement is computable from the
+public commitment vector, fixed basis,
+public affine coefficients and required
+parity target by
+Lemma~\ref{lem:realize:rows-public}.
+
+To prove equality of transcript laws,
+condition on any current visible history
+and the verifier's private random tape.
+Fresh commitment blindings hide the
+underlying bits perfectly, even under
+this conditioning; the commitment
+message transition is therefore
+the same in the real and simulated
+processes.
+The exact conditional laws of the
+public core were proved in
+Lemmas~\ref{lem:zkrs:input-uniform},
+\ref{lem:zkrs:U-conditional}, and
+\ref{lem:zkrs:A-conditional}.
+Those laws remain unchanged by
+conditioning on the public proof
+messages: each proof message has
+a witness-independent conditional
+distribution by
+Theorem~\ref{thm:mv:one-perfect},
+and all honest prover coins for
+each new proof are fresh.
+For the next inner OR mini-proof,
+Theorem~\ref{thm:mv:one-perfect}
+matches the exact conditional
+transcript law for the current
+visible history, regardless of
+how the malicious verifier chooses
+the bit.
+Outer challenges are supplied by
+the same causal verifier kernel
+in both experiments and thus
+have identical conditional laws.
+All honest affine relations are
+valid by Lemmas~\ref{lem:zkrs:honest-checker}
+and~\ref{lem:zkrs:honest-relations};
+their compiled proof checks pass
+by Lemma~\ref{lem:mv:repeat-complete}.
+Induction over the finite ordered
+message stages therefore proves
+equality of full visible laws.
+Finally Lemma~\ref{lem:mv:repeat-cost}
+bounds the expected number of
+replayed mini-proofs by twice
+their polynomial total count,
+so the simulator has expected
+polynomial running time.
+\end{proof}
+
+\begin{definition}[Bounded-retry simulator]\label{def:mv:truncated}
+Given a deterministic retry bound $R\ge1$,
+modify the balanced simulator so that
+after $R$ unselected trials of a mini-proof
+it outputs a distinguished simulation
+failure symbol and terminates.
+Otherwise it runs unchanged.
+\end{definition}
+
+\begin{theorem}[Strict polynomial time with negligible statistical error]\label{thm:mv:truncated}
+Suppose a protocol execution uses at most
+$M$ sequential one-bit mini-proofs.
+The bounded-retry full-transcript simulator
+of Definition~\ref{def:mv:truncated}
+is strict polynomial time whenever $MR$
+is polynomial, and its output law has
+statistical distance at most
+\[
+ \boxed{\min\{1,M2^{-R}\}}
+\]
+from the honest real transcript law.
+In particular $R=\lambda+\lceil\log_2M\rceil$
+gives distance at most $2^{-\lambda}$.
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:mv:expected-two},
+the probability of $R$ consecutive
+unselected trials at any reached
+mini-proof is $2^{-R}$, conditional
+on its starting visible history.
+A union bound over at most $M$
+mini-proofs gives failure probability
+at most $M2^{-R}$.
+Couple the truncated simulator to
+the unbounded perfect simulator
+using identical trial coins until
+a truncation occurs. The views
+coincide on the complementary event,
+so their statistical distance is
+at most the truncation probability.
+Theorem~\ref{thm:mv:affine-mvzk}
+identifies the unbounded simulator's
+output law with the real transcript.
+Each mini-proof makes at most
+$R$ verifier invocations, hence
+at most $MR$ in total.
+For the stated choice of $R$,
+$M2^{-R}\le 2^{-\lambda}$.
+\end{proof}
+
+\begin{remark}[Sequentiality is essential for this simulator]
+A single parallel challenge containing
+$\kappa$ unpredictable bits would require
+guessing all $\kappa$ bits at once under the
+simple transcript-guessing approach,
+with acceptance probability $2^{-\kappa}$.
+Sequential repetition permits a separate
+one-bit rewind after each first message,
+costing two expected trials per copy.
+The next section makes this contrast exact.
+\end{remark}
