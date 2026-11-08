@@ -1,0 +1,262 @@
+\subsection{Final security theorem, concrete status, and certification handoff}\label{sec:security14:ledger}
+
+\begin{definition}[Classical reference-protocol assumption package]\label{def:security14:package}
+For the single-opening full-relation protocol
+$\Pi_{\rm KBFold}^{\rm hid}$, let
+$\mathsf{ClassicalRef}(\lambda)$ consist of:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item the odd-characteristic
+KBFold algebra and finite
+relation circuits of
+Chapter~13;
+\item freshly blinded
+Pedersen bit commitments
+in the setup of
+Definition~\ref{def:security14:setup},
+with a discrete-logarithm
+hard group for classical
+PPT adversaries;
+\item a collision-resistant,
+domain-separated Merkle hash;
+\item a perfectly complete
+NP relation engine
+with prefix-preserving
+knowledge extraction
+(Definition~\ref{def:security14:extract-contract})
+and adaptive multi-proof
+witness indistinguishability
+(Definition~\ref{def:security14:wi-contract});
+\item a single authorized
+evaluation opening with
+commitment and pre-evaluation
+proof issued before the
+chosen point $z$;
+\item a verifier enforcing
+every full-word, claimed-value,
+fold, degree, authenticated
+opening and terminal closure
+relation from
+Definition~\ref{def:full:protocol}.
+\end{enumerate}
+The source-word representation,
+bit encoding and commitment
+tags must be fixed across
+all relation invocations.
+\end{definition}
+
+\begin{theorem}[Final classical reference-protocol theorem]\label{thm:security14:final}
+Under
+$\mathsf{ClassicalRef}(\lambda)$
+the Chapter~13 protocol
+has the following properties
+for a \emph{single} opening:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \textbf{Perfect completeness:}
+honest true evaluations
+are accepted with probability one.
+\item \textbf{Classical computational
+evaluation binding:}
+\[
+ \boxed{\varepsilon_{\rm snd}
+ \le \min\{1,
+ \varepsilon_{\rm KE}
+ +\varepsilon_{\rm DL}
+ +\varepsilon_{\rm CRH}\}.}
+\]
+\item \textbf{Classical online
+computational zero knowledge:}
+a witness-free simulator
+publishes the initial
+commitment before $z$,
+uses only the authorized
+value $v$ after $z$,
+and satisfies
+\[
+ \boxed{
+ \operatorname{Adv}^{\rm ZK}
+ \le\varepsilon_{\rm WI}.}
+\]
+\item \textbf{No inherited
+sparse succinctness:}
+the described full-relation
+protocol uses
+$bM(2-2^{-m})$ public
+fold-word commitment
+group elements and
+does not establish a
+succinct KBFold
+opening proof.
+\end{enumerate}
+These conclusions are
+classical/CRS and
+\emph{conditional} on
+the explicitly stated
+NP proof-engine contracts.
+No ROM or post-quantum
+claim is part of this theorem.
+\end{theorem}
+\begin{proof}
+Completeness is
+Lemma~\ref{lem:security14:complete}.
+The evaluation-binding
+error follows directly
+from
+Theorem~\ref{thm:security14:full-binding}.
+The online ZK simulator
+and bound follow from
+Theorem~\ref{thm:security14:online-zk}.
+The public commitment
+count and nonsuccinctness
+are proved by
+Lemma~\ref{lem:full:word-count}
+and
+Proposition~\ref{prop:full:not-succinct}.
+All required assumptions
+are explicitly included
+in
+Definition~\ref{def:security14:package},
+so these results may
+be composed for the
+same single-opening
+interactive protocol.
+\end{proof}
+
+\begin{corollary}[Asymptotic conditional classical security]\label{cor:security14:negligible}
+If the concrete relation-engine
+implementation makes
+$\varepsilon_{\rm KE}$ and
+$\varepsilon_{\rm WI}$
+negligible, and
+discrete logarithms
+and collision finding
+are classically hard
+so that
+$\varepsilon_{\rm DL}$
+and $\varepsilon_{\rm CRH}$
+are negligible, the
+reference protocol
+has negligible
+false-evaluation
+acceptance and negligible
+complete-view
+distinguishing advantage.
+\end{corollary}
+\begin{proof}
+A sum of finitely
+many negligible functions
+is negligible.
+Apply the error
+bounds in
+Theorem~\ref{thm:security14:final}.
+\end{proof}
+
+\begin{definition}[Outstanding proof ledger for Chapter 15]\label{def:security14:open}
+The final certification
+chapter records exactly
+the following unresolved
+cryptographic requirements,
+without creating additional
+research chapters:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \textbf{NP engine
+instantiation:}
+a named concrete prover,
+verifier, CRS setup and
+prefix-preserving
+extractor for all odd-field,
+Merkle and polynomial
+circuits, plus an
+adaptive joint WI bound;
+\item \textbf{Sparse proximity:}
+an actual initial source
+binding/degree test and
+adversarial correlated
+Reed--Solomon proximity
+bound with budgets
+$D_j=N_j+B_j$;
+\item \textbf{ROM/QROM:
+} an argument for
+the modified interactive
+transcript under the
+selected hash model
+and, if quantum security
+is required, a
+post-quantum replacement
+for Pedersen commitments
+and proof machinery;
+\item \textbf{Certification:}
+Lean 4 statements/proofs
+for the new exact algebraic
+identities and reductions,
+Rust executable
+sanity tests, complexity
+accounting and
+full manuscript/source audit.
+\end{enumerate}
+\end{definition}
+
+\begin{proposition}[The four-block scope is closed]\label{prop:security14:locked}
+Every remaining
+verification or
+instantiation task
+of this manuscript
+is covered by the
+Chapter~15 certification
+and unresolved-obligation
+ledger above.
+No additional numbered
+chapter is required to
+state the proved final
+security theorem and
+its limits.
+\end{proposition}
+\begin{proof}
+The exact algebra and
+chronological extraction
+are developed in
+Chapters~1--12.
+Chapter~13 provides
+the full odd-field
+prover/verifier,
+authenticated shells
+and circuit relations.
+The present chapter
+gives the final
+conditional security
+theorems and precise
+negative results for
+sparse folding and
+quantum Pedersen binding.
+The only missing work
+is the concrete
+instantiation, stronger
+model security and
+formal/software
+certification enumerated
+in
+Definition~\ref{def:security14:open},
+all of which are
+assigned to the final
+Chapter~15 by
+the locked roadmap.
+\end{proof}
+
+\begin{remark}[Status, not a probability of mathematical correctness]
+The statements
+Theorems~\ref{thm:security14:full-binding},
+\ref{thm:security14:online-zk},
+\ref{thm:security14:sparse-counterexample}
+and~\ref{thm:security14:quantum-break}
+have paper proofs with
+their displayed hypotheses.
+Their new Lean declarations
+are not yet certified.
+The full-reference
+end-to-end theorem is
+conditional on the
+actual NP proof engine;
+the sparse mode and
+post-quantum mode
+are \emph{not}
+claimed secure.
+\end{remark}
