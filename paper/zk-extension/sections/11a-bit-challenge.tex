@@ -1,0 +1,93 @@
+\subsection{One-bit OR proofs and their causal security model}\label{sec:mv:bit}
+The three-move Schnorr OR proof of Chapter~10 has a challenge
+in $\mathbb Z_P$. A generic simulator that guesses this entire
+challenge succeeds with probability $1/P$, which is unsuitable
+when $P$ is cryptographically large. We use the classical
+\emph{one-bit challenge and rewinding} technique
+\cite{Schnorr1991,CramerDamgardSchoenmakers1994}
+to obtain an explicit malicious-verifier simulator.
+A textbook treatment of the bit-challenge technique is
+given in~\cite{Goldreich2001Foundations}.
+
+\begin{definition}[One-bit OR mini-proof]\label{def:mv:mini}
+Fix a public group commitment $C$, a nonempty finite set
+$S=\{t_1,\dots,t_d\}\subset\mathbb Z_P$, and a witness
+$(j_*,r)$ satisfying $C=g^{t_{j_*}}h^r$.
+The prover executes Definition~\ref{def:realize:or},
+except that the \emph{global} verifier challenge is
+a bit $e\in\{0,1\}\subset\mathbb Z_P$.
+The internal branch challenges $e_j$ and responses $z_j$
+remain arbitrary elements of $\mathbb Z_P$ and must obey
+$\sum_je_j=e\pmod P$.
+An honest verifier samples the challenge bit uniformly
+\emph{after} receiving the entire first-message vector $T$.
+\end{definition}
+
+\begin{lemma}[Perfect completeness of the mini-proof]\label{lem:mv:mini-complete}
+For either global challenge bit, every honest execution
+of Definition~\ref{def:mv:mini} satisfies the OR verifier equations.
+\end{lemma}
+\begin{proof}
+The completeness proof of
+Lemma~\ref{lem:realize:or-complete} is an identity
+for every $e\in\mathbb Z_P$, hence in particular
+for $e=0$ and $e=1$.
+\end{proof}
+
+\begin{definition}[Schedule-respecting malicious verifier]\label{def:mv:verifier}
+A malicious verifier $V^*$ is a probabilistic
+algorithm with a private random tape and a
+rewindable state. At each OR mini-proof stage,
+after observing the statement, previous transcript,
+and first message $T$, it may either:
+(i) send either bit $0$ or $1$;
+or (ii) terminate with a distinguished abort symbol $\bot$.
+Any other response is normalized to $\bot$.
+The verifier may choose the bit as an arbitrary efficient
+function of its entire visible history and its private tape.
+All other public Ring Switching challenges may likewise
+be chosen causally from the current visible history.
+The verifier cannot demand an extraneous secret opening
+or change the prescribed protocol equations.
+\end{definition}
+
+\begin{definition}[One-step black-box rewinding]\label{def:mv:rewind}
+A simulator is allowed to save the verifier state
+immediately before one OR first message, execute
+the verifier on a trial first message, inspect the
+bit challenge or abort, and restore the saved state
+with the \emph{same} verifier random tape.
+Only the current mini-proof is rewound.
+After a trial is selected, the simulator continues
+from the selected verifier state without changing
+any earlier public message.
+This is the standard classical black-box
+rewinding model and does not grant rewinding
+access to a quantum verifier.
+\end{definition}
+
+\begin{lemma}[A fixed statement admits a known witness in the honest case]\label{lem:mv:honest-witness}
+For every bitness or parity OR statement generated
+by an honest registration and a true affine relation
+in Chapter~10, the honest prover knows a candidate
+index $j_*$ and blinding $r$ required by
+Definition~\ref{def:mv:mini}.
+\end{lemma}
+\begin{proof}
+For bitness, the actual bit and its fresh Pedersen
+blinding give $C=g^b h^r$ with candidate $b\in\{0,1\}$.
+For an affine parity row, the true integer sum lies
+in its permitted parity set by
+Lemma~\ref{lem:realize:correct-candidate}.
+Lemma~\ref{lem:realize:aggregate} supplies its known
+aggregate blinding. Both are valid OR witnesses.
+\end{proof}
+
+\begin{remark}[Cost of choosing a shorter challenge]
+The mini-proof has challenge entropy only one bit.
+Its standalone knowledge error cannot be treated as
+$1/P$. It must be repeated with fresh prover randomness
+and fresh verifier challenge bits; the soundness analysis
+of this repetition appears in
+Section~\ref{sec:mv:forking}.
+\end{remark}
