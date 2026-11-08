@@ -13,11 +13,11 @@
 | `13a-commitment-oracles.tex` | lemma | Perfect uniformity of a committed field symbol | `lem:full:leaf-uniform` | `ZKFull.leaf_uniform` | paper proof |
 | `13a-commitment-oracles.tex` | definition | Domain-separated Merkle trees | `def:full:merkle` | `ZKFull.merkle` | typed contract |
 | `13a-commitment-oracles.tex` | lemma | Perfect privacy of the authenticated shell | `lem:full:merkle-shell` | `ZKFull.merkle_shell` | paper proof |
-| `13a-commitment-oracles.tex` | definition | Authenticated commitment opening | `def:full:auth-commit` | `ZKFull.auth_commit` | typed contract |
+| `13a-commitment-oracles.tex` | definition | Authenticated shell opening | `def:full:auth-commit` | `ZKFull.auth_commit` | typed contract |
 | `13a-commitment-oracles.tex` | lemma | Merkle opening conflict implies a hash collision | `lem:full:merkle-binding` | `ZKFull.merkle_binding` | paper proof |
 | `13b-hidden-sumcheck.tex` | definition | True sumcheck states | `def:full:true-sum` | `ZKFull.true_sum` | typed contract |
 | `13b-hidden-sumcheck.tex` | lemma | Exact sumcheck transition | `lem:full:true-transition` | `ZKFull.true_transition` | paper proof |
-| `13b-hidden-sumcheck.tex` | definition | Hidden-offset masked sumcheck | `def:full:masked-round` | `ZKFull.masked_round` | typed contract |
+| `13b-hidden-sumcheck.tex` | definition | Hidden-offset Sumcheck | `def:full:masked-round` | `ZKFull.masked_round` | typed contract |
 | `13b-hidden-sumcheck.tex` | lemma | Endpoint carry for the round mask | `lem:full:mask-endpoints` | `ZKFull.mask_endpoints` | paper proof |
 | `13b-hidden-sumcheck.tex` | theorem | Exact masked sumcheck invariant | `thm:full:masked-sumcheck` | `ZKFull.masked_sumcheck` | paper proof |
 | `13b-hidden-sumcheck.tex` | lemma | Public evaluation weight at the last round | `lem:full:final-chi` | `ZKFull.final_chi` | paper proof |
