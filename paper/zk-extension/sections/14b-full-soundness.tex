@@ -1,0 +1,255 @@
+\subsection{A final classical evaluation-binding theorem}\label{sec:security14:soundness}
+
+\begin{lemma}[Canonical bit opening is unique except under discrete-log failure]\label{lem:security14:canonical}
+Fix the public Pedersen key $(g,h)$ and a collection
+of tagged bit commitments. If two accepted
+extracted witnesses assign different bits to
+the same tagged group element, then from the
+two witnesses one can compute $\alpha=\log_g h$.
+If their bit values agree, their blinding
+exponents agree as well.
+\end{lemma}
+\begin{proof}
+For distinct bits, apply the explicit
+collision formula of
+Lemma~\ref{lem:realize:binding-reduction}.
+For equal bits, cancel the shared
+factor $g^b$ from the two
+valid openings, giving
+$h^r=h^{r'}$. Since $h$
+has prime order $P$, the
+blindings agree modulo $P$ by
+Lemma~\ref{lem:global:unique-r}.
+This is pointwise for every
+tagged element, hence for the
+whole registered bit vector.
+\end{proof}
+
+\begin{lemma}[A changed authenticated leaf gives a hash collision]\label{lem:security14:same-root}
+Suppose the preprocessing extractor
+obtains one valid indexed Merkle
+commitment tree under root
+$\mathsf{root}_j$, and a later
+accepted relation proof or
+authentication shell assigns
+a different commitment vector
+to an existing position under
+the \emph{same} root.
+Then a collision in the
+underlying hash function can
+be computed from the two
+authenticated paths.
+\end{lemma}
+\begin{proof}
+The preprocessing and later
+witnesses provide the
+different indexed leaf vectors
+and their paths to the identical
+root. The domain-separated
+Merkle conflict reduction of
+Lemma~\ref{lem:full:merkle-binding}
+finds the first incompatible
+serialized node inputs whose
+hash outputs agree.
+The differing inputs form
+an explicit hash collision.
+\end{proof}
+
+\begin{lemma}[The preprocessing witness fixes one source table]\label{lem:security14:pre-fixed}
+On the good event of the
+prefix-preserving extraction
+contract, the accepted
+pre-evaluation transcript
+determines one canonical
+source table
+$f_{\rm pre}:I_m\to\F$
+before the point $z$ is chosen.
+Every later accepted relation
+that references the registered
+source commitments uses the
+same source table, unless a
+discrete-log opening conflict
+is obtained.
+\end{lemma}
+\begin{proof}
+Definition~\ref{def:security14:extract-contract}
+extracts actual canonical
+bit openings for every source
+field variable in the
+preprocessing relation,
+prior to revealing $z$.
+Definition~\ref{def:full:field-encoding}
+makes the source field value
+uniquely determined by its
+valid bit encoding.
+Every subsequent use of that
+source value refers to its
+same named group commitments,
+by Definition~\ref{def:full:registry}.
+A different extracted source
+value would change at least
+one encoding bit and therefore
+give two valid openings of
+the same tagged group element.
+Lemma~\ref{lem:security14:canonical}
+then extracts the setup
+discrete logarithm.
+\end{proof}
+
+\begin{theorem}[End-to-end classical evaluation binding: full-relation mode]\label{thm:security14:full-binding}
+Under Definitions
+\ref{def:security14:setup} and
+\ref{def:security14:extract-contract},
+for any classical PPT malicious
+prover in the one-opening game,
+the full-relation protocol of
+Chapter~13 satisfies
+\[
+ \boxed{\Pr[\mathrm{accept}\ \wedge\
+ v\neq\widetilde f_{\rm pre}(z)]
+ \le\min\{1,\,
+ \varepsilon_{\rm KE}
+ +\varepsilon_{\rm DL}
+ +\varepsilon_{\rm CRH}\}.}
+\]
+In particular, when the three
+underlying advantages are negligible,
+the protocol is classically
+computationally evaluation binding.
+There is no additional univariate
+root-test or Reed--Solomon proximity
+error in this full-relation
+security bound.
+\end{theorem}
+\begin{proof}
+Run the prescribed extractor
+along the unchanged accepted
+main path. Let $E$ be the
+event of a failed extraction,
+$D$ an extracted Pedersen
+bit-opening conflict, and
+$H$ an authenticated leaf
+conflict for a fixed root.
+Their probabilities are bounded
+by the three displayed terms,
+respectively. Outside
+$E\cup D\cup H$, all
+accepted proofs have valid
+witnesses on one registered
+source table $f_{\rm pre}$:
+Lemma~\ref{lem:security14:pre-fixed}
+fixes the source before $z$,
+Lemma~\ref{lem:security14:canonical}
+prevents conflicting
+registered field values,
+and Lemma~\ref{lem:security14:same-root}
+prevents conflicting
+authenticated leaf vectors.
+The initial claimed-evaluation
+relation in
+Definition~\ref{def:full:protocol}
+is an \emph{exact} circuit
+equality for those same
+registered source bits:
+\[
+ v=\sum_{a\in I_m}
+ f_{\rm pre}(a)\operatorname{eq}_m(a,z).
+\]
+By the multilinear
+interpolation identity
+Lemma~\ref{lem:intro:interpolation},
+the right side equals
+$\widetilde f_{\rm pre}(z)$.
+Thus an accepted false claim
+cannot occur outside
+$E\cup D\cup H$.
+Apply the union bound and
+cap by one. The proof never
+replaces a complete-word
+relation by a sparse-query
+degree test; hence there is
+no Schwartz--Zippel or
+proximity term to add.
+\end{proof}
+
+\begin{corollary}[Knowledge-soundness of the expanded witness relation]\label{cor:security14:knowledge}
+On the complement of the
+extraction, discrete-log and
+hash-collision events, an
+accepted transcript determines
+a single registered source
+table $f_{\rm pre}$ and
+witnesses for all accepted
+NP relation statements that
+verify the original masked
+fold chain and terminal
+Sumcheck relation.
+\end{corollary}
+\begin{proof}
+Definition~\ref{def:security14:extract-contract}
+returns a valid circuit
+witness for every accepted
+proof. The canonical commitment
+and Merkle consistency
+lemmas make their common
+registered values agree.
+The circuit relations in
+Definitions
+\ref{def:full:pre-relation} and
+\ref{def:full:round-relations}
+then give the fold chain,
+degree budgets and masked
+Sumcheck equalities.
+The terminal relation is
+verified by the final
+extracted circuit witness.
+All values refer to the
+same source table by
+Lemma~\ref{lem:security14:pre-fixed}.
+\end{proof}
+
+\begin{proposition}[Random challenges are unnecessary for full-relation algebraic binding]\label{prop:security14:uniform-not-needed}
+Once the source has been
+extracted before $z$ and
+all complete relations are
+enforced, the implication
+\[
+ \mathrm{accept}\Longrightarrow
+ v=\widetilde f_{\rm pre}(z)
+\]
+outside the named cryptographic
+bad events holds for every
+fixed $z$ and every sequence
+of legal fold challenges.
+\end{proposition}
+\begin{proof}
+The proof of
+Theorem~\ref{thm:security14:full-binding}
+uses only the exact
+registered-source identity
+and multilinear
+interpolation, not a
+probabilistic root bound.
+Both are valid for every
+field input. Therefore
+the conclusion holds
+pointwise for any legal
+challenge sequence.
+\end{proof}
+
+\begin{remark}[Why this is not yet an unconditional deployed theorem]
+Theorem~\ref{thm:security14:full-binding}
+is a \emph{rigorous reduction under an
+explicit NP argument-of-knowledge
+contract}. Chapter~13 provides the
+circuits; Chapters~10--12 provide
+a concrete classical affine component.
+But an implemented proof system
+for the \emph{full odd-field circuits}
+with the prefix-preserving extraction
+property has not yet been supplied
+or machine audited. Assigning
+$\varepsilon_{\rm KE}=0$ without
+such an instantiation would be
+unjustified.
+\end{remark}
