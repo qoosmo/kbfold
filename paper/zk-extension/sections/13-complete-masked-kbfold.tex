@@ -1,0 +1,120 @@
+\section{Complete Masked KBFold Protocol and Authenticated Oracles}\label{sec:full}
+This chapter works in the \emph{original odd-characteristic
+field} of KBFold~\cite{MkhidaKBFold2026}.
+It assembles the already proved normalized fold
+dictionary and degree-aware high-degree masking
+(Chapter~5), the genuine KBFold Sumcheck
+transcript (Chapter~3), and an authenticated
+\emph{hiding} oracle interface.
+The public Merkle leaves are fresh Pedersen
+commitments to field symbols, rather than
+the field symbols themselves. Sumcheck
+round coefficients and final folded
+values remain hidden behind prescribed
+relation proofs; only the authorized
+evaluation $v=\widetilde f(z)$ is public.
+
+The protocol has two precisely separated
+verification modes. The \emph{full-relation}
+mode checks all committed polynomial
+words and source-to-fold identities
+in a polynomial-size NP circuit,
+giving a nonsuccinct but fully
+specified reference protocol.
+The \emph{sparse} mode retains KBFold's
+local-query architecture, but requires
+a separate adversarial proximity proof
+for the enlarged degree budgets.
+The relation proof engine is
+an explicit cryptographic interface
+with circuit-level statements;
+its real-world knowledge extraction
+and adaptive ZK simulation are the
+final security obligations of
+Chapter~14. No other research
+chapter is introduced.
+
+\input{sections/13a-commitment-oracles}
+\input{sections/13b-hidden-sumcheck}
+\input{sections/13c-fold-authentication}
+\input{sections/13d-complete-protocol}
+\input{sections/13e-online-view}
+\input{sections/13f-soundness-cost}
+
+\subsection{The exact achieved theorem chain}\label{sec:full:conclusion}
+For a private table $f$ and mask
+$R\in\F[X]_{<B}$, the honest
+prover commits to the entire
+masked fold chain
+\[
+ Q_0=U_f^{(m)}+X^{2^m}R,\qquad
+ Q_{j+1}=\pfold_{r_j}(Q_j),\qquad
+ \deg Q_j<2^{m-j}+\left\lceil B/2^j\right\rceil.
+\]
+The full masked Sumcheck keeps
+its round coefficients and
+running offset hidden:
+\[
+ \boxed{
+ \begin{aligned}
+ \mu_j(0)+\mu_j(1)&=\sigma_{j-1}+b_{j-1},\\
+ \mu_j(r_{j-1})&=\sigma_j+b_j,\\
+ \mu_m(r_{m-1})&=\chi_m[X^0]Q_m+b_m.
+ \end{aligned}}
+\]
+The final word has degree at most
+one and its hidden constant
+coefficient is authenticated
+by two distinct final leaves.
+Theorem~\ref{thm:full:completeness}
+proves perfect algebraic
+completeness of the \emph{entire}
+declared prover/verifier protocol.
+
+Every public oracle leaf is a
+freshly blinded Pedersen
+bit-commitment vector.
+Theorem~\ref{thm:full:shell-online}
+establishes exact \emph{online
+witness independence} of the
+public commitments, roots,
+adaptive authenticated shells
+and their paths, even when the
+commitment is sent before
+the evaluation point is chosen.
+The complete view also contains
+interactive proof transcripts:
+Theorem~\ref{thm:full:conditional-online}
+gives their conditional simulation
+reduction with an explicit
+$\varepsilon_{\rm proofZK}$ contract.
+
+In full-relation mode, accepted
+false claims are confined to
+the precise pre-knowledge,
+relation-soundness, Pedersen
+binding and hash-collision events:
+\[
+ \boxed{
+ \varepsilon_{\rm full,snd}
+ \le
+ \varepsilon_{\rm pre}
+ +\varepsilon_{\rm rel}
+ +\varepsilon_{\rm bind}
+ +\varepsilon_{\rm hash}.}
+\]
+The direct construction uses
+$bM(2-2^{-m})$ public group
+elements for fold-word symbols,
+and therefore is not a succinct
+PCS. The sparse mode must
+replace the full circuit
+checks using a proved
+$\varepsilon_{\rm prox}$ for
+the new RS rates. Chapter~14
+closes the security theorem
+statements in the chosen
+classical/ROM/quantum model,
+and Chapter~15 is reserved
+exclusively for certification
+and final manuscript audit.
