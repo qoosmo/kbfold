@@ -1,0 +1,338 @@
+\subsection{Online verifier view and the exact simulation boundary}\label{sec:full:online}
+
+\begin{definition}[Public authenticated shell transcript]\label{def:full:shell-view}
+The \emph{shell projection} of a full
+verifier view consists of the
+source/mask/round/fold bit commitments,
+all Merkle roots, $z,v$, the outer
+challenge vector $r$, selected query
+indices and all publicly authenticated
+commitment vectors and paths.
+It omits all $\Pi_{\rm rel}$ proof
+messages and \emph{never} contains
+unblinded field-symbol values,
+masked round coefficients or
+mask offsets.
+\end{definition}
+
+\begin{lemma}[Hiding roots can be sampled without any witness]\label{lem:full:simulate-roots}
+For each prescribed commitment stage,
+the conditional public distribution
+of its fresh commitment vectors
+and the Merkle roots computed from
+them is produced exactly by sampling
+uniform vectors in $G^b$ at all
+new leaf positions and hashing
+the resulting arrays. The sampler
+does not need to know $f,R,Q_j$,
+$s_j,\mu_j$ or any committed secret.
+\end{lemma}
+\begin{proof}
+Condition on any fixed hidden
+field values that the honest
+prover intends to commit at
+this stage. By
+Lemma~\ref{lem:full:leaf-uniform},
+the new independently blinded
+bit-commitment vectors are
+product-uniform on $G^b$,
+independently of those values.
+The Merkle roots are deterministic
+functions of these vectors, and
+the remaining named field-variable
+commitments use the same
+independent blinding argument.
+The conditional law therefore
+equals the output of the stated
+witness-free sampler.
+Averaging over the hidden values
+leaves this law unchanged.
+\end{proof}
+
+\begin{lemma}[Authenticated shell replies are deterministic after root construction]\label{lem:full:path-determined}
+After the simulator has sampled
+and stored an entire leaf
+commitment array and built
+its Merkle tree, every public
+authentication shell for a
+subsequently queried index is
+computable without a hidden
+field opening. Repeated queries
+to the same indexed leaf obtain
+the same commitment vector and
+path.
+\end{lemma}
+\begin{proof}
+The shell is defined only by
+the public commitment vector
+at that index and sibling hashes
+on the unique canonical tree
+path. Both are determined by
+the stored array and the public
+hash function. Reading the
+stored elements again reproduces
+the same values for a repeated
+index. No opening bit or
+Pedersen blinding is required.
+\end{proof}
+
+\begin{theorem}[Perfect online privacy of the public shell]\label{thm:full:shell-online}
+Let a causal verifier choose its
+evaluation point after the
+preprocessing shell and later
+choose its outer challenges and
+authentication-query indices
+as functions only of the
+previous shell messages,
+its own random tape and the
+authorized public evaluation
+value $v$ when available.
+For any fixed witness $f$,
+the public-shell process of
+the honest prover is
+\emph{exactly} simulatable by
+a witness-free online algorithm
+with access only to the
+authorized evaluation
+functionality
+$\mathcal F_{\rm eval}^{f}$.
+The simulator samples its
+first commitment shell
+\emph{before} the verifier
+chooses $z$, and answers all
+later queries consistently.
+\end{theorem}
+\begin{proof}
+The simulator first draws
+the public commitments and
+initial Merkle tree with
+Lemma~\ref{lem:full:simulate-roots};
+their law is independent of $f$.
+It forwards the resulting shell
+to the verifier, which chooses
+$z$ as a causal function of
+the same visible history in
+the real and simulated processes.
+The simulator then obtains the
+authorized scalar $v$ from
+$\mathcal F_{\rm eval}^{f}(z)$.
+At every later registration
+or word-commitment stage,
+Lemma~\ref{lem:full:simulate-roots}
+gives the same conditional
+distribution of fresh public
+group commitments and roots
+in both processes, independent
+of the new private values.
+At every authenticated query
+stage, Lemma~\ref{lem:full:path-determined}
+constructs the same deterministic
+reply from the already stored
+public array. The verifier's
+next causal choice therefore
+has the same conditional law
+in both experiments.
+Induction over the finite
+stage and query sequence
+proves equality of the joint
+online shell views, including
+the verifier's random tape.
+The theorem does not include
+relation-proof messages,
+which have been explicitly
+excluded from the shell view.
+\end{proof}
+
+\begin{lemma}[Any group commitment is mathematically openable to any fixed bit]\label{lem:full:exist-opening}
+Let $C\in G$ and $b\in\{0,1\}$.
+There exists a unique
+$r\in\mathbb Z_P$ such that
+$C=g^bh^r$.
+The assertion is an existence
+statement, not an efficient
+opening algorithm.
+\end{lemma}
+\begin{proof}
+The element $Cg^{-b}$ belongs
+to the cyclic group generated
+by $h$. Hence it equals
+$h^r$ for some unique
+$r\in\mathbb Z_P$.
+Rearranging gives the
+required commitment equation.
+Finding $r$ from public
+$(C,g,h)$ may require
+solving a discrete logarithm.
+\end{proof}
+
+\begin{corollary}[Simulated public trees admit algebraically consistent hidden interpretations]\label{cor:full:exist-witness}
+Fix any arrays of public
+commitment vectors with
+valid deterministic Merkle
+roots, any public point
+$z\in\F^m$, and any
+authorized scalar $v\in\F$.
+There exists a \emph{mathematical}
+hidden assignment satisfying
+all honest algebraic
+relationships of
+Definitions~\ref{def:full:pre-relation}
+and~\ref{def:full:round-relations},
+with a table $f$ for which
+$\widetilde f(z)=v$.
+The assignment need not be
+efficiently computable from
+the public arrays.
+\end{corollary}
+\begin{proof}
+Choose the constant table
+$f(a)=v$ for every $a\in I_m$,
+and choose any
+$R\in\F[X]_{<B}$, for example
+$R=0$. Define $Q_j$,
+$s_j,\mu_j,c_j,b_j$
+as in the honest protocol,
+using the already selected
+public challenges and any
+fixed choices of the round
+masks. Their algebraic
+relations hold by
+Theorems~\ref{thm:kbff:masked-invariant}
+and~\ref{thm:full:masked-sumcheck}.
+For each existing public
+bit commitment vector, apply
+Lemma~\ref{lem:full:exist-opening}
+coordinatewise to obtain
+some blinding exponents that
+open it to the required valid
+field-symbol encoding. Use
+the provided deterministic
+Merkle trees as the hash
+witnesses. The hidden
+interpretations therefore
+satisfy all specified
+relations. The table's
+multilinear extension is
+constant $v$, so its
+authorized evaluation is $v$.
+No algorithm for computing
+the potentially hard opening
+exponents has been supplied.
+\end{proof}
+
+\begin{definition}[Full-proof simulation contract]\label{def:full:zk-contract}
+A concrete $\Pi_{\rm rel}$ satisfies
+the \emph{online sequential
+relation-simulation contract}
+if, for every allowed classical
+malicious verifier and query
+budget, its pre-evaluation
+knowledge-binding proof and
+all later adaptively scheduled
+relation proofs admit one
+causal witness-independent
+simulator, with a bound
+$\varepsilon_{\rm proofZK}$ on
+the statistical distance or
+computational distinguishing
+advantage of their
+\emph{joint} messages,
+conditioned on the entire
+previous visible shell and
+proof history. The simulator
+must operate on the true
+public statements built from
+simulated shells, including
+the commitments registered
+before $z$, and must not
+require efficient knowledge
+of the hidden openings
+in Corollary~\ref{cor:full:exist-witness}.
+This is a required property
+of the chosen proof engine;
+it is not inferred from
+Pedersen hiding alone.
+\end{definition}
+
+\begin{theorem}[Conditional complete online-view simulation]\label{thm:full:conditional-online}
+Suppose the relation-proof engine
+satisfies
+Definition~\ref{def:full:zk-contract}
+and preserves the exact causal
+protocol schedule.
+Then the complete single-opening
+verifier view, including all
+public roots, authenticated
+shells and proof transcripts,
+has an online simulator whose
+advantage is at most
+$\varepsilon_{\rm proofZK}$,
+in the corresponding statistical
+or computational model.
+The simulator publishes its
+initial commitment before
+learning $z$ and uses only
+the authorized ideal evaluation
+value $v$ afterward.
+\end{theorem}
+\begin{proof}
+First use the witness-free
+public-shell simulator from
+Theorem~\ref{thm:full:shell-online}.
+It samples and retains
+the commitment trees and
+can answer every future
+adaptive shell query.
+By Corollary~\ref{cor:full:exist-witness},
+the resulting adaptively
+constructed public proof
+statements have consistent
+mathematical witnesses.
+At each scheduled proof stage,
+invoke the online simulator
+guaranteed by
+Definition~\ref{def:full:zk-contract},
+using the current public
+statement and verifier state.
+The contract controls the
+complete joint proof-message
+distribution, including its
+correlation with the shell
+and previous proofs, by
+$\varepsilon_{\rm proofZK}$.
+All other transitions are
+identical conditional
+distributions by
+Theorem~\ref{thm:full:shell-online}.
+The stepwise hybrid bound
+Lemma~\ref{lem:security:online-hybrid}
+(or its computational analogue)
+gives at most the contracted
+error for the complete
+verifier view.
+\end{proof}
+
+\begin{remark}[Critical security boundary]
+The shell simulator and
+its mathematical witness
+existence theorem are
+\emph{proved}. The complete
+online-view statement
+is conditional on an
+actual \emph{adaptive}
+zero-knowledge argument-of-
+knowledge realization for
+the stage circuits.
+The general binary-field
+Pedersen/Schnorr affine
+compiler of Chapter~12
+does \emph{not} prove all
+odd-characteristic field
+multiplications, Merkle
+hash gates and source-word
+polynomial constraints
+needed by $\Pi_{\rm rel}$.
+Those circuits and their
+cryptographic security
+are the Chapter~14 task.
+\end{remark}
