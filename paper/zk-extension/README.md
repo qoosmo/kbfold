@@ -41,7 +41,7 @@ Existing KBFold algebraic results are reproved here where required for self-cont
 10. Concrete classical bit commitment and affine proofs (complete)
 11. Classical malicious-verifier simulation and local extraction (complete)
 12. Global temporal extraction and computational affine soundness (complete)
-13. **Complete masked original KBFold protocol and authenticated oracles (next)**
+13. Complete masked original KBFold protocol and authenticated oracles (written, algebraically proved)
 14. **Final completeness, proximity soundness and end-to-end ZK theorems**
 15. **Lean/Rust certification, complexity and final manuscript audit**
 
@@ -285,3 +285,33 @@ If an attacker has non-negligible success, choosing a polynomial replay budget i
 **Exact boundary:** This does not implement or prove authentication/zero knowledge for the original KBFold folded polynomial oracle, Merkle/FRI openings or odd-characteristic PCS; those belong strictly to Chapters 13–14. Quantum rewinding and post-quantum commitments are also excluded.
 
 **Regression audit:** `audit/global_extraction.rs` verifies the combinatorial replay bound in exact integer arithmetic, exhaustively checks small challenge trees and tests commitment collision recovery.
+
+
+## Chapter 13 — Complete Masked KBFold Protocol and Authenticated Oracles
+
+**Source:** `sections/13-complete-masked-kbfold.tex` (six proof-oriented subsections).
+**Lean map:** [CHAPTER_13_LEAN_MAP.md](CHAPTER_13_LEAN_MAP.md).
+**Locked roadmap:** [ROADMAP_LOCK.md](ROADMAP_LOCK.md).
+**Proof audit:** 47 labeled definitions/results and **28 complete mathematical paper proofs**. No new Chapter 13 Lean declaration is machine-certified.
+
+### Completed construction
+
+- Original **odd-characteristic KBFold** field, high-degree masked polynomial $Q_0=U_f+X^NR$, normalized fold chain and precise enlarged RS degree budgets $D_j$.
+- Authenticated folded words with **fresh perfectly hiding Pedersen bit-commitment leaves**. Public Merkle roots, leaf commitments and paths reveal no raw field symbols; hidden circuit proofs check the openings.
+- A full concealed Sumcheck with $\\mu_j(T)=s_j(T)+b_{j-1}/2+c_j(2T-1)$, hidden coefficient/offset commitments, exact endpoint/challenge equations and the last-round relation $\\mu_m(r_{m-1})=\\chi_m[X^0]Q_m+b_m$.
+- Complete interactive prover/verifier with pre-evaluation registration, pre- and post-challenge field relations, adaptive local fold queries, and two-point final linear closure.
+- **Perfect algebraic completeness** relative to a perfectly complete relation-proof engine.
+- An exact **online simulator for the complete public authentication shell** (commitments, Merkle roots, paths, queries), publishing the initial root **before** the evaluation point; a conditional theorem for the full view including proof transcripts.
+- A conditional full-relation soundness theorem with explicit preprocessing-extraction, relation-soundness, Pedersen-binding and Merkle-collision errors.
+
+### Strict separation of the two verification modes
+
+**Full-relation mode** is a completely specified, but nonsuccinct, polynomial-size NP circuit proof of every committed word. Its security still depends on the selected relation engine's actual online ZK and knowledge-extraction reductions.
+
+**Sparse KBFold mode** retains local queries and can hope for succinctness; soundness against arbitrary adversarial non-codewords with revised RS rates $D_j/M_j$ has **not** been proved by the algebraic fold identities. This is a named Chapter 14 obligation.
+
+The ordinary binary-field affine proof from Chapters 10–12 does **not** automatically certify odd-field multiplication, hash arithmetic or NP circuit proof security. Classical, ROM and quantum/QROM cases remain separate.
+
+### Tests and deliverables
+
+`audit/full_kbfold.rs` runs deterministic finite-field checks of masked Sumcheck offsets, codeword folds, final closure, and hiding distributions for small pedagogical prime groups; the full manuscript is built by GitHub CI.
