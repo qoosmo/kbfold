@@ -222,3 +222,29 @@ This is a **classical, honest-sigma-verifier** construction, not a complete mali
 ### Reproducible audit
 
 `audit/affine_sigma.rs` uses an intentionally insecure tiny group and GF(16) only for checking algebra, OR transcript distributions, special-soundness formulas, and field-to-parity identities; it is not a cryptographic implementation.
+
+
+## Chapter 11 — Malicious-Verifier Zero Knowledge and Temporal Extraction
+
+**Source:** `sections/11-malicious-verifier.tex` and eight proof-oriented subsections.
+**Lean map:** [CHAPTER_11_LEAN_MAP.md](CHAPTER_11_LEAN_MAP.md).
+**Audit:** 56 individually labeled statements, including **40 complete mathematical proofs** and 16 definitions. New Chapter 11 declarations are not yet machine-checked in Lean.
+
+### Proved
+
+- Exact fixed-bit Schnorr OR proof simulation, including the uniform first-message law.
+- A balanced classical rewinding simulator for an arbitrary challenge-selecting or aborting verifier, with **perfect transcript law** and **two expected trials** per mini-proof.
+- Sequential one-bit repetition yields perfect expected-time **malicious-verifier zero knowledge for the one-opening binary-field affine transcript**, including the public core and Pedersen commitment proofs, while allowing adaptive outer Ring Switching challenges.
+- The bounded-retry simulator runs in strict polynomial time with statistical error at most `M*2^(-R)`.
+- Exact two-run forking probability `p*(p-2^(-kappa))` for a deterministic reset prover and lower bound `eps*(eps-2^(-kappa))` for a randomized prover, with extraction from the earliest distinct challenge bit.
+- Stand-alone extraction before each outer challenge when the relevant bitness proof is completed before that challenge.
+- False-parity discrete-log reduction and `eps <= 2^(-kappa)+sqrt(delta_DL)` for a fixed aggregate with known true bit openings.
+- A conditional outer false-claim soundness theorem with explicit global extraction, row proof and authenticated-oracle error terms.
+
+### Open and excluded
+
+**Global multistage temporal extraction has not been proved.** The two-run local witness extractor does not yet guarantee a consistent extraction of all dependent field variables on one accepted transcript while preserving challenge independence. The proof does not cover original KBFold authentication paths, odd-characteristic folding, multiple openings, quantum verifiers or QROM soundness. The bit-commitment compiler remains nonsuccinct and classical.
+
+### Rust verification
+
+`audit/malicious_sigma.rs` exhaustively enumerates tiny-group Schnorr OR transcript distributions, a malicious verifier's adaptive challenge/abort behavior, and challenge-tree forking and extraction. The tiny group is for algebraic regression testing only, not cryptographic deployment.
