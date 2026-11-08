@@ -1,0 +1,103 @@
+\section{Global Temporal Extraction and Classical Soundness}\label{sec:global}
+The chronological extraction contract left open in
+Chapters~10--11 is addressed here \emph{for the explicit
+sequential one-bit Schnorr OR affine-proof compiler}.
+We retain the same accepted main transcript while
+privately replaying each accepted OR statement from
+its saved pre-statement classical state.
+The resulting \emph{bounded-replay} extractor
+assigns one consistent binary-coordinate
+registry before each protected outer challenge,
+or computes the forbidden Pedersen setup
+discrete logarithm.
+The construction and its proof rely on
+classical checkpoint access, fixed public
+statements, a strict epoch schedule and an
+independent public-coin verifier.
+The underlying authenticating KBFold oracle
+remains a separate interface for Chapter~13;
+our result does not silently assume its
+extractability or quantum soundness.
+
+\input{sections/12a-checkpoints}
+\input{sections/12b-online-fork}
+\input{sections/12c-global-registry}
+\input{sections/12d-final-soundness}
+\input{sections/12e-protocol-and-handoff}
+
+\subsection{Theorem chain and exact error budget}\label{sec:global:conclusion}
+For a sequential OR block with $\kappa$
+honest one-bit challenges, let
+$p$ be the accepted challenge-string
+fraction in a fixed saved classical
+prover state. If the main block
+accepts, $R$ independent side
+attempts fail to find an accepted
+\emph{different} challenge string
+with joint probability
+\[
+ \boxed{p(1-p+2^{-\kappa})^R
+ \le 2^{-\kappa}+\frac1{R+1}.}
+\]
+Theorem~\ref{thm:global:chronological}
+runs this extraction at every accepted
+block and restores the original main
+post-block state. Its probability of
+an accepted main execution with
+some missing opening is at most
+\[
+ \boxed{\varepsilon_{\rm fork}\le
+ J\left(2^{-\kappa}+\frac1{R+1}\right).}
+\]
+The canonical extracted bit values
+are fixed before $\theta$ or $z$
+according to their epoch, and all
+accepted parity checks agree with one
+extracted field tuple unless their
+conflicting openings compute
+$\log_g h$. The fresh outer
+challenges retain their independent
+uniform distributions.
+
+Consequently the explicit classical
+false-claim soundness reduction is
+\[
+ \boxed{
+ \begin{aligned}
+ \varepsilon_{\rm false}
+ &\le\min\biggl\{1,\
+ \frac{\ell+n}{2^n}
+ +\varepsilon_{\rm oracle}
+ +\varepsilon_{\rm DL}(R)\\[-1mm]
+ &\hspace{30mm}
+ +J\left(2^{-\kappa}+\frac1{R+1}\right)
+ \biggr\}.
+ \end{aligned}}
+\]
+For any non-negligible false-claim
+probability, choosing polynomial
+$R$ inversely proportional to that
+probability gives a non-negligible
+discrete-log solver
+(Corollary~\ref{cor:global:advantage}).
+Thus, when the field root error,
+the external oracle error and
+$J2^{-\kappa}$ are negligible,
+the \emph{classical affine
+component is computationally sound}
+(Theorem~\ref{thm:global:asymptotic}).
+This is the quantitative
+replacement for the formerly
+unspecified global temporal
+extraction error.
+
+The remaining cryptographic
+boundary is \emph{one concrete
+authenticated KBFold oracle}
+with a proven binding and
+joint zero-knowledge simulation
+contract. That is the whole
+scope of Chapter~13; the
+locked manuscript concludes
+with Chapter~14 (security)
+and Chapter~15 (certification).
