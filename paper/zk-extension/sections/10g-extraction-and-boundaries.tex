@@ -15,12 +15,15 @@ assigned a unique extracted binary opening
 enters the anchored residual is assigned a
 unique extracted binary opening
 \emph{before} the verifier samples $z$;
-\item every accepted compiled parity proof
-certifies the corresponding exact affine
-relation on the extracted field values,
-and every packed-column witness used by
-the outer protocol is consistently linked
-to its registered binary coordinates;
+\item every accepted compiled parity OR proof
+has an extracted aggregate opening
+$(t,R)$ with $t$ in the public
+permitted candidate set; every
+bitness proof has an extracted binary
+opening; and every packed-column witness
+used by the outer protocol is linked
+to its registered binary coordinates
+by the separately checked packing relation;
 \item the resulting coupled ideal protocol
 has the same public messages and the same
 fresh independent $\theta,z$ as the
