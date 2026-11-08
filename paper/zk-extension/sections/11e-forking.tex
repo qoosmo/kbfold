@@ -1,0 +1,233 @@
+\subsection{Two-run forking and quantitative knowledge error}\label{sec:mv:forking}
+For soundness the \emph{honest} sigma verifier
+chooses the bit challenges uniformly.
+This is a different security game from the
+malicious-verifier ZK simulation above.
+
+\begin{definition}[Resettable fixed-statement prover]\label{def:mv:reset-prover}
+Fix a public OR statement $(C,S)$ before
+the first one-bit verifier challenge.
+A resettable prover has a fixed initial
+state and a complete fixed random tape
+for a sequence of $\kappa$ fresh one-bit
+mini-proofs for that same statement.
+Given any verifier challenge string
+$\mathbf e=(e_1,\ldots,e_\kappa)
+\in\{0,1\}^\kappa$,
+the resulting messages and accepting
+or rejecting outcome are deterministic.
+The prover may adapt its next first
+message to earlier challenges, but not
+to the current challenge before sending
+that first message.
+A reset restarts it from the same
+initial state and random tape.
+\end{definition}
+
+\begin{definition}[Accepting challenge set]\label{def:mv:accepting-set}
+For the fixed deterministic state of
+Definition~\ref{def:mv:reset-prover},
+let
+\[
+ \mathcal A:=\{\mathbf e\in\{0,1\}^{\kappa}:
+       \text{every mini-proof accepts}\},\quad
+ m:=|\mathcal A|,\quad p:=m/2^\kappa.
+\]
+The quantity $p$ is the conditional success
+probability against independent uniform
+verifier challenge bits.
+\end{definition}
+
+\begin{lemma}[Earliest difference yields one OR fork]\label{lem:mv:earliest}
+If two distinct challenge strings
+$\mathbf e,\mathbf e'\in\mathcal A$
+are both accepted from the same
+reset prover state and random tape,
+then their transcripts contain two
+accepting responses to the
+\emph{same} OR first message
+under the \emph{different} global
+bits $0$ and $1$.
+\end{lemma}
+\begin{proof}
+Let $i$ be the smallest index
+with $e_i\ne e_i'$.
+All earlier verifier challenges
+and prover responses are identical,
+because the starting state and
+random tape are fixed and the
+prover is causal.
+Immediately before the $i$-th
+challenge, both runs therefore
+have the same prover state
+and the same first message $T_i$.
+Their current challenges differ:
+one is $0$ and the other $1$.
+Both full challenge strings lie in
+$\mathcal A$, so the verifier
+accepts the $i$-th mini-proof
+in both runs. The two local
+accepting transcripts have the
+required common first message
+and distinct global challenges.
+\end{proof}
+
+\begin{theorem}[Combinatorial knowledge extraction from two accepting runs]\label{thm:mv:two-run-extract}
+Under the hypotheses of
+Lemma~\ref{lem:mv:earliest},
+one can compute in polynomial
+time from the two transcripts
+an OR witness $(t_j,r)$ such that
+\[
+ \boxed{t_j\in S,\qquad C=g^{t_j}h^r.}
+\]
+\end{theorem}
+\begin{proof}
+The preceding lemma supplies two
+accepting mini-proofs with the same
+statement and first message and
+two different global challenges.
+Apply the explicit extraction
+formula of
+Theorem~\ref{thm:realize:or-extract}.
+It produces a branch index $j$
+and its opening exponent $r$.
+Comparing the two transcripts to
+find the earliest challenge
+difference, and computing the
+one modular inverse, are
+polynomial-time operations.
+\end{proof}
+
+\begin{lemma}[Exact two-run forking probability]\label{lem:mv:fork-prob}
+For a fixed deterministic prover
+with success probability
+$p=m/2^\kappa$, sample two independent
+uniform challenge strings and reset
+the same prover state between runs.
+The probability that both runs
+accept and their challenge strings
+are distinct is exactly
+\[
+ \boxed{p(p-2^{-\kappa}).}
+\]
+\end{lemma}
+\begin{proof}
+There are $m$ accepting strings.
+The probability that both independent
+samples belong to $\mathcal A$ is
+$(m/2^\kappa)^2=p^2$.
+Among those ordered pairs,
+there are exactly $m$ diagonal
+pairs with identical challenge strings.
+Each ordered pair has probability
+$2^{-2\kappa}$, so the diagonal
+probability equals
+$m2^{-2\kappa}=p2^{-\kappa}$.
+Subtracting yields the formula.
+\end{proof}
+
+\begin{theorem}[Randomized-prover two-run forking bound]\label{thm:mv:fork-average}
+Let a randomized causal prover have
+acceptance probability $\varepsilon$
+against $\kappa$ independent uniform
+challenge bits, on a fixed statement.
+Run it twice from the \emph{same}
+initial state and \emph{same} private
+random tape but with independent
+verifier challenge strings.
+The probability of obtaining an
+extractable fork is at least
+\[
+ \boxed{
+ \max\{0,\varepsilon(\varepsilon-2^{-\kappa})\}.}
+\]
+\end{theorem}
+\begin{proof}
+Condition on the prover's
+initial private random tape $R$,
+and write $p_R$ for its conditional
+acceptance probability.
+Lemma~\ref{lem:mv:fork-prob}
+gives conditional fork probability
+$p_R^2-2^{-\kappa}p_R$.
+Averaging over $R$ yields
+\[
+ \mathbb E[p_R^2]
+ -2^{-\kappa}\mathbb E[p_R].
+\]
+By the elementary nonnegativity
+of variance,
+$\mathbb E[p_R^2]\ge
+(\mathbb E[p_R])^2=\varepsilon^2$.
+The expectation of $p_R$ is
+$\varepsilon$ by the law of total
+probability. The lower bound
+is therefore
+$\varepsilon^2-2^{-\kappa}\varepsilon$.
+A probability is also nonnegative,
+giving the stated maximum.
+Theorem~\ref{thm:mv:two-run-extract}
+turns any successful fork into
+a valid OR witness.
+\end{proof}
+
+\begin{corollary}[Knowledge-error dichotomy]\label{cor:mv:knowledge-error}
+Fix a resettable prover running in
+polynomial time. Either
+$\varepsilon\le2^{-\kappa}+\delta$,
+or a two-run black-box extractor
+finds an OR witness with probability
+at least $\varepsilon\delta$,
+where $\delta>0$ is any chosen
+threshold.
+\end{corollary}
+\begin{proof}
+If the first alternative fails,
+then $\varepsilon-2^{-\kappa}>\delta$.
+Theorem~\ref{thm:mv:fork-average}
+makes the extraction probability
+at least
+$\varepsilon(\varepsilon-2^{-\kappa})
+>\varepsilon\delta$.
+\end{proof}
+
+\begin{lemma}[Why a single global $\kappa$-bit guess is costly]\label{lem:mv:parallel-cost}
+Suppose a verifier independently
+samples a uniform bit vector
+$\mathbf e\in\{0,1\}^{\kappa}$
+\emph{after} receiving all first
+messages, and a simulator guesses
+one independent uniform
+$\widehat{\mathbf e}$ in advance.
+Then the probability of a complete
+match is exactly $2^{-\kappa}$,
+so the expected number of complete
+independent trials until a match
+is $2^\kappa$.
+\end{lemma}
+\begin{proof}
+For every guessed vector, precisely
+one of the $2^\kappa$ equally likely
+verifier vectors matches.
+Independent repeated trials
+therefore have success probability
+$2^{-\kappa}$ and geometric
+expected trial count its reciprocal,
+namely $2^\kappa$.
+\end{proof}
+
+\begin{remark}[What this theorem actually extracts]
+Theorems~\ref{thm:mv:two-run-extract}
+and~\ref{thm:mv:fork-average}
+establish extraction for \emph{one fixed
+OR statement} across resettable
+one-bit repetitions. They do not
+by themselves yield a single
+online extractor for every
+interleaved proof and a complete
+Ring Switching transcript.
+That multistage composition must
+respect the two outer challenge
+boundaries; we state it separately.
+\end{remark}
