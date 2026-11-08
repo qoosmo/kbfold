@@ -1,0 +1,176 @@
+\subsection{Complexity ledger and the next certification boundary}\label{sec:mv:cost}
+
+\begin{definition}[Compiled proof counts]\label{def:mv:proof-count}
+Let $B=sn$ be the number of registered
+binary commitments for $s$ field
+elements and let $Q\le nE$ count the
+nonempty affine-parity rows for
+$E$ field-affine equations.
+Each bit commitment has one bitness
+OR statement and each nonempty row
+has one aggregate OR statement.
+Write $J:=B+Q$ for this number
+of prescribed OR statements.
+Each statement is replaced by
+$\kappa$ sequential mini-proofs.
+\end{definition}
+
+\begin{lemma}[Exact mini-proof count]\label{lem:mv:proof-count}
+The modified compiler performs
+\[
+ \boxed{M=\kappa J=\kappa(B+Q)}
+\]
+one-bit OR mini-proofs, provided
+none is skipped by early rejection.
+Its verifier sends $M$ challenge
+bits, one after each OR first
+message, in addition to the
+outer field challenges.
+\end{lemma}
+\begin{proof}
+There are $B$ bitness statements
+and $Q$ aggregate statements
+by Definition~\ref{def:mv:proof-count}.
+Each runs exactly $\kappa$ copies
+of Definition~\ref{def:mv:mini}
+under a non-rejecting execution.
+Thus their sum is
+$\kappa(B+Q)$.
+Each mini-proof receives exactly
+one bit challenge after sending
+its first message.
+\end{proof}
+
+\begin{lemma}[Expected and bounded simulator costs]\label{lem:mv:simulation-cost}
+For the $M$ mini-proofs of
+Lemma~\ref{lem:mv:proof-count},
+the exact malicious-verifier
+simulator uses at most $2M$
+expected mini-proof trials.
+A truncated simulator with
+\[
+ R=\lambda+\lceil\log_2 M\rceil
+\]
+uses at most $MR$ trials and
+has statistical simulation
+error at most $2^{-\lambda}$.
+\end{lemma}
+\begin{proof}
+Apply
+Lemma~\ref{lem:mv:repeat-cost}
+to all $M$ possible copies
+to obtain the expectation.
+Apply
+Theorem~\ref{thm:mv:truncated}
+with the displayed $R$
+for the strict upper bound
+and its error estimate.
+\end{proof}
+
+\begin{proposition}[A security-efficiency tradeoff]\label{prop:mv:tradeoff}
+Amplifying the inner challenge
+with $\kappa$ \emph{sequential}
+one-bit repetitions reduces the
+baseline challenge-guessing
+knowledge error to $2^{-\kappa}$
+while increasing raw proof
+communication by a factor of
+$\kappa$. The resulting
+uncompressed affine compiler
+remains nonsuccinct.
+\end{proposition}
+\begin{proof}
+A deterministic prover with no
+two accepting challenge strings
+passes at most one of the
+$2^\kappa$ challenge sequences,
+by Lemma~\ref{lem:mv:single-leaf}.
+Thus its baseline acceptance is
+at most $2^{-\kappa}$.
+Lemma~\ref{lem:mv:proof-count}
+shows that each prescribed OR
+statement is transmitted
+$\kappa$ times, using fresh
+first messages and responses.
+The size per copy remains
+proportional to its branch set
+by Lemma~\ref{lem:realize:or-communication},
+so the raw communication is
+multiplied by $\kappa$.
+The direct compiler was already
+nonsuccinct by
+Proposition~\ref{prop:realize:not-succinct};
+sequential repetition does not
+add a compression step.
+\end{proof}
+
+\begin{definition}[Lean certification graph]\label{def:mv:lean-graph}
+The intended dependency order
+of Chapter~11 is:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item fixed-bit OR uniform
+hyperplane and conditional
+transcript distribution;
+\item balanced malicious-verifier
+simulator and abort-preserving
+selection lemma;
+\item sequential transcript
+composition and bounded retries;
+\item challenge-tree forking,
+same-first-message extraction
+and the quantitative $\varepsilon$
+inequality;
+\item stand-alone temporal
+extraction and false-parity
+discrete-log reduction;
+\item a separately constructed
+global temporal extractor for
+all dependent commitments;
+\item adaptive KBFold oracle
+opening simulation and
+post-quantum soundness.
+\end{enumerate}
+Items (vi)--(vii) are
+\emph{unproved obligations},
+not Lean declarations claimed
+to exist.
+\end{definition}
+
+\begin{remark}[Historical placement]
+The one-bit challenge rewinding
+strategy is classical
+zero-knowledge methodology
+\cite{Goldreich2001Foundations};
+our concrete OR transcript
+uses the established Schnorr and
+Cramer--Damg{\aa}rd--Schoenmakers
+constructions
+\cite{Schnorr1991,CramerDamgardSchoenmakers1994}.
+The mathematical work here is to
+make the challenge range, abort
+conditioning, sequential
+composition, exact forking
+probability and extraction
+timing explicit for the
+kernel-coordinate affine
+Ring Switching interface.
+No claim that one-bit rewinding
+itself is new is made.
+\end{remark}
+
+\begin{remark}[Next substantive mathematical problem]
+To close the Chapter~10 early
+extraction obligation, the
+multistage extractor must produce
+\emph{one} fixed hidden field
+tuple before each outer challenge,
+with the same accepted public
+history and independent outer
+challenge law. Only after that
+can the resulting malicious-verifier
+ZK affine proof be safely
+composed with KBFold's original
+authenticated folding-oracle
+transcript, and its odd-
+characteristic proximity theorem.
+\end{remark}
