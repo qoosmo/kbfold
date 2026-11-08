@@ -16,22 +16,25 @@ required to evaluate the circuit.
 The verifier checks the \emph{entire} relation
 without receiving any private circuit input.
 
-We separate two possible engines:
-\begin{enumerate}[label=\textup{(\roman*)}]
-\item $\Pi_{\rm full}$ certifies the entire
-committed word at each level, its polynomial
-degree bound, source relation and fold
-identity (a nonsuccinct reference mode).
-\item $\Pi_{\rm sparse}$ certifies just
-the explicitly requested authenticated
-local statements; its soundness requires
-a separately proved proximity theorem.
-\end{enumerate}
-The existence of a complete relation
-circuit is an algorithmic statement,
-not a claim that the source KBFold
-proximity theorem transfers to the
-sparse mode.
+The \emph{implemented relation predicate}
+in this chapter is $\Pi_{\rm full}$:
+it certifies the entire committed
+word at every level, its degree
+bound, source relation and fold
+identity. This defines one
+nonsuccinct reference protocol.
+A proposed \emph{sparse optimization}
+$\Pi_{\rm sparse}$ would replace
+these complete-word proofs with
+authenticated local statements
+and a separately proved proximity
+and initial-word binding theorem.
+It is a target of Chapter~14,
+not an alternative instantiated
+verifier in the present chapter.
+The original KBFold proximity
+analysis cannot simply be reused
+with the enlarged degree budgets.
 \end{definition}
 
 \begin{definition}[Public commitment registry]\label{def:full:registry}
@@ -301,17 +304,17 @@ acceptance with probability one.
 \end{proof}
 
 \begin{remark}[Two verification modes]
-The full-relation mode checks
-all committed word symbols and
-their degrees inside a general
-NP circuit; it has large,
-non-KBFold-sized proofs but is
-a complete finite reference
-protocol. The sparse mode
-retains the original KBFold
-local-query architecture;
-its proof of degree/proximity
-soundness with the enlarged
-budgets $D_j$ is a separate
-Chapter~14 obligation.
+The defined protocol runs the
+full-relation circuit checks
+over all committed word symbols
+and degree budgets. This is a
+nonsuccinct finite reference
+protocol. Replacing those
+checks with sparse KBFold
+proximity queries requires
+new source binding and
+proximity theorems for
+the degree budgets $D_j$;
+that optimization belongs to
+Chapter~14.
 \end{remark}
