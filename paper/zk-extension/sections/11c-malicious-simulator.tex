@@ -1,0 +1,185 @@
+\subsection{Perfect black-box simulation for a malicious verifier}\label{sec:mv:rewinding}
+
+\begin{definition}[Balanced one-bit rewinding simulator]\label{def:mv:balanced-sim}
+At the beginning of one prescribed OR mini-proof,
+save the complete verifier state, including its
+random tape. Repeat the following trial:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item Restore the saved verifier state.
+Independently guess $\widehat e\overset{\$}{\leftarrow}
+\{0,1\}$ and run the fixed-bit simulator
+of Definition~\ref{def:mv:fixed-sim} for $\widehat e$,
+obtaining first message $T$ and response $R$.
+\item Send $T$ to $V^*$ and read its reply.
+If its reply is a bit $e$, \emph{select} the
+trial exactly when $e=\widehat e$.
+If its reply is $\bot$, independently
+flip an additional fair coin and select
+the trial exactly when this coin is $1$.
+\item If unselected, rewind and retry.
+If selected with a valid bit, send $R$
+as the prover response and continue
+from that verifier state. If selected
+with $\bot$, preserve that terminating
+verifier state and output its abort transcript.
+\end{enumerate}
+The independent fair coin on abort is essential:
+it makes the trial-selection probability
+the same for aborts and valid challenges.
+\end{definition}
+
+\begin{lemma}[Every trial is selected with probability one half]\label{lem:mv:half}
+Fix the entire visible history and verifier
+random tape at the beginning of a mini-proof.
+For every possible sampled first message $T$,
+the probability that a trial of
+Definition~\ref{def:mv:balanced-sim}
+is selected is exactly $1/2$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:mv:first-uniform},
+the guessed bit $\widehat e$ is independent
+of $T$ and is uniform.
+For a fixed verifier state and $T$,
+the verifier's reply is determined.
+If the reply is $0$ or $1$, the independent
+uniform $\widehat e$ equals it with probability $1/2$.
+If the reply is $\bot$, the simulator's
+additional fair selection coin equals $1$
+with probability $1/2$.
+These exhaust the possible replies.
+\end{proof}
+
+\begin{lemma}[Expected trial count]\label{lem:mv:expected-two}
+For every fixed verifier state, the balanced
+simulator selects a trial almost surely;
+the number $N$ of trials satisfies
+\[
+ \Pr[N>t]=2^{-t}\quad(t\ge0),
+ \qquad \mathbb E[N]=2.
+\]
+\end{lemma}
+\begin{proof}
+Each retry uses fresh independent simulator
+randomness from the same saved verifier state.
+Lemma~\ref{lem:mv:half} gives conditional
+selection probability $1/2$ in every trial.
+Thus the probability of failing the
+first $t$ trials is $(1/2)^t$.
+Finally
+$\mathbb E[N]=\sum_{t\ge0}\Pr[N>t]
+=\sum_{t\ge0}2^{-t}=2$.
+\end{proof}
+
+\begin{lemma}[Balanced selection preserves the real first-message law]\label{lem:mv:preserve-first}
+For a fixed verifier state, the selected
+first message $T$ is uniform on $G^d$,
+exactly as in an honest real execution.
+The verifier's decision to abort and its
+chosen challenge bit are distributed in
+the same way in both experiments.
+\end{lemma}
+\begin{proof}
+Every trial samples $T$ uniformly on $G^d$
+by Lemma~\ref{lem:mv:first-uniform}.
+Lemma~\ref{lem:mv:half} states that,
+conditional on each $T$, it is selected
+with the same probability $1/2$.
+Consequently selection does not reweight
+the uniform distribution of $T$.
+The verifier's response is a fixed
+function of this selected $T$ and its
+saved random tape; hence its response
+has the real-execution distribution.
+\end{proof}
+
+\begin{lemma}[A selected accepting response has the real conditional law]\label{lem:mv:real-response}
+Condition on any selected non-aborting first
+message $T$ and challenge bit $e$.
+The balanced simulator's OR response has
+the same conditional distribution as that
+of the honest prover answering $e$ after $T$.
+\end{lemma}
+\begin{proof}
+The trial is selected with a valid response
+exactly when $\widehat e=e$.
+Under this event, the trial's response
+comes from the fixed-$e$ simulator.
+The selection event imposes no further
+condition on the sampled response once
+$(T,\widehat e)$ are fixed, because
+the verifier chooses $e$ based on the
+first message and its saved state.
+Corollary~\ref{cor:mv:conditional-response}
+identifies this response law with
+the honest conditional response law.
+\end{proof}
+
+\begin{theorem}[Perfect malicious-verifier zero knowledge for one mini-proof]\label{thm:mv:one-perfect}
+For every fixed valid OR statement and every
+rewindable, schedule-respecting malicious
+verifier $V^*$, the balanced simulator is
+witness free, terminates almost surely in
+expected two trials, and produces \emph{exactly}
+the joint real distribution of the verifier
+random tape, first message, challenge or abort,
+and (when present) prover response.
+\end{theorem}
+\begin{proof}
+Couple the verifier's initially sampled
+random tape in the two experiments and fix
+it. By Lemma~\ref{lem:mv:preserve-first},
+the selected $T$ and the verifier's
+reply have the honest real distribution.
+If the verifier aborts, the selected
+trial reports precisely that abort history;
+there is no prover response.
+If the verifier sends a challenge bit,
+Lemma~\ref{lem:mv:real-response}
+gives precisely the honest conditional
+prover-response law.
+These are all components of the visible
+mini-proof transcript, so their joint
+laws match for the fixed tape.
+Averaging over the tape gives exact
+equality of the joint distributions.
+Lemma~\ref{lem:mv:expected-two}
+proves almost-sure termination and
+the expected trial count.
+\end{proof}
+
+\begin{lemma}[Why unconditional acceptance of simulated aborts is biased]\label{lem:mv:abort-bias}
+Suppose a trial were accepted whenever the verifier
+aborts, but accepted after a valid challenge
+only when the guessed bit matches.
+If the verifier aborts on half of the possible
+uniform first messages, the selected transcript
+would abort with probability $2/3$, although
+the honest prover's transcript aborts with
+probability $1/2$.
+\end{lemma}
+\begin{proof}
+Let $A$ be the event that the verifier
+aborts on $T$. By assumption $\Pr[A]=1/2$.
+Under the incorrect selection rule,
+the probability of selecting a trial
+with abort is $1/2$; that of selecting
+one with a valid challenge is
+$(1/2)(1/2)=1/4$.
+Conditioned on selection, the probability
+of abort would therefore be
+$(1/2)/(1/2+1/4)=2/3$.
+The honest prover sends a uniformly
+distributed $T$ without selection,
+so it encounters abort with probability
+$1/2$. The balanced rule avoids
+this discrepancy.
+\end{proof}
+
+\begin{remark}[Classical scope]
+The simulator rewinds the verifier to
+the same \emph{classical} random tape and state.
+This proof does not authorize rewinding
+quantum verifier states or claim security
+in the quantum-random-oracle model.
+\end{remark}
