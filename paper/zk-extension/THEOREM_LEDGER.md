@@ -241,3 +241,29 @@ Run `sh audit/RUN.sh` to execute the existing kernel tests plus the new determin
 **Security boundary:** Chapter 9 does **not** establish unconditional real-world zero knowledge for the complete KBFold PCS. Concrete binding, hiding, online simulation of all commitment roots/proofs/openings, and the original KBFold degree/proximity arguments remain to be proved.
 
 **Reproducible tests:** Chapter 9 has deterministic finite-field regression tests of public message distributions and conditional mask laws over GF(4) and GF(16).
+
+
+## Chapter 10 — Commitment and Affine-Proof Realization
+
+**Source:** `sections/10-commitment-realization.tex` and eight small sections.
+**Lean map:** [CHAPTER_10_LEAN_MAP.md](CHAPTER_10_LEAN_MAP.md).
+**Audit:** 57 labeled definitions/results, with **39 complete mathematical paper proofs**. No new Chapter 10 theorem has yet been Lean certified.
+
+### Established mathematics
+
+- Exact compilation of public-coefficient affine constraints over `GF(2^n)` into parity constraints over their `n` binary coordinates.
+- Concrete fresh Pedersen commitments `C=g^b h^r`: perfect hiding and computational binding with explicit discrete-log extraction from two inconsistent openings.
+- Full Schnorr OR proof equations, perfect completeness, exact honest-verifier zero-knowledge simulator and special-soundness extraction.
+- Integer-lift parity OR proof that correctly handles `1+1=0` in `GF(2)` without falsely treating odd-prime-order Pedersen commitments as XOR-homomorphic.
+- Compilation of all Chapter 9 affine equations and binary packing links into committed parity checks.
+- **Perfect honest-sigma-verifier transcript simulation** for one admissible opening, with potentially adaptive outer Ring Switching challenges.
+- A conditional false-claim soundness bound `(ell+n)/2^n + eps_ext + eps_DL`, requiring a separate **early-extraction and challenge-timing contract** for the actual adaptive proof composition.
+- Cost bounds establishing that the raw construction is neither succinct nor post-quantum.
+
+### Security boundary
+
+This is a **classical, honest-sigma-verifier** construction, not a complete malicious-verifier, QROM or post-quantum KBFold PCS theorem. It does not simulate original KBFold commitment roots, Merkle authentication paths or folded oracles. The multistage extraction contract is stated precisely but **has not been discharged** by the current component proofs.
+
+### Reproducible audit
+
+`audit/affine_sigma.rs` uses an intentionally insecure tiny group and GF(16) only for checking algebra, OR transcript distributions, special-soundness formulas, and field-to-parity identities; it is not a cryptographic implementation.
