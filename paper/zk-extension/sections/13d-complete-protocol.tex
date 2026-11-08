@@ -139,16 +139,23 @@ It proves $\mathcal R_{\rm pre}$.
 The verifier verifies this proof.
 No evaluation point $z$ has yet
 been chosen.
-\item \textbf{Authorized claim:}
+\item \textbf{Evaluation claim:}
 after preprocessing, the verifier
 chooses $z\in\F^m$, and the
-authorized scalar $v=\widetilde f(z)$
-is provided publicly. The prover
-initializes $\chi_0$, $\sigma_0=v$
-and $b_0=0$. The relation
-$\sigma_0=\sum_a f(a)\chi_0(a)$
-is included in the first round's
-proof (or a terminal proof if $m=0$).
+prover publishes a claimed scalar
+$v$. An honest prover sends
+$v=\widetilde f(z)$.
+The prover initializes $\chi_0$,
+the claimed running sum
+$\sigma_0=v$, and $b_0=0$.
+The relation
+$v=\sum_a f(a)\chi_0(a)$
+against the \emph{preprocessing-bound}
+source table is included in the
+first round's proof.
+A cheating prover may choose
+a false $v$; the verifier
+must still enforce the relation.
 \item \textbf{For $j=1,\ldots,m$:}
 the prover computes $s_j$ and
 samples fresh $c_j$, commits to
