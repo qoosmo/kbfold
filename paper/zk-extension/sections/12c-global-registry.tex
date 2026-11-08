@@ -44,15 +44,19 @@ If any repeated commitment tag has a different
 extracted bit opening, or any aggregate
 opening is inconsistent with the true
 integer sum of its extracted constituent
-bits, it outputs the derived value
-$\log_g h$ using the reduction of
-Chapter~10. Otherwise it continues
-the main path without changing its
-messages or challenge distribution.
-The output is an accepting main transcript
-with a complete consistent extracted
-registry, a setup discrete logarithm,
-or an extraction failure symbol.
+bits, it \emph{records} the derived
+value $\log_g h$ using the reduction
+of Chapter~10. It does \emph{not}
+terminate or change the main execution
+upon discovering a collision or an
+extraction failure: it restores the
+main state and continues the verifier
+to its natural completion.
+Afterward it returns the complete
+main transcript together with a
+consistent registry, a recorded setup
+discrete logarithm, or an extraction
+failure flag.
 \end{definition}
 
 \begin{lemma}[A group element has a unique blinding for a fixed bit]\label{lem:global:unique-r}
