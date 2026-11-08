@@ -1,0 +1,189 @@
+\subsection{Exact zero-knowledge parity proofs from bit commitments}\label{sec:realize:parity}
+
+\begin{definition}[Parity-compatible integer openings]\label{def:realize:candidates}
+For $m\geq0$ and a public desired parity
+$b\in\{0,1\}$, define
+\[
+ \mathcal S_{m,b}:=\{t\in\{0,\ldots,m\}:t\equiv b
+                                  \pmod 2\}.
+\]
+If $\mathcal S_{m,b}$ is empty, the verifier
+rejects the parity statement deterministically.
+Assume $P>m$, so all candidates map injectively
+into $\mathbb Z_P$.
+\end{definition}
+
+\begin{lemma}[Correct integer sum lies in the permitted set]\label{lem:realize:correct-candidate}
+Let $b_1,\ldots,b_m\in\{0,1\}$.
+If $\sum_i b_i=b$ in $\F_2$,
+then the ordinary integer
+$S=\sum_i b_i$ belongs to $\mathcal S_{m,b}$.
+\end{lemma}
+\begin{proof}
+As an integer, $0\leq S\leq m$.
+Reduction of the sum modulo $2$
+is exactly addition of the bits in $\F_2$,
+so $S\equiv b\pmod2$, giving membership.
+\end{proof}
+
+\begin{definition}[Concrete parity proof]\label{def:realize:parity-proof}
+Given public bit commitments
+$C_i=g^{b_i}h^{r_i}$, form $C_T=\prod_iC_i$.
+The prover proves:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item For each $C_i$ it knows a bit opening,
+using Definition~\ref{def:realize:or}
+with candidate set $\{0,1\}$.
+\item It knows an opening of $C_T$ to an
+integer $t\in\mathcal S_{m,b}$, using
+Definition~\ref{def:realize:or} with
+candidate set $\mathcal S_{m,b}$.
+\end{enumerate}
+All OR-proofs have independent fresh prover
+randomness and independent uniform sigma
+verifier challenges. The first bitness
+proofs can be executed when the commitments
+are bound; the aggregate parity proof is
+performed when the public row coefficients
+and target parity become known.
+\end{definition}
+
+\begin{theorem}[Perfect completeness of the parity compiler]\label{thm:realize:parity-complete}
+For honest bit commitments and bits satisfying
+$\sum_i b_i=b$ in $\F_2$, the concrete
+parity proof accepts with probability $1$.
+\end{theorem}
+\begin{proof}
+Each $C_i$ has the known bit opening
+$(b_i,r_i)$, so its two-branch OR proof
+is perfectly complete by
+Lemma~\ref{lem:realize:or-complete}.
+Lemma~\ref{lem:realize:correct-candidate}
+places the true integer sum
+$S=\sum_i b_i$ in $\mathcal S_{m,b}$.
+Lemma~\ref{lem:realize:aggregate}
+gives the known aggregate opening
+$C_T=g^S h^{R_T}$ with
+$R_T=\sum_i r_i$.
+The aggregate OR proof is therefore
+complete by the same lemma.
+All checks pass.
+\end{proof}
+
+\begin{lemma}[An incorrect parity gives two different aggregate openings]\label{lem:realize:parity-equivocation}
+Suppose each $C_i$ has an extracted
+valid bit opening $(b_i,r_i)$, and the
+aggregate OR proof has an extracted
+opening $(t,r_T)$ with
+$t\in\mathcal S_{m,b}$.
+If $\sum_i b_i\neq b$ in $\F_2$,
+then
+\[
+ t\not\equiv S:=\sum_i b_i\pmod P.
+\]
+\end{lemma}
+\begin{proof}
+The incorrect parity means
+$S\not\equiv b\pmod2$,
+whereas every $t\in\mathcal S_{m,b}$
+satisfies $t\equiv b\pmod2$.
+Thus $S\neq t$ as integers.
+Both lie in $\{0,\ldots,m\}$ and
+$P>m$, so they remain distinct
+modulo $P$.
+\end{proof}
+
+\begin{theorem}[Extracted incorrect parity breaks discrete log]\label{thm:realize:parity-binding}
+Under the hypotheses of
+Lemma~\ref{lem:realize:parity-equivocation},
+the bit openings and aggregate opening
+explicitly determine the setup logarithm:
+\[
+ \boxed{
+ \log_g h=(S-t)(r_T-R_T)^{-1}\pmod P,
+ \quad R_T=\sum_i r_i.}
+\]
+Therefore a polynomial-time adversary
+that yields extracted accepting proofs for
+a false parity relation with non-negligible
+probability contradicts the discrete-logarithm
+assumption.
+\end{theorem}
+\begin{proof}
+From the extracted bit openings,
+Lemma~\ref{lem:realize:aggregate} gives
+$C_T=g^S h^{R_T}$.
+The extracted aggregate opening gives
+$C_T=g^t h^{r_T}$.
+Hence $g^{S-t}=h^{r_T-R_T}$.
+The previous lemma gives
+$S-t\ne0$ modulo $P$, so
+$r_T-R_T$ cannot vanish modulo $P$:
+otherwise the nonidentity element
+$g^{S-t}$ would equal $1$.
+The formula follows by exponent comparison
+and inversion, exactly as in
+Lemma~\ref{lem:realize:binding-reduction}.
+Computing it from the alleged proof
+extractor contradicts discrete-logarithm
+hardness whenever such adversaries succeed
+non-negligibly and extraction itself succeeds.
+\end{proof}
+
+\begin{theorem}[Perfect honest-verifier privacy of parity proofs]\label{thm:realize:parity-hvzk}
+For a fixed public commitment vector and
+public parity row, the full set of
+honest-verifier bitness and aggregate
+OR-proof transcripts has a
+perfect simulator using only the
+commitments and row coefficients.
+The simulator requires no committed bits
+or blinding scalars.
+\end{theorem}
+\begin{proof}
+For each bitness proof and the aggregate
+proof, use the witness-free perfect simulator
+from Theorem~\ref{thm:realize:or-hvzk}.
+The publicly determined aggregate
+commitment is the product of the
+given commitments, so the simulator can
+construct all branch statements.
+Honest provers choose independent
+fresh OR-protocol randomness and
+honest sigma verifiers choose independent
+uniform challenges. Conditional on the
+fixed public statements, each OR transcript
+therefore has exactly its independently
+simulated law. Multiplying these conditional
+laws yields equality of the complete
+joint transcript distribution.
+\end{proof}
+
+\begin{corollary}[Exact empty-row handling]\label{cor:realize:empty-row}
+If a row contains no committed bits,
+its parity constraint is true exactly when
+its public target is $0$, and it can be checked
+without any cryptographic proof.
+\end{corollary}
+\begin{proof}
+The empty sum in $\F_2$ equals $0$.
+Thus its equality to the target holds
+precisely for target $0$.
+The candidate sets are
+$\mathcal S_{0,0}=\{0\}$ and
+$\mathcal S_{0,1}=\varnothing$,
+in agreement with direct checking.
+\end{proof}
+
+\begin{remark}[Extractor scope]
+The parity binding theorem is an
+\emph{extracted-witness} argument:
+it assumes the standard knowledge
+extractor succeeds on each accepted
+Schnorr OR proof. Its explicit
+computational error must be added
+when this extractor is composed with
+the outer ring-switching challenges.
+It is not a claim of unconditional
+information-theoretic soundness.
+\end{remark}
