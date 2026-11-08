@@ -1,0 +1,234 @@
+\subsection{Temporal extraction, soundness composition, and remaining real-world gaps}\label{sec:realize:security}
+
+\begin{definition}[Extraction-before-challenge contract]\label{def:realize:early-extract}
+A concrete execution satisfies the
+\emph{early extraction contract} if there is a
+computational coupling with an ideal run
+in which, except with probability at most
+$\varepsilon_{\rm ext}$:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item every bit commitment whose value is
+used in the first-challenge discrepancy is
+assigned a unique extracted binary opening
+\emph{before} the verifier samples $\theta$;
+\item every auxiliary bit commitment whose value
+enters the anchored residual is assigned a
+unique extracted binary opening
+\emph{before} the verifier samples $z$;
+\item every accepted compiled parity proof
+certifies the corresponding exact affine
+relation on the extracted field values,
+and every packed-column witness used by
+the outer protocol is consistently linked
+to its registered binary coordinates;
+\item the resulting coupled ideal protocol
+has the same public messages and the same
+fresh independent $\theta,z$ as the
+real execution outside the bad event.
+\end{enumerate}
+The contract is a \emph{knowledge and
+timing property to be proved for an actual
+composition of the OR extractors},
+not a consequence of bare computational
+binding alone.
+\end{definition}
+
+\begin{lemma}[Accepted parity equations are valid under extracted consistency]\label{lem:realize:extracted-correct}
+Suppose all bit and aggregate OR proofs have
+successful extracted openings and the adversary
+has not solved the setup discrete logarithm.
+Then each accepted compiled affine equation
+holds for the extracted registered field values.
+\end{lemma}
+\begin{proof}
+If one accepted affine equation failed,
+Theorem~\ref{thm:realize:compiler-extract}
+would turn the extracted openings for its
+nonzero parity row into a solution of the
+setup discrete-logarithm problem.
+This contradicts the stipulated
+non-solution event. Hence every such
+equation holds.
+\end{proof}
+
+\begin{theorem}[Conditional soundness of the explicit bit-commitment compiler]\label{thm:realize:outer-sound}
+Assume the false public evaluation
+instance and timing hypotheses of
+Theorem~\ref{thm:zkrs:false-sound}.
+Suppose the concrete bit-commitment
+and OR-proof implementation satisfies
+the early extraction contract of
+Definition~\ref{def:realize:early-extract}
+with bad-event probability at most
+$\varepsilon_{\rm ext}$, and the chance
+of breaking the discrete-logarithm
+binding assumption in this coupling is
+at most $\varepsilon_{\rm DL}$.
+Then
+\[
+ \boxed{\Pr[\mathrm{accept\ false\ claim}]
+ \leq\min\left\{1,\frac{\ell+n}{q}
+                   +\varepsilon_{\rm ext}
+                   +\varepsilon_{\rm DL}\right\}.}
+\]
+\end{theorem}
+\begin{proof}
+Remove the event that the early
+extraction contract fails and the
+event that a forbidden
+discrete-logarithm opening collision
+is produced. Their total probability
+is at most
+$\varepsilon_{\rm ext}+\varepsilon_{\rm DL}$
+by the union bound.
+On the complementary event,
+Lemma~\ref{lem:realize:extracted-correct}
+makes every accepted compiled
+affine equation true on the fixed
+extracted field values, with the
+required order of commitments and
+random challenges.
+The coupled execution is therefore
+a legal instance of the ideal
+algebraic checker in
+Theorem~\ref{thm:zkrs:false-sound}.
+That theorem bounds false-claim
+acceptance on this good event
+by $(\ell+n)/q$.
+Add the two removed bad-event
+probabilities and cap by one.
+\end{proof}
+
+\begin{lemma}[Multi-statement extraction cannot be silently assumed]\label{lem:realize:extract-needs-proof}
+The two-transcript special soundness
+of an individual Schnorr OR proof
+does not, as a matter of logical
+implication alone, establish the
+early extraction contract for
+an arbitrary adaptive multi-stage
+protocol using many proofs.
+\end{lemma}
+\begin{proof}
+Theorem~\ref{thm:realize:or-extract}
+has hypotheses concerning two
+accepting transcripts of one fixed
+statement sharing exactly one
+first-message vector and carrying
+different global challenges.
+Definition~\ref{def:realize:early-extract}
+instead quantifies over many
+interleaved statements and their
+dependency order relative to
+two outer challenges and a fixed
+witness representation.
+The former statement contains
+neither the latter's challenge
+timing hypothesis nor a coupling
+of the extracted witnesses across
+distinct proofs. Hence the latter
+requires additional premises and
+a separate composition proof.
+\end{proof}
+
+\begin{definition}[Malicious sigma-verifier security target]\label{def:realize:mv-target}
+The \emph{malicious-sigma-verifier
+simulation target} removes the
+requirement that each global
+Schnorr OR challenge be independently
+uniform. The verifier may compute
+it as an arbitrary efficient function
+of its entire view, including the
+OR first messages, commitments,
+outer challenges and prior proofs.
+The target requires one efficient
+online witness-independent simulator
+for the full resulting interactive
+verifier view.
+\end{definition}
+
+\begin{proposition}[The proven HVZK simulator does not discharge the malicious target]\label{prop:realize:hv-not-mv}
+The proof of
+Theorem~\ref{thm:realize:full-hvzk}
+does not establish
+Definition~\ref{def:realize:mv-target}.
+\end{proposition}
+\begin{proof}
+The simulator of
+Theorem~\ref{thm:realize:or-hvzk}
+first chooses a uniform vector
+of branch challenges and
+defines the OR first messages
+from that choice. Consequently
+the global challenge it outputs
+is uniformly distributed and
+is not obtained by running an
+arbitrary verifier on the
+already determined first messages.
+Definition~\ref{def:realize:mv-target}
+permits the verifier to choose
+its challenge by such an
+arbitrary function. The
+simulator's argument therefore
+does not cover that quantifier.
+No impossibility of an alternative
+simulator is claimed.
+\end{proof}
+
+\begin{definition}[Concrete ZK compiler obligation]\label{def:realize:mv-compiler}
+A \emph{malicious-verifier
+zero-knowledge sigma compiler}
+for this chapter is an explicit
+transformation of the bitness
+and parity proof transcripts
+together with a proof that:
+(i) its complete visible
+transition kernels satisfy
+Definition~\ref{def:zkrs:realization}
+for all allowed malicious
+verifiers; (ii) its knowledge
+extraction respects the early
+challenge-timing contract;
+and (iii) it retains binding
+to the same committed witness.
+The transformation may use a
+designated-verifier technique,
+a proven malicious-verifier
+interactive compiler, or an
+appropriately modeled
+Fiat--Shamir transform
+\cite{FiatShamir1986}, but
+neither its implementation nor
+its proof is supplied here.
+\end{definition}
+
+\begin{remark}[ROM and QROM are different proof obligations]
+A Fiat--Shamir transform of these
+Schnorr-style proofs is not
+automatically a quantum-random-oracle
+proof, and conventional discrete-log
+commitments are not quantum-resistant.
+To claim a post-quantum KBFold
+extension, the commitments,
+knowledge-soundness extractor,
+adaptive ZK simulator,
+authenticated fold-oracle openings,
+and original KBFold QROM
+analysis must all be revisited
+with quantum adversaries.
+\end{remark}
+
+\begin{remark}[The honest-verifier result is substantive but bounded]
+Chapter~10 constructs the concrete
+commitment and affine proof at the
+binary-coordinate level. The
+perfect honest-sigma-verifier
+simulation theorem is a real
+transcript result for this
+restricted model, not just an
+ideal-functionality restatement.
+It must not be labeled full
+zero knowledge without a
+malicious-verifier compiler
+and the external KBFold PCS
+commitment/opening simulator.
+\end{remark}
