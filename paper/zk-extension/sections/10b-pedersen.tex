@@ -1,0 +1,132 @@
+\subsection{A concrete hiding and computationally binding bit commitment}\label{sec:realize:pedersen}
+We use Pedersen's group commitment~\cite{Pedersen1991}
+for \emph{binary coordinates}, not for raw field addition in $L$.
+
+\begin{definition}[Prime-order commitment parameters]\label{def:realize:group}
+Let $G$ be a cyclic multiplicative group of \emph{odd prime}
+order $P$, with generators $g,h\in G$. Setup is trusted only
+in the following precise sense: no efficient participant
+knows $\alpha=\log_g h$.
+The discrete-logarithm assumption is that a probabilistic
+polynomial-time algorithm given the public pair $(g,h)$
+cannot compute $\alpha$ except with negligible probability.
+We require $P$ to exceed every parity row's number of summands.
+\end{definition}
+
+\begin{definition}[Pedersen commitment to a binary coordinate]\label{def:realize:commit}
+For $b\in\{0,1\}\subset\mathbb Z_P$ and
+$r\in\mathbb Z_P$, define
+\[
+ \mathsf{Com}(b;r):=g^b h^r\in G.
+\]
+An opening is the pair $(b,r)$, with $b$ restricted to
+$\{0,1\}$. Every bit commitment uses a fresh independent
+uniform $r$.
+\end{definition}
+
+\begin{lemma}[Exact perfect hiding]\label{lem:realize:hiding}
+For each fixed bit $b$, if $r$ is uniform in $\mathbb Z_P$,
+then $\mathsf{Com}(b;r)$ is uniform on $G$.
+Consequently, any vector of independently blinded bit
+commitments is jointly uniform on the appropriate power of $G$
+and independent of its binary message vector.
+\end{lemma}
+\begin{proof}
+Because $h$ generates $G$, the map $r\mapsto h^r$
+is a bijection from $\mathbb Z_P$ to $G$.
+Multiplication by the fixed $g^b$ is another bijection.
+The composition sends uniform $r$ to uniform group elements.
+For a vector of commitments, the maps act on independently
+sampled blindings coordinatewise, so the joint distribution
+is the product of the individual uniform distributions.
+\end{proof}
+
+\begin{lemma}[Two openings recover the forbidden setup logarithm]\label{lem:realize:binding-reduction}
+If
+$g^b h^r=g^{b'}h^{r'}$ with
+$b\ne b'$ in $\mathbb Z_P$, then
+$r'\ne r$ and
+\[
+ \boxed{\log_g h=(b-b')(r'-r)^{-1}\pmod P.}
+\]
+\end{lemma}
+\begin{proof}
+Rearrange the commitment equality:
+$g^{b-b'}=h^{r'-r}=g^{\alpha(r'-r)}$.
+If $r'=r$, then $g^{b-b'}=1$, implying
+$b=b'$ because $g$ has order $P$.
+Thus $r'-r\ne0$, and the inverse exists in
+the prime field $\mathbb Z_P$. Equate the exponents modulo $P$
+and divide to obtain the formula.
+\end{proof}
+
+\begin{theorem}[Computational binding for bits]\label{thm:realize:binding}
+Under the discrete-logarithm assumption of
+Definition~\ref{def:realize:group}, no efficient
+committer can output a group element and valid
+openings to two distinct bits with non-negligible probability.
+\end{theorem}
+\begin{proof}
+Given such an algorithm, run it on
+public $(G,P,g,h)$. Whenever it outputs
+two distinct openings, apply
+Lemma~\ref{lem:realize:binding-reduction}.
+This computes $\log_g h$ in polynomial time
+with the algorithm's success probability,
+contradicting the discrete-logarithm assumption.
+\end{proof}
+
+\begin{definition}[Aggregating commitments]\label{def:realize:product}
+For an index set $T$ of $m$ committed bits
+$C_i=\mathsf{Com}(b_i;r_i)$, put
+\[
+ C_T:=\prod_{i\in T} C_i,\qquad
+ S_T:=\sum_{i\in T}b_i\in\{0,\ldots,m\},
+ \qquad R_T:=\sum_{i\in T}r_i\in\mathbb Z_P.
+\]
+The sum $S_T$ is an \emph{ordinary integer},
+subsequently embedded in $\mathbb Z_P$.
+\end{definition}
+
+\begin{lemma}[Exact aggregate opening]\label{lem:realize:aggregate}
+For each finite $T$,
+\[
+ \boxed{C_T=g^{S_T}h^{R_T}.}
+\]
+\end{lemma}
+\begin{proof}
+Multiply the defining equations
+$C_i=g^{b_i}h^{r_i}$ over all $i\in T$.
+Because $G$ is abelian, powers of $g$
+and $h$ may be collected separately.
+Their exponents add, yielding the identity.
+\end{proof}
+
+\begin{lemma}[Why naive XOR homomorphism fails]\label{lem:realize:no-xor}
+For two committed bits $b_1=b_2=1$,
+their aggregate opens to the integer $S_T=2$,
+whereas $b_1+b_2=0$ in $\F_2$.
+Consequently the natural product of two
+bit commitments is not automatically an
+opening of their XOR with the sum of blindings.
+\end{lemma}
+\begin{proof}
+The product is $g^2h^{r_1+r_2}$
+by Lemma~\ref{lem:realize:aggregate}.
+An opening to the XOR using the same
+blinding $r_1+r_2$ would instead be
+$h^{r_1+r_2}$. As $g$ has odd prime order
+$P$, we have $g^2\ne1$. Thus the elements
+are different.
+\end{proof}
+
+\begin{remark}[Setup and post-quantum scope]
+The Pedersen instantiation in a conventional
+discrete-logarithm group is \emph{not}
+post-quantum secure against general quantum
+computers. It is an explicit classical
+commitment/proof candidate for the affine
+checker, not a post-quantum implementation
+of the original KBFold PCS. A transparent
+post-quantum realization remains separate.
+\end{remark}
