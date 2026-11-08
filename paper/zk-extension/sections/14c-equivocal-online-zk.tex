@@ -1,0 +1,526 @@
+\subsection{Constructive online simulation using equivocal Pedersen openings}\label{sec:security14:zk}
+The privacy proof can be made more explicit than the
+abstract online proof-simulation condition of
+Chapter~13. The zero-knowledge simulator need not
+solve discrete logarithms of arbitrary sampled group
+elements. Instead it samples each public commitment
+\emph{together with a known opening to zero} in
+a setup where it knows the relation between the
+generators, then \emph{equivocates} those same
+group elements to any later required field values.
+The public group distribution is unchanged.
+
+\begin{definition}[Simulated commitment key]\label{def:security14:sim-key}
+The simulator samples the same prime-order
+group $G$, generator $g$, and
+$\alpha\overset{\$}{\leftarrow}
+\mathbb Z_P^\times$ as in
+Definition~\ref{def:security14:setup}.
+It sets $h=g^\alpha$,
+publishes $(G,P,g,h)$ and
+retains the \emph{simulation
+trapdoor} $\alpha$.
+It also samples the relation-engine
+CRS from its normal setup
+distribution; it is not assumed
+to know any proof-engine
+extraction key.
+\end{definition}
+
+\begin{lemma}[Simulated and real commitment keys have identical public laws]\label{lem:security14:sim-key-law}
+The public generator pair
+$(g,h)$ produced by
+Definition~\ref{def:security14:sim-key}
+has \emph{exactly} the
+real-setup distribution of
+Definition~\ref{def:security14:setup}.
+\end{lemma}
+\begin{proof}
+Both algorithms sample
+$\alpha$ uniformly among
+the nonzero elements of
+$\mathbb Z_P$ and publish
+$h=g^\alpha$, withholding
+or retaining $\alpha$
+only as local private state.
+The published group and
+generator pairs therefore
+have identical distributions.
+The relation-engine CRS
+is independently sampled
+in both cases.
+\end{proof}
+
+\begin{definition}[Trapdoor equivocation algorithm]\label{def:security14:equiv}
+To publish a bit commitment,
+the simulator samples
+$\rho\overset{\$}{\leftarrow}
+\mathbb Z_P$ and outputs
+$C=h^\rho$ with a private
+record of $\rho$.
+Later, for any desired
+$b\in\{0,1\}$, define
+\[
+ \boxed{r_b:=\rho-b\alpha^{-1}
+        \pmod P.}
+\]
+To commit to a field symbol,
+repeat this for all bits of
+its canonical encoding.
+No equivocated bit or
+blinding is publicly opened
+in the target protocol.
+\end{definition}
+
+\begin{theorem}[Exact trapdoor equivocation with uniform public commitments]\label{thm:security14:equiv-perfect}
+For every sampled pair $(C,\rho)$
+and every bit $b$, the algorithm
+of Definition~\ref{def:security14:equiv}
+computes a valid opening
+\[
+ \boxed{C=g^b h^{r_b}.}
+\]
+The public $C$ is uniform on
+$G$, independent of the
+chosen $b$. Moreover, for
+each \emph{fixed} target bit,
+the produced opening blinding
+$r_b$ is uniform in
+$\mathbb Z_P$.
+\end{theorem}
+\begin{proof}
+As $h=g^\alpha$,
+\[
+ g^b h^{r_b}
+ =g^b g^{\alpha(\rho-b\alpha^{-1})}
+ =g^{\alpha\rho}=h^\rho=C.
+\]
+The map $\rho\mapsto h^\rho$
+is a bijection from
+$\mathbb Z_P$ onto $G$,
+so $C$ is uniform.
+For a fixed bit $b$,
+the map
+$\rho\mapsto\rho-b\alpha^{-1}$
+is a translation of
+$\mathbb Z_P$, so
+$r_b$ is uniform as well.
+The assertion holds
+coordinatewise for
+field-symbol encodings.
+\end{proof}
+
+\begin{definition}[Online equivocal full-protocol simulator]\label{def:security14:online-sim}
+The simulator $\mathsf{Sim}_{\rm eq}$
+has the public parameter and
+the authorized evaluation
+functionality but no access
+to the real witness $f$.
+It proceeds in the \emph{actual}
+protocol order:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \textbf{Before $z$:}
+sample the public bit
+commitments and level-zero
+Merkle tree by the zero-opening
+method of
+Definition~\ref{def:security14:equiv}.
+For the hidden preprocessing
+witness, choose the \emph{dummy}
+table $f^{\rm pre}\equiv0$
+and mask $R^{\rm pre}=0$.
+Use the trapdoor to produce
+valid openings to those dummy
+values; run the honest prover
+of $\Pi_{\rm rel}$ on that true
+preprocessing statement.
+Publish the root and its proof
+before receiving $z$.
+\item \textbf{After $z$:}
+obtain the authorized scalar
+$v=\mathcal F_{\rm eval}^f(z)$.
+Choose the \emph{virtual}
+table
+\[
+ \boxed{f^{z}(a):=v
+       \quad(a\in I_m)}
+\]
+and virtual mask $R^z=0$.
+Reinterpret the \emph{same}
+already published source,
+mask and level-zero
+commitments by equivocation
+to these new hidden values.
+\item \textbf{Each fold round:}
+run the honest hidden
+Sumcheck and polynomial-fold
+algebra for $f^z,R^z$ and
+the actual verifier
+challenges received so far.
+Sample every new public
+commitment with known
+zero openings, then
+equivocate to the
+current correct hidden
+coefficients, offsets
+and word values.
+Publish each Merkle root
+at its required stage and
+use the actual chosen
+witnesses to produce
+the prescribed relation
+proofs.
+\item \textbf{Oracle queries:}
+answer every authenticated
+shell query from the stored
+commitment trees, preserving
+all repeated-leaf consistency.
+Produce honest relation
+proofs for the corresponding
+virtual hidden field values.
+Finish with the honest
+two-point terminal relation
+for the virtual fold word.
+\end{enumerate}
+The \emph{internal} source
+used in the pre-evaluation
+proof may differ from
+the virtual source used
+after $z$. This is permitted
+only in the \emph{simulator's}
+equivocal setup. Honest
+real provers and malicious
+provers without $\alpha$
+cannot rely on such a
+change without violating
+computational binding.
+\end{definition}
+
+\begin{lemma}[The virtual source matches every authorized one-point claim]\label{lem:security14:virtual-eval}
+For the constant virtual
+table $f^z(a)=v$,
+\[
+ \boxed{\widetilde{f^z}(z)=v}
+\]
+for every $z\in\F^m$.
+\end{lemma}
+\begin{proof}
+By multilinear interpolation,
+\[
+ \widetilde{f^z}(z)
+ =v\sum_{a\in I_m}
+ \operatorname{eq}_m(a,z).
+\]
+The sum of all Boolean
+equality weights is
+$\prod_{i=0}^{m-1}
+((1-z_i)+z_i)=1$.
+Thus the expression equals
+$v$ identically.
+\end{proof}
+
+\begin{lemma}[Every simulated circuit statement has a known valid witness]\label{lem:security14:sim-witnesses}
+The algorithm
+$\mathsf{Sim}_{\rm eq}$
+can compute in polynomial
+time a valid private
+witness for each
+\emph{individual}
+public relation statement
+it submits, including the
+pre-evaluation statement
+before learning $z$.
+\end{lemma}
+\begin{proof}
+Before $z$, the dummy
+source $f^{\rm pre}=0$
+and mask $R^{\rm pre}=0$
+satisfy the preprocessing
+relation by honest
+construction. The simulator
+knows the blinding
+exponents for all its
+public commitments by
+Theorem~\ref{thm:security14:equiv-perfect},
+and it stores the full
+Merkle tree. Thus it knows
+a preprocessing witness.
+After $z$, the constant
+source $f^z=v$ has the
+correct public evaluation
+by Lemma~\ref{lem:security14:virtual-eval}.
+The simulator computes the
+genuine masked Sumcheck
+and fold chain from that
+source, plus all the
+offsets and low-degree
+witnesses of Chapter~13.
+Theorem~\ref{thm:security14:equiv-perfect}
+opens all previously or newly
+sampled Pedersen commitments
+to the desired bits.
+Lemmas~\ref{lem:full:fold-query-complete}
+and~\ref{lem:full:final-complete}
+show the authenticated query
+and terminal constraints hold.
+Therefore every submitted
+statement has a known
+valid witness.
+The pre-evaluation and
+post-evaluation witnesses
+need not be the same
+\emph{joint} witness;
+the real protocol's
+binding prevents that
+behavior for efficient
+ordinary provers.
+\end{proof}
+
+\begin{lemma}[The simulator's public authenticated shells have the honest law]\label{lem:security14:eq-shell-law}
+At every stage, conditioned
+on the preceding visible
+shell transcript and actual
+causal verifier actions,
+the new public Pedersen
+commitments and their Merkle
+roots in $\mathsf{Sim}_{\rm eq}$
+have exactly the honest
+distribution. Authenticated
+path replies use the same
+deterministic stored-array
+rule as the real protocol.
+\end{lemma}
+\begin{proof}
+For each newly committed
+field-symbol bit, the
+simulator samples
+$C=h^\rho$, which is
+uniform on $G$ by
+Theorem~\ref{thm:security14:equiv-perfect}.
+The real prover samples
+$C=g^b h^r$ with uniform
+$r$, which is also
+uniform by
+Lemma~\ref{lem:realize:hiding}.
+All fresh blindings are
+independent on both sides,
+so their entire conditional
+public arrays have the
+same product distribution
+regardless of the hidden
+word and its correlations.
+Merkle roots and paths
+are deterministic functions
+of those arrays.
+Repeated queries read the
+stored values, as in
+Lemma~\ref{lem:full:path-determined}.
+Thus the conditional shell
+transition laws agree.
+\end{proof}
+
+\begin{theorem}[Constructive classical online zero knowledge: full-relation mode]\label{thm:security14:online-zk}
+Assume the real and simulated
+commitment setup
+of Definitions
+\ref{def:security14:setup} and
+\ref{def:security14:sim-key},
+and assume
+$\Pi_{\rm rel}$ meets the
+adaptive multi-proof
+witness-indistinguishability
+contract of
+Definition~\ref{def:security14:wi-contract}.
+Then
+$\mathsf{Sim}_{\rm eq}$
+is an \emph{online,
+witness-independent,
+classical PPT} simulator
+for the complete verifier
+view of one correct opening,
+including all relation
+proofs, Merkle paths and
+adaptive query choices.
+Its distinguishing
+advantage is bounded by
+\[
+ \boxed{
+ \operatorname{Adv}^{\rm ZK}_{\rm full}
+ \le \varepsilon_{\rm WI}.}
+\]
+The simulator sends the
+preprocessing commitment
+\emph{before} learning the
+evaluation point and receives
+only the authorized evaluation
+value afterward.
+\end{theorem}
+\begin{proof}
+Compare a real opening of
+an arbitrary fixed private
+source table $f$ with the
+proposed simulation.
+
+First couple the
+public commitment setup by
+Lemma~\ref{lem:security14:sim-key-law};
+both distributions are
+identical, and the
+simulator merely retains
+the secret exponent
+$\alpha$ locally.
+For every private bit
+value in the real
+execution, choose a fresh
+zero-opening record
+$\rho$ and set
+$r_b=\rho-b\alpha^{-1}$.
+Theorem~\ref{thm:security14:equiv-perfect}
+shows that this gives the
+same public commitment
+and the same uniform
+honest blinding law
+as the real protocol.
+The entire shell law,
+including all
+root-before-query timing,
+is therefore identical
+by Lemma~\ref{lem:security14:eq-shell-law}.
+
+Next consider the sequence
+of at most $K$ relation
+proofs. In the real
+execution, their witnesses
+come from the actual
+source table $f$ and
+its honest fold chain.
+In the simulated
+execution, the pre-evaluation
+proof uses $f^{\rm pre}=0$,
+while every subsequent
+relation proof uses the
+virtual source $f^z=v$,
+the actual outer
+challenges and its
+corresponding honest
+masked fold chain.
+Lemma~\ref{lem:security14:sim-witnesses}
+makes all these
+\emph{individual} witnesses
+valid for their respective
+public statements.
+The public commitment
+arrays and roots can be
+coupled identically,
+with different private
+openings computed using
+$\alpha$. The allowed
+public value $v$ is
+identical in both
+processes because the
+simulator obtains
+$\widetilde f(z)$ from
+the authorized
+functionality, while
+Lemma~\ref{lem:security14:virtual-eval}
+makes the virtual
+source evaluate to
+the same $v$.
+The adaptive multi-proof
+witness-indistinguishability
+contract then changes
+the real proof-witness
+sequence into the
+simulator's proof-witness
+sequence on these same
+public statements with
+advantage at most
+$\varepsilon_{\rm WI}$,
+including the verifier's
+responses to earlier
+proof messages.
+All non-proof
+transitions, Merkle
+query responses and
+causal verifier
+challenge kernels have
+identical conditional
+laws under this
+comparison, by the
+shell coupling.
+Thus the final
+complete-view
+distinguishing
+advantage is at most
+$\varepsilon_{\rm WI}$.
+Every simulated
+witness and opening
+is computed by finite
+polynomial-time
+operations from
+$\alpha$, stored
+blinding records, the
+public challenges and
+the authorized value.
+This proves the claimed
+online PPT bound.
+\end{proof}
+
+\begin{corollary}[Perfect zero knowledge under perfect adaptive WI]\label{cor:security14:perfect-wi}
+If the stipulated
+adaptive multi-proof
+witness indistinguishability
+holds with
+$\varepsilon_{\rm WI}=0$,
+then the complete
+classical one-opening
+view is \emph{perfectly}
+zero knowledge in the
+simulatable commitment
+setup model.
+\end{corollary}
+\begin{proof}
+Set
+$\varepsilon_{\rm WI}=0$
+in
+Theorem~\ref{thm:security14:online-zk}.
+The commitment setup
+and all shell transitions
+are already exactly
+distribution preserving.
+\end{proof}
+
+\begin{remark}[Why the trapdoor is not a soundness backdoor]
+The real adversary receives
+only $(g,h)$, not $\alpha$.
+The simulator can equivocate
+because it retained
+$\alpha$ when generating
+an \emph{identically
+distributed} public key.
+The discrete-log reduction
+in the soundness theorem
+uses the distinct real
+experiment where no prover
+is given this exponent.
+The proof does not require
+one physical setup party to
+simultaneously keep and
+reveal $\alpha$.
+\end{remark}
+
+\begin{remark}[Model and engine restriction]
+This is a \emph{simulatable CRS}
+security theorem, not an
+assertion of plain-model
+simulation for a fixed
+uncontrolled commitment key.
+The concrete NP proof
+engine remains to be chosen
+and verified against the
+stated adaptive WI contract.
+The theorem does not cover
+multiple openings, quantum
+verifiers, or Fiat--Shamir
+transformations.
+\end{remark}
