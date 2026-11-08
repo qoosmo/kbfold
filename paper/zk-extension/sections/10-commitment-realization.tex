@@ -1,0 +1,86 @@
+\section{Commitment and Affine-Proof Realization}\label{sec:realize}
+The masked Ring Switching interface of Chapter~9 requires
+proofs of field-affine relations on a fixed hidden tuple.
+This chapter provides an \emph{explicit classical realization
+of those relations}: binary-coordinate compilation,
+fresh Pedersen commitments, and Schnorr-style OR proofs
+for parity constraints. The foundational primitives
+are classical~\cite{Pedersen1991,Schnorr1991,CramerDamgardSchoenmakers1994}.
+The result is a concrete perfect \emph{honest-sigma-verifier}
+zero-knowledge theorem for one opening, with arbitrary causal
+choices of the outer Ring Switching challenges.
+The exact extraction timing is isolated as a separate
+knowledge-soundness contract; full malicious-verifier
+zero knowledge, succinctness, quantum security, and
+integration with KBFold's original authenticated oracle
+are \emph{not} asserted.
+
+\input{sections/10a-binary-affine}
+\input{sections/10b-pedersen}
+\input{sections/10c-or-schnorr}
+\input{sections/10d-parity}
+\input{sections/10e-field-affine-compiler}
+\input{sections/10f-honest-verifier-zk}
+\input{sections/10g-extraction-and-boundaries}
+\input{sections/10h-accounting}
+
+\subsection{Main theorem chain and certified scope}\label{sec:realize:conclusion}
+For public $a_j,b\in L=\F_{2^n}$ and hidden $x_j\in L$,
+Theorem~\ref{thm:realize:affine-to-parity} proves
+\[
+ \boxed{\sum_ja_jx_j=b
+ \iff
+ \sum_{j,i}d_k(a_j\gamma_i)d_i(x_j)=d_k(b)
+ \quad\forall\,0\le k<n.}
+\]
+Commit each hidden binary coordinate using the
+freshly blinded Pedersen equation
+\[
+ C_i=g^{b_i}h^{r_i}
+\]
+in an odd-prime-order group. The commitment is
+perfectly hiding and computationally binding
+under discrete-log hardness
+(Theorems~\ref{thm:realize:binding} and
+\ref{thm:realize:parity-binding}).
+A parity row is proved by a Schnorr OR proof
+that its product commitment opens to an
+integer with the correct parity.
+Those proofs have perfect completeness,
+perfect honest-verifier simulation and
+two-transcript special soundness
+(Theorems~\ref{thm:realize:parity-complete},
+\ref{thm:realize:parity-hvzk},
+\ref{thm:realize:or-extract}).
+
+The concrete affine transcript, combined with
+the single-opening public core of Chapter~9,
+admits an exact simulator for verifiers whose
+\emph{inner sigma challenges are honest uniform},
+while their \emph{outer} Ring Switching challenges
+may be adaptively chosen:
+\[
+ \boxed{
+ \mathsf{Law}(\mathrm{FullView}_{\rm honest\ sigma})
+ =\mathsf{Law}(\mathsf{Sim}_{\rm honest\ sigma}).}
+\]
+The associated computational soundness implication
+requires the early extraction contract:
+\[
+ \boxed{
+ \Pr[\mathrm{false\ evaluation\ accepted}]
+ \leq \min\left\{1,
+       \frac{\ell+n}{2^n}
+       +\varepsilon_{\rm ext}
+       +\varepsilon_{\rm DL}\right\}.}
+\]
+The theorem is \emph{conditional} until the
+multi-stage extractor and its exact errors are
+constructed and audited.
+
+The raw compiler is not succinct, is not
+post-quantum binding, and is not a proof of
+malicious-verifier or online multiple-opening
+zero knowledge for the original KBFold PCS.
+These are subsequent, explicitly identified
+research obligations.
