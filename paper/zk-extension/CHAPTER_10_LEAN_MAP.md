@@ -77,7 +77,7 @@
 
 ## Precise security scope
 
-- Group scalar field $ℝ_P$ has **odd** prime characteristic; binary packed field $L$ has characteristic **2**. They are related only through `ZKAffine/FieldBitMatrices`, not through a fictitious field homomorphism.
+- Group scalar field $𝔽_P$ has **odd** prime characteristic; binary packed field $L$ has characteristic **2**. They are related only through `ZKAffine/FieldBitMatrices`, not through a fictitious field homomorphism.
 - Concrete commitments and OR-proofs have perfect completeness, perfect hiding / **honest-verifier** proof simulation, and extraction-based computational binding under classical discrete-logarithm hardness.
 - Theorem `thm:realize:full-hvzk` gives perfect simulation for one valid opening when every **inner sigma-proof challenge is independent uniform**; the outer Ring Switching challenges $θ,z$ may be causal/adaptive.
 - Theorem `thm:realize:outer-sound` is conditional on **early extraction** of commitments into one fixed field tuple before the relevant outer challenge. Neither Schnorr special soundness nor Pedersen binding alone proves this multistage coupling.
