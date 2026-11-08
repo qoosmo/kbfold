@@ -14,17 +14,19 @@ values remain hidden behind prescribed
 relation proofs; only the authorized
 evaluation $v=\widetilde f(z)$ is public.
 
-The protocol has two precisely separated
-verification modes. The \emph{full-relation}
-mode checks all committed polynomial
+The protocol defined here uses a
+\emph{full-relation} verification mode:
+it checks the committed polynomial
 words and source-to-fold identities
-in a polynomial-size NP circuit,
-giving a nonsuccinct but fully
-specified reference protocol.
-The \emph{sparse} mode retains KBFold's
-local-query architecture, but requires
-a separate adversarial proximity proof
-for the enlarged degree budgets.
+in a polynomial-size NP circuit.
+This is a nonsuccinct reference
+protocol with fully specified
+algebraic predicates.
+A future \emph{sparse} optimization
+would retain KBFold's local-query
+architecture, but requires a new
+adversarial proximity proof for
+the enlarged degree budgets.
 The relation proof engine is
 an explicit cryptographic interface
 with circuit-level statements;
