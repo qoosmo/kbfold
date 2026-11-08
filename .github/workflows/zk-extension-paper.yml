@@ -9,6 +9,8 @@ on:
     paths:
       - "paper/zk-extension/**"
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,6 +24,18 @@ jobs:
         with:
           root_file: main.tex
           working_directory: paper/zk-extension
+      - name: Publish consolidated fifteen-chapter PDF on main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          test -s paper/zk-extension/main.pdf
+          cp paper/zk-extension/main.pdf paper/zk-extension/KBFold_ZK_Chapters_1-15.pdf
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add paper/zk-extension/KBFold_ZK_Chapters_1-15.pdf
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish consolidated KBFold ZK chapters 1-15 PDF [skip ci]"
+            git push
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: kbfold-zk-manuscript
