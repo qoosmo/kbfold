@@ -26,11 +26,11 @@ fresh independent outer challenge $z\leftarrow L$:
 all additional hidden variables $t,\rho,\sigma$
 and the public trace vector $U$ are fixed, with
 their mandatory bitness proofs completed.
-\item \emph{Epoch 2}, after $z$: all remaining
-prescribed public-coefficient affine parity
-proofs and authenticated-oracle checks are completed.
-An affine parity proof may also occur in an earlier
-epoch once its public coefficients are available.
+\item \emph{Epoch 2}, after $z$: the verifier
+finishes the remaining parity proofs and
+checks the external authenticated oracle.
+A parity proof may occur earlier as soon
+as its public coefficients are fixed.
 \end{enumerate}
 No commitment or field variable from a later
 epoch may replace an already registered value
