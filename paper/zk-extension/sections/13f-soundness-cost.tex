@@ -1,0 +1,296 @@
+\subsection{Binding, cost, and the Chapter 14 handoff}\label{sec:full:boundary}
+
+\begin{definition}[Nonsuccinct full-relation soundness events]\label{def:full:sound-events}
+For a cheating classical prover in the
+\emph{full-relation mode}, introduce:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item $\mathcal B_{\rm pre}$:
+the preprocessing proof accepts
+but its knowledge extractor cannot
+assign one source table $f$ and
+mask $R$ to the commitments
+\emph{before} the evaluation point;
+\item $\mathcal B_{\rm rel}$:
+an accepted relation proof
+has a false circuit statement
+for the fixed registered values;
+\item $\mathcal B_{\rm bind}$:
+one Pedersen bit commitment
+has two distinct accepted
+openings in the protocol;
+\item $\mathcal B_{\rm hash}$:
+one Merkle root has two
+conflicting authenticated
+commitment shells for the
+same indexed position.
+\end{enumerate}
+Their probabilities are parameters
+$\varepsilon_{\rm pre}$,
+$\varepsilon_{\rm rel}$,
+$\varepsilon_{\rm bind}$,
+$\varepsilon_{\rm hash}$,
+to be bounded by separate
+cryptographic reductions in
+Chapter~14.
+\end{definition}
+
+\begin{lemma}[Sound full-relation checks fix the original evaluation]\label{lem:full:fixed-eval}
+Assume none of the events in
+Definition~\ref{def:full:sound-events}
+occurs and that the initial
+claim relation
+$\sigma_0=\sum_a f(a)\chi_0(a)=v$
+is enforced using the \emph{same}
+pre-evaluation extracted source
+table $f$. Then
+\[
+ \boxed{v=\widetilde f(z).}
+\]
+\end{lemma}
+\begin{proof}
+The initial claim relation
+identifies $v$ with
+$\sum_a f(a)\chi_0(a)$.
+By construction
+$\chi_0(a)=\operatorname{eq}_m(a,z)$.
+The multilinear interpolation
+identity
+Lemma~\ref{lem:intro:interpolation}
+says exactly that this sum
+equals $\widetilde f(z)$.
+The no-bad-event hypotheses
+ensure that the source table
+in this relation is the same
+one bound before $z$.
+\end{proof}
+
+\begin{theorem}[Conditional full-relation false-evaluation bound]\label{thm:full:sound-conditional}
+For any adversary producing
+an accepted claimed value
+$v\neq\widetilde f(z)$
+relative to the source table
+extracted at preprocessing,
+the acceptance probability
+in full-relation mode is bounded by
+\[
+ \boxed{
+ \varepsilon_{\rm full,snd}
+ \le\min\{1,\,
+ \varepsilon_{\rm pre}
+ +\varepsilon_{\rm rel}
+ +\varepsilon_{\rm bind}
+ +\varepsilon_{\rm hash}\}.}
+\]
+This theorem does not
+use a proximity reduction:
+the entire word relation
+is checked in the
+nonsuccinct NP circuit.
+\end{theorem}
+\begin{proof}
+By Lemma~\ref{lem:full:fixed-eval},
+an accepted transcript outside
+the four bad events must satisfy
+$v=\widetilde f(z)$ for the
+preprocessing-extracted table.
+Thus acceptance of a false
+evaluation implies at least
+one of the four bad events.
+The union bound gives their
+total error, capped at one.
+No sparse-query proximity
+event has been invoked.
+\end{proof}
+
+\begin{definition}[Sparse KBFold proximity obligation]\label{def:full:proximity}
+For the \emph{sparse} mode,
+define $\varepsilon_{\rm prox}$
+as a claimed bound on the event
+that an adversary supplies
+committed words outside one
+consistent degree-bounded
+masked fold chain but still
+passes the authenticated
+local checks, degree/proximity
+tests, and hidden Sumcheck
+relations. The event and bound
+must be stated for the actual
+sequence of enlarged Reed--Solomon
+degree budgets
+\[
+ D_j=2^{m-j}+\lceil B/2^j\rceil
+\]
+and the correlation of its
+adaptive fold and query challenges.
+No numerical value is assigned
+to $\varepsilon_{\rm prox}$
+in this chapter.
+\end{definition}
+
+\begin{lemma}[Exact total fold-word size]\label{lem:full:total-words}
+The total number of committed
+field-symbol positions in
+the entire $(m+1)$-level
+word chain is
+\[
+ \boxed{
+ \sum_{j=0}^{m}M_j
+ =M(2-2^{-m})<2M.}
+\]
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:kbff:domain-sizes},
+$M_j=M2^{-j}$. Summing the finite
+geometric series gives
+$M\sum_{j=0}^m2^{-j}
+=M(2-2^{-m})$.
+Because $m\ge1$, the last
+factor is strictly less than two.
+\end{proof}
+
+\begin{lemma}[Bit-commitment count for fold oracles]\label{lem:full:word-count}
+With the field encoding length
+$b=\lceil\log_2|\F|\rceil$,
+the full word chain uses
+exactly
+\[
+ \boxed{bM(2-2^{-m})}
+\]
+Pedersen group elements for
+its field-symbol commitments,
+excluding separate source,
+mask, round-polynomial and
+offset commitments.
+\end{lemma}
+\begin{proof}
+Every committed field symbol
+has exactly $b$ bit commitments
+by Definition~\ref{def:full:symbol-commit}.
+Multiply the position count of
+Lemma~\ref{lem:full:total-words}
+by $b$.
+\end{proof}
+
+\begin{lemma}[Authenticated query-shell complexity]\label{lem:full:query-cost}
+In a balanced binary Merkle tree
+with $M_j$ leaves, an
+authenticated commitment shell
+contains $b$ group elements
+and $\log_2 M_j$ sibling hashes,
+apart from its public index.
+Thus a local fold query
+opens at most three such shells
+and uses at most
+\[
+ \boxed{3b\text{ group elements}
+       +3\log_2M\text{ sibling hashes}.}
+\]
+The zero-knowledge relation-proof
+cost is \emph{additional}.
+\end{lemma}
+\begin{proof}
+The tree height is
+$\log_2M_j$ because $M_j$
+is a power of two.
+A path consists of one sibling
+hash at each tree level.
+The leaf holds $b$ group
+elements. The fold query
+requests two symbols at
+level $j$ and one at $j+1$,
+for three such shells.
+Since $M_j\le M$, each
+individual path has length
+at most $\log_2M$, giving
+the stated upper bound.
+\end{proof}
+
+\begin{proposition}[Full-relation mode has linear committed-word overhead]\label{prop:full:not-succinct}
+The reference full-relation
+mode requires $\Theta(bM)$
+public group elements for
+its authenticated word
+commitments and at least
+the full word arrays as
+private relation witnesses.
+It does not preserve the
+polylogarithmic opening-size
+objective of the source
+KBFold PCS.
+\end{proposition}
+\begin{proof}
+Lemma~\ref{lem:full:word-count}
+gives a count between
+$bM$ and $2bM$.
+Consequently the public
+commitment and input
+representation alone are
+linear in the expanded
+word size $M$, up to
+the encoding factor $b$.
+A relation that checks the
+entire word and its
+Merkle commitments must
+access each committed
+leaf and its corresponding
+hidden opening, so its
+uncompressed witness
+includes all these entries.
+No compression theorem has
+been supplied by this mode.
+\end{proof}
+
+\begin{definition}[Locked Chapter 14 security inputs]\label{def:full:handoff}
+The following objects, and no
+additional chapter, are the
+Chapter~14 inputs:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item complete prover/verifier
+$\Pi_{\rm KBFold}^{\rm hid}$,
+its circuit relations and
+online shell simulator;
+\item the pre-evaluation
+knowledge-binding reduction,
+the Pedersen/hash consistency
+errors and the online adaptive
+relation-proof simulation contract;
+\item the enlarged-budget sparse
+proximity event
+$\varepsilon_{\rm prox}$,
+or the nonsuccinct
+full-relation alternative;
+\item the odd-characteristic
+Sumcheck and linear fold-closure
+identities;
+\item a separate treatment of
+classical interactive,
+Fiat--Shamir ROM and
+post-quantum/QROM models.
+\end{enumerate}
+Chapter~15 remains the
+final Lean/Rust certification
+and document audit block.
+\end{definition}
+
+\begin{remark}[Exact current status]
+The algebraic prover/verifier
+and its confidential
+authentication checks are
+fully defined and have
+perfect completeness.
+The Merkle/commitment
+shell has exact witness-
+independent online distribution.
+A complete cryptographic
+security theorem still needs
+a concrete relation proof
+engine with the precise
+online simulation and
+pre-evaluation extraction
+guarantees, and the
+sparse mode additionally
+needs a proximity theorem
+for the changed RS rates.
+Those obligations are
+confined to Chapter~14.
+\end{remark}
