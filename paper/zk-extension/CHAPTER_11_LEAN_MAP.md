@@ -54,7 +54,7 @@
 | `11g-security-boundaries.tex` | lemma | Union bound for false accepted parity rows | `lem:mv:row-union` | `ZKMV.row_union` | paper proof |
 | `11g-security-boundaries.tex` | definition | Global extraction error | `def:mv:coupling-error` | `ZKMV.coupling_error` | typed model |
 | `11g-security-boundaries.tex` | theorem | Conditional soundness of the sequential-bit compiler | `thm:mv:conditional-sound` | `ZKMV.conditional_sound` | paper proof |
-| `11g-security-boundaries.tex` | lemma | Malicious-verifier ZK does not depend on uniform outer challenges | `lem:mv:outer-adaptive` | `ZKMV.outer_adaptive` | paper proof |
+| `11g-security-boundaries.tex` | lemma | Outer challenge assumptions | `lem:mv:outer-adaptive` | `ZKMV.outer_adaptive` | paper proof |
 | `11g-security-boundaries.tex` | theorem | An unmasked authenticated opening defeats witness privacy | `thm:mv:raw-oracle-leak` | `ZKMV.raw_oracle_leak` | paper proof |
 | `11g-security-boundaries.tex` | proposition | The Chapter 11 transcript result does not certify original KBFold | `prop:mv:not-kbfold` | `ZKMV.not_kbfold` | paper proof |
 | `11h-cost-and-roadmap.tex` | definition | Compiled proof counts | `def:mv:proof-count` | `ZKMV.proof_count` | typed model |
