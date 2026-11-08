@@ -43,7 +43,7 @@ Existing KBFold algebraic results are reproved here where required for self-cont
 12. Global temporal extraction and computational affine soundness (complete)
 13. Complete masked original KBFold protocol and authenticated oracles (written, algebraically proved)
 14. Final classical reference security theorems, explicit sparse obstruction and quantum break (complete at manuscript level)
-15. **Lean/Rust certification, complexity and final manuscript audit**
+15. **Final certification ledger, Lean/Rust targets and manuscript audit (integrated in `sections/15-final-certification.tex`; formal/software certification remains outstanding)**
 
 No additional numbered chapters will be introduced. Details and acceptance criteria: [ROADMAP_LOCK.md](ROADMAP_LOCK.md).
 
@@ -340,3 +340,8 @@ A concrete audited argument of knowledge for the **entire odd-field NP relation*
 `audit/final_security.rs` checks the exact trapdoor-equivocation equations, a full sparse-fold invalid-codeword counterexample over F_97, and RS rate/distance budgets with deterministic Rust regression tests.
 
 **Locked roadmap:** [ROADMAP_LOCK.md](ROADMAP_LOCK.md) — Chapter 15 is final.
+
+
+## Chapter 15 — final manuscript closure
+
+Chapter 15 is integrated into the same `main.tex` as Chapters 1–14, not published as an independent manuscript. It restates the exact conditional classical single-opening theorem, records the sparse-degree counterexample and quantum Pedersen attack, and gives explicit Lean/Rust certification targets and unresolved NP-engine/ROM obligations. The manuscript's 15 chapters are assembled; end-to-end Lean certification, NP engine instantiation, sparse soundness and post-quantum security are **not claimed completed**. Build the consolidated document from this directory using the commands above.
