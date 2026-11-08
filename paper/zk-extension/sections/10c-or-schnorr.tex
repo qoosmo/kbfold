@@ -1,0 +1,194 @@
+\subsection{Schnorr knowledge proofs and explicit OR composition}\label{sec:realize:or}
+The three-move proof of knowledge for discrete logarithms
+is due to Schnorr~\cite{Schnorr1991}; its OR composition is
+a standard instance of the partial-knowledge methods
+of Cramer--Damgård--Schoenmakers~\cite{CramerDamgardSchoenmakers1994}.
+We give the messages and verify all the required elementary properties.
+
+\begin{definition}[Schnorr relation]\label{def:realize:schnorr}
+For a group element $Y\in G$, define the relation
+$\mathcal R_{\log}(Y;r)$ by $Y=h^r$,
+$r\in\mathbb Z_P$.
+The prover sends $T=h^u$ for uniform
+$u\in\mathbb Z_P$; the verifier responds with
+uniform challenge $e\in\mathbb Z_P$; the
+prover returns $z=u+er$.
+The verifier accepts if
+$h^z=TY^e$.
+\end{definition}
+
+\begin{lemma}[Schnorr completeness]\label{lem:realize:schnorr-complete}
+For every valid witness $r$ and all $u,e$,
+the Schnorr verifier accepts.
+\end{lemma}
+\begin{proof}
+Since $Y=h^r$ and $z=u+er$,
+$h^z=h^uh^{er}=TY^e$.
+\end{proof}
+
+\begin{lemma}[Two Schnorr transcripts extract the logarithm]\label{lem:realize:schnorr-extract}
+If two accepting Schnorr transcripts have the same
+$Y,T$ but distinct challenges $e\ne e'$ and
+responses $z,z'$, then
+\[
+ \boxed{r=(z-z')(e-e')^{-1}}
+\]
+satisfies $Y=h^r$.
+\end{lemma}
+\begin{proof}
+Divide the two verifier equations to obtain
+$h^{z-z'}=Y^{e-e'}$.
+Since $e-e'\ne0$ modulo the prime $P$, it has
+an inverse. Raise both sides to that inverse:
+$h^{(z-z')(e-e')^{-1}}=Y$.
+\end{proof}
+
+\begin{lemma}[Perfect honest-verifier Schnorr simulation]\label{lem:realize:schnorr-hvzk}
+For a uniformly sampled verifier challenge $e$,
+the joint transcript has exactly the distribution obtained
+without the witness by sampling independent uniform
+$(e,z)$ and setting $T=h^zY^{-e}$.
+\end{lemma}
+\begin{proof}
+For any fixed valid witness $r$,
+the honest challenge $e$ is uniform and independent of
+uniform prover nonce $u$. Conditional on $e$,
+the response $z=u+er$ is uniform on $\mathbb Z_P$.
+The verifier equation uniquely determines
+$T=h^zY^{-e}$ from $(e,z)$.
+Therefore the simulated and honest distributions
+of the entire triple coincide.
+\end{proof}
+
+\begin{definition}[Schnorr OR proof for a finite candidate set]\label{def:realize:or}
+Fix nonempty $S=\{t_1,\ldots,t_d\}\subseteq\mathbb Z_P$
+with distinct elements and a public commitment $C\in G$.
+For each branch set $Y_j=Cg^{-t_j}$.
+The prover knows an index $j_*$ and a scalar $r$
+such that $Y_{j_*}=h^r$.
+Before receiving the global verifier challenge,
+it chooses independent uniform
+$e_j,z_j\in\mathbb Z_P$ for $j\ne j_*$,
+sets
+\[
+ T_j=h^{z_j}Y_j^{-e_j}\quad(j\ne j_*),
+\]
+and chooses uniform $u$ to set $T_{j_*}=h^u$.
+It sends $(T_1,\ldots,T_d)$.
+After the verifier draws uniform $e\in\mathbb Z_P$,
+the prover sets
+\[
+ e_{j_*}:=e-\sum_{j\ne j_*}e_j,\qquad
+ z_{j_*}:=u+e_{j_*}r,
+\]
+and sends all $(e_j,z_j)_{j=1}^d$.
+The verifier accepts if
+\[
+ \sum_j e_j=e
+ \quad\text{and}\quad
+ h^{z_j}=T_jY_j^{e_j}\ \ \forall j.
+\]
+All challenge and response scalars belong to $\mathbb Z_P$.
+\end{definition}
+
+\begin{lemma}[OR-proof perfect completeness]\label{lem:realize:or-complete}
+For any candidate $t_{j_*}$ with a known
+opening $C=g^{t_{j_*}}h^r$, every honest
+execution of Definition~\ref{def:realize:or} accepts.
+\end{lemma}
+\begin{proof}
+By construction the local challenges sum to the
+verifier's global challenge.
+For $j\ne j_*$ the prover defined $T_j$ precisely so that
+$h^{z_j}=T_jY_j^{e_j}$.
+For $j=j_*$,
+$T_{j_*}Y_{j_*}^{e_{j_*}}
+=h^uh^{re_{j_*}}=h^{u+e_{j_*}r}=h^{z_{j_*}}$.
+Thus all equations pass.
+\end{proof}
+
+\begin{theorem}[OR-proof perfect honest-verifier zero knowledge]\label{thm:realize:or-hvzk}
+With uniform independent global challenge $e$,
+the full accepting OR-proof transcript can be
+simulated \emph{exactly} without any opening of $C$:
+choose independent uniform $(e_j,z_j)\in\mathbb Z_P^2$
+for every branch, put $e=\sum_j e_j$, and set
+\[
+ \boxed{T_j=h^{z_j}(Cg^{-t_j})^{-e_j}.}
+\]
+The resulting joint distribution agrees with
+the honest prover/verifier distribution for
+every valid witness branch.
+\end{theorem}
+\begin{proof}
+For the honest prover, the challenges $e_j$ on
+false branches are independent uniform.
+The true-branch challenge
+$e_{j_*}=e-\sum_{j\ne j_*}e_j$ is uniform
+and independent of them because the global
+honest-verifier challenge is uniform.
+The false-branch responses $z_j$ were drawn
+independent uniform; the true response
+$z_{j_*}=u+e_{j_*}r$ is also uniform
+conditioned on the entire challenge vector
+because $u$ was uniform independent.
+Thus the complete vector $(e_j,z_j)_j$
+is uniform on $(\mathbb Z_P^2)^d$.
+Every first message $T_j$ is uniquely
+determined by the verifier equation as
+$h^{z_j}Y_j^{-e_j}$.
+The simulator uses exactly this deterministic
+expression from exactly the same distribution,
+so the complete transcript laws coincide.
+\end{proof}
+
+\begin{theorem}[OR-proof special soundness]\label{thm:realize:or-extract}
+Two accepting OR-proof transcripts for
+the same statement $C,S$ and the same first-message
+vector $(T_j)_j$ but different global
+challenges $e\ne e'$ determine an index $j$
+and an opening
+\[
+ \boxed{C=g^{t_j}h^r,\qquad
+ r=(z_j-z_j')(e_j-e_j')^{-1}.}
+\]
+\end{theorem}
+\begin{proof}
+The sums of the two local challenge vectors
+are different, so for some branch $j$
+we have $e_j\ne e_j'$.
+Divide the two accepting verifier equations
+for that branch, obtaining
+$h^{z_j-z_j'}=Y_j^{e_j-e_j'}$.
+As in Lemma~\ref{lem:realize:schnorr-extract},
+inverting the nonzero challenge difference yields
+$Y_j=h^r$ for the displayed $r$.
+Since $Y_j=Cg^{-t_j}$, multiplying by $g^{t_j}$
+gives $C=g^{t_j}h^r$.
+\end{proof}
+
+\begin{remark}[Proof of knowledge versus a nontrivial language]
+Because $h$ generates the entire group $G$,
+each group element $Y_j$ has some logarithm
+mathematically. The OR protocol proves
+\emph{efficient knowledge of an opening},
+not mere set membership. Its computational
+knowledge-soundness guarantee requires
+the standard rewinding extractor and
+independent uniform global challenges;
+the two-transcript special-soundness
+theorem does not alone bound a malicious
+prover's success probability in the
+entire composed protocol.
+\end{remark}
+
+\begin{remark}[Honest-verifier scope]
+Theorem~\ref{thm:realize:or-hvzk} assumes the
+sigma verifier chooses its challenge uniformly.
+It makes no assertion of straight-line
+zero knowledge against an arbitrary
+malicious verifier that chooses the
+sigma challenge as a function of its first
+message. A separate compiler is needed for
+that stronger notion.
+\end{remark}
