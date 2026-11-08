@@ -1,0 +1,310 @@
+\subsection{The complete interactive prover and verifier}\label{sec:full:protocol}
+
+\begin{definition}[Explicit relation-proof interface]\label{def:full:proof-engine}
+Fix an interactive zero-knowledge \emph{proof-of-relation}
+engine $\Pi_{\rm rel}$ for polynomial-size arithmetic and
+Boolean circuits over $\F$, including:
+valid field-symbol encodings, Pedersen bit openings,
+canonical Merkle-tree reconstruction, polynomial
+arithmetic and equality, and all public constraints
+specified below.
+Its public input is a tuple of public commitments,
+roots, points and claimed scalars. Its private
+witness is the collection of field values,
+blinding scalars, word evaluations and paths
+required to evaluate the circuit.
+The verifier checks the \emph{entire} relation
+without receiving any private circuit input.
+
+We separate two possible engines:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item $\Pi_{\rm full}$ certifies the entire
+committed word at each level, its polynomial
+degree bound, source relation and fold
+identity (a nonsuccinct reference mode).
+\item $\Pi_{\rm sparse}$ certifies just
+the explicitly requested authenticated
+local statements; its soundness requires
+a separately proved proximity theorem.
+\end{enumerate}
+The existence of a complete relation
+circuit is an algorithmic statement,
+not a claim that the source KBFold
+proximity theorem transfers to the
+sparse mode.
+\end{definition}
+
+\begin{definition}[Public commitment registry]\label{def:full:registry}
+For each named hidden field variable, keep
+a single public vector of Pedersen bit
+commitments. An invocation of
+$\Pi_{\rm rel}$ must refer to that same
+vector whenever it uses the variable.
+At preprocessing the registered variables
+include all entries $f(a)$, all
+coefficients of $R$, and every
+symbol of the level-zero masked word.
+At each Sumcheck round the registered
+variables include the three coefficients
+of $\mu_j$, the round mask $c_j$
+and, after $r_{j-1}$, the offset $b_j$
+and every newly committed level-$j$
+oracle symbol.
+The equality of a named field variable
+across two circuit invocations is checked
+through its fixed public commitment vector.
+\end{definition}
+
+\begin{definition}[Complete preprocessing relation]\label{def:full:pre-relation}
+The stage-zero public statement consists
+of the initial Merkle root
+$\mathsf{root}_0$, the public source
+and mask commitment vectors
+$\mathbf C_f,\mathbf C_R$, and parameters.
+The private witness of
+$\mathcal R_{\rm pre}$ consists of
+$(f,R)$, every related blinding vector
+and the full level-zero Merkle tree.
+The relation checks:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item every source/mask commitment
+opens to the correctly encoded
+field value, with $\deg R<B$;
+\item $Q_0=U_f^{(m)}+X^NR$;
+\item every level-zero leaf
+commitment opens to $Q_0(x)$
+and all its hashes reconstruct
+the announced $\mathsf{root}_0$;
+\item $\deg Q_0<D_0$.
+\end{enumerate}
+The preprocessing proof is a
+\emph{knowledge-binding registration
+proof} completed before $z$ is
+chosen. Its extraction property
+is a named cryptographic interface
+contract of Chapter~14.
+\end{definition}
+
+\begin{definition}[Round relations]\label{def:full:round-relations}
+For round $1\le j\le m$, the
+\emph{pre-challenge relation}
+$\mathcal R_{j,\rm pre}$, proved
+after commitment of $\mu_j$
+but before sampling $r_{j-1}$,
+binds the hidden $c_j$,
+the three coefficients of
+$\mu_j$, and earlier offset
+$b_{j-1}$ to
+\[
+ \mu_j(T)=s_j(T)+
+   b_{j-1}/2+c_j(2T-1),
+\]
+where $s_j$ is reconstructed
+from the same committed source
+table $f$ and already fixed
+earlier challenges.
+
+The \emph{post-challenge relation}
+$\mathcal R_{j,\rm post}$, proved
+after $r_{j-1}$ but before any
+level-$j$ query, checks
+\[
+ \begin{aligned}
+ b_j&=b_{j-1}/2+c_j(2r_{j-1}-1),\\
+ \mu_j(0)+\mu_j(1)&=\sigma_{j-1}+b_{j-1},\\
+ \mu_j(r_{j-1})&=\sigma_j+b_j,\\
+ Q_j&=\pfold_{r_{j-1}}(Q_{j-1}),\\
+ \deg Q_j&<D_j,
+ \end{aligned}
+\]
+and, in $\Pi_{\rm full}$ mode,
+checks all openings of the
+level-$j$ Merkle leaf commitments
+against the coefficients of $Q_j$.
+The public challenge is not
+allowed to modify any earlier
+commitment or named hidden value.
+\end{definition}
+
+\begin{definition}[Full protocol $\Pi_{\rm KBFold}^{\rm hid}$]\label{def:full:protocol}
+The interactive opening protocol is:
+
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \textbf{Before evaluation:}
+the prover samples $R$ and fresh
+bit-commitment blindings, builds
+$Q_0$, and publishes
+$(\mathbf C_f,\mathbf C_R,\mathsf{root}_0)$.
+It proves $\mathcal R_{\rm pre}$.
+The verifier verifies this proof.
+No evaluation point $z$ has yet
+been chosen.
+\item \textbf{Authorized claim:}
+after preprocessing, the verifier
+chooses $z\in\F^m$, and the
+authorized scalar $v=\widetilde f(z)$
+is provided publicly. The prover
+initializes $\chi_0$, $\sigma_0=v$
+and $b_0=0$. The relation
+$\sigma_0=\sum_a f(a)\chi_0(a)$
+is included in the first round's
+proof (or a terminal proof if $m=0$).
+\item \textbf{For $j=1,\ldots,m$:}
+the prover computes $s_j$ and
+samples fresh $c_j$, commits to
+the three coefficients of $\mu_j$
+and $c_j$, and proves
+$\mathcal R_{j,\rm pre}$.
+Only then the honest verifier
+samples the fresh fold/Sumcheck
+challenge $r_{j-1}\in\F$.
+The prover computes $b_j,Q_j$,
+publishes their fresh hiding
+commitments and $\mathsf{root}_j$,
+and proves $\mathcal R_{j,\rm post}$.
+\item \textbf{Authenticated queries:}
+after $\mathsf{root}_j$ is bound,
+the verifier may choose up to
+$q_j$ adaptive indices
+$y\in\Omega_j$ for the previous
+fold $j-1$. For each it receives
+the three shells of
+Definition~\ref{def:full:fold-query}
+and a zero-knowledge proof of
+their hidden fold equation and
+registered leaf openings.
+It checks every Merkle path
+and proof. No field-symbol
+value is publicly revealed.
+\item \textbf{Final closure:}
+after all $m$ rounds, the
+verifier requests two distinct
+final-level authenticated shells
+and a proof of the
+degree-$<2$ final relation and
+the terminal Sumcheck link of
+Definition~\ref{def:full:final-close}.
+It accepts if and only if
+all public Merkle checks and
+all required relation proofs
+have accepted.
+\end{enumerate}
+The full verifier view records
+every commitment vector and root,
+all inner proof messages,
+$z,v,r$, adaptive query indices,
+all authenticated shells and
+all final proof messages.
+\end{definition}
+
+\begin{lemma}[All protocol relations are finite arithmetic circuits]\label{lem:full:circuits}
+For fixed finite field representation,
+$m,B,M$ and a bounded number of queries,
+each relation in Definitions
+\ref{def:full:pre-relation},
+\ref{def:full:round-relations},
+\ref{def:full:fold-query} and
+\ref{def:full:final-close}
+is decidable by an explicit finite
+Boolean/arithmetic circuit of
+size polynomial in the expanded
+input and committed-word lengths
+and the hash-circuit complexity.
+\end{lemma}
+\begin{proof}
+A field element has a finite
+canonical $b$-bit encoding.
+Every field sum, product, inverse
+of a fixed nonzero public scalar
+and basis expansion has a finite
+arithmetic circuit over the fixed
+representation. The polynomials
+$U_f,Q_j,s_j,H_j,\mu_j$ have
+publicly bounded degrees and
+are computed by finitely many
+sums and products with indices
+bounded by $N,B,M$. A Merkle
+leaf hash and its internal
+hash circuits are finite by
+assumption on the efficiently
+computable hash $H$; the
+bounded Merkle reconstruction
+is a composition of such
+circuits. Group scalar
+exponentiation to check a
+Pedersen commitment is
+computable by repeated
+squaring in $O(\log P)$
+group multiplications.
+The tests in the displayed
+definitions are equality
+comparisons of these circuit
+outputs. Combining finitely
+many polynomial-size circuits
+gives the asserted finite
+relation circuit.
+\end{proof}
+
+\begin{theorem}[Perfect algebraic completeness of the full protocol]\label{thm:full:completeness}
+For every $f$, $z$,
+$v=\widetilde f(z)$, uniform
+mask $R$ and honest prover
+random tape, every relation
+statement submitted by the
+honest prover of
+Definition~\ref{def:full:protocol}
+has a valid hidden witness.
+Consequently the complete
+protocol accepts with
+probability one whenever
+$\Pi_{\rm rel}$ has perfect
+completeness and the honest
+verifier follows the stated
+authenticated-query schedule.
+\end{theorem}
+\begin{proof}
+The initial relation is
+satisfied by construction of
+$Q_0$ and the Merkle tree.
+Lemma~\ref{lem:full:true-transition}
+and Theorem~\ref{thm:full:masked-sumcheck}
+establish every Sumcheck
+pre- and post-challenge
+relation, including the
+initial claim. Lemma~\ref{lem:full:fold-invariants}
+proves the fold, degree and
+oracle-word equalities at
+every level.
+Lemma~\ref{lem:full:fold-query-complete}
+gives valid authenticated
+hidden witnesses for every
+queried fold triple.
+Lemma~\ref{lem:full:final-complete}
+gives the terminal witness.
+Every Pedersen commitment
+opens using its actual honest
+blinding and every Merkle path
+reconstructs the announced root.
+Thus all circuit relations
+are true; perfect completeness
+of the relation engine
+and deterministic correctness
+of the hash checks imply
+acceptance with probability one.
+\end{proof}
+
+\begin{remark}[Two verification modes]
+The full-relation mode checks
+all committed word symbols and
+their degrees inside a general
+NP circuit; it has large,
+non-KBFold-sized proofs but is
+a complete finite reference
+protocol. The sparse mode
+retains the original KBFold
+local-query architecture;
+its proof of degree/proximity
+soundness with the enlarged
+budgets $D_j$ is a separate
+Chapter~14 obligation.
+\end{remark}
