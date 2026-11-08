@@ -43,7 +43,7 @@ fn exhaustive_challenge_tree_fork_counts(){
 }
 fn accepting_set(k:usize,tag:usize)->Vec<usize>{
     let n=1usize<<k;
-    (0..n).filter(|i| (i+2*tag)%3!=0).collect()
+    (0..n).filter(|i| (*i+2*tag)%3!=0).collect()
 }
 #[test]
 fn chronological_multi_block_forks_preserve_main_path(){
