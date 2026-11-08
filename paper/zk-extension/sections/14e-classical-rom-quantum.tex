@@ -1,0 +1,330 @@
+\subsection{Security-model separation and a concrete quantum obstruction}\label{sec:security14:models}
+The soundness and privacy results above are
+\emph{classical interactive/CRS} results.
+Random-oracle compilation and quantum adversaries
+change both the proof model and the hardness
+assumptions. In particular, the present
+Pedersen commitment instantiation is
+\emph{not post-quantum binding}.
+
+\begin{definition}[Four distinct claims]\label{def:security14:models}
+We distinguish:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item \emph{Classical interactive soundness:}
+the verifier samples every required
+outer challenge after the prescribed
+commitment/proof prefix, and the
+relation engine satisfies its
+knowledge-extraction contract
+against classical PPT provers.
+\item \emph{Classical online ZK in a simulatable CRS:}
+the commitment setup may be generated
+by a simulator retaining $\alpha$;
+malicious verifiers and query indices
+are arbitrary classical causal
+algorithms, and relation proofs
+satisfy adaptive multi-proof WI.
+\item \emph{Fiat--Shamir ROM security:}
+the interactive challenges are
+derived from a domain-separated
+transcript hash, and a separate
+classical random-oracle proof
+justifies every extraction and
+simulation step in that
+noninteractive experiment.
+\item \emph{QROM/post-quantum security:}
+the adversary may perform quantum
+computation and quantum oracle
+queries. All commitment,
+proof-engine, hash and
+folding-oracle reductions
+must be valid against that
+adversary class.
+\end{enumerate}
+Only (i)--(ii) are addressed by
+the proved conditional
+theorems of this chapter.
+\end{definition}
+
+\begin{lemma}[A known Pedersen setup logarithm gives two openings]\label{lem:security14:known-alpha}
+If an adversary knows
+$\alpha=\log_g h$, then for
+every bit commitment
+$C=g^b h^r$ it can efficiently
+produce an opening to any
+desired bit $b'\in\{0,1\}$:
+\[
+ \boxed{
+ r'=r+(b-b')\alpha^{-1}\pmod P.}
+\]
+If $b'\neq b$ these are two
+different valid bit openings.
+\end{lemma}
+\begin{proof}
+Compute
+\[
+ g^{b'}h^{r'}
+ =g^{b'}g^{\alpha r+b-b'}
+ =g^b h^r=C.
+\]
+All operations are in
+the public prime-order
+scalar field; $\alpha$
+is nonzero, so its inverse
+exists. If $b'\ne b$,
+the two openings have
+different bit values
+although the public
+commitment is unchanged.
+\end{proof}
+
+\begin{theorem}[Quantum break of classical Pedersen-based binding]\label{thm:security14:quantum-break}
+Assume the commitment group is a
+standard finite cyclic group
+whose discrete logarithm can
+be computed by a polynomial-time
+quantum algorithm
+\cite{Shor1997}.
+Then the field-symbol
+commitments of Chapter~13
+are \emph{not} quantum
+computationally binding.
+Indeed, a quantum adversary
+can run the following
+false-claim attack on the
+full-relation protocol:
+register a valid preprocessing
+proof for $f_{\rm pre}\equiv0$,
+wait for the evaluation point
+$z$, and subsequently produce
+valid proofs for an equivocated
+source $f^{\rm post}\equiv1$
+and public claim $v=1$.
+All public commitment vectors
+and the initial Merkle root
+remain unchanged. Whenever the
+underlying relation engine is
+perfectly complete and allows
+honest proofs of its true
+statements, this attack
+passes the algebraic and
+authentication checks while
+$1\neq\widetilde f_{\rm pre}(z)=0$.
+\end{theorem}
+\begin{proof}
+First sample the honest
+preprocessing commitment
+arrays and all required
+blinding scalars for the
+zero source and zero mask.
+Construct $Q_0=0$, its
+full authenticated
+commitment tree, and
+an honest proof of the
+true pre-evaluation
+relation. Submit the
+result before learning $z$.
+The preprocessing source
+is therefore the zero
+table, so
+$\widetilde f_{\rm pre}(z)=0$
+for every $z$.
+
+After learning $z$,
+use the assumed quantum
+discrete-log algorithm to
+obtain
+$\alpha=\log_g h$
+from the already published
+key, unless it was computed
+earlier. For every previously
+registered Pedersen bit
+commitment, use
+Lemma~\ref{lem:security14:known-alpha}
+to compute an opening to
+the bits of the desired
+constant-one source,
+zero mask and corresponding
+masked $Q_0$. The public
+commitment vectors, their
+hashes, the first Merkle
+root and its paths
+do not change.
+The pre-evaluation proof
+remains a valid proof of
+its original true
+statement. All subsequent
+statements are also true:
+take the virtual
+constant-one table,
+generate its honest
+Sumcheck masks and
+fold chain, equivocate
+the original level-zero
+leaf commitments to
+that chain, and build
+the later levels
+honestly.
+The identities and
+completeness of
+Theorem~\ref{thm:full:completeness}
+make every post-evaluation
+NP relation and
+authenticated query valid.
+The adversary possesses
+every required witness
+and blinding and can
+therefore produce honest
+proofs without violating
+their proof-system
+soundness.
+
+The verifier accepts
+by perfect completeness,
+yet the claimed value
+is $v=1$ while the
+preprocessing source
+had evaluation $0$.
+Finally, Shor's
+quantum discrete-logarithm
+algorithm~\cite{Shor1997}
+runs in quantum
+polynomial time on the
+stated cyclic-group
+families. Thus neither
+the binding property
+nor the protocol's
+evaluation binding
+survives this quantum
+adversary.
+\end{proof}
+
+\begin{corollary}[No post-quantum theorem for the present Pedersen instantiation]\label{cor:security14:no-pq}
+A claimed QROM or post-quantum
+knowledge-soundness theorem
+for the \emph{unchanged}
+Pedersen-based full protocol
+would be false under
+the quantum group
+model of
+Theorem~\ref{thm:security14:quantum-break}.
+\end{corollary}
+\begin{proof}
+The theorem explicitly
+constructs a
+polynomial-time quantum
+false-claim adversary
+accepted by the honest
+verifier. Therefore the
+required quantum
+evaluation-binding game
+does not have negligible
+adversarial success.
+A proof model cannot
+restore a binding
+property already
+broken by the group's
+quantum discrete-log
+algorithm.
+\end{proof}
+
+\begin{proposition}[Original KBFold QROM soundness does not automatically transfer]\label{prop:security14:qrom-nontransfer}
+The original KBFold
+knowledge-soundness/QROM
+theorems cannot be applied
+as black-box end-to-end
+security proofs of
+the Chapter~13
+Pedersen-hiding protocol.
+\end{proposition}
+\begin{proof}
+The original scheme
+authenticates field
+codeword values with
+a transparent Merkle/FRI
+oracle and proves
+proximity for the
+specified unmasked code
+and challenge schedule.
+Chapter~13 changes
+the leaves to Pedersen
+bit-commitment vectors,
+hides every field
+opening behind
+independent NP proofs,
+changes the source
+relation and degree
+budgets to $D_j$,
+and introduces
+a distinct simulator
+and extraction interface.
+The assumptions and
+transcript distribution
+of the old theorem
+therefore do not match
+those of the new
+protocol. Moreover
+Theorem~\ref{thm:security14:quantum-break}
+exhibits a quantum
+binding failure in
+the new leaf scheme,
+independently of the
+original hash/FRI
+proximity argument.
+Consequently no
+automatic theorem
+transfer is valid.
+\end{proof}
+
+\begin{definition}[Required post-quantum replacement contract]\label{def:security14:pq-replacement}
+A future QROM secure
+version of the \emph{same
+Chapter~13 protocol
+structure} must replace
+the Pedersen binding layer
+by a quantum-resistant
+commitment with a
+suitable equivocal
+simulation setup or
+another proved
+online privacy method;
+instantiate a
+quantum-secure
+relation argument
+with compatible
+extraction and adaptive
+simulation;
+and re-prove
+authentication,
+proximity and
+noninteractive
+challenge-sampling
+bounds for the complete
+altered transcript.
+These are \emph{Chapter~15
+certification/open-obligation
+entries}, not a new
+Chapter~16.
+\end{definition}
+
+\begin{remark}[Fiat--Shamir is not a missing algebraic lemma]
+Hashing an interactive
+verifier message into a
+Fiat--Shamir challenge
+changes the prover's
+ability to correlate
+its commitments and
+challenge oracle
+queries. Without an
+appropriate ROM theorem
+for the exact engine
+and transcript order,
+the classical interactive
+proofs of
+Theorems~\ref{thm:security14:full-binding}
+and~\ref{thm:security14:online-zk}
+do not imply
+noninteractive security.
+No such reduction is
+claimed in this chapter.
+\end{remark}
