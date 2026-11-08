@@ -9,7 +9,7 @@
 | Source | Kind | Title | LaTeX label | Suggested Lean declaration | Status |
 |---|---|---|---|---|---|
 | `14a-security-games.tex` | definition | Classical commitment setup | `def:security14:setup` | `ZKFinal.setup` | model / contract |
-| `14a-security-games.tex` | definition | One-opening evaluation-binding game | `def:security14:binding-game` | `ZKFinal.binding_game` | model / contract |
+| `14a-security-games.tex` | definition | Evaluation-binding game | `def:security14:binding-game` | `ZKFinal.binding_game` | model / contract |
 | `14a-security-games.tex` | definition | Authorized one-opening zero-knowledge game | `def:security14:zk-game` | `ZKFinal.zk_game` | model / contract |
 | `14a-security-games.tex` | definition | Online relation-engine extraction contract | `def:security14:extract-contract` | `ZKFinal.extract_contract` | model / contract |
 | `14a-security-games.tex` | definition | Adaptive witness-indistinguishability contract | `def:security14:wi-contract` | `ZKFinal.wi_contract` | model / contract |
