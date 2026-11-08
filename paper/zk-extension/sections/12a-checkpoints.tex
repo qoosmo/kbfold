@@ -14,11 +14,13 @@ A \emph{two-challenge execution} is divided into
 three ordered epochs:
 \begin{enumerate}[label=\textup{(\roman*)}]
 \item \emph{Epoch 0}, before the first fresh independent
-outer challenge $\theta\leftarrow L^\ell$: all
-witness and packed-column bits and the field variables
-$m,p,p_{\rm in},c,y'$ entering the first discrepancy
-are registered and subjected to their mandatory
-bitness proofs.
+outer challenge $\theta\leftarrow L^\ell$:
+the hidden witness/packed-column bit coordinates
+and the hidden field variables $p,p_{\rm in},c$
+are registered with mandatory bitness proofs;
+the public masked values $m,y'$ are published
+and fixed. Every variable entering the first
+discrepancy is thus fixed before $\theta$.
 \item \emph{Epoch 1}, between $\theta$ and the second
 fresh independent outer challenge $z\leftarrow L$:
 all additional hidden variables $t,\rho,\sigma$
