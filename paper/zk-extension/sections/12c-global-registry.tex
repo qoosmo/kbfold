@@ -1,0 +1,288 @@
+\subsection{A single extracted registry across all protocol epochs}\label{sec:global:registry}
+We now combine the per-block extractor into one
+chronological procedure. The registry is an
+\emph{analysis object}: it never appears in the
+honest public protocol, and the extractor does
+not open any commitment to the verifier.
+
+\begin{definition}[Tagged bit-commitment registry]\label{def:global:registry}
+A registered hidden field element is represented
+by $n$ tagged Pedersen bit commitments
+$(C_{x,0},\ldots,C_{x,n-1})$ and their
+prescribed bitness OR blocks. Each tag uniquely
+identifies a group element in the commitment
+record; subsequent affine rows must reference
+the \emph{same} tag and group element, not a
+new value chosen under the same name.
+A canonical extracted entry is
+\[
+ (C_{x,i};\,b_{x,i},r_{x,i}),\qquad
+ C_{x,i}=g^{b_{x,i}}h^{r_{x,i}},
+ \quad b_{x,i}\in\{0,1\}.
+\]
+The reconstructed field value is
+$x^{\rm ext}=\sum_i\beta_i b_{x,i}$.
+\end{definition}
+
+\begin{definition}[Global checkpoint extractor]\label{def:global:extractor}
+The extractor $\mathcal E_R$ follows exactly
+the \emph{main} execution of the prescribed
+protocol in Definition~\ref{def:global:epochs}.
+Whenever a mandatory OR block accepts,
+it immediately applies
+Theorem~\ref{thm:global:one-block}
+with at most $R$ side attempts, then restores
+the main state. For a successful bitness
+extraction it records the branch bit and
+blinding in the registry.
+For a successful aggregate-parity extraction
+it records a permitted integer candidate
+and its aggregate blinding, and verifies
+its consistency with the already extracted
+constituent bit entries.
+If any repeated commitment tag has a different
+extracted bit opening, or any aggregate
+opening is inconsistent with the true
+integer sum of its extracted constituent
+bits, it outputs the derived value
+$\log_g h$ using the reduction of
+Chapter~10. Otherwise it continues
+the main path without changing its
+messages or challenge distribution.
+The output is an accepting main transcript
+with a complete consistent extracted
+registry, a setup discrete logarithm,
+or an extraction failure symbol.
+\end{definition}
+
+\begin{lemma}[A group element has a unique blinding for a fixed bit]\label{lem:global:unique-r}
+If $\mathsf{Com}(b;r)=\mathsf{Com}(b;r')$,
+then $r=r'$ in $\mathbb Z_P$.
+\end{lemma}
+\begin{proof}
+Cancel the common factor $g^b$.
+The equality becomes $h^r=h^{r'}$.
+Because $h$ has prime order $P$,
+this implies $r=r'\pmod P$.
+\end{proof}
+
+\begin{lemma}[Conflicting extracted bits reveal the setup logarithm]\label{lem:global:tag-conflict}
+If two valid extracted openings
+$(b,r)$ and $(b',r')$ of the same
+tagged commitment have $b\neq b'$,
+then $\mathcal E_R$ computes $\log_g h$.
+\end{lemma}
+\begin{proof}
+The openings satisfy
+$g^b h^r=g^{b'}h^{r'}$.
+Lemma~\ref{lem:realize:binding-reduction}
+provides the explicit modular inverse
+formula for $\log_g h$.
+\end{proof}
+
+\begin{lemma}[False aggregate parity reveals the setup logarithm]\label{lem:global:row-conflict}
+Suppose an accepted aggregate parity
+block has extracted opening $(t,R_T)$,
+where $t$ lies in the public permitted
+candidate set, and all of its tagged
+constituent bit commitments have
+canonical extracted openings
+$(b_i,r_i)$.
+If the parity of $\sum_i b_i$
+differs from the public parity target,
+then $\mathcal E_R$ computes $\log_g h$.
+\end{lemma}
+\begin{proof}
+Let $S=\sum_i b_i$ and
+$R_{\rm true}=\sum_i r_i$.
+Lemma~\ref{lem:realize:aggregate}
+gives the valid aggregate opening
+$(S,R_{\rm true})$. The OR fork gives
+the second valid aggregate opening
+$(t,R_T)$. Their parities differ,
+so $S\neq t$ as ordinary integers.
+The setup condition $P>|T|$
+makes them distinct modulo $P$.
+Theorem~\ref{thm:realize:parity-binding}
+computes the forbidden logarithm.
+\end{proof}
+
+\begin{lemma}[Correct parity of every row gives all field-affine equations]\label{lem:global:all-affine}
+Suppose all registered bit openings
+are consistent, every prescribed affine
+parity row is accepted and extracted,
+and no aggregate row yields a setup
+logarithm under
+Lemma~\ref{lem:global:row-conflict}.
+Then each prescribed field-affine
+equation is true for the single
+field tuple reconstructed from
+the canonical bit registry.
+\end{lemma}
+\begin{proof}
+Every accepted parity OR block
+extracts an integer candidate
+$t$ with the required target
+parity. If the true integer sum
+of its constituent canonical bits
+had the opposite parity, then
+Lemma~\ref{lem:global:row-conflict}
+would return the setup logarithm,
+contrary to assumption.
+Thus every compiled row holds
+over $\F_2$ for the canonical bits.
+The exact affine-to-parity
+equivalence
+Theorem~\ref{thm:realize:affine-to-parity}
+then makes every original
+field-affine equation true for
+the uniquely reconstructed
+field values.
+\end{proof}
+
+\begin{theorem}[Global chronological extraction]\label{thm:global:chronological}
+Assume the scheduling and checkpoint
+model of Definitions~\ref{def:global:epochs}
+and~\ref{def:global:access}; every
+hidden bit appears under one stable
+commitment tag, all required bitness
+blocks are completed before the outer
+challenge that uses that bit, and
+all later compiled parity rows refer
+to those existing tags.
+For a main protocol with at most $J$
+mandatory OR blocks, $\mathcal E_R$
+has the following properties:
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item The main visible transcript has
+\emph{exactly} the law of the unmodified
+honest-verifier interaction.
+\item With probability at least
+$1-\varepsilon_{\rm fork}$ on
+the event of main acceptance,
+understood in the unconditioned
+joint-event sense
+\[
+ \Pr[\mathrm{main\ accepts}\ \wedge\
+ \mathrm{any\ block\ extraction\ fails}]
+ \le\varepsilon_{\rm fork},
+\]
+every mandatory accepted block yields
+a valid opening.
+\item Outside that failure event, either
+$\mathcal E_R$ computes the setup
+discrete logarithm, or the extracted
+registry is consistent and every
+accepted compiled field-affine
+equation holds on one fixed field
+tuple.
+\item The field variables registered
+in Epoch 0 are extracted
+\emph{before} the actual sampling
+of $\theta$; those registered in
+Epoch 1 are extracted
+\emph{before} the actual sampling
+of $z$. The fresh outer challenges
+retain their prescribed independent
+uniform distributions.
+\item The worst-case replay count is
+at most $J(R+1)$ OR block executions.
+\end{enumerate}
+Here
+$\varepsilon_{\rm fork}=
+\min\{1,J(2^{-\kappa}+1/(R+1))\}$.
+\end{theorem}
+\begin{proof}
+Apply the per-block procedure
+of Theorem~\ref{thm:global:one-block}
+at each accepted mandatory OR block.
+Lemma~\ref{lem:global:main-law}
+proves (i), because every side
+replay is discarded and the
+accepted main post-block state
+is restored. The union bound
+Corollary~\ref{cor:global:J-blocks}
+proves the joint-event estimate
+(ii). On its complement,
+every accepted block has an
+extracted permitted opening.
+If two openings for the same
+tag disagree on their bits,
+Lemma~\ref{lem:global:tag-conflict}
+computes the setup logarithm;
+otherwise Lemma~\ref{lem:global:unique-r}
+makes every tagged opening
+unambiguous. If any extracted
+aggregate candidate disagrees
+with the bits of the same
+registered commitments,
+Lemma~\ref{lem:global:row-conflict}
+computes the logarithm.
+If neither happens,
+Lemma~\ref{lem:global:all-affine}
+establishes all prescribed
+field-affine equations on
+the canonical tuple. This
+proves (iii).
+
+For (iv), the protocol's Epoch 0
+schedule finishes every required
+bitness block and its immediate
+side replay before the first
+outer sampling step. Therefore
+all Epoch 0 canonical entries are
+already fixed when $\theta$
+is drawn. The identical argument
+applies to the Epoch 1 bitness
+blocks before $z$.
+Lemma~\ref{lem:global:outer-uniform}
+shows that the outer challenges
+remain independent uniforms.
+Finally Lemma~\ref{lem:global:runtime}
+gives (v).
+\end{proof}
+
+\begin{corollary}[No separately assumed global extractor for this affine compiler]\label{cor:global:discharged}
+Within the \emph{classical checkpoint-replay
+model} and the explicit registration schedule
+of Theorem~\ref{thm:global:chronological},
+the abstract global extraction obligation
+of Definition~\ref{def:mv:global-coupling}
+is realized by $\mathcal E_R$ with
+the stated finite failure bound,
+up to a discrete-log-breaking event.
+This conclusion applies to the
+bit-commitment/affine-proof component,
+not to an unmodeled external KBFold
+authenticated oracle or to quantum provers.
+\end{corollary}
+\begin{proof}
+The five required properties
+are precisely the output,
+chronological consistency,
+challenge independence and
+same-main-path assertions of
+Theorem~\ref{thm:global:chronological}.
+The only exceptional events
+are a failed side extraction
+or a conflicting pair of
+valid openings, which yields
+the setup logarithm.
+The oracle exclusion is part
+of the checkpoint access model
+and the declared transcript
+domain, so it cannot be
+eliminated by this argument.
+\end{proof}
+
+\begin{remark}[Conditioning is not being hidden]
+The extraction error bound controls
+the \emph{joint event} that an
+accepted main run lacks a witness.
+It does not claim a negligible
+conditional failure probability
+given acceptance if the adversary's
+acceptance probability is itself
+tiny. This distinction is needed
+for the final soundness reduction.
+\end{remark}
