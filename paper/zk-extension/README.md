@@ -27,21 +27,25 @@ pdflatex -interaction=nonstopmode -halt-on-error main.tex
 
 Existing KBFold algebraic results are reproved here where required for self-containedness. Each new claim is separated from the results established in prior work.
 
-## Chapter order
+## Chapter order — LOCKED at 15 chapters
 
 1. Introduction and exact mathematical problem (complete)
 2. Historical background and related work (complete)
-3. Formal security model, online zero knowledge, and adaptive masking (complete)
-4. Complete Boolean-kernel algebra (written, fully proved)
-5. Multilinearization, normalized folding, linear masked closure, and joint query criteria (complete)
-6. Characteristic-two kernel, Frobenius, trace and anchored consistency checker (complete)
-7. Binary-field packing, inverse transposition and complete Ring Switching equations (complete)
-8. Diamond--Posen ring switching
-9. Kochergin masking
-10. Kernel representation of transposition
-11--16. Algebraic consistency, trace-zero masking, anchored kernels, protocol, soundness, simulation
-17--20. Zero-knowledge KBFold over the original field
-21--23. Costs, Lean mapping, reproducibility
+3. Formal security model and adaptive masking (complete)
+4. Complete Boolean-kernel algebra (complete)
+5. Multilinearization and normalized masked folding (complete)
+6. Characteristic-two kernel, Frobenius and trace algebra (complete)
+7. Binary packing, transposition and Ring Switching equations (complete)
+8. Original Diamond--Posen tensor Ring Switching (complete)
+9. Single-opening public-core zero knowledge and ideal proof interfaces (complete)
+10. Concrete classical bit commitment and affine proofs (complete)
+11. Classical malicious-verifier simulation and local extraction (complete)
+12. Global temporal extraction and computational affine soundness (complete)
+13. **Complete masked original KBFold protocol and authenticated oracles (next)**
+14. **Final completeness, proximity soundness and end-to-end ZK theorems**
+15. **Lean/Rust certification, complexity and final manuscript audit**
+
+No additional numbered chapters will be introduced. Details and acceptance criteria: [ROADMAP_LOCK.md](ROADMAP_LOCK.md).
 
 Original reference: https://github.com/qoosmo/kbfold
 
@@ -248,3 +252,36 @@ This is a **classical, honest-sigma-verifier** construction, not a complete mali
 ### Rust verification
 
 `audit/malicious_sigma.rs` exhaustively enumerates tiny-group Schnorr OR transcript distributions, a malicious verifier's adaptive challenge/abort behavior, and challenge-tree forking and extraction. The tiny group is for algebraic regression testing only, not cryptographic deployment.
+
+
+## Chapter 12 — Global Temporal Extraction and Classical Soundness
+
+**Source:** `sections/12-global-extraction.tex` (five detailed subsections).
+**Lean map:** [CHAPTER_12_LEAN_MAP.md](CHAPTER_12_LEAN_MAP.md).
+**Fixed roadmap:** [ROADMAP_LOCK.md](ROADMAP_LOCK.md) — Chapters **12–15 only**, no additional chapters.
+**Audit:** 32 labeled statements: 11 definitions and **21 complete mathematical proofs**, with no new Lean-certified declaration yet.
+
+### Main theorem
+
+A classical checkpoint/replay extractor follows **one unchanged accepted main transcript**, and privately searches for a second accepted challenge string at each of at most `J` sequential OR proof blocks with `kappa` one-bit challenges. For at most `R` side attempts per block:
+
+```
+Pr[main accepts AND any OR opening missing]
+    <= J * (2^(-kappa) + 1/(R+1)).
+```
+
+It fixes one canonical bit-commitment registry before `theta` and the new auxiliary variables before `z`; conflicting valid openings compute the forbidden Pedersen setup discrete logarithm. It preserves **the exact original main transcript** and fresh independent outer challenges. This replaces the formerly unspecified global temporal extractor for the **classical sequential OR affine component**.
+
+Consequently, under the separate authenticated-oracle error `eps_oracle`,
+
+```
+Pr[false evaluation claim accepted]
+    <= (ell+n)/2^n + eps_oracle + Adv_DL(D_R)
+       + J*(2^(-kappa) + 1/(R+1)).
+```
+
+If an attacker has non-negligible success, choosing a polynomial replay budget inverse in that success yields a non-negligible discrete-log reduction whenever the three baseline errors are negligible.
+
+**Exact boundary:** This does not implement or prove authentication/zero knowledge for the original KBFold folded polynomial oracle, Merkle/FRI openings or odd-characteristic PCS; those belong strictly to Chapters 13–14. Quantum rewinding and post-quantum commitments are also excluded.
+
+**Regression audit:** `audit/global_extraction.rs` verifies the combinatorial replay bound in exact integer arithmetic, exhaustively checks small challenge trees and tests commitment collision recovery.
