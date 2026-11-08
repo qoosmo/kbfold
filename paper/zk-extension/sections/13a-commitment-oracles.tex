@@ -1,0 +1,167 @@
+\subsection{Parameters, hiding leaves, and authenticated oracle semantics}\label{sec:full:oracles}
+
+Throughout this chapter $\F$ is a finite field of \emph{odd}
+characteristic; $N=2^m$, $M=2^{m+s}$, $s\geq1$,
+and $\Omega_j$ is the subgroup of size $M_j=M/2^j$
+from Section~\ref{sec:kbfoldfold:codewords}.
+Fix $1\leq B\leq N$, $B_j=\lceil B/2^j\rceil$,
+$N_j=2^{m-j}$ and $D_j=N_j+B_j\leq M_j$.
+No characteristic-two trace or Artin--Schreier
+identity is invoked in this chapter.
+
+\begin{definition}[Canonical field encoding]\label{def:full:field-encoding}
+Fix a public injective map
+$\mathsf{enc}_{\F}:\F\hookrightarrow\{0,1\}^b$
+with $b=\lceil\log_2|\F|\rceil$.
+The image of this map is the set of \emph{valid}
+encodings; a relation circuit must check validity,
+rather than interpreting every $b$-bit string as
+a field element. All field arithmetic in the
+relation is arithmetic of $\F$, not arithmetic
+of the commitment group.
+\end{definition}
+
+\begin{definition}[Hiding commitment to a field symbol]\label{def:full:symbol-commit}
+Let $G=\langle g\rangle=\langle h\rangle$
+be an odd-prime-order group as in
+Definition~\ref{def:realize:group}.
+For $a\in\F$ with encoding
+$(a_1,\ldots,a_b)$, sample independent
+$r_1,\ldots,r_b\leftarrow\mathbb Z_P$
+and form
+\[
+ \mathsf{VC}(a;\mathbf r)
+   :=\bigl(g^{a_1}h^{r_1},\ldots,
+            g^{a_b}h^{r_b}\bigr)\in G^b.
+\]
+Each component is a Pedersen bit commitment.
+The map $\mathsf{VC}$ is \emph{not}
+assumed to be additive over $\F$.
+\end{definition}
+
+\begin{lemma}[Perfect uniformity of a committed field symbol]\label{lem:full:leaf-uniform}
+For every fixed $a\in\F$ and fresh independent
+uniform $\mathbf r$, the public vector
+$\mathsf{VC}(a;\mathbf r)$ is uniform on $G^b$.
+For any finite collection of possibly correlated
+field symbols, their independently blinded
+commitment vectors are jointly uniform on the
+corresponding power of $G$, independently of
+all symbol values.
+\end{lemma}
+\begin{proof}
+Apply Lemma~\ref{lem:realize:hiding}
+to each of the $b$ Pedersen bit commitments.
+Their blindings are independent, so their
+joint law is uniform on $G^b$, for every
+fixed encoding. Conditioning on any fixed
+collection of field symbols, the entire
+collection of commitments is thus a product
+uniform law independent of those symbols.
+Averaging over any distribution on the
+symbols preserves the same product law.
+\end{proof}
+
+\begin{definition}[Domain-separated Merkle trees]\label{def:full:merkle}
+Fix a deterministic hash
+$H:\{0,1\}^*\to\{0,1\}^{\lambda_H}$
+and a canonical injective serialization
+$\mathsf{ser}$ for group elements, indices and
+domain identifiers. For each level $j$ and
+ordered index $x\in\Omega_j$, put
+\[
+ L_{j,x}:=H(\mathsf{ser}(\texttt{leaf},j,x,
+                        \mathsf{VC}(Q_j(x);\mathbf r_{j,x}))).
+\]
+Internal binary nodes hash
+$\mathsf{ser}(\texttt{node},j,\text{left},\text{right})$.
+Pad non-power-of-two levels with a publicly
+fixed convention if needed. Write $\mathsf{root}_j$
+for the resulting root and
+$\mathsf{Path}_{j,x}$ for the leaf's sibling hashes
+and orientation bits. A \emph{public opening shell}
+consists of the index $x$, the group commitment
+vector $\mathsf{VC}(Q_j(x);\mathbf r_{j,x})$
+and its Merkle authentication path.
+It does \emph{not} reveal $Q_j(x)$ or
+$\mathbf r_{j,x}$.
+\end{definition}
+
+\begin{lemma}[Perfect privacy of the authenticated shell]\label{lem:full:merkle-shell}
+Fix any finite collection of field words
+$w_j:\Omega_j\to\F$. Build all the Merkle
+trees with independent uniform Pedersen
+blindings at every $(j,x)$.
+Then the joint distribution of all roots,
+all commitment vectors and \emph{all} their
+Merkle paths is independent of the words
+$(w_j)_j$. The result holds for any
+deterministic hash $H$.
+\end{lemma}
+\begin{proof}
+By Lemma~\ref{lem:full:leaf-uniform},
+the complete public array of bit-commitment
+group elements is a product uniform
+distribution independent of the words.
+All leaf hashes, internal hashes, roots
+and paths are deterministic functions of
+that public array and fixed indices.
+Applying the same deterministic function
+to equal input distributions yields equal
+output distributions.
+\end{proof}
+
+\begin{definition}[Authenticated commitment opening]\label{def:full:auth-commit}
+Given a public root $\mathsf{root}_j$,
+$\mathsf{AuthComOpen}(j,x)$ reveals the
+\emph{commitment vector} $\mathbf C_{j,x}$
+and Merkle path only. The verifier recomputes
+the leaf and root and checks equality with
+$\mathsf{root}_j$.
+Any assertion about the hidden symbol
+$a_{j,x}\in\F$ and the blinding $\mathbf r_{j,x}$
+is part of a separate zero-knowledge
+\emph{relation proof}, not of the
+public opening shell.
+\end{definition}
+
+\begin{lemma}[Merkle opening conflict implies a hash collision]\label{lem:full:merkle-binding}
+Fix one root and index, and assume canonical
+injective serialization and proper domain
+separation. If two valid authentication shells
+for that root and index contain distinct
+commitment vectors or disagree at a node
+of the authenticated path, then these shells
+yield two distinct inputs with the same hash
+output, unless their entire authenticated
+leaf-to-root sequences are identical.
+\end{lemma}
+\begin{proof}
+Compare the two purported authenticated
+chains from the root downward.
+They share the same terminal root hash.
+If the underlying child encodings at the
+highest differing node are different,
+but their parent hashes agree, the two
+distinct serialized parent inputs collide
+under $H$. If no internal node differs,
+then at the leaf the distinct commitment
+vectors give distinct injectively serialized
+leaf inputs with the same leaf hash,
+again a collision. Domain separation
+prevents a leaf encoding from coinciding
+with a node encoding.
+\end{proof}
+
+\begin{remark}[Exact authentication and privacy distinction]
+Collision resistance bounds malicious
+changes to authenticated commitment vectors.
+Discrete-log binding bounds changes to
+their hidden bit values.
+Neither property makes a \emph{raw}
+unmasked field-symbol opening private.
+Accordingly the interface above never sends
+the field symbol itself; a zero-knowledge
+relation proof must enforce its opening
+and all arithmetic constraints.
+\end{remark}
