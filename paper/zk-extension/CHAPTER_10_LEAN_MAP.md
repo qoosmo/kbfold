@@ -31,12 +31,12 @@
 | `10d-parity.tex` | definition | Concrete parity proof | `def:realize:parity-proof` | `ZKAffine.parity_proof` | typed model |
 | `10d-parity.tex` | theorem | Perfect completeness of the parity compiler | `thm:realize:parity-complete` | `ZKAffine.parity_complete` | complete paper proof |
 | `10d-parity.tex` | lemma | An incorrect parity gives two different aggregate openings | `lem:realize:parity-equivocation` | `ZKAffine.parity_equivocation` | complete paper proof |
-| `10d-parity.tex` | theorem | Extracted incorrect parity breaks discrete log | `thm:realize:parity-binding` | `ZKAffine.parity_binding` | complete paper proof |
+| `10d-parity.tex` | theorem | False parity reveals the setup logarithm | `thm:realize:parity-binding` | `ZKAffine.parity_binding` | complete paper proof |
 | `10d-parity.tex` | theorem | Perfect honest-verifier privacy of parity proofs | `thm:realize:parity-hvzk` | `ZKAffine.parity_hvzk` | complete paper proof |
 | `10d-parity.tex` | corollary | Exact empty-row handling | `cor:realize:empty-row` | `ZKAffine.empty_row` | complete paper proof |
 | `10e-field-affine-compiler.tex` | definition | Bit-committed field variables | `def:realize:field-commit` | `ZKAffine.field_commit` | typed model |
 | `10e-field-affine-compiler.tex` | lemma | Registered coordinates reconstruct one field element | `lem:realize:field-reconstruct` | `ZKAffine.field_reconstruct` | complete paper proof |
-| `10e-field-affine-compiler.tex` | definition | Affine-proof compilation algorithm | `def:realize:affine-compiler` | `ZKAffine.affine_compiler` | typed model |
+| `10e-field-affine-compiler.tex` | definition | Affine proof compiler | `def:realize:affine-compiler` | `ZKAffine.affine_compiler` | typed model |
 | `10e-field-affine-compiler.tex` | lemma | All affine row statements are publicly computable | `lem:realize:rows-public` | `ZKAffine.rows_public` | complete paper proof |
 | `10e-field-affine-compiler.tex` | theorem | Perfect completeness of the field-affine compiler | `thm:realize:compiler-complete` | `ZKAffine.compiler_complete` | complete paper proof |
 | `10e-field-affine-compiler.tex` | theorem | Extracted field-affine correctness | `thm:realize:compiler-extract` | `ZKAffine.compiler_extract` | complete paper proof |
@@ -59,7 +59,7 @@
 | `10h-accounting.tex` | lemma | Exact bit commitment and parity proof counts | `lem:realize:count` | `ZKAffine.count` | complete paper proof |
 | `10h-accounting.tex` | lemma | Linear branch-size upper bound | `lem:realize:branch-upper` | `ZKAffine.branch_upper` | complete paper proof |
 | `10h-accounting.tex` | lemma | Two group elements per branch in a raw OR proof | `lem:realize:or-communication` | `ZKAffine.or_communication` | complete paper proof |
-| `10h-accounting.tex` | proposition | The naive compiler is not succinct | `prop:realize:not-succinct` | `ZKAffine.not_succinct` | complete paper proof |
+| `10h-accounting.tex` | proposition | Raw compiler overhead | `prop:realize:not-succinct` | `ZKAffine.not_succinct` | complete paper proof |
 | `10h-accounting.tex` | definition | Chapter 10 Lean module contract | `def:realize:lean-map` | `ZKAffine.lean_map` | typed model |
 
 ## Certification modules in dependency order
