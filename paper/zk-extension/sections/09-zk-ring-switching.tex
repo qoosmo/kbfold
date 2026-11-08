@@ -61,10 +61,9 @@ additional requirement on a concrete external proof system:
 a sequential witness-independent simulator for its complete
 commitment, proof and authenticated-opening transcripts.
 
-Neither of those results is an unconditional cryptographic
-zero-knowledge proof for a deployed PCS. In particular,
-the multiple-opening pad-reuse construction is provably
-insecure (Theorem~\ref{thm:zkrs:reuse-attack}),
+Neither result proves real-world zero knowledge for a
+fully deployed PCS. The multiple-opening pad-reuse pattern
+is insecure (Theorem~\ref{thm:zkrs:reuse-attack}),
 and an unmasked original KBFold oracle is not private
 (Theorem~\ref{thm:security:unmasked-obstruction}).
 The next stage must instantiate and prove the missing
