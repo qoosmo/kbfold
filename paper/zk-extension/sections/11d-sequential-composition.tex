@@ -43,16 +43,16 @@ where $M$ counts the already repeated
 one-bit mini-proofs.
 \end{lemma}
 \begin{proof}
-At each mini-proof start, condition on
-the current visible history and verifier state.
-Lemma~\ref{lem:mv:expected-two} gives
-expected trial count $2$. If the verifier
-aborts, fewer future proofs are executed,
-so that only decreases the total cost.
-Linearity of expectation, applied to
-the at most $\kappa$ mini-proofs
-per statement and at most $M$ in
-the entire run, gives the bounds.
+Fix the visible history and verifier
+state at each mini-proof start.
+By Lemma~\ref{lem:mv:expected-two},
+each copy needs two expected trials.
+Early verifier aborts only reduce
+the number of copies executed.
+Linearity of expectation over the
+at most $\kappa$ copies per
+statement, or at most $M$
+copies in total, gives the bounds.
 \end{proof}
 
 \begin{theorem}[Perfect simulation of sequential OR statements]\label{thm:mv:repeat-perfect}
