@@ -1,0 +1,227 @@
+\subsection{A masked sumcheck with hidden offsets}\label{sec:full:sumcheck}
+
+Let $f:I_m\to\F$ be the private witness,
+$z\in\F^m$ the public evaluation point,
+and $v=\widetilde f(z)$ the authorized public
+value. Put $\chi_0(a)=\operatorname{eq}_m(a,z)$
+and
+\[
+ \sigma_0:=\sum_{a\in I_m}f(a)\chi_0(a)=v.
+\]
+For each round $1\le j\le m$ use the
+unmasked degree-two polynomial $s_j(T)$
+from~\eqref{eq:security:kbfold-round}.
+Its challenge $r_{j-1}\in\F$ is sampled
+only after the round-message commitment
+has been bound.
+
+\begin{definition}[True sumcheck states]\label{def:full:true-sum}
+Starting with $(f_0,\chi_0)=(f,\chi_0)$,
+put
+\[
+ f_j:=\Res_{r_{j-1}}f_{j-1},\qquad
+ \chi_j:=\Res_{r_{j-1}}\chi_{j-1},
+ \qquad
+ \sigma_j:=\sum_{a\in I_{m-j}}f_j(a)\chi_j(a).
+\]
+The prover computes $s_j(T)$ from
+$f_{j-1},\chi_{j-1}$ by
+Definition~\ref{def:security:kbfold-transcript}.
+\end{definition}
+
+\begin{lemma}[Exact sumcheck transition]\label{lem:full:true-transition}
+For every honest round $1\le j\le m$,
+\[
+ \boxed{
+ s_j(0)+s_j(1)=\sigma_{j-1},\qquad
+ s_j(r_{j-1})=\sigma_j.}
+\]
+\end{lemma}
+\begin{proof}
+The first equality is
+Lemma~\ref{lem:security:kbfold-roundsum}.
+For the second, each summand of
+$s_j(r_{j-1})$ is the product of the
+two affine restrictions
+$\Res_{r_{j-1}}(f_{j-1})(b)$
+and $\Res_{r_{j-1}}(\chi_{j-1})(b)$.
+By Definition~\ref{def:full:true-sum}
+these are $f_j(b)$ and $\chi_j(b)$.
+Summing their products over
+$b\in I_{m-j}$ gives $\sigma_j$.
+\end{proof}
+
+\begin{definition}[Hidden-offset masked sumcheck]\label{def:full:masked-round}
+Choose independently uniform masks
+$c_1,\ldots,c_m\in\F$, each sampled
+when its round begins, and initialize
+$b_0:=0$. For round $j$ define
+\[
+ \begin{aligned}
+ H_j(T)&:=\frac{b_{j-1}}{2}
+              +c_j(2T-1),\\
+ \mu_j(T)&:=s_j(T)+H_j(T),\\
+ b_j&:=H_j(r_{j-1})
+       =\frac{b_{j-1}}{2}
+               +c_j(2r_{j-1}-1).
+ \end{aligned}
+\]
+The prover sends \emph{only} a fresh,
+perfectly hiding commitment
+$\mathbf C_{\mu_j}$ to the three
+coefficients of the degree-$\le2$
+polynomial $\mu_j$. The coefficients,
+$c_j$, $b_j$, and $s_j$ remain private.
+The public challenge $r_{j-1}$ is
+chosen after $\mathbf C_{\mu_j}$
+is fixed.
+\end{definition}
+
+\begin{lemma}[Endpoint carry for the round mask]\label{lem:full:mask-endpoints}
+For every $j$,
+\[
+ \boxed{H_j(0)+H_j(1)=b_{j-1}.}
+\]
+\end{lemma}
+\begin{proof}
+From the defining formula,
+$H_j(0)=b_{j-1}/2-c_j$ and
+$H_j(1)=b_{j-1}/2+c_j$.
+Their sum is $b_{j-1}$.
+The division by two is valid
+because $\F$ has odd characteristic.
+\end{proof}
+
+\begin{theorem}[Exact masked sumcheck invariant]\label{thm:full:masked-sumcheck}
+For every $1\le j\le m$, the
+honest hidden round polynomial satisfies
+\[
+ \boxed{
+ \begin{aligned}
+ \mu_j(0)+\mu_j(1)&=\sigma_{j-1}+b_{j-1},\\
+ \mu_j(r_{j-1})&=\sigma_j+b_j,
+ \end{aligned}}
+\]
+and $\deg\mu_j\le2$.
+Thus the publicly authorized
+initial claim is
+$\sigma_0+b_0=v$ and the
+private running claim after
+round $j$ is $\sigma_j+b_j$.
+\end{theorem}
+\begin{proof}
+Lemma~\ref{lem:full:true-transition}
+gives the two unmasked sumcheck
+equalities. Lemma~\ref{lem:full:mask-endpoints}
+gives the mask's endpoint sum,
+and Definition~\ref{def:full:masked-round}
+gives its evaluation at the
+fresh challenge. Adding the
+respective equalities proves
+both displayed identities.
+The degree bound holds because
+$s_j$ has degree at most two
+by Lemma~\ref{lem:security:kbfold-rounddegree}
+and $H_j$ has degree at most one.
+The starting relation follows
+from $\sigma_0=v$ and $b_0=0$.
+\end{proof}
+
+\begin{lemma}[Public evaluation weight at the last round]\label{lem:full:final-chi}
+At the end of all $m$ rounds,
+the zero-variable weight is
+the public scalar
+\[
+ \boxed{
+ \chi_m=\prod_{i=0}^{m-1}
+ \bigl((1-r_i)(1-z_i)+r_iz_i\bigr).
+ }
+\]
+Moreover
+$\sigma_m=\widetilde f(r)\chi_m$.
+\end{lemma}
+\begin{proof}
+The function $\chi_0$ is the
+Boolean equality table
+$b\mapsto\operatorname{eq}_m(b,z)$.
+Successive affine restrictions
+at $r_0,\ldots,r_{m-1}$
+produce the multilinear extension
+$\widetilde{\chi_0}(r)$ by
+Lemma~\ref{lem:kbff:prefix-mle}.
+Since the equality table is the
+product of coordinate-wise
+Boolean weights, its
+multilinear extension is the
+displayed product.
+The final table $f_m$ has
+one entry, equal to
+$\widetilde f(r)$ by
+Corollary~\ref{cor:kbff:full-prefix}.
+Its product with the single
+entry $\chi_m$ is
+$\sigma_m$ by definition.
+\end{proof}
+
+\begin{corollary}[Masked sumcheck to linear fold closure]\label{cor:full:masked-final-link}
+Let $Q_m$ be the honestly masked
+fold polynomial of
+Theorem~\ref{thm:kbff:linear-closure},
+and put $a:=[X^0]Q_m$. Then
+\[
+ \boxed{
+ \mu_m(r_{m-1})=\chi_m a+b_m.
+ }
+\]
+\end{corollary}
+\begin{proof}
+By Theorem~\ref{thm:full:masked-sumcheck},
+$\mu_m(r_{m-1})=\sigma_m+b_m$.
+Lemma~\ref{lem:full:final-chi}
+makes $\sigma_m=\widetilde f(r)\chi_m$.
+The constant-term closure identity
+Corollary~\ref{cor:kbff:masked-constant}
+gives $a=\widetilde f(r)$.
+Substitution proves the equality.
+\end{proof}
+
+\begin{lemma}[Publicly revealing the masked round coefficients is unsafe]\label{lem:full:quadratic-leak}
+The mask $H_j$ does not alter
+the quadratic coefficient of
+$s_j$. In particular,
+\[
+ [T^2]\mu_j=[T^2]s_j.
+\]
+Therefore the prescribed protocol
+must not publish the entire
+$\mu_j$ coefficient vector
+and infer privacy merely from
+the uniformity of $c_j$.
+\end{lemma}
+\begin{proof}
+By Definition~\ref{def:full:masked-round},
+$H_j$ has degree at most one.
+Consequently its $T^2$
+coefficient is zero.
+Taking the coefficient of $T^2$
+in $\mu_j=s_j+H_j$ proves
+the displayed identity.
+A public quadratic coefficient
+would hence reveal the unmasked
+quadratic coefficient exactly.
+\end{proof}
+
+\begin{remark}[Relation-proof requirement]
+The verifier must certify the
+endpoint sum, the masked challenge
+transition, the updated private
+offset $b_j$, and the final
+equation of
+Corollary~\ref{cor:full:masked-final-link}
+\emph{without revealing} their
+secret values. A generic zero-knowledge
+proof of the explicit finite-field
+relations will perform these checks;
+ordinary raw sumcheck message
+verification cannot.
+\end{remark}
